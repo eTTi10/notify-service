@@ -1,4 +1,4 @@
-package com.lguplus.fleta.data.dto.response;
+package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

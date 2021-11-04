@@ -1,7 +1,7 @@
 package com.lguplus.fleta.advice.exhandler;
 
-import com.lguplus.fleta.data.dto.response.InnerResponseDto;
-import com.lguplus.fleta.data.dto.response.InnerResponseErrorDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseErrorDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
 import lombok.extern.slf4j.Slf4j;

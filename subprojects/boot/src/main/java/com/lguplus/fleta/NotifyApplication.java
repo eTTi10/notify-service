@@ -6,8 +6,8 @@ import org.springframework.cache.annotation.EnableCaching;
 
 @EnableCaching
 @SpringBootApplication
-public class MsaBoilerplateApplication {
+public class NotifyApplication {
     public static void main(String[] args) {
-        SpringApplication.run(MsaBoilerplateApplication.class, args);
+        SpringApplication.run(NotifyApplication.class, args);
     }
 }
