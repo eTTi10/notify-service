@@ -1,0 +1,14 @@
+rootProject.name = 'msa-boilerplate'
+
+include 'boot'
+include 'presentation'
+include 'application'
+include 'domain'
+include 'infrastructure'
+include 'infrastructure-di'
+
+def subProjectDir = "subprojects";
+for (project in rootProject.children) {
+    project.projectDir = file("${subProjectDir}/${project.name}")
+}
+

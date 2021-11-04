@@ -1,0 +1,228 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '2.5.6'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'com.adarshr.test-logger' version '3.0.0'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'jacoco'
+
+    group = 'com.lguplus.fleta'
+    version = '0.1.0'
+    sourceCompatibility = '11'
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
+        implementation 'org.apache.commons:commons-lang3:3.11'
+        implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
+
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
+
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+    }
+
+    jacoco {
+        toolVersion = '0.8.7'
+
+        // 테스트 결과 리포트 저장 경로 설정
+        // default : "${project.reporting.baseDir}/jacoco"
+        //reportsDir = file("$buildDir/customJacocoReportDir")
+    }
+
+    // JaCoCo Task
+    jacocoTestReport {
+        reports {
+            // 리포트 활성화
+            html.enabled true
+            xml.enabled false
+            csv.enabled false
+
+            // 리포트 저장 경로 설정
+            //html.destination file("$buildDir/jacocoHtml")
+            //xml.destination file("$buildDir/jacoco.xml")
+        }
+
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "com/lguplus/fleta/advice/*",
+                        "com/lguplus/fleta/config/*",
+                        "com/lguplus/fleta/data/*",
+                        "com/lguplus/fleta/exception/*",
+                        "com/lguplus/fleta/filter/*",
+                        "com/lguplus/fleta/interceptor/*",
+                ])
+            }))
+        }
+
+        finalizedBy 'jacocoTestCoverageVerification'
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                // Jacoco Rule 활성화
+                enabled = true
+
+                // 룰 체크 단위
+                element = 'CLASS' // Option: BUNDLE(default), PACKAGE, CLASS, SOURCEFILE, METHOD
+
+                // Method 커버리지
+                limit {
+                    counter = 'METHOD' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
+                    value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
+                    minimum = 1.00
+                }
+
+                // Branch 커버리지
+                limit {
+                    counter = 'BRANCH' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
+                    value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
+                    minimum = 0.60
+                }
+
+                // 커버리지 체크 제외 클래스
+                excludes = [
+                        'com.lguplus.fleta.advice.*',
+                        'com.lguplus.fleta.config.*',
+                        'com.lguplus.fleta.data.*',
+                        'com.lguplus.fleta.exception.*',
+                        'com.lguplus.fleta.filter.*',
+                        'com.lguplus.fleta.interceptor.*',
+                ]
+            }
+        }
+    }
+
+    task testCoverage(type: Test) {
+        group 'verification'
+        description 'Runs the unit tests with coverage'
+
+        dependsOn(':test',
+                ':jacocoTestReport',
+                ':jacocoTestCoverageVerification')
+
+        tasks['jacocoTestReport'].mustRunAfter(tasks['test'])
+        tasks['jacocoTestCoverageVerification'].mustRunAfter(tasks['jacocoTestReport'])
+    }
+
+    test {
+        // Jacoco 실행 시, 지정한 Profile로 실행
+        if (System.properties.containsKey('spring.profiles.active')) {
+            String activeProfile = System.properties['spring.profiles.active']
+            println "profile: $activeProfile"
+            systemProperty "spring.profiles.active", activeProfile
+        }
+        useJUnitPlatform()
+        ignoreFailures = true
+        finalizedBy 'jacocoTestReport'
+        afterTest { desc, result ->
+            logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+        }
+    }
+
+    testlogger {
+        theme 'mocha'
+        showExceptions true
+        showStackTraces true
+        showFullStackTraces false
+        showCauses true
+        slowThreshold 2000
+        showSummary true
+        showSimpleNames false
+        showPassed true
+        showSkipped true
+        showFailed true
+        showStandardStreams false
+        showPassedStandardStreams true
+        showSkippedStandardStreams true
+        showFailedStandardStreams true
+        logLevel 'info'
+    }
+}
+
+project(':boot') {
+    dependencies {
+        implementation project(':presentation')
+        implementation project(':application')
+        implementation project(':domain')
+        implementation project(':infrastructure')
+    }
+    bootJar { enabled = true }
+    jar { enabled = true }
+
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
+}
+
+project(':presentation') {
+    dependencies {
+        implementation project(':application')
+        implementation project(':domain')
+        //implementation project(':infrastructure-di')
+    }
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+
+project(':application') {
+    dependencies {
+        implementation project(':domain')
+        //implementation project(':infrastructure-di')
+    }
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+
+project(':domain') {
+    dependencies {
+        testImplementation project(':boot')
+    }
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+
+project(':infrastructure') {
+    dependencies {
+        implementation project(':domain')
+        implementation project(':infrastructure-di')
+    }
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+
+project(':infrastructure-di') {
+    dependencies {
+    }
+    bootJar { enabled = false }
+    jar { enabled = true }
+}
+
+task printVersion {
+    doLast {
+        // println subprojects[0].version
+        println project(':boot').version
+    }
+}

@@ -1,0 +1,66 @@
+############################################
+#### Server
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+
+
+############################################
+####  Spring
+spring:
+  datasource:
+    hikari:
+      jdbc-url: jdbc:postgresql://<<postgres.msa-template.write.host>>:<<postgres.msa-template.write.port>>/<<postgres.msa-template.write.db.mylgdb>>
+      username: <<postgres.msa-template.write.username>>
+      password: <<postgres.msa-template.write.password>>
+  jpa:
+    database: postgresql
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      use-new-id-generator-mappings: false
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        format_sql: false
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+
+  ## Cache - Redis
+  cache:
+    type: redis
+  redis:
+    database: 0
+    host: <<redis.host>>
+    port: <<redis.port>>
+    password:
+
+
+
+############################################
+####  Logging
+logging:
+  level:
+    com.lguplus.fleta: DEBUG
+    org.hibernate:
+      SQL: DEBUG
+#      type: DEBUG
+#      type.descriptor.sql: DEBUG
+
+
+
+############################################
+#### Other Domain Application Service
+service:
+  vodlookup:
+    url: http://vodlookup:8080
+  programming:
+    url: http://programming:8080

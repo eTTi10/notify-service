@@ -1,0 +1,22 @@
+############################################
+####  Spring
+spring:
+  profiles:
+    active: local
+    #  - local
+#  main:
+#    allow-bean-definition-overriding: false
+
+  messages:
+    basename: messages/response
+    encoding: utf-8
+
+
+
+############################################
+####  Logging
+logging:
+  level:
+    root: info
+  pattern:
+    level: "%5p [%X{traceId}]"
