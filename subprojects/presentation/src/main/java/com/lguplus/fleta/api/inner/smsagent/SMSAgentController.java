@@ -1,4 +1,4 @@
 package com.lguplus.fleta.api.inner.smsagent;
 
-public class DummyClass {
+public class SMSAgentController {
 }
