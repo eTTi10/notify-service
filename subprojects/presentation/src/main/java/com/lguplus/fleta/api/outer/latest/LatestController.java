@@ -39,7 +39,7 @@ public class LatestController {
     public GenericRecordsetResponseDto<LatestDto> getNoticeInfoApi(@Valid LatestRequestVo vo) {
         try{
             log.info(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId());
-            // 검색) isEmpty유효성 검사는 @Valid로 대체
+            // 등록, 삭제, 검색) isEmpty유효성 검사는 @Valid로 대체
             // 등록, 삭제) isNumeric(ctn) 검사는 @Valid로 대체
             // 등록, 삭제) isNull(category_gb, "I20").toUpperCase()
         //} catch (SmartUXException e) { <-- asis확인할것
