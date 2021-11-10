@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.latest;
 
+import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.repository.LatestRepository;
@@ -23,7 +24,7 @@ public class LatestDomainService {
      * @param latestRequestDto  최신회 정보조회를 위한 DTO
      * @return 최신회 정보조회 결과
      */
-    public List<LatestEntity> getLatest(LatestRequestDto latestRequestDto) {
+    public List<LatestDto> getLatest(LatestRequestDto latestRequestDto) {
         return latestRepository.getLatest(latestRequestDto);
     }
 }

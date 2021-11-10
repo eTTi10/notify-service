@@ -1,5 +1,6 @@
 package com.lguplus.fleta.api.outer.latest;
 
+import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -20,97 +22,38 @@ import java.util.List;
 public class LatestController {
 
     private final LatestService latestService;
-    /*
-        @GetMapping("/latest")
-        public List<LatestEntity> getLatest(
-                @RequestParam(value="sa_id", required = false) String saId,
-                @RequestParam(value="stb_mac", required = false) String stbMac,
-                @RequestParam(value="ctn", required = false) String ctn,
-                @RequestParam(value="cat_id", required = false) String catId,
-                @RequestBody @Valid LatestRequestVo latestRequestVo
-        ) {
-            LatestRequestDto latestRequestDto = latestRequestVo.convert();
-            return latestService.getLatest(latestRequestDto);
+
+    //programming-service\subprojects\presentation\src\main\java\com\lguplus\fleta\api\outer\menunoti
+
+    /**
+     * @return 최신회 알림 리스트
+     * @param vo
+     * [Request]
+     * sa_id 가입자 번호
+     * stb_mac 가입자 맥 어드레스
+     * ctn 전화번호
+     * cat_id 카테고리 아이디
+     * @return
+     */
+    @GetMapping(value = "/smartux/latest")
+    public GenericRecordsetResponseDto<LatestDto> getNoticeInfoApi(@Valid LatestRequestVo vo) {
+        try{
+            log.info(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId());
+            // isEmpty유효성 검사는 @Valid로 대체
+            // isNumeric(ctn) 검사는 @Valid로 대체
+            // isNull(category_gb, "I20").toUpperCase()
+        //} catch (SmartUXException e) { <-- asis확인할것
+        } catch (Exception e) {
+            log.error(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId(), e.getClass().getSimpleName(), e.getMessage());
+            //asis --> com.dmi.smartux.common.exception.ExceptionHandler handler = new com.dmi.smartux.common.exception.ExceptionHandler(e);
+            //asis --> exception.setFlag(handler.getFlag());
+            //asis --> exception.setMessage(handler.getMessage());
+            throw e;
         }
-    */
-    /*
-    @GetMapping("/latest")
-    public List<LatestEntity> getLatest(
-            @RequestParam String sa_id,
-            @RequestParam String stb_mac,
-            @RequestParam String ctn,
-            @RequestParam String cat_id
-    ) {
-        LatestRequestVo latestRequestVo = new LatestRequestVo();
-        LatestRequestDto latestRequestDto = latestRequestVo.convert();
-        return latestService.getLatest(latestRequestDto);
+        LatestRequestDto latestRequestDto = vo.convert();
+        GenericRecordsetResponseDto<LatestDto> result = latestService.getLatest(latestRequestDto);
+        return result;
     }
-
-*/
-    @GetMapping("/latest")
-    public GenericRecordsetResponseDto<LatestEntity> getLatest(
-            @RequestParam String sa_id,
-            @RequestParam String stb_mac,
-            @RequestParam String ctn,
-            @RequestParam String cat_id
-    ) {
-        LatestRequestVo latestRequestVo = new LatestRequestVo();
-        LatestRequestDto latestRequestDto = latestRequestVo.convert();
-        List<LatestEntity> resultList = latestService.getLatest(latestRequestDto);
-
-        //GenericRecordsetResponseDto<LatestRequestDto> result;
-
-        return GenericRecordsetResponseDto
-                .<LatestEntity>genericRecordsetResponseBuilder()
-                .totalCount(resultList.size())
-                .recordset(resultList)
-                .build();
-    }
-
-/*
-{
-    "result": {
-        "flag": "0000",
-        "message": "성공",
-        "total_count": "3",
-        "list": [
-            {
-                "album_id": "M0115CF222PPV00",
-                "play_time": "3662",
-                "mall_cd": "30",
-                "price_type_cd": "",
-                "good_no": "1511092745",
-                "good_nm": "[경품] 광주 천현한우 30일숙성 등심 500g",
-                "app_pkg_nm": "uplus",
-                "category_nm": "",
-                "sale_price": "0",
-                "good_img": "http://imagevshop.uplus.co.kr/upload/C14001/goods/745/1511092745_0000002.jpg",
-                "web_link_url": "http://mecs.uplus.co.kr",
-                "coupon_cont": "",
-                "sellpnt_cont": ""
-            },
-            {
-                "album_id": "M0115CF222PPV00",
-                "play_time": "3662",
-                "mall_cd": "30",
-                "price_type_cd": "",
-                "good_no": "1507092513",
-                "good_nm": "유플러스 테스트 상품 3",
-                "app_pkg_nm": "uplus",
-                "category_nm": "",
-                "sale_price": "0",
-                "good_img": "http://imagevshop.uplus.co.kr/upload/C14001/goods/513/1507092513_0000001.jpg",
-                "web_link_url": "http://mecs.uplus.co.kr",
-                "coupon_cont": "",
-                "sellpnt_cont": ""
-            }
-        ]
-    }
-}
-
-*/
-
-
 
     @DeleteMapping("/latest")
     public void deleteLatest(){
