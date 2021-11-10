@@ -13,7 +13,7 @@ import java.io.Serializable;
 @SuperBuilder
 @NoArgsConstructor
 @JsonPropertyOrder({"sa_id", "mac", "ctn", "reg_id", "cat_id", "cat_name", "r_date", "category_gb"})
-public class LatestDto implements PlainTextibleDto, Serializable {
+public class LatestRequestDto implements PlainTextibleDto, Serializable {
 
     private static final long serialVersionUID = 1L;//무엇????
 
