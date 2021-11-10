@@ -1,6 +1,7 @@
 package com.lguplus.fleta.data.entity;
 
 
+import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.entity.id.LatestId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "pt_ux_latest")
 @IdClass(LatestId.class)
-public class LatestEntity implements Serializable {
+public class LatestEntity implements Serializable{
     @Id
     @Column(name = "sa_id")
     private String saId;
@@ -44,4 +45,11 @@ public class LatestEntity implements Serializable {
 
     @Column(name = "cat_name")
     private String catName;
+
+    public String toPlainText() {
+        return String.join(CommonResponseDto.Separator.COLUMN
+                , getSaId(), getMac(), getCtn()
+                , getRegId(), getCatId(), getCatName()
+                , getRDate(), getCategoryGb());
+    }
 }

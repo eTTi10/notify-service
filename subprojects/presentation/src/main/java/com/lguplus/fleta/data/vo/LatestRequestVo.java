@@ -1,6 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
-import com.lguplus.fleta.data.dto.LatestRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;

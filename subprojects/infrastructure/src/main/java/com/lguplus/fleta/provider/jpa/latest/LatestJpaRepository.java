@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.jpa.latest;
 
-import com.lguplus.fleta.data.dto.LatestRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.extern.slf4j.Slf4j;

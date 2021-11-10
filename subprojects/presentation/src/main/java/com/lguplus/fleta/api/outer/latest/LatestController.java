@@ -1,8 +1,7 @@
 package com.lguplus.fleta.api.outer.latest;
 
-import com.lguplus.fleta.data.dto.LatestRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.vo.LatestRequestVo;
 import com.lguplus.fleta.service.latest.LatestService;
@@ -10,9 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import java.util.List;
 
 /**
@@ -49,8 +45,9 @@ public class LatestController {
         return latestService.getLatest(latestRequestDto);
     }
 
+
     @GetMapping("/latest2")
-    public List<LatestEntity> getLatest2(
+    public GenericRecordsetResponseDto<LatestEntity> getLatest2(
             @RequestParam String sa_id,
             @RequestParam String stb_mac,
             @RequestParam String ctn,
@@ -58,7 +55,15 @@ public class LatestController {
     ) {
         LatestRequestVo latestRequestVo = new LatestRequestVo();
         LatestRequestDto latestRequestDto = latestRequestVo.convert();
-        return latestService.getLatest(latestRequestDto);
+        List<LatestEntity> resultList = latestService.getLatest(latestRequestDto);
+
+        //GenericRecordsetResponseDto<LatestRequestDto> result;
+
+        return GenericRecordsetResponseDto
+                .<LatestEntity>genericRecordsetResponseBuilder()
+                .totalCount(resultList.size())
+                .recordset(resultList)
+                .build();
     }
 
 /*
