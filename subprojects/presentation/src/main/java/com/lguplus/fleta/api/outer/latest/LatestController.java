@@ -38,7 +38,7 @@ public class LatestController {
         }
     */
     @GetMapping("/latest")
-    public List<LatestEntity> getMainPanelInterlockingInfo(
+    public List<LatestEntity> getLatest(
             @RequestParam String sa_id,
             @RequestParam String stb_mac,
             @RequestParam String ctn,
@@ -46,6 +46,20 @@ public class LatestController {
     ) {
         LatestRequestVo latestRequestVo = new LatestRequestVo();
         LatestRequestDto latestRequestDto = latestRequestVo.convert();
+        return latestService.getLatest(latestRequestDto);
+    }
+
+    @GetMapping("/latest2")
+    public List<LatestEntity> getLatest2(
+            @RequestParam String sa_id,
+            @RequestParam String stb_mac,
+            @RequestParam String ctn,
+            @RequestParam String cat_id
+    ) {
+        LatestRequestVo latestRequestVo = new LatestRequestVo();
+        LatestRequestDto latestRequestDto = latestRequestVo.convert();
+        return latestService.getLatest(latestRequestDto);
+    }
 
 /*
 {
@@ -90,10 +104,6 @@ public class LatestController {
 
 */
 
-
-
-        return latestService.getLatest(latestRequestDto);
-    }
 
 
     @DeleteMapping("/latest")
