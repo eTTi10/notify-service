@@ -33,6 +33,7 @@ public class LatestController {
             return latestService.getLatest(latestRequestDto);
         }
     */
+    /*
     @GetMapping("/latest")
     public List<LatestEntity> getLatest(
             @RequestParam String sa_id,
@@ -45,9 +46,9 @@ public class LatestController {
         return latestService.getLatest(latestRequestDto);
     }
 
-
-    @GetMapping("/latest2")
-    public GenericRecordsetResponseDto<LatestEntity> getLatest2(
+*/
+    @GetMapping("/latest")
+    public GenericRecordsetResponseDto<LatestEntity> getLatest(
             @RequestParam String sa_id,
             @RequestParam String stb_mac,
             @RequestParam String ctn,
