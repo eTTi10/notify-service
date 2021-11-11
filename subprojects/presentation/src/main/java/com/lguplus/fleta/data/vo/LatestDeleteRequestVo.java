@@ -1,15 +1,13 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Positive;
 
 @Getter
-public class LatestRequestVo {
+public class LatestDeleteRequestVo {
     @ParamAlias("sa_id")
     @NotBlank(message = "[가입자 번호]가 입력되지 않았습니다.")
     private String saId;

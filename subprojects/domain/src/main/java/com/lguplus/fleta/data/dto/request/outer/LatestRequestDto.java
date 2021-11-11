@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
-@Data
+@Getter
 @SuperBuilder
 public class LatestRequestDto implements PlainTextibleDto, Serializable {
 
@@ -29,9 +29,23 @@ public class LatestRequestDto implements PlainTextibleDto, Serializable {
     @JsonProperty("cat_id") //카테고리 아이디
     private String catId;
 
+    @JsonProperty("reg_id") //Push 할 Reg ID
+    private String regId;
+
+    @JsonProperty("cat_name") //카테고리명
+    private String catName;
+
+    @JsonProperty("r_date") //등록일시
+    private String rDate;
+
+    @JsonProperty("category_gb") //카테고리 구분
+    private String categoryGb;
+
     @Override
     public String toPlainText() {
         return String.join(CommonResponseDto.Separator.COLUMN
-                , getSaId(), getMac(), getCtn());
+                , getSaId(), getMac(), getCtn()
+                , getRegId(), getCatId(), getCatName()
+                , getRDate(), getCategoryGb());
     }
 }

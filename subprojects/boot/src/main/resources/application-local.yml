@@ -15,9 +15,16 @@ spring:
   datasource:
     hikari:
       #driver-class-name: org.postgresql.Driver
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      username: postgres
-      password: devadmin!
+
+      #jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      #username: postgres
+      #password: devadmin!
+
+      jdbc-url: jdbc:postgresql://alche.iptime.org:5432/demo
+      username: demo
+      password: chae3834
+
+
       #platform: postgres
       #auto-commit: false
       #connection-test-query: SELECT 1

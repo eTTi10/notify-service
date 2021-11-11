@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface LatestRepository {
     List<LatestDto> getLatest(LatestRequestDto latestRequestDto);
+    int deleteLatest(LatestRequestDto latestRequestDto);
+    int insertLatest(LatestRequestDto latestRequestDto);
 }

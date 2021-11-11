@@ -26,5 +26,13 @@ public class LatestService {
                 .build();
     }
 
+    public  int deleteLatest(LatestRequestDto latestRequestDto) {
+        int result = latestDomainService.deleteLatest(latestRequestDto);
+        return result;
+    }
 
+    public  int insertLatest(LatestRequestDto latestRequestDto) {
+        int result = latestDomainService.insertLatest(latestRequestDto);
+        return result;
+    }
 }
