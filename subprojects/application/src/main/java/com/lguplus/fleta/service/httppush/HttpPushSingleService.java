@@ -1,28 +1,25 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.data.dto.request.inner.VariationInfoListRequestDto;
-import com.lguplus.fleta.data.entity.UxVariationInfoEntity;
-import lombok.AllArgsConstructor;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class HttpPushSingleService {
 
-//    private final VariationInfoDomainService variationInfoDomainService;
+    private final HttpPushSingleDomainService httpPushSingleDomainService;
 
     /**
+     * 단건푸시등록
      *
-     * @param variationInfoListRequestDto variation 정보 조회를 위한 DTO
-     * @return variation 정보 조회 결과
-    public List<UxVariationInfoEntity> getVariationInfoList(VariationInfoListRequestDto variationInfoListRequestDto) {
-        return variationInfoDomainService.getVariationInfoList(variationInfoListRequestDto);
-    }
+     * @param httpPushSingleRequestDto 단건푸시등록을 위한 DTO
+     * @return 단건푸시등록 결과
      */
-
+    public String requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
+        return httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+    }
 
 }
