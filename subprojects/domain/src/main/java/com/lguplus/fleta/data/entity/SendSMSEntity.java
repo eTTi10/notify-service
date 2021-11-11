@@ -1,4 +1,4 @@
 package com.lguplus.fleta.data.entity;
 
-public class DummyClass {
+public class SendSMSEntity {
 }
