@@ -47,13 +47,10 @@ public class LatestService {
         //개선된 for문으로 교체할것
         for (int i = 0; i < checkList.size(); i++) {
             String catId = checkList.get(i).getCatId();
-            log.debug(i+")"+catId+"@@@@@@@@@@@@@@@"+latestRequestDto.getCatId());
             if (catId.equals(latestRequestDto.getCatId())) {
-
                 return "DUPL";//중복
             }
         }
-
         return "OK";
     }
 
