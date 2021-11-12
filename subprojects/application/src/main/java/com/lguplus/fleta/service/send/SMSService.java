@@ -1,7 +1,6 @@
 package com.lguplus.fleta.service.send;
 
-import com.lguplus.fleta.data.dto.request.outer.SendSMSCodeRequestDto;
-import com.lguplus.fleta.data.dto.request.outer.SendSMSRequestDto;
+import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.service.smsagent.SMSAgentDomainService;
 import lombok.RequiredArgsConstructor;

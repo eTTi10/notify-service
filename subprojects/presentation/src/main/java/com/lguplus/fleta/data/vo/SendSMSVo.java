@@ -1,16 +1,10 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.outer.SendSMSRequestDto;
-import com.lguplus.fleta.exception.ParameterContainsNonAlphanumericException;
-import com.lguplus.fleta.exception.ParameterContainsWhitespaceException;
-import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
-import com.lguplus.fleta.exception.ParameterOverBoundsException;
+import com.lguplus.fleta.data.dto.request.SendSMSRequestDto;
 import lombok.Getter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 @Getter
 public class SendSMSVo {

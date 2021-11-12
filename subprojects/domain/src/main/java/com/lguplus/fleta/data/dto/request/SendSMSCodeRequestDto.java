@@ -1,4 +1,4 @@
-package com.lguplus.fleta.data.dto.request.outer;
+package com.lguplus.fleta.data.dto.request;
 
 import com.lguplus.fleta.data.dto.request.CommonRequestDto;
 import lombok.Getter;

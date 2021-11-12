@@ -1,8 +1,7 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.outer.SendSMSCodeRequestDto;
-import com.lguplus.fleta.data.dto.request.outer.SendSMSRequestDto;
+import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.exception.ParameterContainsNonAlphanumericException;
 import com.lguplus.fleta.exception.ParameterContainsWhitespaceException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;

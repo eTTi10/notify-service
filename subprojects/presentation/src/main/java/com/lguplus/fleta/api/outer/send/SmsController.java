@@ -1,6 +1,6 @@
 package com.lguplus.fleta.api.outer.send;
 
-import com.lguplus.fleta.data.dto.request.outer.SendSMSCodeRequestDto;
+import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.vo.SendSMSCodeVo;
 import com.lguplus.fleta.service.send.SMSService;
