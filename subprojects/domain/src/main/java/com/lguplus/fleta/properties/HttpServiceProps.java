@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -29,14 +30,8 @@ public class HttpServiceProps {
      * @param serviceId 서비스아이디
      * @return serviceId 에 해당하는 객체
      */
-   public Map<String, String> findMapByServiceId(String serviceId) {
-       if (CollectionUtils.isEmpty(keys)) {
-            return new HashMap<>();
-       }
-
-//       keys.stream()
-       return null;
+   public Optional<Map<String, String>> findMapByServiceId(String serviceId) {
+       return keys.stream().filter(m -> m.get("service_id").equals(serviceId)).findFirst();
    }
-
 
 }

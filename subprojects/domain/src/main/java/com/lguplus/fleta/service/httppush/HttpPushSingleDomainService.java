@@ -11,6 +11,9 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 
 @Slf4j
@@ -27,9 +30,13 @@ public class HttpPushSingleDomainService {
      * @return 단건푸시등록 결과
      */
     public String requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
-//        log.debug("httpPushSingleRequestDto ::::::::::::::: {}", httpPushSingleRequestDto);
+        log.debug("httpPushSingleRequestDto ::::::::::::::: {}", httpPushSingleRequestDto);
 
 //        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
+
+        String serviceId = httpPushSingleRequestDto.getServiceId();
+        String pushType = httpPushSingleRequestDto.getPushType();
+        String msg = httpPushSingleRequestDto.getMsg();
 
         try {
             // 4자리수 넘지 않도록 방어코드
@@ -50,7 +57,7 @@ public class HttpPushSingleDomainService {
 
                 log.debug("tRealTransaction :::::::: {}", tRealTransaction);
 
-            } catch(Exception e) {
+            } catch (Exception e) {
 //                multiLogger.info("[pushHttpSingle][setPushData][TransactionID Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
 //                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
             }
@@ -58,17 +65,68 @@ public class HttpPushSingleDomainService {
             //서비스 KEY
             String tServicePwd = "";
             try{
-                tServicePwd = PushHttpServiceProperties.serviceKeyMap.get(service_id);
-                if (tServicePwd==null || tServicePwd.equals("")) {
+                Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseGet(HashMap::new);
+
+                log.debug("serviceMap ::::::::::::::::: {}", serviceMap);
+
+                tServicePwd = serviceMap.get("service_pwd");
+
+                log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, tServicePwd);
+
+                if (tServicePwd == null || tServicePwd.isBlank()) {
+                    log.debug("========no found service_pwd!!===========");
 //                    throw new CustomExceptionHandler(Properties.getProperty("flag.pushgw.servicenotfound"), Properties.getProperty("message.pushgw.servicenotfound"));
                 }
 
-            } catch(Exception e) {
+            } catch (Exception e) {
 //                multiLogger.info("[pushHttpSingle][setPushData][ServicePass Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
 //                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
             }
 
-        } catch(Exception e){
+            // PAYLOAD
+            /*String tPayLoadStr = "";
+            try {
+                if (pushType.equals("G")) {
+                    StringBuffer sb = new StringBuffer();
+
+                    sb.append("{");
+//					sb.append("\"MSG1\":"+"\""+msg+"\",");
+//					sb.append("\"PushCtrl\":"+"\"MSG\"");
+                    sb.append(msg.replace('\b', ' ').replace('\t', ' ').replace('\n', ' ').replace('\f', ' ').replace('\r', ' ').replace("\\\\\\\"", "&quot;").replace("\\", "").replace("&quot;","\\\\\\\""));
+                    sb.append("}");
+
+                    tPayLoadStr = sb.toString();
+
+                } else {
+                    StringBuffer sb = new StringBuffer();
+                    String tCmStr = "";
+
+                    sb.append("{");
+                    sb.append("\"aps\":{");
+                    sb.append("\"alert\":{");
+//					sb.append("\"MESSAGE\":"+"\""+msg+"\"}");
+                    sb.append(msg.replace('\b', ' ').replace('\t', ' ').replace('\n', ' ').replace('\f', ' ').replace('\r', ' ').replace("\\\\\\\"", "&quot;").replace("\\", "").replace("&quot;","\\\\\\\"")+"}");
+
+                    for (String itemList : arrItem) {
+                        String[] item = itemList.split("\\!\\^");
+                        if (item.length >= 2) {
+                            if (item[0].equalsIgnoreCase("cm")) {
+                                tCmStr = ",\""+item[0]+"\":\""+item[1]+"\"";
+                            } else {
+                                sb.append(",\""+item[0]+"\":\""+item[1]+"\"");
+                            }
+                        }
+                    }
+                    sb.append("}"+ tCmStr +"}");
+
+                    tPayLoadStr = sb.toString();
+                }
+            } catch(Exception e) {
+                multiLogger.info("[pushHttpSingle][setPushData][PAYLOAD Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
+                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
+            }*/
+
+        } catch (Exception e){
 
         }
 

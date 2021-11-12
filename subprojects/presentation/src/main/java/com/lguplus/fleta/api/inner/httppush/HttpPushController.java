@@ -46,6 +46,7 @@ public class HttpPushController {
             @RequestParam(value="push_type", required = false, defaultValue = "G") @Pattern(regexp = "^[gaGA]]?$", message = "push_type 파라미터는 값이 G 나 A 이어야 함") String pushType,
             @RequestBody @Valid HttpPushSingleRequestVo httpPushSingleRequestVo
     ) {
+        // TODO : PUSH_REJECT_REGLIST
         HttpPushSingleRequestDto httpPushSingleRequestDto = httpPushSingleRequestVo.convert(appId, serviceId, pushType);
 
         return InnerResponseDto.of(httpPushSingleService.requestHttpPushSingle(httpPushSingleRequestDto));
