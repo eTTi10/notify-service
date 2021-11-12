@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.data.dto.request.SendSMSRequestDto;
-import com.lguplus.fleta.data.dto.response.SendSMSResponseDto;
+import com.lguplus.fleta.data.dto.request.outer.SendSMSCodeRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.SendSMSRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +16,11 @@ public class SMSAgentService {
 
     public SuccessResponseDto sendSMS(SendSMSRequestDto sendSMSRequestDto) {
 
-        return smsAgentDomainService.sendSMS(sendSMSRequestDto);
+        return smsAgentDomainService.send(sendSMSRequestDto);
+    }
+
+    public SuccessResponseDto sendSMSCode(SendSMSCodeRequestDto sendSMSCodeRequestDto) {
+
+        return smsAgentDomainService.sendSMS(sendSMSCodeRequestDto);
     }
 }
