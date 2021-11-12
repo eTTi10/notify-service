@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.text.DecimalFormat;
@@ -32,7 +33,7 @@ public class HttpPushSingleDomainService {
     public String requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
         log.debug("httpPushSingleRequestDto ::::::::::::::: {}", httpPushSingleRequestDto);
 
-//        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
+        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
 
         String serviceId = httpPushSingleRequestDto.getServiceId();
         String pushType = httpPushSingleRequestDto.getPushType();
