@@ -23,8 +23,18 @@ public class LatestDomainService {
      * @param latestRequestDto  최신회 정보조회를 위한 DTO
      * @return 최신회 정보조회 결과
      */
-    public List<LatestDto> getLatest(LatestRequestDto latestRequestDto) {
-        return latestRepository.getLatest(latestRequestDto);
+    public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
+        return latestRepository.getLatestList(latestRequestDto);
+    }
+
+
+    /**
+     * 최대증록개수, 중복체크를 위한 리스트출력
+     * @param latestRequestDto  최신회 정보조회를 위한 DTO
+     * @return 최신회 정보조회 결과
+     */
+    public List<LatestDto> getLatestCheckList(LatestRequestDto latestRequestDto) {
+        return latestRepository.getLatestCheckList(latestRequestDto);
     }
 
     /**
