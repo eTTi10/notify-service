@@ -1,0 +1,63 @@
+#Push G/W에서 발급 받은 service_key 리스트
+########################
+#연동 타입
+#기본(미지정 시) : 연동정의서 1.2.1(service_key)
+#LGUPUSH_OLD : LGUPUSH 초기버전 연동
+########################
+
+http:
+  service:
+    keys:
+      - service_id: '20014'
+        service_pwd: hdtv_GCM01
+        service_name: 안드로이드 HDTV 상용 키
+      - service_id: '20015'
+        service_pwd: ucine_GCM1
+        service_name: 안드로이드 UFLIX 상용 키
+      - service_id: '20002'
+        service_pwd: smartux
+        service_name: MIMS(IPTV) 상용 키
+        linkage_type: LGUPUSH_OLD
+      - service_id: '20019'
+        service_pwd: 2ndtv_GCM1
+        service_name: 세컨드TV 상용 키
+      - service_id: '30005'
+        service_pwd: hdtv_APNS1
+        service_name: HDTV iOS 상용 키
+      - service_id: '30006'
+        service_pwd: uflix_APNS
+        service_name: UFLIX iOS 상용 키
+      - service_id: '20056'
+        service_pwd: liveU_GCM1
+        service_name: 뮤직공연 테스트용 키 Android
+      - service_id: '30034'
+        service_pwd: liveU_APNS1
+        service_name: 뮤직공연 테스트용 키 iOS
+      - service_id: '20057'
+        service_pwd: Ugolf_GCM1
+        service_name: GOLF 테스트용 키 Android
+      - service_id: '30035'
+        service_pwd: Ugolf_APNS1
+        service_name: GOLF 테스트용 키 iOS
+      - service_id: '20063'
+        service_pwd: uVR_GCM1
+        service_name: VR 테스트용 키 Android
+      - service_id: '30125'
+        service_pwd: lguplus_game_live
+        service_name: GAME 테스트용 키 Android
+      - service_id: '21006'
+        service_pwd: UTVseamless_FCM1
+        service_name: Push Module work_2020.03.04
+      - service_id: '21009'
+        service_pwd: baseball_FCM1
+        service_name: 프로야구 키 Android
+      - service_id: '30043'
+        service_pwd: baseball_APNS1
+        service_name: 프로야구 키 IOS
+      - service_id: '21011'
+        service_pwd: mobilekids_FCM1
+        service_name: 아이들나라 Android
+      - service_id: '30044'
+        service_pwd: mobilekids_APNS1
+        service_name: 아이들나라 IOS
+
