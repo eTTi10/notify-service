@@ -15,7 +15,7 @@ import javax.validation.constraints.Positive;
 
 @Getter
 @ToString
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, LatestSearchRequestVo.class})
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, LatestPostRequestVo.class})
 public class LatestPostRequestVo {
     @ParamAlias("sa_id")
     @NotBlank(message = "[가입자 번호]가 입력되지 않았습니다.", groups = Groups.C1.class)
