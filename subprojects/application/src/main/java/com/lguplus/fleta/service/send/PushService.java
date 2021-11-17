@@ -15,14 +15,16 @@ public class PushService {
 
     private final PushDomainService pushDomainService;
     private final HttpPushSingleDomainService httpPushSingleDomainService;
-    private final HttpPushSingleRequestDto httpPushSingleRequestDto;
     private final SuccessResponseDto successResponseDto;
 
     public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
-        return successResponseDto;
+        //TODO http push domain service에 연결 21.11.17 moutlaw
+//        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+//        return successResponseDto;
+
+        return pushDomainService.sendPushCode(sendPushCodeRequestDto);
     }
 
 }

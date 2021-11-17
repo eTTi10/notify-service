@@ -3,6 +3,8 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.entity.RegistrationIdEntity;
+import com.lguplus.fleta.repository.PushRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +16,13 @@ import org.w3c.dom.Document;
 @RequiredArgsConstructor
 public class PushDomainService {
 
+    private final PushRepository pushRepository;
+
     public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+
+        RegistrationIdEntity registrationId = pushRepository.getRegistrationID(sendPushCodeRequestDto);
+        String regId = registrationId.getRegId();
+        log.debug("DB regId: {}", regId);
 
         return SuccessResponseDto.builder().build();
     }
