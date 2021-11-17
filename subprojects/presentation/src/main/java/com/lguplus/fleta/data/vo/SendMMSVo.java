@@ -2,13 +2,11 @@ package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.dto.request.SendMMSRequestDto;
-import com.lguplus.fleta.data.dto.request.SendSMSRequestDto;
 import com.lguplus.fleta.exception.ParameterContainsNonAlphanumericException;
 import com.lguplus.fleta.exception.ParameterContainsWhitespaceException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.exception.ParameterOverBoundsException;
 import lombok.Getter;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
