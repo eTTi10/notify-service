@@ -18,19 +18,12 @@ public class MMSAgentController {
 
     private final MMSAgentService mmsAgentService;
 
-    @PostMapping("/mmsagent/mms")
-    public SuccessResponseDto sendSms(@Valid SendMMSVo request) {
-
-        log.debug("SMSAgentController.sendMms() - {}:{}", "MMS발송 처리", request);
-
-        return SuccessResponseDto.builder().build();
-    }
-
     @PostMapping("/smsagent/mmsCode")
     public SuccessResponseDto sendMmsCode(@Valid SendMMSVo request) {
 
         log.debug("MMSAgentController.sendMmsCode() - {}:{}", "MMS발송 처리", request);
 
+        //▶ 001 [완료] sa_id, stb_mac, mms_cd, ctn 값이 null인지 체크
         SendMMSRequestDto requestDto = request.convert();
 
         return mmsAgentService.sendMMS(requestDto);

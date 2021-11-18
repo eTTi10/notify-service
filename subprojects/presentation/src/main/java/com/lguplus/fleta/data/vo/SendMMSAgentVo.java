@@ -12,7 +12,7 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @ToString
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, LatestSearchRequestVo.class})
-public class SendMMSVo {
+public class SendMMSAgentVo {
     @ParamAlias("sa_id")
     @NotBlank(message = "[가입자 번호]가 입력되지 않았습니다.", groups = Groups.C1.class)
     private String saId;
