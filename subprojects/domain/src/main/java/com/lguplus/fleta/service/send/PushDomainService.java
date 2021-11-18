@@ -2,12 +2,16 @@ package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import com.lguplus.fleta.repository.PushRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Cache;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -18,15 +22,17 @@ public class PushDomainService {
 
     private final PushRepository pushRepository;
 
-    public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+//    @Cacheable(value="PUSH_CACHE", key="REG_ID")
+    public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        RegistrationIdEntity registrationId = pushRepository.getRegistrationID(sendPushCodeRequestDto);
-        String regId = registrationId.getRegId();
-        log.debug("DB regId: {}", regId);
-
-        return SuccessResponseDto.builder().build();
+        return loadRegistrationID(sendPushCodeRequestDto);
     }
 
+//    @CachePut(value="PUSH_CACHE", key="REG_ID")
+    public RegistrationIdEntity loadRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+
+        return pushRepository.getRegistrationID(sendPushCodeRequestDto);
+    }
 /*
     private final String changeNodeName = "reg_id";
 

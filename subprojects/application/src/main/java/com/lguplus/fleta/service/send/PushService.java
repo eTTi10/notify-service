@@ -1,9 +1,9 @@
 package com.lguplus.fleta.service.send;
 
-import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.service.httppush.HttpPushSingleDomainService;
+import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,17 +14,23 @@ import org.springframework.stereotype.Service;
 public class PushService {
 
     private final PushDomainService pushDomainService;
-    private final HttpPushSingleDomainService httpPushSingleDomainService;
-    private final SuccessResponseDto successResponseDto;
 
-    public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegistrationIdResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
 
         //TODO http push domain service에 연결 21.11.17 moutlaw
 //        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-//        return successResponseDto;
+        String registrationId = "";
+        registrationId = getRegistrationID(sendPushCodeRequestDto).getRegId();
 
-        return pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        return RegistrationIdResponseDto.builder()
+                .regId(registrationId)
+                .build();
+    }
+
+    public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+
+        return pushDomainService.getRegistrationID(sendPushCodeRequestDto);
     }
 
 }

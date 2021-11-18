@@ -19,13 +19,13 @@ public class PushJpaRepository implements PushRepository {
     @Override
     public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        String sql = "SELECT /*+INDEX(A IDX_PARING_UK)*/\n" +
+
+        String sql = "SELECT \n" +
                 "\t\t       REG_ID\n" +
-                "\t\tFROM   PT_UX_PAIRING\n" +
+                "\t\tFROM   SMARTUX.PT_UX_PAIRING\n" +
                 "\t\tWHERE  SA_ID = :saId \n" +
-                "\t\tAND    STB_MAC = :stbMac \n" +
-                "\t\tAND    APP_TYPE = 'UX'\n" +
-                "\t\tAND\t   ROWNUM = 1";
+                "\t\tAND  STB_MAC = :stbMac \n" +
+                "\t\tLIMIT 1";
 
        return (RegistrationIdEntity) em.createNativeQuery(sql, RegistrationIdEntity.class)
                .setParameter("saId", sendPushCodeRequestDto.getSaId())
