@@ -23,12 +23,14 @@ import org.springframework.data.annotation.Immutable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 public class Announce {
 
+    private final FeignAnnounceInterface announceClient;
     private final HttpClient httpClient;
 
     public String request(String host, int port, String url, String param, int timeout, String acceptHeader, String protocolName, String encoding) {
@@ -82,5 +84,27 @@ public class Announce {
             HttpClientUtils.closeQuietly(response);
         }
         return null;
+    }
+
+    public String request2(String host, int port, String url, String param, int timeout, String acceptHeader, String protocolName, String encoding) {
+
+        HashMap<String,Object> requestMap = new HashMap<>();
+        requestMap.put("msg_id", "PUSH_ANNOUNCEMENT");
+        /*
+        if("LGUPUSH_OLD".equals(linkageType)) {//구버전 LGUPUSH
+            requestMap.put("push_app_id",MlCommProperties.getProperty("push.old.lgupush.pushAppId"));
+            requestMap.put("noti_type",MlCommProperties.getProperty("push.old.lgupush.notiType"));
+        }
+
+        requestMap.put("push_id", realTransaction);
+        requestMap.put("service_id",pushVo.getService_id());
+        requestMap.put("service_passwd", SHA512Hash.getDigest(tServicePwd));	//SHA512 암호화 값
+        requestMap.put("app_id",pushVo.getApp_id());
+        requestMap.put("noti_contents",pushVo.getNoti_message());
+        */
+
+        AnnounceResponse announceResponse = announceClient.sendAnnounceMessage2(requestMap);
+        return announceResponse.toString();
+
     }
 }
