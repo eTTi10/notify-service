@@ -1,6 +1,5 @@
 package com.lguplus.fleta.data.dto.request;
 
-import com.lguplus.fleta.data.dto.request.CommonRequestDto;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 

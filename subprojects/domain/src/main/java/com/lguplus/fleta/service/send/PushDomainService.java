@@ -9,9 +9,6 @@ import com.lguplus.fleta.repository.PushRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Cache;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
@@ -22,14 +19,7 @@ public class PushDomainService {
 
     private final PushRepository pushRepository;
 
-//    @Cacheable(value="PUSH_CACHE", key="REG_ID")
     public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        return loadRegistrationID(sendPushCodeRequestDto);
-    }
-
-//    @CachePut(value="PUSH_CACHE", key="REG_ID")
-    public RegistrationIdEntity loadRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         return pushRepository.getRegistrationID(sendPushCodeRequestDto);
     }

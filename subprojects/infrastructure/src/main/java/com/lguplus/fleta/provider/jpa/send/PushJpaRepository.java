@@ -9,6 +9,12 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+/**
+ * REGID 조회 용
+ * TODO Feign으로 변경되어 삭제예정
+ *
+ * */
+
 @Slf4j
 @Repository
 public class PushJpaRepository implements PushRepository {

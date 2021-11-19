@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
+
+/**
+ * REGID 조회 용
+ * TODO Feign으로 변경되어 삭제예정
+ *
+ * */
 @Getter
 @SuperBuilder
 public class RegistrationIdResponseDto extends SuccessResponseDto{

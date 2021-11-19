@@ -4,6 +4,12 @@ import lombok.Getter;
 
 import javax.persistence.*;
 
+/**
+* REGID 조회 용
+* TODO Feign으로 변경되어 삭제예정
+*
+* */
+
 @Entity
 @Getter
 public class RegistrationIdEntity {

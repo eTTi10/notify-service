@@ -98,3 +98,5 @@ service:
     url: http://vodlookup.fleta.com
   channel:
     url: http://channel.fleta.com
+  personalization:
+    url: http://personalization.fleta.com
