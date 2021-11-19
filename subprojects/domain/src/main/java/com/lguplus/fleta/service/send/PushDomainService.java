@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.send;
 
+import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
@@ -12,17 +13,32 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PushDomainService {
 
+    private final PersonalizationDomainClient personalizationDomainClient;
     private final PushRepository pushRepository;
 
-    public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public Map<String, RegistrationIdResponseDto> getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+
+        Map<String, String> inputMap = new HashMap<>();
+
+        inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
+        inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
+
+        return personalizationDomainClient.getRegistrationID(inputMap);
+    }
+
+    public RegistrationIdEntity loadRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         return pushRepository.getRegistrationID(sendPushCodeRequestDto);
     }
+
 /*
     private final String changeNodeName = "reg_id";
 

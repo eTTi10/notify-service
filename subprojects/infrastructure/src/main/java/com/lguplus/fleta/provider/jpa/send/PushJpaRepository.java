@@ -26,11 +26,18 @@ public class PushJpaRepository implements PushRepository {
     public RegistrationIdEntity getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
 
+//        String sql = "SELECT \n" +
+//                "\t\t       REG_ID\n" +
+//                "\t\tFROM   SMARTUX.PT_UX_PAIRING\n" +
+//                "\t\tWHERE  SA_ID = :saId \n" +
+//                "\t\tAND  STB_MAC = :stbMac \n" +
+//                "\t\tLIMIT 1";
+
         String sql = "SELECT \n" +
                 "\t\t       REG_ID\n" +
-                "\t\tFROM   SMARTUX.PT_UX_PAIRING\n" +
+                "\t\tFROM   SMARTUX.PT_UX_LATEST\n" +
                 "\t\tWHERE  SA_ID = :saId \n" +
-                "\t\tAND  STB_MAC = :stbMac \n" +
+                "\t\tAND  MAC = :stbMac \n" +
                 "\t\tLIMIT 1";
 
        return (RegistrationIdEntity) em.createNativeQuery(sql, RegistrationIdEntity.class)
