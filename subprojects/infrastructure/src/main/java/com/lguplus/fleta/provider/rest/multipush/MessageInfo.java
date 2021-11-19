@@ -1,14 +1,14 @@
 package com.lguplus.fleta.provider.rest.multipush;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @NoArgsConstructor
-@Setter
+@Builder
 @Getter
 public class MessageInfo {
-
     private int messageID;
     private byte[] bTransactionID;
     private String transactionID;
@@ -17,6 +17,9 @@ public class MessageInfo {
     private String data;
     private String statusCode;
 
+    private String transactionDate;
+    private int transactionSeq;
+/*
     public MessageInfo(int messageID, String transactionID, String channelID, String result, String data, String statusCode) {
         this.messageID = messageID;
         this.transactionID = transactionID;
@@ -25,5 +28,5 @@ public class MessageInfo {
         this.data = data;
         this.statusCode = statusCode;
     }
-
+*/
 }

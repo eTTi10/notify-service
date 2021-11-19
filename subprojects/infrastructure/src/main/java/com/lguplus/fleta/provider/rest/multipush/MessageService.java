@@ -1,11 +1,10 @@
 package com.lguplus.fleta.provider.rest.multipush;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -99,10 +98,9 @@ public class MessageService {
 	 */
 	public boolean channelConnectionRequest() throws Exception {
 		String channelID = this.getNextChannelID();
-		
-		MessageInfo message = new MessageInfo();
-		message.setMessageID(MsgEntityCommon.CHANNEL_CONNECTION_REQUEST);
-		message.setChannelID(channelID);
+
+		MessageInfo message = MessageInfo.builder().messageID(MsgEntityCommon.CHANNEL_CONNECTION_REQUEST)
+				.channelID(channelID).build();
 
 		if (nettyClient.write(message)) {
 			this.channelID = channelID;
@@ -121,10 +119,9 @@ public class MessageService {
 		if (this.channelID == null) {
 			return false;
 		}
-		
-		MessageInfo message = new MessageInfo();
-		message.setMessageID(MsgEntityCommon.CHANNEL_RELEASE_REQUEST);
-		message.setChannelID(this.channelID);
+
+		MessageInfo message = MessageInfo.builder().messageID(MsgEntityCommon.CHANNEL_RELEASE_REQUEST)
+				.channelID(this.channelID).build();
 		
 		return nettyClient.write(message);
 	}
@@ -137,9 +134,8 @@ public class MessageService {
 			return false;
 		}
 
-		MessageInfo message = new MessageInfo();
-		message.setMessageID(MsgEntityCommon.PROCESS_STATE_REQUEST);		
-		message.setChannelID(this.channelID);
+		MessageInfo message = MessageInfo.builder().messageID(MsgEntityCommon.PROCESS_STATE_REQUEST)
+				.channelID(this.channelID).build();
 				
 		MessageInfo response = (MessageInfo) nettyClient.writeSync(message);
 		
@@ -171,11 +167,11 @@ public class MessageService {
 		String messageData = this.makeMessageData((transactionID.length() > 12 ? transactionID.substring(0, 12) : transactionID), 
 				app_id, service_id, service_key, noti_message, arr_item);
 
-		MessageInfo message = new MessageInfo();
-		message.setMessageID(MsgEntityCommon.COMMAND_REQUEST);
-		message.setBTransactionID(bTransactionID);
-		message.setChannelID(this.channelID);
-		message.setData(messageData);
+		MessageInfo message = MessageInfo.builder().messageID(MsgEntityCommon.COMMAND_REQUEST)
+				.channelID(this.channelID).bTransactionID(bTransactionID).data(messageData)
+				.transactionDate(DateFormatUtils.format(new Date(), "yyyyMMdd"))
+				.transactionSeq(TRANSACTION_SEQ_NO.incrementAndGet())
+				.build();
 		
 		if (!nettyClient.write(message)) {
 			return null;
@@ -188,7 +184,7 @@ public class MessageService {
 	private String makeMessageData(String push_id, String app_id, String service_id, String service_key, 
 			String noti_message, List<String> arr_item) throws Exception {
 
-		HashMap<String, String> pushBody = null;
+		TreeMap<String, String> pushBody = null;
 		
 		//try {
 			PushBaseVo psVO = new PushBaseVo();
@@ -228,9 +224,24 @@ public class MessageService {
 		System.out.println(jsonNode2); // {"name":"Anna","id":1}
 		*/
 
+		try {
+			TreeMap<String, TreeMap<String, String>> m = new TreeMap<>();
+			m.put("request", pushBody);
+
+			ObjectMapper om = new ObjectMapper();
+			String json = om.writeValueAsString(m);
+			//System.out.println(json);
+			return json;
+		}
+		catch(JsonProcessingException ex) {
+			return null;
+		}
+/*
 		ObjectNode oNode = objectMapper.createObjectNode();
 		oNode.set("request", objectMapper.valueToTree(pushBody));
 		return oNode.toString();
+
+ */
 	}
 	
 	public synchronized String getNextChannelID() {

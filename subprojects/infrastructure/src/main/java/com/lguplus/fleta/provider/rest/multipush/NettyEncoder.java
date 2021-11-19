@@ -5,10 +5,15 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
+
 import lombok.NoArgsConstructor;
 
+import java.nio.charset.Charset;
 import java.util.List;
-
+/**
+ * Client -> Server
+ * Client에서 송신하는 데이터(MessageInfo)를 byte[]로 변환한다.
+ */
 @NoArgsConstructor
 public class NettyEncoder extends MessageToMessageEncoder<MessageInfo> { // OneToOneEncoder -> MessageToMessageEncoder
 
@@ -71,6 +76,36 @@ public class NettyEncoder extends MessageToMessageEncoder<MessageInfo> { // OneT
 
         ByteBuf byteBuf = Unpooled.copiedBuffer(byteTotalData);
         out.add(byteBuf);
+
+        //Test
+        Charset cs = Charset.forName("euc-kr");
+        //Default Order Big Endian
+        ByteBuf buffer = Unpooled.buffer(MsgEntityCommon.HEADER_SIZE + message.getData().getBytes(cs).length);
+        int idx = 0;
+        buffer.setInt(idx, message.getMessageID());
+        idx += 4;
+        buffer.setCharSequence(idx, message.getTransactionDate(), cs);
+        idx += 8;
+        buffer.setInt(idx, message.getTransactionSeq());
+        idx += 4;
+        buffer.setCharSequence(idx, message.getChannelID(), cs);
+        idx += 14;
+        buffer.setShort(idx, 0);//Reservation1
+        idx += 2;
+        buffer.setBytes(idx, convertStrToBytes("127.0.0.1", 16, cs));
+        idx += 16;
+        buffer.setBytes(idx, new byte[12]);//Reservation2
+        idx += 12;
+        buffer.setInt(idx, message.getData().getBytes(cs).length);
+        idx += 4;
+        buffer.setCharSequence(idx, message.getData(), cs);
+
+        //out.add(buffer);
     }
 
+    private byte[] convertStrToBytes(String src, int length, Charset cs) {
+        byte[] dst = new byte[length];
+        System.arraycopy(src.getBytes(cs), 0, dst, 0, src.getBytes(cs).length);
+        return dst;
+    }
 }

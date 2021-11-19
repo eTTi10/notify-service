@@ -1,8 +1,35 @@
 package com.lguplus.fleta.provider.rest.multipush;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.util.ByteProcessor;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.channels.GatheringByteChannel;
+import java.nio.channels.ScatteringByteChannel;
+import java.nio.charset.Charset;
+
 public class ByteUtil
 {
     private ByteUtil(){}
+
+    public static final byte[] short2byteN(short s)
+    {
+        byte dest[] = new byte[2];
+        dest[1] = (byte)(s & 0xff);
+        dest[0] = (byte)(s >>> 8 & 0xff);
+
+        //ByteBuf buf = ;
+        //ByteBufUtil.setShortBE()
+
+        return dest;
+    }
     
     public static final byte[] short2byte(short s)
     {

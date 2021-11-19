@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 /*
 import com.dmi.pushagent.common.exception.CustomException;
@@ -23,9 +24,9 @@ public class PushMakeBody {
 	 * @return
 	 * @throws Exception
 	 */
-	public static HashMap makeBodyByNoti(String realTransaction, MessageService.PushBaseVo pushVo)  throws Exception{
-		
-		HashMap resultMap = new HashMap();
+	public static TreeMap makeBodyByNoti(String realTransaction, MessageService.PushBaseVo pushVo)  throws Exception{
+
+		TreeMap resultMap = new TreeMap();
 		String serviceId = pushVo.getService_id();
 		
 		String tServicePwd = "";

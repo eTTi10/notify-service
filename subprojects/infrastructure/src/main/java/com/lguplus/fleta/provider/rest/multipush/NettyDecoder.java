@@ -1,5 +1,6 @@
 package com.lguplus.fleta.provider.rest.multipush;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
@@ -9,8 +10,14 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
+/**
+ * Server -> Client
+ * Server에서 수신한 데이터를 MessageInfo로 변환한다.
+ */
 @NoArgsConstructor
 public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> ByteToMessageDecoder
 
@@ -94,13 +101,21 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
                 JSONObject responseObj = jsonObj.getJSONObject("response");
                 statusCode = responseObj.getString("status_code");
  */
-                JsonNode jsonNode = objectMapper.readTree(data);
-                statusCode = jsonNode.get("response").get("status_code").asText();
+                TreeMap<String, Object> results = objectMapper.readValue(data, new TypeReference<TreeMap<String, Object>>() {});
+                TreeMap<String, Object> res = (TreeMap<String, Object>)results.get("response");
+                statusCode = (String)res.get("status_code");
 
             }
         }
 
-        MessageInfo msg = new MessageInfo(messageID, transactionID, new String(byte_ChannelID), result, data, statusCode);
+        MessageInfo msg = MessageInfo.builder()
+                    .messageID(messageID)
+                    .transactionID(transactionID)
+                    .channelID(new String(byte_ChannelID))
+                    .result(result)
+                    .data(data)
+                    .statusCode(statusCode)
+                .build();
 
         out.add(msg);
     }
