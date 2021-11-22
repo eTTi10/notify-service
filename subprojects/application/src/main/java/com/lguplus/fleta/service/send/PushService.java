@@ -23,7 +23,7 @@ public class PushService {
 
         //TODO http push domain service에 연결 21.11.17 moutlaw
 //        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-        String registrationId = getRegistrationIDFein(sendPushCodeRequestDto).getRegId();
+        String registrationId = pushDomainService.getRegistrationID(sendPushCodeRequestDto).getRegId();
 
         log.debug("PushService - sendPushCode() - registrationId : " + registrationId);
 
@@ -32,10 +32,5 @@ public class PushService {
                 .build();
     }
 
-
-    public RegIdDto getRegistrationIDFein(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        return pushDomainService.getRegistrationID(sendPushCodeRequestDto);
-    }
 
 }

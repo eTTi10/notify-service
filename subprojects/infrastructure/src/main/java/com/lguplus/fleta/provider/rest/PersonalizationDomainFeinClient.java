@@ -20,7 +20,4 @@ public class PersonalizationDomainFeinClient extends CommonDomainFeinClient impl
 
         return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));
     }
-
-
-
 }

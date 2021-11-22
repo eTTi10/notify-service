@@ -14,8 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -32,7 +34,9 @@ public class PushDomainService {
         inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
         inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
 
-        return personalizationDomainClient.getRegistrationID(inputMap);
+//        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseGet(RegIdDto::new);
+        RegIdDto regIdDto = personalizationDomainClient.getRegistrationID(inputMap);
+        return regIdDto;
     }
 
 

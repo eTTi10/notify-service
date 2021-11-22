@@ -10,6 +10,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * REGID response용
+ * FeinClient 테스트를 위해 임시로 생성
+ * TODO FeinClient 테스트 후 삭제
+ *
+ * */
+
 @Slf4j
 @RequiredArgsConstructor
 @RestController
