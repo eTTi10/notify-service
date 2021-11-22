@@ -8,14 +8,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import javax.validation.Valid;
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
 public class MMSAgentController {
-
     private final MMSAgentService mmsAgentService;
 
     @PostMapping("/smsagent/mmsCode")

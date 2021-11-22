@@ -37,4 +37,9 @@ public class Groups {
     public interface C12 {}
     public interface C13 {}
     public interface C14 {}
+    public interface C15 {}
+    public interface C16 {}
+    public interface C17 {}
+    public interface C18 {}
+    public interface C19 {}
 }
