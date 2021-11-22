@@ -1,6 +1,7 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.client.PersonalizationDomainClient;
+import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
@@ -24,7 +25,7 @@ public class PushDomainService {
     private final PersonalizationDomainClient personalizationDomainClient;
     private final PushRepository pushRepository;
 
-    public RegistrationIdResponseDto getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegIdDto getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         Map<String, String> inputMap = new HashMap<>();
 

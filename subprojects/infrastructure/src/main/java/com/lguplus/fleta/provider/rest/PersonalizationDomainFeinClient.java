@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.client.PersonalizationDomainClient;
+import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ public class PersonalizationDomainFeinClient extends CommonDomainFeinClient impl
     private final PersonalizationFeinClient personalizationFeinClient;
 
     @Override
-    public RegistrationIdResponseDto getRegistrationID(Map<String, String> sendPushInput) {
+    public RegIdDto getRegistrationID(Map<String, String> sendPushInput) {
 
         return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));
     }

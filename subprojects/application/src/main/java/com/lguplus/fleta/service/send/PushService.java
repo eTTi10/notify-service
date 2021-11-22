@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.send;
 
+import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
@@ -22,7 +23,7 @@ public class PushService {
 
         //TODO http push domain service에 연결 21.11.17 moutlaw
 //        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-        String registrationId = getRegistrationIDFein(sendPushCodeRequestDto).toString();
+        String registrationId = getRegistrationIDFein(sendPushCodeRequestDto).getRegId();
 
         log.debug("PushService - sendPushCode() - registrationId : " + registrationId);
 
@@ -32,7 +33,7 @@ public class PushService {
     }
 
 
-    public RegistrationIdResponseDto getRegistrationIDFein(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegIdDto getRegistrationIDFein(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         return pushDomainService.getRegistrationID(sendPushCodeRequestDto);
     }

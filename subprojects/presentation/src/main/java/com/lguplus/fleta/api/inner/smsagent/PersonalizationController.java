@@ -20,6 +20,9 @@ public class PersonalizationController {
     @GetMapping("/personalization/registrationId")
     public InnerResponseDto<RegistrationIdEntity> getRegId(SendPushCodeRequestVo sendPushCodeRequestVo) {
 
+        log.debug("PersonalizationController - sendPushCodeRequestVo.getSaId() : {}", sendPushCodeRequestVo.getSaId());
+        log.debug("PersonalizationController - sendPushCodeRequestVo.getStbMac() : {}", sendPushCodeRequestVo.getStbMac());
+
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestVo.convert();
 
         return InnerResponseDto.of(personalizationService.loadRegistrationID(sendPushCodeRequestDto));

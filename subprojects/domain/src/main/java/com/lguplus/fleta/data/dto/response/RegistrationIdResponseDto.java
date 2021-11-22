@@ -6,8 +6,8 @@ import lombok.experimental.SuperBuilder;
 
 
 /**
- * REGID 조회 용
- * TODO Feign으로 변경되어 삭제예정
+ * REGID response용
+ * SuccessResponseDto에 regId라는 특정필드도 response 하기 위해 테스트로 생성
  *
  * */
 @Getter
