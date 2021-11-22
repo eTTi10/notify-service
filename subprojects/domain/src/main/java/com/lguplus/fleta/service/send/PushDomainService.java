@@ -24,7 +24,7 @@ public class PushDomainService {
     private final PersonalizationDomainClient personalizationDomainClient;
     private final PushRepository pushRepository;
 
-    public Map<String, RegistrationIdResponseDto> getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegistrationIdResponseDto getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         Map<String, String> inputMap = new HashMap<>();
 
@@ -34,10 +34,6 @@ public class PushDomainService {
         return personalizationDomainClient.getRegistrationID(inputMap);
     }
 
-    public RegistrationIdEntity loadRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        return pushRepository.getRegistrationID(sendPushCodeRequestDto);
-    }
 
 /*
     private final String changeNodeName = "reg_id";

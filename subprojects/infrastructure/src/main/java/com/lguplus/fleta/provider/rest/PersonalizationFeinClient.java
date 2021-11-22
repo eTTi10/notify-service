@@ -15,5 +15,5 @@ import java.util.Map;
 public interface PersonalizationFeinClient {
 
     @GetMapping(value="/personalization/registrationId", consumes = "application/json")
-    InnerResponseDto<Map<String, RegistrationIdResponseDto>> getRegistrationID(@RequestParam Map<String, String> conditions);
+    InnerResponseDto<RegistrationIdResponseDto> getRegistrationID(@RequestParam Map<String, String> conditions);
 }

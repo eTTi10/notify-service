@@ -3,6 +3,8 @@ package com.lguplus.fleta.api.outer.send;
 import com.lguplus.fleta.data.dto.request.SendSMSRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import com.lguplus.fleta.data.vo.SendPushCodeRequestVo;
 import com.lguplus.fleta.data.vo.SendSMSVo;
 import com.lguplus.fleta.service.send.PushService;
@@ -21,14 +23,6 @@ import javax.validation.Valid;
 public class PushController {
 
     private final PushService pushService;
-
-    @GetMapping("/personalization/registrationId")
-    public SuccessResponseDto getRegId(SendPushCodeRequestVo sendPushCodeRequestVo) {
-
-        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestVo.convert();
-
-        return pushService.getRegId(sendPushCodeRequestDto);
-    }
 
     @PostMapping("/mims/sendPushCode")
     public SuccessResponseDto sendPushCode(@Valid SendPushCodeRequestVo sendPushCodeRequestVo){

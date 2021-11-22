@@ -22,8 +22,9 @@ public class PushService {
 
         //TODO http push domain service에 연결 21.11.17 moutlaw
 //        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-        String registrationId = "";
-        registrationId = getRegistrationID(sendPushCodeRequestDto);
+        String registrationId = getRegistrationIDFein(sendPushCodeRequestDto).toString();
+
+        log.debug("PushService - sendPushCode() - registrationId : " + registrationId);
 
         return RegistrationIdResponseDto.builder()
                 .regId(registrationId)
@@ -31,27 +32,9 @@ public class PushService {
     }
 
 
-    public RegistrationIdResponseDto getRegId(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegistrationIdResponseDto getRegistrationIDFein(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        String registrationId = "";
-        registrationId = loadRegistrationID(sendPushCodeRequestDto).getRegId();
-
-        log.debug("registrationId : {}", registrationId );
-
-        return RegistrationIdResponseDto.builder()
-                .regId(registrationId)
-                .build();
+        return pushDomainService.getRegistrationID(sendPushCodeRequestDto);
     }
 
-    public String getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        Map<String, RegistrationIdResponseDto> resultMap = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
-        String regId = resultMap.toString();
-        return regId;
-    }
-
-    public RegistrationIdEntity loadRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        return pushDomainService.loadRegistrationID(sendPushCodeRequestDto);
-    }
 }

@@ -6,5 +6,5 @@ import java.util.Map;
 
 public interface PersonalizationDomainClient {
 
-    Map<String, RegistrationIdResponseDto> getRegistrationID(Map<String, String> sendPushInput);
+    RegistrationIdResponseDto getRegistrationID(Map<String, String> sendPushInput);
 }

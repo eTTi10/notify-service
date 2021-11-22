@@ -15,7 +15,7 @@ public class PersonalizationDomainFeinClient extends CommonDomainFeinClient impl
     private final PersonalizationFeinClient personalizationFeinClient;
 
     @Override
-    public Map<String, RegistrationIdResponseDto> getRegistrationID(Map<String, String> sendPushInput) {
+    public RegistrationIdResponseDto getRegistrationID(Map<String, String> sendPushInput) {
 
         return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));
     }
