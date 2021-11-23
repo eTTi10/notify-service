@@ -34,11 +34,11 @@ public class PushSingleRequestVo {
     @JacksonXmlProperty(localName="reg_id")
     private List<String> users;
 
-    public PushSingleRequestDto convert(String appId, String serviceId, String pushType) {
+    public PushSingleRequestDto convert(PushRequestVo pushRequestVo) {//String appId, String serviceId, String pushType) {
         return PushSingleRequestDto.builder()
-                .appId(appId)
-                .serviceId(serviceId)
-                .pushType(pushType)
+                .appId(pushRequestVo.getAppId())
+                .serviceId(pushRequestVo.getServiceId())
+                .pushType(pushRequestVo.getPushType())
                 .msg(getMsg())
                 .items(getItems())
                 .users(getUsers())
