@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.push;
 
+import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushSingleRequestDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
@@ -19,7 +20,9 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PushSingleDomainService {
 
+    private final PushConfig pushConfig;
     private final HttpServiceProps httpServiceProps;
+
 
     /**
      * 단건푸시등록
@@ -29,6 +32,11 @@ public class PushSingleDomainService {
      */
     public String requestPushSingle(PushSingleRequestDto pushSingleRequestDto) {
         log.debug("pushSingleRequestDto ::::::::::::::: {}", pushSingleRequestDto);
+
+        log.debug(pushConfig.getCommPropValue("announce.server.url"));
+        log.debug(pushConfig.getCommPropValue("announce.server.header"));
+        log.debug(pushConfig.getServicePropValue("key7.push.service_id"));
+        log.debug(pushConfig.getServicePropValue("key7.push.service_pwd"));
 
         httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
 
@@ -102,7 +110,7 @@ public class PushSingleDomainService {
             //서비스 KEY
             String tServicePwd = "";
             try{
-                Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseGet(HashMap::new);
+                Map<String, String> serviceMap = null;//httpServiceProps.findMapByServiceId(serviceId).orElseGet(HashMap::new);
 
                 log.debug("serviceMap ::::::::::::::::: {}", serviceMap);
 

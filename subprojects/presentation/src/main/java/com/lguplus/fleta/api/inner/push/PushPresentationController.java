@@ -18,7 +18,7 @@ import javax.validation.Valid;
 @RestController
 @Validated
 @RequiredArgsConstructor
-public class PushController {
+public class PushPresentationController {
 
     private final PushSingleService pushSingleService;
 

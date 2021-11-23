@@ -15,7 +15,7 @@ public class PushService {
 
     private final PushDomainService pushDomainService;
     private final HttpPushSingleDomainService httpPushSingleDomainService;
-    private final SuccessResponseDto successResponseDto;
+    //private final SuccessResponseDto successResponseDto;
 
     public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
