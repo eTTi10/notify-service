@@ -3,9 +3,8 @@ package com.lguplus.fleta.provider.rest.multipush;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@NoArgsConstructor
+//@NoArgsConstructor
 @Builder
 @Getter
 public class MessageInfo {
@@ -28,5 +27,6 @@ public class MessageInfo {
         this.data = data;
         this.statusCode = statusCode;
     }
-*/
+    */
+
 }

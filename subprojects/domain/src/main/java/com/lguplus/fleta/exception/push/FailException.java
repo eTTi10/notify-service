@@ -1,12 +1,14 @@
 package com.lguplus.fleta.exception.push;
 
+import com.lguplus.fleta.exception.NotifyRuntimeException;
+
 /**
  * Exception for error flag 1111
  *
  * @author Taekuk Song
  * @since 1.0
  */
-public class FailException extends RuntimeException {
+public class FailException extends NotifyRuntimeException {
 
     /**
      *

@@ -1,12 +1,14 @@
 package com.lguplus.fleta.exception.push;
 
+import com.lguplus.fleta.exception.NotifyRuntimeException;
+
 /**
  * Exception for error flag 1115.
  *
  * @author Minwoo Lee
  * @since 1.0
  */
-public class ServiceIdNotFoundException extends RuntimeException {
+public class ServiceIdNotFoundException extends NotifyRuntimeException {
 
     /**
      *

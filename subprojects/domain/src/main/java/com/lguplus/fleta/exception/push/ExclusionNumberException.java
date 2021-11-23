@@ -1,12 +1,14 @@
 package com.lguplus.fleta.exception.push;
 
+import com.lguplus.fleta.exception.NotifyRuntimeException;
+
 /**
  * Exception for error flag 9998.
  *
  * @author Minwoo Lee
  * @since 1.0
  */
-public class ExclusionNumberException extends RuntimeException {
+public class ExclusionNumberException extends NotifyRuntimeException {
 
     /**
      *
