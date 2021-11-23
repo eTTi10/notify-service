@@ -6,9 +6,11 @@ singlepush:
     encoding: utf-8
     url: /restapi/push/single/servicekey
     contenttype: application/json; charset=utf-8
-    ip: 211.115.75.227
+    ip: localhost
+#    ip: 211.115.75.227
     port2: '6556'
-    port1: '5556'
+    port1: '8082'
+#    port1: '5556'
     accept: application/json
 
 # MULTIPUSH SETTING (SINGLEPUSH USE)

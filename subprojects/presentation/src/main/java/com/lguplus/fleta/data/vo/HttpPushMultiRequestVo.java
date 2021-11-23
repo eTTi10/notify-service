@@ -1,12 +1,8 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.lguplus.fleta.data.annotation.ParamAlias;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
-import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import lombok.Getter;
@@ -14,15 +10,14 @@ import lombok.Getter;
 import javax.validation.GroupSequence;
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Locale;
 
 /**
- * 단건푸시등록 요청 VO
+ * 멀티푸시등록 요청 VO
  *
  */
 @Getter
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, HttpPushSingleRequestVo.class})
-public class HttpPushSingleRequestVo {
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, HttpPushMultiRequestVo.class})
+public class HttpPushMultiRequestVo {
 
     /** 어플리케이션 ID */
     @NotBlank(message = "app_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)
@@ -50,17 +45,22 @@ public class HttpPushSingleRequestVo {
 
     /** 사용자 ID */
     @NotEmpty(message = "필수 BODY DATA 미존재[users]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C6.class)
-    @Size(max = 1, message = "최대 호출횟수 초과", groups = Groups.C7.class)  // 1120
+    @Size(max = 5000, message = "최대 호출횟수 초과", groups = Groups.C7.class)  // 1120
     private List<String> users;
 
-    public HttpPushSingleRequestDto convert() {
-        return HttpPushSingleRequestDto.builder()
+    /** 초당 최대 Push 전송 허용 갯수  */
+    @JsonProperty("multi_count")
+    private Integer multiCount;
+
+    public HttpPushMultiRequestDto convert() {
+        return HttpPushMultiRequestDto.builder()
                 .appId(getAppId())
                 .serviceId(getServiceId())
                 .pushType(getPushType().toUpperCase())
                 .msg(getMsg())
                 .items(getItems())
                 .users(getUsers())
+                .multiCount(getMultiCount())
                 .build();
     }
 
