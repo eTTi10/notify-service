@@ -8,10 +8,12 @@ import com.lguplus.fleta.data.vo.SendSMSVo;
 import com.lguplus.fleta.service.smsagent.SMSAgentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -20,12 +22,25 @@ public class SMSAgentController {
 
     private final SMSAgentService smsAgentService;
 
+    @Value("${agent.no.sendtime}")
+    private String sendTime;
+
     @PostMapping("/smsagent/sms")
     public SuccessResponseDto sendSms(@Valid SendSMSVo request) {
+
+        String s_ctn = request.getSCtn();
+        String r_ctn = request.getRCtn();
+        String msg = request.getMsg();
+
+        log.debug("[sms] - [{}][{}][{}]", s_ctn, r_ctn, msg);
+
+        s_ctn = s_ctn.replace("-", "").replace(".", "");
+        r_ctn = r_ctn.replace("-", "").replace(".", "");
 
         log.debug("SMSAgentController.sendSms() - {}:{}", "SMS발송 처리", request);
 
         SendSMSRequestDto requestDto = request.convert();
+
 
         return smsAgentService.sendSMS(requestDto);
     }
@@ -38,5 +53,17 @@ public class SMSAgentController {
         SendSMSCodeRequestDto requestDto = request.convert();
 
         return smsAgentService.sendSMSCode(requestDto);
+    }
+
+
+    /**
+     * 삭제
+     * 요구사항정의서에 없음
+     * @return HttpServletRequest 결과
+     */
+    @RequestMapping(value = "/smsCode", method = RequestMethod.DELETE)
+    public SuccessResponseDto deleteCacheSmsMsg(HttpServletRequest request) {
+
+        return SuccessResponseDto.builder().build();
     }
 }
