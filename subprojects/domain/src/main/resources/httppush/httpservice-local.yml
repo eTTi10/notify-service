@@ -1,0 +1,48 @@
+#Push G/W에서 발급 받은 service_key 리스트
+########################
+#연동 타입
+#기본(미지정 시) : 연동정의서 1.2.1(service_key)
+#LGUPUSH_OLD : LGUPUSH 초기버전 연동
+########################
+
+http:
+  service:
+    keys:
+      - service_id: '30011'
+        service_pwd: lguplushdtvgcm
+        service_name: 안드로이드 HDTV 시험용 키
+      - service_id: '30015'
+        service_pwd: lguplusuflix
+        service_name: 안드로이드 UFLIX 시험용 키
+      - service_id: '30021'
+        service_pwd: lguplushdtvapns
+        service_name: iOS HDTV 시험용 키
+      - service_id: '30022'
+        service_pwd: lguplussecondtv
+        service_name: 세컨드TV 시험용 키
+      - service_id: '30024'
+        service_pwd: lguplusuflixapns
+        service_name: iOS UFLIX 시험용 키
+      - service_id: '00007'
+        service_pwd: smartux
+        service_name: MIMS(IPTV) 시험용 키
+        linkage_type: LGUPUSH_OLD
+      - service_id: '30104'
+        service_pwd: musicshow_gcm
+        service_name: 뮤직공연 테스트용 키 Android
+      - service_id: '30107'
+        service_pwd: musicshow_apns
+        service_name: 뮤직공연 테스트용 키 iOS
+      - service_id: '30105'
+        service_pwd: ugolf_GCM
+        service_name: GOLF 테스트용 키 Android
+      - service_id: '30106'
+        service_pwd: ugolf_APNS
+        service_name: GOLF 테스트용 키 iOS
+      - service_id: '30112'
+        service_pwd: uvrapp_gcm
+        service_name: VR 테스트용 키 Android
+      - service_id: '30125'
+        service_pwd: lguplus_game_live
+        service_name: GAME 테스트용 키 Android
+

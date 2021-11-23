@@ -39,6 +39,9 @@ error:
               InvalidExpireTimeException: "1302"
               UrlNotPermittedException: "1303"
               UnauthenticatedException: "1304"
+            push:
+              ServiceIdNotFoundException: "1115"
+              ExclusionNumberException: "9998"
             coupon:
               ExceedMaxCouponRequestException: "1400"
               DuplicatedCouponRequestException: "1401"
@@ -144,4 +147,5 @@ error:
     "8001": "DB 요청 데이터 존재"
     "8002": "DB 요청 데이터 미존재"
     "8999": "DB 에러"
+    "9998": "발송제한번호"
     "9999": "기타 에러"
