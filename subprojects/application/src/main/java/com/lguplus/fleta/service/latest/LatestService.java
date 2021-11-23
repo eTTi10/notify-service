@@ -54,6 +54,11 @@ public class LatestService {
         return "OK";
     }
 
+    /**
+     * 최신회 등록
+     * @param latestRequestDto
+     * @return int
+     */
     public  int insertLatest(LatestRequestDto latestRequestDto) {
         int result = latestDomainService.insertLatest(latestRequestDto);
         return result;
