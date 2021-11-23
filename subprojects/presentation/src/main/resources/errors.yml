@@ -39,6 +39,9 @@ error:
               InvalidExpireTimeException: "1302"
               UrlNotPermittedException: "1303"
               UnauthenticatedException: "1304"
+            push:
+              ServiceIdNotFoundException: "1115"
+              ExclusionNumberException: "9998"
             coupon:
               ExceedMaxCouponRequestException: "1400"
               DuplicatedCouponRequestException: "1401"
@@ -76,6 +79,7 @@ error:
         Throwable: "9999"
   message:
     "0001": "검색 결과 없음"
+    "1115": "서비스ID 확인 불가"
     "1201": "최대 요청 횟수 초과"
     "1300": "Access Key 인증 허용 안됨"
     "1301": "CP ID 인증 허용 안됨"
@@ -126,4 +130,5 @@ error:
     "8001": "DB 요청 데이터 존재"
     "8002": "DB 요청 데이터 미존재"
     "8999": "DB 에러"
+    "9998": "발송제한번호"
     "9999": "기타 에러"
