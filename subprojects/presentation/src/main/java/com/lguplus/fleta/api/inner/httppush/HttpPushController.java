@@ -6,18 +6,15 @@ import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.vo.HttpPushMultiRequestVo;
 import com.lguplus.fleta.data.vo.HttpPushSingleRequestVo;
-import com.lguplus.fleta.exception.push.ExclusionNumberException;
-import com.lguplus.fleta.service.httppush.HttpPushSingleService;
+import com.lguplus.fleta.service.httppush.HttpPushService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Arrays;
 
 /**
  * Http Push RestController
@@ -30,10 +27,7 @@ import java.util.Arrays;
 @RequestMapping("/notify")
 public class HttpPushController {
 
-    private final HttpPushSingleService httpPushSingleService;
-
-    @Value("${multi.push.reject.regList}")
-    private String exception;
+    private final HttpPushService httpPushService;
 
 
     /**
@@ -44,20 +38,13 @@ public class HttpPushController {
      */
     @PostMapping(value = "/httppush/single")
     public InnerResponseDto<HttpPushResponseDto> requestHttpPushSingle(@RequestBody @Valid HttpPushSingleRequestVo httpPushSingleRequestVo) {
-        // 발송 제외 가번 확인
-        log.debug("exception :::::::::::::::::::: {}", exception);
-        String[] exceptionList = exception.split("\\|");
-        String regId = httpPushSingleRequestVo.getUsers().get(0);
-
-        if (Arrays.asList(exceptionList).contains(regId.strip())) {
-            throw new ExclusionNumberException("발송제한번호");   // 9998
-        }
-
+        log.debug("==================단건푸시등록 BEGIN======================");
         HttpPushSingleRequestDto httpPushSingleRequestDto = httpPushSingleRequestVo.convert();
 
-        HttpPushResponseDto httpPushResponseDto = httpPushSingleService.requestHttpPushSingle(httpPushSingleRequestDto);
+        HttpPushResponseDto httpPushResponseDto = httpPushService.requestHttpPushSingle(httpPushSingleRequestDto);
 
         log.debug("httpPushResponseDto :::::::::::::::::::: {}", httpPushResponseDto);
+        log.debug("==================단건푸시등록 END======================");
 
         return InnerResponseDto.of(httpPushResponseDto);
     }
@@ -70,11 +57,13 @@ public class HttpPushController {
      */
     @PostMapping(value = "/httppush/multi")
     public InnerResponseDto<HttpPushResponseDto> requestHttpPushMulti(@RequestBody @Valid HttpPushMultiRequestVo httpPushMultiRequestVo) {
+        log.debug("==================멀티푸시등록 BEGIN======================");
         HttpPushMultiRequestDto httpPushMultiRequestDto = httpPushMultiRequestVo.convert();
 
-        HttpPushResponseDto httpPushResponseDto = httpPushSingleService.requestHttpPushMulti(httpPushMultiRequestDto);
+        HttpPushResponseDto httpPushResponseDto = httpPushService.requestHttpPushMulti(httpPushMultiRequestDto);
 
         log.debug("httpPushResponseDto :::::::::::::::::::: {}", httpPushResponseDto);
+        log.debug("==================멀티푸시등록 END======================");
 
         return InnerResponseDto.of(httpPushResponseDto);
     }

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HttpPushSingleService {
+public class HttpPushService {
 
-    private final HttpPushSingleDomainService httpPushSingleDomainService;
+    private final HttpPushDomainService httpPushDomainService;
 
     /**
      * 단건푸시등록
@@ -26,7 +26,7 @@ public class HttpPushSingleService {
      * @return 단건푸시등록 결과
      */
     public HttpPushResponseDto requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
-        return httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+        return httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
     }
 
     /**
@@ -36,7 +36,7 @@ public class HttpPushSingleService {
      * @return 멀티푸시등록 결과
      */
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
-        return httpPushSingleDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
+        return httpPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
     }
 
 }
