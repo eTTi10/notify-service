@@ -1,0 +1,31 @@
+sms:
+  sender:
+    retry:
+      sleep:
+        ms: '1000'
+    'no': '101'
+  send:
+    retry: '1'
+    busy:
+      retry: '3'
+  setting:
+    timeout: '5000'
+    request:
+      method: GET
+    url: http://localhost/hdtv/comm/setting?sa_id=sms&stb_mac=sms&code_id=&svc_type=I
+check:
+  https: '1'
+agent:
+  'no':
+    send:
+      use: '0'
+    sendtime: 23|06
+  port1: '8551'
+  id2: hdtv
+  tps: '1'
+  id1: hdtv
+  ip2: 192.168.239.109
+  password2: uflix2
+  ip1: 192.168.239.109
+  password1: uflix1
+  port2: '8552'

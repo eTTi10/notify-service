@@ -22,4 +22,8 @@ public class InfrastructureConfig {
             .type(HikariDataSource.class)
             .build();
     }
+
+    private void test() {
+        org.springframework.data.jpa.support.ClasspathScanningPersistenceUnitPostProcessor a ;
+    }
 }
