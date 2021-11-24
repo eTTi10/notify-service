@@ -8,6 +8,7 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
+import com.lguplus.fleta.exception.push.ExclusionNumberException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class HttpPushSingleDomainService {
+public class HttpPushDomainService {
 
     private final HttpPushDomainClient httpPushDomainClient;
 
@@ -68,11 +69,19 @@ public class HttpPushSingleDomainService {
 
 //        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
 
+        // 발송 제외 가번 확인
+        log.debug("exception :::::::::::::::::::: {}", exception);
+        String[] exceptionList = exception.split("\\|");
+        String regId = httpPushSingleRequestDto.getUsers().get(0);
+
+        if (Arrays.asList(exceptionList).contains(regId.strip())) {
+            throw new ExclusionNumberException("발송제한번호");   // 9998
+        }
+
         String appId = httpPushSingleRequestDto.getAppId();
         String serviceId = httpPushSingleRequestDto.getServiceId();
         String pushType = httpPushSingleRequestDto.getPushType();
         String msg = httpPushSingleRequestDto.getMsg();
-        String regId = httpPushSingleRequestDto.getUsers().get(0);
         List<String> items = httpPushSingleRequestDto.getItems();
 
         OpenApiPushResponseDto openApiPushResponseDto = requestHttpPush(appId, serviceId, pushType, msg, regId, items);
