@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @ToString
 @SuperBuilder
-public class PushSingleRequestDto {
+public class PushRequestAnnounceDto {
 
     private String appId;
 
@@ -25,6 +25,6 @@ public class PushSingleRequestDto {
     private List<String> items;
 
     /** 사용자 ID */
-    private List<String> users;
+    //private List<String> users;
 
 }

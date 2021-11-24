@@ -3,8 +3,7 @@ package com.lguplus.fleta.data.vo;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
-import com.lguplus.fleta.data.dto.request.inner.PushSingleRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import lombok.Getter;
 
@@ -15,7 +14,7 @@ import java.util.List;
 
 @Getter
 @JacksonXmlRootElement(localName = "request")
-public class PushSingleRequestVo {
+public class PushRequestBodyMultiVo {
 
     /** 보낼 메시지 */
     @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class)
@@ -34,15 +33,16 @@ public class PushSingleRequestVo {
     @JacksonXmlProperty(localName="reg_id")
     private List<String> users;
 
-    public PushSingleRequestDto convert(PushRequestVo pushRequestVo) {//String appId, String serviceId, String pushType) {
-        return PushSingleRequestDto.builder()
-                .appId(pushRequestVo.getAppId())
-                .serviceId(pushRequestVo.getServiceId())
-                .pushType(pushRequestVo.getPushType())
+    public PushRequestMultiDto convert(PushRequestParamMultiVo pushRequestParamMultiVo) {
+
+        return PushRequestMultiDto.builder()
+                .appId(pushRequestParamMultiVo.getAppId())
+                .serviceId(pushRequestParamMultiVo.getServiceId())
+                .pushType(pushRequestParamMultiVo.getPushType())
+                .multiCount(pushRequestParamMultiVo.getMultiCount())
                 .msg(getMsg())
                 .items(getItems())
                 .users(getUsers())
                 .build();
     }
-
 }

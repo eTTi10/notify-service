@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.data.dto.request.inner.PushSingleRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,11 +15,11 @@ public class PushSingleService {
     /**
      * 단건푸시등록
      *
-     * @param pushSingleRequestDto 단건푸시등록을 위한 DTO
+     * @param pushRequestSingleDto 단건푸시등록을 위한 DTO
      * @return 단건푸시등록 결과
      */
-    public String requestPushSingle(PushSingleRequestDto pushSingleRequestDto) {
-        return pushSingleDomainService.requestPushSingle(pushSingleRequestDto);
+    public String requestPushSingle(PushRequestSingleDto pushRequestSingleDto) {
+        return pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
     }
 
 }
