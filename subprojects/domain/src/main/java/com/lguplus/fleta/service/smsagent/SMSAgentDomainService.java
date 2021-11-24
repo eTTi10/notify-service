@@ -12,6 +12,13 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
+
+/**
+ *
+ *  SMSAgentDomainService 설명
+ *
+ *  최초작성 2021-11-23
+**/
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,6 +39,7 @@ public class SMSAgentDomainService {
     }
 
     public String selectSmsMsg(String sms_cd, Log log) {
+
         Map<String, String> map = null;
         try{
             map = service.callSettingApi(log);
