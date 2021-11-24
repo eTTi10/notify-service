@@ -1,19 +1,20 @@
 package com.lguplus.fleta.exception.push;
 
+
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
- * Exception for error flag 1115.
+ * Exception for error flag 1116
  *
- * @author Minwoo Lee
+ * @author Taekuk Song
  * @since 1.0
  */
-public class ServiceIdNotFoundException extends NotifyRuntimeException {
+public class TimeoutException extends NotifyRuntimeException {
 
     /**
      *
      */
-    public ServiceIdNotFoundException() {
+    public TimeoutException() {
 
         super();
     }
@@ -22,7 +23,7 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
      *
      * @param message
      */
-    public ServiceIdNotFoundException(final String message) {
+    public TimeoutException(final String message) {
 
         super(message);
     }
@@ -32,7 +33,7 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
      * @param message
      * @param cause
      */
-    public ServiceIdNotFoundException(final String message, final Throwable cause) {
+    public TimeoutException(final String message, final Throwable cause) {
 
         super(message, cause);
     }
@@ -41,7 +42,7 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
      *
      * @param cause
      */
-    public ServiceIdNotFoundException(final Throwable cause) {
+    public TimeoutException(final Throwable cause) {
 
         super(cause);
     }
