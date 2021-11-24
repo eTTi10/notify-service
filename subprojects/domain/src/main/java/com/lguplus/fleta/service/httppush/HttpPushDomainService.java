@@ -8,8 +8,7 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
-import com.lguplus.fleta.exception.push.ExclusionNumberException;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -199,33 +198,37 @@ public class HttpPushDomainService {
             }
 
             // Push 메시지 전송 실패
-            if (!"200".equals(code)) {
+            if (!code.equals("200")) {
                 log.debug("Push 메시지 전송 실패 code ::::::::::::::::::: {}", code);
 
-                switch (code) {
-                    case "202":
-                        // TODO : code "1112", message "The request Accepted"
-                        break;
-                    case "400":
-                        // TODO : code "1104", message "Push GW BadRequest"
-                        break;
-                    case "401":
-                        // TODO : code "1105", message "Push GW UnAuthorized"
-                        break;
-                    case "403":
-                        // TODO : code "1106", message "Push GW Forbidden"
-                        break;
-                    case "404":
-                        // TODO : code "1107", message "Push GW Not Found"
-                        break;
-                    case "410":
-                    case "412":
-                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
-                        break;
-                    default:
-                        log.debug("메시지 전송 실패 - Retry 대상");
-                        failUsers.add(regId);
-                        break;
+                // code "1112", message "The request Accepted"
+                if (code.equals("202")) {
+                    throw new AcceptedException();
+
+                // code "1104", message "Push GW BZadRequest"
+                } else if (code.equals("400")) {
+                    throw new BadRequestException();
+
+                // code "1105", message "Push GW UnAuthorized"
+                } else if (code.equals("401")) {
+                    throw new UnAuthorizedException();
+
+                // code "1106", message "Push GW Forbidden"
+                } else if (code.equals("403")) {
+                    throw new ForbiddenException();
+
+                // code "1107", message "Push GW Not Found"
+                } else if (code.equals("404")) {
+                    throw new NotFoundException();
+
+                // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
+                } else if (code.equals("410") || code.equals("412")) {
+                    log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
+
+                // 메시지 전송 실패 - Retry 대상
+                } else {
+                    log.debug("메시지 전송 실패 - Retry 대상");
+                    failUsers.add(regId);
                 }
             }
         }
