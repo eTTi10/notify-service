@@ -16,7 +16,7 @@ public class SMSService {
 
     public SuccessResponseDto sendSMSCode(SendSMSCodeRequestDto request) {
 
-        SuccessResponseDto responseDto = smsAgentDomainService.sendSMS(request);
+        SuccessResponseDto responseDto = smsAgentDomainService.sendSmsCode(request);
         return responseDto;
     }
 

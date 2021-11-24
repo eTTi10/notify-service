@@ -23,8 +23,8 @@ public class SendSMSVo {
     public SendSMSRequestDto convert(){
 
         return SendSMSRequestDto.builder()
-                .sCtn(getSCtn())
-                .rCtn(getRCtn())
+                .sCtn(getSCtn().replace("-", "").replace(".", ""))
+                .rCtn(getRCtn().replace("-", "").replace(".", ""))
                 .msg(getMsg())
                 .build();
     }
