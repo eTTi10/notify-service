@@ -1,28 +1,23 @@
-package com.lguplus.fleta.service.smsagent;
+package com.lguplus.fleta.provider.socket;
 
+import com.lguplus.fleta.client.SmsGatewayClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.*;
-import java.util.concurrent.Future;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SmsProviderDomainService {
+public class SmsGatewaySocketClient implements SmsGatewayClient {
 
     private static final int BIND = 0;
     private static final int BIND_ACK = 1;
@@ -66,7 +61,7 @@ public class SmsProviderDomainService {
     private Map<Integer, Timer> mTimerMap = new HashMap<Integer, Timer>();
 
 /*
-    public SMSGateway(String ip, String port, String id, String password) {
+    public SMSGatewayDomainService(String ip, String port, String id, String password) {
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());

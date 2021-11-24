@@ -20,29 +20,18 @@ import javax.validation.Valid;
 @RestController
 public class SMSAgentController {
 
-    private final SMSAgentService smsAgentService;
-
     @Value("${agent.no.sendtime}")
     private String sendTime;
 
     @PostMapping("/smsagent/sms")
     public SuccessResponseDto sendSms(@Valid SendSMSVo request) {
 
-        String s_ctn = request.getSCtn();
-        String r_ctn = request.getRCtn();
-        String msg = request.getMsg();
-
-        log.debug("[sms] - [{}][{}][{}]", s_ctn, r_ctn, msg);
-
-        s_ctn = s_ctn.replace("-", "").replace(".", "");
-        r_ctn = r_ctn.replace("-", "").replace(".", "");
-
-        log.debug("SMSAgentController.sendSms() - {}:{}", "SMS발송 처리", request);
+        log.debug("[SMSAgentController] - [{}]]", request.toString());
 
         SendSMSRequestDto requestDto = request.convert();
 
-
-        return smsAgentService.sendSMS(requestDto);
+        return SuccessResponseDto.builder().build();
+//        return smsAgentService.sendSMS(requestDto);
     }
 
     @PostMapping("/smsagent/smsCode")
@@ -52,7 +41,8 @@ public class SMSAgentController {
 
         SendSMSCodeRequestDto requestDto = request.convert();
 
-        return smsAgentService.sendSMSCode(requestDto);
+        return SuccessResponseDto.builder().build();
+//        return smsAgentService.sendSMSCode(requestDto);
     }
 
 

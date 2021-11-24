@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -24,25 +26,26 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class SMSAgentDomainService {
 
+    @Value("${check.https}")
+    private String propertyCheckHttps;
 
-    /**
-     *
-     * 단순 SMS 전송
-     * @param sendSMSRequestDto SMS전송 DTO
-     * @return 단건푸시등록 결과
-     */
-    public SuccessResponseDto send(SendSMSRequestDto sendSMSRequestDto) {
+//    @Value("${flag.no.https}")
+//    private String flagNoHttps;
 
-        log.debug("SMSAgentDomainService.sendSMS() - {}:{}", "SMS발송 처리", sendSMSRequestDto);
+//    @Value("${message.no.https}")
+//    private String messageNoHttps;
 
-        return ;
+    public SuccessResponseDto sendSmsCode(SendSMSCodeRequestDto sendSMSCodeRequestDto) {
+
+        return SuccessResponseDto.builder().build();
     }
+/*
 
     public String selectSmsMsg(String sms_cd, Log log) {
 
         Map<String, String> map = null;
         try{
-            map = service.callSettingApi(log);
+            map = smsAgentDomainService.callSettingApi(log);
         }catch(java.lang.Exception e){}
 
         if(null == map || map.size() == 0){
@@ -53,39 +56,63 @@ public class SMSAgentDomainService {
         return map.get(sms_cd);
     }
 
-    /**
+
+*/
+/**
      * HTTPS 통신 체크
      *
      * @param request HttpServletRequest
-     */
+     *//*
+
+
     private void checkHttps(HttpServletRequest request) {
-        String checkHttps = StringUtils.defaultString(Properties.getProperty("check.https"), "1");
+
+        String checkHttps = StringUtils.defaultString(propertyCheckHttps, "1");
         CustomExceptionHandler exception = new CustomExceptionHandler();
 
         if (!"0".equals(checkHttps)) {
             String protocol = request.getScheme();
 
             if (!"https".equalsIgnoreCase(protocol)) {
-                exception.setFlag(Properties.getProperty("flag.no.https"));
-                exception.setMessage(Properties.getProperty("message.no.https"));
+                exception.setFlag(flagNoHttps);
+                exception.setMessage(messageNoHttps);
                 throw exception;
             }
         }
     }
 
 
+    @Cacheable(cacheName="smsMessageCache")
+    public Map<String,String> callSettingApi(Log log) throws Exception{
 
-    /**
-     *
-     * 코드를 이용한 SMS 전송
-     * @param sendSMSCodeRequestDto SMS전송 DTO
-     * @return 단건푸시등록 결과
-     */
-    public SuccessResponseDto sendSMS(SendSMSCodeRequestDto sendSMSCodeRequestDto) {
+        Map<String, String> map = new HashMap<String, String>();
+        try {
+            String url = Properties.getProperty("sms.setting.url");
+            String method = StringUtils.defaultIfEmpty(Properties.getProperty("sms.setting.request.method"), "GET");
+            int timeout = Integer.parseInt(StringUtils.defaultIfEmpty(Properties.getProperty("sms.setting.timeout"), "5000"));
+            if(StringUtils.isEmpty(url)){
+                log.info("[selectSmsMsg]Cannot found URL");
+                return null;
+            }
 
-        log.debug("SMSAgentDomainService.sendSMS() - {}:{}", "SMS발송 처리", sendSMSCodeRequestDto);
+            String response = TransferUtilDomainClass.callHttpClient(url, "application/json", method, "UTF-8", null, timeout, timeout);
+            log.info("[callSettingApi][Call]["+response+"]");
 
-        return SuccessResponseDto.builder().build();
+            JSONObject jObj = (JSONObject)JSONValue.parse(response);
+            JSONArray records = (JSONArray) ((JSONObject)jObj.get("result")).get("recordset");
+            for(int i=0;i < records.size(); i++){
+                JSONObject jo = (JSONObject)records.get(i);
+                String codeId = (String) jo.get("code_id");
+                String codeName = (String) jo.get("code_name");
+                map.put(codeId, codeName);
+            }
+        } catch (Exception e) {
+            log.info("[callSettingApi][Call]["+e.getClass().getName()+"]"+e.getMessage());
+            throw e;
+        }
+
+        return map;
     }
+*/
 
 }

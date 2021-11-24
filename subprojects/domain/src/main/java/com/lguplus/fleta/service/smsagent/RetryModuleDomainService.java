@@ -35,6 +35,8 @@ public class RetryModuleDomainService {
         busyEr = 0;
     }
 
+/*
+
     public ResultVO smsSend(SmsSendVo smsVo, boolean encryptYn, Log log){
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
@@ -82,5 +84,6 @@ public class RetryModuleDomainService {
             return smsSend(smsVo, encryptYn, log);
         }
     }
+*/
 
 }
