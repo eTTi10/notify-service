@@ -13,6 +13,7 @@ import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -192,26 +194,39 @@ public class HttpPushDomainService {
                 regId = result[0];
                 code = result[1];
 
-                // Push 메시지 전송 실패
-                if (!"200".equals(code)) {
-                    if ("202".equals(code) || "400".equals(code) || "401".equals(code) || "403".equals(code) || "404".equals(code)) {
-//                        throw new CustomExceptionHandler(t_status);
-                        // TODO : exception
-                        log.debug("111111111111111111");
-
-                    // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
-                    } else if ("410".equals(code) || "412".equals(code)) {
-                        log.debug("222222222222222222");
-
-                    // 메시지 전송 실패 - Retry 대상
-                    } else {
-                        log.debug("33333333333333333");
-                        failUsers.add(regId);
-                    }
-                }
-
             } catch (Exception ex) {
-                // TODO : excetpion
+                throw new RuntimeException("기타 오류");
+            }
+
+            // Push 메시지 전송 실패
+            if (!"200".equals(code)) {
+                log.debug("Push 메시지 전송 실패 code ::::::::::::::::::: {}", code);
+
+                switch (code) {
+                    case "202":
+                        // TODO : code "1112", message "The request Accepted"
+                        break;
+                    case "400":
+                        // TODO : code "1104", message "Push GW BadRequest"
+                        break;
+                    case "401":
+                        // TODO : code "1105", message "Push GW UnAuthorized"
+                        break;
+                    case "403":
+                        // TODO : code "1106", message "Push GW Forbidden"
+                        break;
+                    case "404":
+                        // TODO : code "1107", message "Push GW Not Found"
+                        break;
+                    case "410":
+                    case "412":
+                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
+                        break;
+                    default:
+                        log.debug("메시지 전송 실패 - Retry 대상");
+                        failUsers.add(regId);
+                        break;
+                }
             }
         }
 
