@@ -1,9 +1,13 @@
 package com.lguplus.fleta.advice.exhandler;
 
+import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseErrorDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
+import com.lguplus.fleta.exception.ClientException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
+import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -21,6 +25,14 @@ import java.util.List;
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.inner")
 public class InnerControllerAdvice {
+    /**
+     *
+     */
+    private final ErrorResponseResolver errorResponseResolver;
+
+    public InnerControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
+        this.errorResponseResolver = errorResponseResolver;
+    }
 
     /**
      * 파라미터 유효성 Exception Handler
@@ -41,6 +53,16 @@ public class InnerControllerAdvice {
                 responseDto.addResponseError(InnerResponseErrorDto.of(InnerResponseErrorType.PARAMETER_ERROR, detailMessage));
             }
         }
+        return responseDto.toResponseEntity();
+    }
+
+    @ExceptionHandler(NotifyRuntimeException.class)
+    public ResponseEntity<InnerResponseDto<ErrorResponseDto>> pushRuntimeExceptionHandler(NotifyRuntimeException ex) {
+        log.debug("[pushRuntimeExceptionHandler] ex:", ex);
+
+        ErrorResponseDto errorResponseDto = errorResponseResolver.resolve(ex);
+        InnerResponseDto<ErrorResponseDto> responseDto = InnerResponseDto.of(errorResponseDto);
+
         return responseDto.toResponseEntity();
     }
 
