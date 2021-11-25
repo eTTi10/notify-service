@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @FeignClient(name = "mms-agent-rest-message", url = "http://hdtv.suxm.uplus.co.kr")
-public interface CallSettingApiFeignClient {
+public interface CallSettingFeignClient {
     /**
      *
      * @return

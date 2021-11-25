@@ -1,6 +1,6 @@
 package com.lguplus.fleta.rest;
 
-import com.lguplus.fleta.client.CallSettingApiClient;
+import com.lguplus.fleta.client.CallSettingDomainClient;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +8,8 @@ import java.util.Map;
 
 @Component
 @AllArgsConstructor
-public class CallSettingApiDomainFeignClient implements CallSettingApiClient {
-    private final CallSettingApiFeignClient api;
+public class CallSettingDomainFeignClient implements CallSettingDomainClient {
+    private final CallSettingFeignClient api;
     /**
      *
      * @return
