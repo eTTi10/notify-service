@@ -21,7 +21,13 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
      */
     @Override
     public Map<String, Object> callSettingApi(CallSettingRequestDto prm){
-        Map<String, Object> result = api.callSettingApi(prm);
+        Map<String, String> prms = new HashMap<>();
+        prms.put("sa_id","mms");
+        prms.put("stb_mac","mms");
+        prms.put("code_id","M011");
+        prms.put("svc_type","E");
+
+        Map<String, Object> result = api.callSettingApi(prms);
 
         return result;
     };

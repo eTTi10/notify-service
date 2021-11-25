@@ -17,7 +17,7 @@ public interface CallSettingFeignClient {
      * @return
      */
     @RequestMapping(method = RequestMethod.GET, value = "/hdtv/comm/setting", produces = "application/json")
-    public Map<String, Object> callSettingApi(@RequestParam CallSettingRequestDto prm);
+    public Map<String, Object> callSettingApi(@RequestParam Map<String, String> prm);
 
 
 }
