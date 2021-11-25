@@ -3,7 +3,7 @@ package com.lguplus.fleta.api.inner.mmsagent;
 import com.lguplus.fleta.data.dto.request.SendMMSRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.vo.SendMMSVo;
-import com.lguplus.fleta.service.mmsagent.MMSAgentService;
+import com.lguplus.fleta.service.mmsagent.MmsAgentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +14,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 @RestController
 public class MMSAgentController {
-    private final MMSAgentService mmsAgentService;
+    private final MmsAgentService mmsAgentService;
 
     @PostMapping("/smsagent/mmsCode")
     public SuccessResponseDto sendMmsCode(@Valid SendMMSVo request) {
@@ -24,6 +24,6 @@ public class MMSAgentController {
         //▶ 001 [완료] sa_id, stb_mac, mms_cd, ctn 값이 null인지 체크
         SendMMSRequestDto requestDto = request.convert();
 
-        return mmsAgentService.sendMMS(requestDto);
+        return mmsAgentService.sendMms(requestDto);
     }
 }

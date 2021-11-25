@@ -13,7 +13,7 @@ public class MmsService {
 
     private final MmsAgentDomainService mmsAgentDomainService;
 
-    public SuccessResponseDto sendMMS(SendMMSRequestDto request) {
+    public SuccessResponseDto sendMms(SendMMSRequestDto request) {
 
         return mmsAgentDomainService.sendMmsCode(request);
     }
