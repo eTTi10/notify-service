@@ -2,6 +2,7 @@ package com.lguplus.fleta.api.inner.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.vo.PushRequestBodyAnnounceVo;
 import com.lguplus.fleta.data.vo.PushRequestParamVo;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
@@ -28,18 +29,18 @@ public class PushAnnounceController {
 
 
     /**
-     * 단건푸시등록
+     * 공지 푸시 등록
      *
-     * @param pushRequestParamVo application ID, 서비스 ID, Push발송 타입
      * @param pushRequestBodyAnnounceVo Announcement 푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @PostMapping(value = "/smartux/v1/announcement", consumes = MediaType.APPLICATION_XML_VALUE)
-    public InnerResponseDto<?> pushRequestAnnouncement(
-            @Valid PushRequestParamVo pushRequestParamVo,
+    @PostMapping(value = "/smartux/v1/announcement")
+    public InnerResponseDto<PushClientResponseDto> pushRequestAnnouncement(
             @RequestBody @Valid PushRequestBodyAnnounceVo pushRequestBodyAnnounceVo) {
 
-        PushRequestAnnounceDto dto = pushRequestBodyAnnounceVo.convert(pushRequestParamVo);
+        log.debug("PushAnnounceController : {}", pushRequestBodyAnnounceVo);
+
+        PushRequestAnnounceDto dto = pushRequestBodyAnnounceVo.convert();
 
         return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(dto));
     }
