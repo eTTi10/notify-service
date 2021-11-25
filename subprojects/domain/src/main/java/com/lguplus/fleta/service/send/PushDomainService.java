@@ -1,7 +1,10 @@
 package com.lguplus.fleta.service.send;
 
+import com.lguplus.fleta.client.PersonalizationDomainClient;
+import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import com.lguplus.fleta.repository.PushRepository;
@@ -11,21 +14,31 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PushDomainService {
 
+    private final PersonalizationDomainClient personalizationDomainClient;
     private final PushRepository pushRepository;
 
-    public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public RegIdDto getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        RegistrationIdEntity registrationId = pushRepository.getRegistrationID(sendPushCodeRequestDto);
-        String regId = registrationId.getRegId();
-        log.debug("DB regId: {}", regId);
+        Map<String, String> inputMap = new HashMap<>();
 
-        return SuccessResponseDto.builder().build();
+        inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
+        inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
+
+//        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseGet(RegIdDto::new);
+        RegIdDto regIdDto = personalizationDomainClient.getRegistrationID(inputMap);
+        return regIdDto;
     }
+
 
 /*
     private final String changeNodeName = "reg_id";

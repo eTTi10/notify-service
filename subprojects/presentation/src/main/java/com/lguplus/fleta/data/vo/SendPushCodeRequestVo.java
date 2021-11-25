@@ -21,7 +21,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendSMSCodeVo.class})
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendPushCodeRequestVo.class})
 public class SendPushCodeRequestVo {
 
     @Pattern(regexp = "^[^\\s]+$", message = "파라미터 sa_id는 값에 공백이 없어야 함", payload = ParameterContainsWhitespaceException.class, groups = Groups.C1.class)
