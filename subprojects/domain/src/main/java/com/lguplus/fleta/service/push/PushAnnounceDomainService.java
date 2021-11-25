@@ -84,29 +84,31 @@ public class PushAnnounceDomainService {
             log.info("[pushAnnouncement]["+status_code+"] [SUCCESS]");
         }else{
             log.info("[pushAnnouncement]["+status_code+"] [FAIL]");
+
             //실패
-            if(status_code.equals("202")){
-                throw new AcceptedException();
-            }else if(status_code.equals("400")){
-                throw new BadRequestException();
-            }else if(status_code.equals("401")){
-                throw new UnAuthorizedException();
-            }else if(status_code.equals("403")){
-                throw new ForbiddenException();
-            }else if(status_code.equals("404")){
-                throw new NotFoundException();
-            }else if(status_code.equals("410")){
-                throw new NotExistRegistIdException();
-            }else if(status_code.equals("412")){
-                throw new PreConditionFailedException();
-            }else if(status_code.equals("500")){
-                throw new InternalErrorException();
-            }else if(status_code.equals("502")){
-                throw new ExceptionOccursException();
-            }else if(status_code.equals("503")){
-                throw new ServiceUnavailableException();
-            }else{
-                throw new RuntimeException("기타 오류");
+            switch (status_code) {
+                case "202":
+                    throw new AcceptedException();
+                case "400":
+                    throw new BadRequestException();
+                case "401":
+                    throw new UnAuthorizedException();
+                case "403":
+                    throw new ForbiddenException();
+                case "404":
+                    throw new NotFoundException();
+                case "410":
+                    throw new NotExistRegistIdException();
+                case "412":
+                    throw new PreConditionFailedException();
+                case "500":
+                    throw new InternalErrorException();
+                case "502":
+                    throw new ExceptionOccursException();
+                case "503":
+                    throw new ServiceUnavailableException();
+                default:
+                    throw new RuntimeException("기타 오류"); //9999
             }
         }
 
