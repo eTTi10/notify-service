@@ -31,7 +31,7 @@ public interface PushAnnounceFeignClient {
      * @param paramMap 푸시 정보
      * @return 푸시 결과
      */
-    @PostMapping(value = "${push-comm.announce.server.url}", headers = "key2=value2")
+    @PostMapping(value = "${push-comm.announce.server.url}")
     PushAnnounceResponseDto requestAnnouncement(URI baseUri, @RequestBody Map<String, Map<String, String>> paramMap);
 
 }
