@@ -1,12 +1,28 @@
 package com.lguplus.fleta.service.push;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
+import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.exception.push.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -14,44 +30,120 @@ import javax.annotation.PostConstruct;
 public class PushAnnounceDomainService {
 
     private final PushConfig pushConfig;
+    private final PushAnnounceDomainClient pushAnnounceDomainClient;
+    //private final ObjectMapper objectMapper = new ObjectMapper();
 
-    //설정 정보 ///////////////
-    private int transactionId;
-    private String serverIp;
-    private int serverPort;
-    private String url;
-    private int timeout;
-    private String header;
-    private String protocol;
-    private String encoding;
-    //////////////////////////
+    private AtomicInteger _transactionIDNum = new AtomicInteger(0);
+
+    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    private String oldLgPushAppId;
+
+    @Value("${push-comm.push.old.lgupush.notiType}")
+    private String oldLgPushNotiType;
 
     /**
      * Announcement 푸시등록
      *
-     * @param pushRequestAnnounceDto Announcement 푸시등록을 위한 DTO
+     * @param dto Announcement 푸시등록을 위한 DTO
      * @return Announcement  푸시등록 결과
      */
-    public String requestAnnouncement(PushRequestAnnounceDto pushRequestAnnounceDto) {
-        log.debug("requestAnnouncement ::::::::::::::: {}", pushRequestAnnounceDto);
+    public PushClientResponseDto requestAnnouncement(PushRequestAnnounceDto dto) {
+        log.debug("requestAnnouncement/PushRequestAnnounceDto ::::::::::::::: {}", dto);
 
         //1. Make Message
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("msg_id", "PUSH_ANNOUNCEMENT");
+        paramMap.put("push_id", getTransactionId());
+        paramMap.put("service_id", dto.getServiceId());
+        paramMap.put("service_passwd", getServicePwd(dto.getServiceId()));
+        paramMap.put("app_id", dto.getAppId());
+        paramMap.put("noti_contents", dto.getMsg());
+
+        //구버전 LGUPUSH
+        if("LGUPUSH_OLD".equals(getLinkType(dto.getServiceId()))) {
+            paramMap.put("push_app_id", oldLgPushAppId);
+            paramMap.put("noti_type", oldLgPushNotiType);
+        }
+
+        dto.getItems().forEach(e -> {
+            String[] item = e.split("\\!\\^");
+            if(item.length >= 2){
+                paramMap.put(item[0], item[1]);
+            }
+        });
 
         //2. Send Announcement Push
+        PushAnnounceResponseDto pushAnnounceResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
 
-        return null;
+        //3. Send Result
+        String status_code = pushAnnounceResponseDto.getResponseAnnouncement().getStatusCode();
+        String status_msg = pushAnnounceResponseDto.getResponseAnnouncement().getStatusMsg();
+        log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+status_code+"]["+status_msg+"]");
+
+        if(status_code.equals("200")){
+            log.info("[pushAnnouncement]["+status_code+"] [SUCCESS]");
+        }else{
+            log.info("[pushAnnouncement]["+status_code+"] [FAIL]");
+            //실패
+            if(status_code.equals("202")){
+                throw new AcceptedException();
+            }else if(status_code.equals("400")){
+                throw new BadRequestException();
+            }else if(status_code.equals("401")){
+                throw new UnAuthorizedException();
+            }else if(status_code.equals("403")){
+                throw new ForbiddenException();
+            }else if(status_code.equals("404")){
+                throw new NotFoundException();
+            }else if(status_code.equals("410")){
+                throw new NotExistRegistIdException();
+            }else if(status_code.equals("412")){
+                throw new PreConditionFailedException();
+            }else if(status_code.equals("500")){
+                throw new InternalErrorException();
+            }else if(status_code.equals("502")){
+                throw new ExceptionOccursException();
+            }else if(status_code.equals("503")){
+                throw new ServiceUnavailableException();
+            }else{
+                throw new RuntimeException("기타 오류");
+            }
+        }
+
+        return PushClientResponseDto.builder().build();
     }
 
-    @PostConstruct
-    void postConstruct() {
-        transactionId = 0;
-        serverIp = pushConfig.getCommPropValue("announce.server.ip");
-        serverPort = Integer.parseInt(pushConfig.getCommPropValue("announce.server.port"));
-        url = pushConfig.getCommPropValue("announce.server.url");
-        timeout = Integer.parseInt(pushConfig.getCommPropValue("announce.server.timeout"));
-        header = pushConfig.getCommPropValue("announce.server.header");
-        protocol = pushConfig.getCommPropValue("announce.server.protocol");
-        encoding = pushConfig.getCommPropValue("announce.server.encoding");
+    // Service Password
+    private String getServicePwd(String serviceId) {
+
+        String servicePwd = pushConfig.getServicePropValue(serviceId + ".push.service_pwd");
+
+        if (servicePwd == null) {
+            throw new ServiceIdNotFoundException();
+        }
+
+        // service_pwd : SHA512 암호화
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            digest.reset();
+            digest.update(servicePwd.getBytes(StandardCharsets.UTF_8));
+            return String.format("%0128x", new BigInteger(1, digest.digest()));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException("기타 오류");
+        }
+    }
+
+    // Link Type
+    private String getLinkType(String serviceId) {
+        String linkType = pushConfig.getServicePropValue(serviceId + ".push.linkage_type");
+        return linkType == null ? "" : linkType;
+    }
+
+    private String getTransactionId() {
+        if(_transactionIDNum.get() >= 9999) {
+            _transactionIDNum.set(0);
+        }
+        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", _transactionIDNum.incrementAndGet());
     }
 
 }

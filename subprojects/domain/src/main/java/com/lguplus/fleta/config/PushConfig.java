@@ -35,35 +35,28 @@ public class PushConfig {
             throw new IllegalStateException("Error properties file not found.");
         }
 
-        AtomicInteger cnt1= new AtomicInteger();
-        AtomicInteger cnt2= new AtomicInteger();
-
         propertySource.getSource()
                 .forEach((propertyName, propertyValue) -> {
                     if (propertyName.startsWith(PUSH_COMM_PROPERTY_PREFIX)) {
-                        cnt1.getAndIncrement();
                         String nm = propertyName.replace(PUSH_COMM_PROPERTY_PREFIX, "");
                         propertiesPushComm.put(nm, String.valueOf(propertyValue));
                     } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX)) {
-                        cnt2.getAndIncrement();
                         String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "");
                         propertiesPushService.put(nm, String.valueOf(propertyValue));
                     }
                 });
-
-        log.debug("########### Properties: ", cnt1, cnt2);
     }
 
     public String getCommPropValue(String key) {
         if(!propertiesPushComm.containsKey(key)) {
-            //throw new Ex
+            return null;
         }
         return propertiesPushComm.get(key);
     }
 
     public String getServicePropValue(String key) {
         if(!propertiesPushService.containsKey(key)) {
-            //throw new Ex
+            return null;
         }
         return propertiesPushService.get(key);
     }
