@@ -14,7 +14,7 @@ import java.util.List;
 
 @Getter
 @ToString
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, HttpPushSingleRequestVo.class})
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, PushRequestBodyAnnounceVo.class})
 public class PushRequestBodyAnnounceVo {
 
     @NotBlank(message = "app_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)

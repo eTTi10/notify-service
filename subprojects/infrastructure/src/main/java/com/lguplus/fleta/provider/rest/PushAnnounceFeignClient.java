@@ -23,7 +23,8 @@ import java.util.Map;
         "Content-Encoding: ${push-comm.announce.server.encoding}"
 })
 public interface PushAnnounceFeignClient {
-
+//PushSingleSocketClient
+    //PushSingleDomainService	requestPushSingle	Socket	PushSingleSocketClient.requestPushSingle()
     /**
      * Announcement 푸시
      *

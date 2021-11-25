@@ -1,7 +1,5 @@
 package com.lguplus.fleta.service.push;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
@@ -21,7 +19,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -55,12 +52,16 @@ public class PushAnnounceDomainService {
         paramMap.put("msg_id", "PUSH_ANNOUNCEMENT");
         paramMap.put("push_id", getTransactionId());
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("service_passwd", getServicePwd(dto.getServiceId()));
         paramMap.put("app_id", dto.getAppId());
         paramMap.put("noti_contents", dto.getMsg());
 
-        //구버전 LGUPUSH
-        if("LGUPUSH_OLD".equals(getLinkType(dto.getServiceId()))) {
+        String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
+        if (servicePwd == null) {
+            throw new ServiceIdNotFoundException();
+        }
+        paramMap.put("service_passwd", servicePwd);
+
+        if("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
             paramMap.put("push_app_id", oldLgPushAppId);
             paramMap.put("noti_type", oldLgPushNotiType);
         }
@@ -113,32 +114,6 @@ public class PushAnnounceDomainService {
         }
 
         return PushClientResponseDto.builder().build();
-    }
-
-    // Service Password
-    private String getServicePwd(String serviceId) {
-
-        String servicePwd = pushConfig.getServicePropValue(serviceId + ".push.service_pwd");
-
-        if (servicePwd == null) {
-            throw new ServiceIdNotFoundException();
-        }
-
-        // service_pwd : SHA512 암호화
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            digest.reset();
-            digest.update(servicePwd.getBytes(StandardCharsets.UTF_8));
-            return String.format("%0128x", new BigInteger(1, digest.digest()));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException("기타 오류");
-        }
-    }
-
-    // Link Type
-    private String getLinkType(String serviceId) {
-        String linkType = pushConfig.getServicePropValue(serviceId + ".push.linkage_type");
-        return linkType == null ? "" : linkType;
     }
 
     private String getTransactionId() {

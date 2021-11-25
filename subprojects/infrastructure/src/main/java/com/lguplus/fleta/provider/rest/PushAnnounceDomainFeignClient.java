@@ -1,21 +1,17 @@
 package com.lguplus.fleta.provider.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,11 +45,16 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
      */
     @Override
     public PushAnnounceResponseDto requestAnnouncement(Map<String, String> paramMap) {
-        log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
+        //log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
         log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
 
         Map<String, Map<String, String>> sendMap = new HashMap<>();
         sendMap.put("request", paramMap);
+        try {
+            log.debug("requestAnnouncement:sendMap :::::::::::: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(sendMap));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
 
         return pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
     }
@@ -69,26 +70,10 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
 
     // Announcement(별도서버 구성 시)
     private String getServiceServerIp(String serviceId) {
+        //test
+        //return "localhost";
+
         String svcServerIp = pushConfig.getCommPropValue(serviceId + ".announce.server.ip");
         return svcServerIp == null ? this.host : svcServerIp;
     }
-
-    /**
-     * 기본 Header 정보를 가져온다.
-     *
-     * @return 기본 Header 정보
-     */
-    /*
-    private Map<String, String> getHeaderMap() {
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put(HttpHeaders.ACCEPT, this.header);
-        headerMap.put(HttpHeaders.ACCEPT_CHARSET, this.encoding);
-        headerMap.put(HttpHeaders.CONTENT_TYPE, this.header);
-        headerMap.put(HttpHeaders.CONTENT_ENCODING, this.encoding);
-       // headerMap.put(HttpHeaders.AUTHORIZATION, authorization);
-
-        return headerMap;
-    }
-    */
-
 }
