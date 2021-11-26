@@ -2,6 +2,7 @@ package com.lguplus.fleta.api.inner.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.vo.PushRequestParamVo;
 import com.lguplus.fleta.data.vo.PushRequestBodySingleVo;
 import com.lguplus.fleta.service.push.PushSingleService;
@@ -28,15 +29,17 @@ public class PushSingleController {
     /**
      * 단건푸시등록
      *
-     * @param pushRequestParamVo application ID, 서비스 ID, Push발송 타입
      * @param pushRequestBodySingleVo 단건푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
     @PostMapping(value = "/smartux/v1/push", consumes = MediaType.APPLICATION_XML_VALUE)
-    public InnerResponseDto<?> pushRequest(
-            @Valid PushRequestParamVo pushRequestParamVo,
+    public InnerResponseDto<PushClientResponseDto> pushRequest(
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
-        PushRequestSingleDto pushRequestSingleDto = pushRequestBodySingleVo.convert(pushRequestParamVo);
+
+        log.debug("PushSingleController : {}", pushRequestBodySingleVo);
+
+        PushRequestSingleDto pushRequestSingleDto = pushRequestBodySingleVo.convert();
+
         return InnerResponseDto.of(pushSingleService.requestPushSingle(pushRequestSingleDto));
     }
 

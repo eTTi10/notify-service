@@ -13,24 +13,9 @@ import java.util.List;
 public class PushRequestAnnounceDto {
 
     private String appId;
-
     private String serviceId;
-
     private String pushType;
-
-    /** 보낼 메시지 */
     private String msg;
-
-    /** 추가할 항목 입력(name!^value) */
     private List<String> items;
 
-    /** 사용자 ID */
-    //private List<String> users;
-
-    private String transactionId;
-/*
-    public void setTransactionId(String transactionId) {
-        this.transactionId = transactionId;
-    }
-*/
 }

@@ -6,11 +6,17 @@ import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import feign.Logger;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,17 +52,21 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
     @Override
     public PushAnnounceResponseDto requestAnnouncement(Map<String, String> paramMap) {
         //log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
-        log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
+        //log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
 
         Map<String, Map<String, String>> sendMap = new HashMap<>();
         sendMap.put("request", paramMap);
-        try {
-            log.debug("requestAnnouncement:sendMap :::::::::::: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(sendMap));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
 
-        return pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
+        try {
+            return pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
+        }
+        catch (RetryableException ex) {
+            log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
+
+            PushAnnounceResponseDto dto = new PushAnnounceResponseDto();
+            dto.setErrorCode("5102", "RetryableException");
+            return dto;
+        }
     }
 
     /**
@@ -76,4 +86,5 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
         String svcServerIp = pushConfig.getCommPropValue(serviceId + ".announce.server.ip");
         return svcServerIp == null ? this.host : svcServerIp;
     }
+
 }
