@@ -2,6 +2,7 @@ package com.lguplus.fleta.config;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.Logger;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import org.springframework.beans.factory.ObjectFactory;
@@ -38,5 +39,10 @@ public class FeignConfig {
     Decoder feignDecoder() {
 
         return new ResponseEntityDecoder(new SpringDecoder(getObjectFactory()));
+    }
+
+    @Bean
+    Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;//NONE, BASIC, HEADERS, FULL
     }
 }
