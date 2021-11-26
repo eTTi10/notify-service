@@ -28,6 +28,7 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class SmsProviderDomainService {
 
+/*
     @Value("${agent.ip}")
     private String agentIp;
 
@@ -37,9 +38,10 @@ public class SmsProviderDomainService {
     @Value("${agent.id}")
     private String agentId;
 
+
     @Value("${agent.password}")
     private String agentPassword;
-
+*/
     public static int mSendTerm;
     public static LinkedList<SmsGatewayClient> sGatewayQueue = new LinkedList<SmsGatewayClient>();
 
