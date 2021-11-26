@@ -61,7 +61,8 @@ public class InnerControllerAdvice {
         log.debug("[pushRuntimeExceptionHandler] ex:", ex);
 
         ErrorResponseDto errorResponseDto = errorResponseResolver.resolve(ex);
-        InnerResponseDto<ErrorResponseDto> responseDto = InnerResponseDto.of(errorResponseDto);
+
+        InnerResponseDto<ErrorResponseDto> responseDto = InnerResponseDto.of(ex.getInnerResponseCodeType(), errorResponseDto);
 
         return responseDto.toResponseEntity();
     }
