@@ -3,7 +3,9 @@ package com.lguplus.fleta.provider.socket;
 import com.lguplus.fleta.client.SmsGatewayClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -60,8 +62,10 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
 
     private Map<Integer, Timer> mTimerMap = new HashMap<Integer, Timer>();
 
+
+    public SmsGatewaySocketClient(String ip, String port, String id, String password) {
+
 /*
-    public SMSGatewayDomainService(String ip, String port, String id, String password) {
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
@@ -83,8 +87,14 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
         mStatusLog.info("password:" + password);
 
         connectGateway();
+*/
     }
 
+    public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) {
+
+    }
+
+    /*
     public boolean isBind() {
         return isBind;
     }
@@ -177,6 +187,7 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
     }
 
     public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
+
         byte[] body = new byte[264];
 
         byte[] tidBytes = intToByte(4098);
@@ -300,25 +311,33 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
+
             } catch (InterruptedException ignored) {
+
                 mStatusLog.error("getResult Error");
             }
 
             if (Properties.getProperty("flag.success").equals(mResult)) {
+
                 resultVO.setFlag(mResult);
                 resultVO.setMessage(Properties.getProperty("message.success"));
+
             } else if (Properties.getProperty("flag.system_error").equals(mResult)) {
+
                 resultVO.setFlag(mResult);
                 resultVO.setMessage(Properties.getProperty("message.system_error"));
             }
         }
 
         clearResult();
+
         mTimerMap.get(TIMER_TIME_OUT).cancel();
+
         return new AsyncResult<ResultVO>(resultVO);
     }
 
     private void readHeader() throws IOException {
+
         int type = readBufferToInt(4);
         int len = readBufferToInt(4);
         int result;
@@ -338,6 +357,7 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
                     mTimerMap.get(TIMER_LINK_CHECK).cancel();
                     mTimerMap.put(TIMER_LINK_CHECK, new Timer());
                     TimerTask timerTask = new TimerTask() {
+
                         @Override
                         public void run() {
                             try {
@@ -420,5 +440,6 @@ public class SmsGatewaySocketClient implements SmsGatewayClient {
         }
     }
 */
+
 
 }
