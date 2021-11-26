@@ -1,14 +1,14 @@
 package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.client.CallSettingDomainClient;
-import com.lguplus.fleta.data.dto.LatestDto;
-import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -25,25 +25,24 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
      * @return
      */
     @Override
-    public GenericRecordsetResponseDto<CallSettingDto> callSettingApi(CallSettingRequestDto parm){
+    @Cacheable(value="PANEL_CACHE", key="'VERSION'")
+    public CallSettingResultMapDto  callSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
         parmMap.put("sa_id",parm.getSaId());
         parmMap.put("stb_mac",parm.getStbMac());
         parmMap.put("code_id",parm.getCodeId());
         parmMap.put("svc_type",parm.getSvcType());
 
-        Map<String, Object> apiMap = api.callSettingApi(parmMap);
-        Map<String, Object> resultMap = (Map<String, Object>) apiMap.get("result");
-        List<CallSettingDto> rs = (List<CallSettingDto>) resultMap.get("recordset");
+        CallSettingResultMapDto apiMap = api.callSettingApi(parmMap);
+       //CallSettingResultDto resultMap = (CallSettingResultDto) apiMap.get("result");
+        //List<CallSettingDto> rs = (List<CallSettingDto>) resultMap.get("recordset");
 
         log.info("\n\n============ [ Start - callSettingApi 전송메세지 목록 ] ============\n\n");
-        log.info(rs.toString());
+        log.info(apiMap.toString());
         log.info("\n\n============ [ End - callSettingApi 전송메세지 목록 ] ============\n\n");
 
-        return GenericRecordsetResponseDto.<CallSettingDto>genericRecordsetResponseBuilder()
-                .totalCount(rs.size())
-                .recordset(rs)
-                .build();
+
+        return apiMap;
     };
 
 }

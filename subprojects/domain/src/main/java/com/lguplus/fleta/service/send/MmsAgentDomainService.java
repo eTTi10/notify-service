@@ -6,11 +6,16 @@ import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -38,8 +43,9 @@ public class MmsAgentDomainService {
         }else{
             prm.setCodeId(sendMMSRequestDto.getMmsCd());
         }
-
-        GenericRecordsetResponseDto<CallSettingDto> result = aipClient.callSettingApi(prm);
+        log.info("001 MmsAgentDomainService");
+        CallSettingResultMapDto result = aipClient.callSettingApi(prm);
+        log.info("002 MmsAgentDomainService");
         return SuccessResponseDto.builder().build();
     }
 }
