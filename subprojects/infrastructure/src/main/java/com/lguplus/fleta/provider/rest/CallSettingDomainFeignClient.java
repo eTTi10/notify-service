@@ -25,7 +25,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
      * @return
      */
     @Override
-    @Cacheable(value="PANEL_CACHE", key="'VERSION'")
+    @Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
     public CallSettingResultMapDto  callSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
         parmMap.put("sa_id",parm.getSaId());
@@ -34,13 +34,12 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("svc_type",parm.getSvcType());
 
         CallSettingResultMapDto apiMap = api.callSettingApi(parmMap);
-       //CallSettingResultDto resultMap = (CallSettingResultDto) apiMap.get("result");
+        //CallSettingResultDto resultMap = (CallSettingResultDto) apiMap.get("result");
         //List<CallSettingDto> rs = (List<CallSettingDto>) resultMap.get("recordset");
 
         log.info("\n\n============ [ Start - callSettingApi 전송메세지 목록 ] ============\n\n");
         log.info(apiMap.toString());
         log.info("\n\n============ [ End - callSettingApi 전송메세지 목록 ] ============\n\n");
-
 
         return apiMap;
     };
