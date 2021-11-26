@@ -11,6 +11,7 @@ import com.lguplus.fleta.service.latest.LatestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,7 +26,6 @@ import java.util.Locale;
 public class LatestController {
 
     private final LatestService latestService;
-
     /**
      * 최신회 알림 조회 API
      * @param vo

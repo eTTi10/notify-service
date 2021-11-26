@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class SendSMSRequestDto extends CommonRequestDto {
+public class SendSmsRequestDto extends CommonRequestDto {
 
     private String sCtn;
 

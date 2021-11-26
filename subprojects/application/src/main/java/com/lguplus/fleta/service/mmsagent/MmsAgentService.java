@@ -17,7 +17,7 @@ public class MMSAgentService {
 
     public SuccessResponseDto sendMMS(SendMMSRequestDto sendSMSRequestDto) {
 
-        return null;//mmsAgentDomainService.sendMMS(sendSMSRequestDto);
+        return mmsAgentDomainService.sendMmsCode(sendSMSRequestDto);
 
     }
 
