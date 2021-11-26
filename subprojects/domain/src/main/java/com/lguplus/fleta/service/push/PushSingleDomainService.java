@@ -34,8 +34,8 @@ public class PushSingleDomainService {
 
         log.debug(pushConfig.getCommPropValue("announce.server.url"));
         log.debug(pushConfig.getCommPropValue("announce.server.header"));
-        log.debug(pushConfig.getServicePropValue("key7.push.service_id"));
-        log.debug(pushConfig.getServicePropValue("key7.push.service_pwd"));
+        log.debug(pushConfig.getServicePassword("key7.push.service_id"));
+        log.debug(pushConfig.getServicePassword("key7.push.service_pwd"));
 
         //httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
 

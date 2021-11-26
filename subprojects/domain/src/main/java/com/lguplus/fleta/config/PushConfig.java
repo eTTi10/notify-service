@@ -1,5 +1,6 @@
 package com.lguplus.fleta.config;
 
+import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,10 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,6 +31,7 @@ public class PushConfig {
 
     private final Map<String, String> propertiesPushComm = new HashMap<>();
     private final Map<String, String> propertiesPushService = new HashMap<>();
+    private final Map<String, String> propertiesPushServiceLinkType = new HashMap<>();
 
     public PushConfig(final StandardEnvironment environment) {
 
@@ -35,36 +41,47 @@ public class PushConfig {
             throw new IllegalStateException("Error properties file not found.");
         }
 
-        AtomicInteger cnt1= new AtomicInteger();
-        AtomicInteger cnt2= new AtomicInteger();
-
         propertySource.getSource()
                 .forEach((propertyName, propertyValue) -> {
                     if (propertyName.startsWith(PUSH_COMM_PROPERTY_PREFIX)) {
-                        cnt1.getAndIncrement();
                         String nm = propertyName.replace(PUSH_COMM_PROPERTY_PREFIX, "");
                         propertiesPushComm.put(nm, String.valueOf(propertyValue));
-                    } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX)) {
-                        cnt2.getAndIncrement();
+                    } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(".service_id")) {
                         String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "");
-                        propertiesPushService.put(nm, String.valueOf(propertyValue));
+                        String serviceId = String.valueOf(propertyValue);
+                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(".service_id", ".service_pwd")));
+                        propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
+
+                        if(propertySource.getSource().containsKey(propertyName.replace(".service_id", ".linkage_type"))) {
+                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(".service_id", ".linkage_type")));
+                            propertiesPushServiceLinkType.put(serviceId, linkType);
+                        }
                     }
                 });
-
-        log.debug("########### Properties: ", cnt1, cnt2);
     }
 
     public String getCommPropValue(String key) {
-        if(!propertiesPushComm.containsKey(key)) {
-            //throw new Ex
-        }
         return propertiesPushComm.get(key);
     }
 
-    public String getServicePropValue(String key) {
-        if(!propertiesPushService.containsKey(key)) {
-            //throw new Ex
+    public String getServicePassword(String serviceId) {
+        return propertiesPushService.get(serviceId);
+    }
+
+    public String getServiceLinkType(String serviceId) {
+        return propertiesPushServiceLinkType.get(serviceId);
+    }
+
+    // Service Password
+    private String getSha512Pwd(String servicePwd) {
+        // service_pwd : SHA512 암호화
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-512");
+            digest.reset();
+            digest.update(servicePwd.getBytes(StandardCharsets.UTF_8));
+            return String.format("%0128x", new BigInteger(1, digest.digest()));
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException("기타 오류");
         }
-        return propertiesPushService.get(key);
     }
 }

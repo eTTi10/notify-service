@@ -13,6 +13,12 @@ sms:
     request:
       method: GET
     url: http://localhost/hdtv/comm/setting?sa_id=sms&stb_mac=sms&code_id=&svc_type=I
+    rest_url: "http://localhost"
+    rest_path: "/hdtv/comm/setting"
+    rest_sa_id: sms
+    rest_stb_mac: sms
+    rest_code_id:
+    rest_svc_type: I
 check:
   https: '1'
 agent:

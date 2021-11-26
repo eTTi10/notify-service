@@ -27,4 +27,10 @@ public class PushRequestAnnounceDto {
     /** 사용자 ID */
     //private List<String> users;
 
+    private String transactionId;
+/*
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+*/
 }
