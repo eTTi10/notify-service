@@ -29,12 +29,9 @@ public class SmsAgentController {
     private final SmsAgentService smsAgentService;
 
     @PostMapping("/smsagent/sms")
-    public SuccessResponseDto sendSms(@Valid SendSmsVo requestVo, HttpServletRequest request) {
+    public SuccessResponseDto sendSms(@Valid @RequestBody SendSmsVo requestVo, HttpServletRequest request) {
 
         log.debug("[SMSAgentController] - [{}]]", requestVo.toString());
-
-        log.debug("[request.getRequestURI()] - [{}]]", request.getRequestURI());
-        log.debug("[request.getScheme()] - [{}]]", request.getScheme());
 
         // Http통신 체크
         checkHttps(request);
@@ -45,11 +42,11 @@ public class SmsAgentController {
     }
 
     @PostMapping("/smsagent/smsCode")
-    public SuccessResponseDto sendSmsCode(@Valid SendSmsCodeVo request) {
+    public SuccessResponseDto sendSmsCode(@Valid SendSmsCodeVo requestVo, HttpServletRequest request) {
 
-        log.debug("SMSAgentController.sendSmsCode() - {}:{}", "SMS발송 처리", request);
+        log.debug("SMSAgentController.sendSmsCode() - {}:{}", "SMS발송 처리", requestVo);
 
-        SendSmsCodeRequestDto requestDto = request.convert();
+        SendSmsCodeRequestDto requestDto = requestVo.convert();
 
         return smsAgentService.sendSmsCode(requestDto);
     }
@@ -73,9 +70,10 @@ public class SmsAgentController {
     private void checkHttps(HttpServletRequest request) {
 
         String checkHttps = StringUtils.defaultString(propertyCheckHttps, "1");
+        log.debug("[checkHttps] - [{}]]", checkHttps);
+        String protocol = request.getScheme();
 
         if (!"0".equals(checkHttps)) {
-            String protocol = request.getScheme();
 
             if (!"https".equalsIgnoreCase(protocol)) {
 
