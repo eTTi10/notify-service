@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.push;
 
 import com.lguplus.fleta.exception.NotifyOpenApiRuntimeException;
+import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
@@ -9,7 +10,7 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  * @author Minwoo Lee
  * @since 1.0
  */
-public class ExclusionNumberException extends NotifyOpenApiRuntimeException {
+public class ExclusionNumberException extends NotifyPushRuntimeException {
 
     /**
      *
