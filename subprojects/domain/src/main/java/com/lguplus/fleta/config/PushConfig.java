@@ -1,6 +1,5 @@
 package com.lguplus.fleta.config;
 
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * HttpPush 설정 파일

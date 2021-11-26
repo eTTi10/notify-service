@@ -13,7 +13,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class MMSAgentController {
+public class MmsAgentController {
     private final MmsAgentService mmsAgentService;
 
     @PostMapping("/smsagent/mmsCode")
