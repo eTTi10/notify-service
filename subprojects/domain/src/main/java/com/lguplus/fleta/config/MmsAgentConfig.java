@@ -9,6 +9,5 @@ import org.springframework.context.annotation.PropertySource;
  */
 @Configuration
 @PropertySource(value = "classpath:mmsagent/mmsagent-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
-@PropertySource(value = "classpath:mmsagent/agent-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
 public class MmsAgentConfig {
 }

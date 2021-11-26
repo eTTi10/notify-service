@@ -25,7 +25,7 @@ public class MmsController {
 
         SendMMSRequestDto requestDto = request.convert();
 
-        return smsService.sendMMS(requestDto);
+        return smsService.sendMms(requestDto);
     }
 
 }
