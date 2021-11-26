@@ -68,6 +68,10 @@ error:
               FailToUseCouponException: "1408"
               ExceedMaxCouponUsageException: "1409"
               CouponNotFoundException: "1410"
+            smsagent:
+              NotSendTimeException: "1504"
+              ServerSettingInfoException: "5200"
+              NoHttpsException: "5400"
             stat:
               StatNotFoundException: "1420"
             subscription:
@@ -132,6 +136,7 @@ error:
     "1430": "이미 존재하는 데이터"
     "1431": "최대 등록 갯수 초과"
     "1432": "서비스 중복 가입 오류"
+    "1504": "전송 가능한 시간이 아님"
     "2000": "플레이리스트 폴더 생성 개수가 초과되었습니다."
     "2001": "삭제할 플레이리스트 폴더가 없습니다."
     "2002": "변경할 플레이리스트 폴더가 없습니다."
@@ -158,6 +163,8 @@ error:
     "5013": "파라미터에 공백이 포함됨"
     "5014": "파라미터 값에 영문,숫자만 포함되어야 함"
     "5017": "요청 정보 허용 범위 이하"
+    "5200": "서버 설정 정보 오류"
+    "5400": "HTTPS 통신이 아닙니다"
     "6000": "버전값이 같습니다."
     "5009": "최대 개수를 초과함"
     "8000": "DB 중복 키 에러"

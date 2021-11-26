@@ -2,22 +2,14 @@ package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
-import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import com.lguplus.fleta.repository.PushRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Component

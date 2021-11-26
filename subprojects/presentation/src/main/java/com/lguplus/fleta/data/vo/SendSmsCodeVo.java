@@ -1,7 +1,7 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
+import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.exception.ParameterContainsNonAlphanumericException;
 import com.lguplus.fleta.exception.ParameterContainsWhitespaceException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
@@ -15,8 +15,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendSMSCodeVo.class})
-public class SendSMSCodeVo {
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendSmsCodeVo.class})
+public class SendSmsCodeVo {
 
     @Pattern(regexp = "^[^\\s]+$", message = "파라미터 sa_id는 값에 공백이 없어야 함", payload = ParameterContainsWhitespaceException.class, groups = Groups.C1.class)
     @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "파라미터 sa_id는 값에 영문,숫자만 포함되어야 함", payload = ParameterContainsNonAlphanumericException.class, groups = Groups.C2.class)
@@ -42,9 +42,9 @@ public class SendSMSCodeVo {
     @ParamAlias("replacement")
     private String replacement;
 
-    public SendSMSCodeRequestDto convert(){
+    public SendSmsCodeRequestDto convert(){
 
-        return SendSMSCodeRequestDto.builder()
+        return SendSmsCodeRequestDto.builder()
                 .saId(getSaId())
                 .stbMac(getStbMac())
                 .smsCd(getSmsCd())

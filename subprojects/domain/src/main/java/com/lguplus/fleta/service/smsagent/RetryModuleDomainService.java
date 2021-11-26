@@ -1,5 +1,7 @@
 package com.lguplus.fleta.service.smsagent;
 
+import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +27,9 @@ public class RetryModuleDomainService {
     @Value("${sms.sender.retry.sleep.ms}")
     private String stringSleepTime;
 
+    private final SmsMessageManagerDomainService smsMessageManagerDomainService;
+    private final SmsProviderDomainService smsProviderDomainService;
+
     private int retry = Integer.parseInt(StringUtils.defaultIfEmpty(stringRetry, "0"));
     private int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(stringBusyRetry, "5"));
     private int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(stringSleepTime, "1000"));
@@ -35,17 +40,19 @@ public class RetryModuleDomainService {
         busyEr = 0;
     }
 
-/*
 
-    public ResultVO smsSend(SmsSendVo smsVo, boolean encryptYn, Log log){
+    public SuccessResponseDto smsSendCode(SendSmsCodeRequestDto sendSmsCodeRequestDto, boolean encryptYn, Log log) {
+
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
-        ResultVO resultVO;
+//        ResultVO resultVO;
         String sendMsg = "";
+/*
+
         try {
             callCount++;
-            sendMsg = SmsMessageManager.convertMsg(smsVo.getSmsMsg(), smsVo.getReplacement());
-            resultVO = SmsProvider.send(Properties.getProperty("sms.sender.no")
+            sendMsg = smsMessageManagerDomainService.convertMsg(smsVo.getSmsMsg(), smsVo.getReplacement());
+            resultVO = smsProviderDomainService.send(Properties.getProperty("sms.sender.no")
                     , encryptYn ? AesUtil.decryptAES(smsVo.getSmsId()) : smsVo.getSmsId(), sendMsg);
 //			//###############TEST
 //			resultVO = new ResultVO();
@@ -72,18 +79,21 @@ public class RetryModuleDomainService {
             checkRetry = 2;
             busyEr++;
         }
-
-        log.info("[smsSend]["+smsVo.getPtDay()+"]["+smsVo.getSmsCd()+"]["+smsVo.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+resultVO.getFlag()+"]["+resultVO.getMessage()+"]");
+ */
+//        log.info("[smsSend]["+smsVo.getPtDay()+"]["+smsVo.getSmsCd()+"]["+smsVo.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+resultVO.getFlag()+"]["+resultVO.getMessage()+"]");
         if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
-            return resultVO;
+//            return resultVO;
+            return SuccessResponseDto.builder().build();
         }else{
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {}
 
-            return smsSend(smsVo, encryptYn, log);
+
+            return smsSendCode(sendSmsCodeRequestDto, encryptYn, log);
         }
+
+
     }
-*/
 
 }
