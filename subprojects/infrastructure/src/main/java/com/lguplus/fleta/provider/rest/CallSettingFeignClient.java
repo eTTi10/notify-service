@@ -1,4 +1,4 @@
-package com.lguplus.fleta.rest;
+package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;

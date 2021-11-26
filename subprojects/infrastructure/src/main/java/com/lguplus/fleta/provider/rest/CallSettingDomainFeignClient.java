@@ -1,9 +1,8 @@
-package com.lguplus.fleta.rest;
+package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
