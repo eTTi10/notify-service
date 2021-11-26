@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class MmsAgentService {
+public class MMSAgentService {
 
 
     private final MmsAgentDomainService mmsAgentDomainService;
 
-    public SuccessResponseDto sendMms(SendMMSRequestDto sendSMSRequestDto) {
+    public SuccessResponseDto sendMMS(SendMMSRequestDto sendSMSRequestDto) {
 
         return mmsAgentDomainService.sendMmsCode(sendSMSRequestDto);
 
