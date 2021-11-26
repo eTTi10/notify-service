@@ -19,7 +19,7 @@ import javax.validation.Valid;
 /**
  * Http Push RestController
  *
- * 단건, 멀티, 공지 푸시등록
+ * 단건, 멀티 푸시등록
  */
 @Slf4j
 @RestController
