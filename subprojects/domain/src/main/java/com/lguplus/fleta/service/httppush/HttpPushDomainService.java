@@ -12,7 +12,6 @@ import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +25,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -51,7 +49,7 @@ public class HttpPushDomainService {
 
     private static final int SECOND = 1000;
 
-    private final String lock = "";
+    private final Object lock = new Object();
 
     @Value("${multi.push.max.tps}")
     private String maxMultiCount;
@@ -85,7 +83,7 @@ public class HttpPushDomainService {
         String msg = httpPushSingleRequestDto.getMsg();
         List<String> items = httpPushSingleRequestDto.getItems();
 
-        OpenApiPushResponseDto openApiPushResponseDto = requestHttpPush(appId, serviceId, pushType, msg, regId, items);
+        OpenApiPushResponseDto openApiPushResponseDto = callOpenAPI(appId, serviceId, pushType, msg, regId, items);
 
         // 성공
         if (openApiPushResponseDto.getReturnCode().equals("200")) {
@@ -123,7 +121,7 @@ public class HttpPushDomainService {
 
         maxLimitPush = httpPushMultiRequestDto.getMultiCount();
 
-        List<String> successUsers = new ArrayList<>();
+//        List<String> successUsers = new ArrayList<>();
         List<String> failUsers = new ArrayList<>();
         List<Future<String>> resultList = new ArrayList<>();
 
@@ -154,7 +152,7 @@ public class HttpPushDomainService {
 
                 resultList.add(executor.submit(() -> {
                             try {
-                                return regId + "|" + requestHttpPush(appId, serviceId, pushType, msg, regId, items).getError().get("CODE");
+                                return regId + "|" + callOpenAPI(appId, serviceId, pushType, msg, regId, items).getError().get("CODE");
 
                             } catch (Exception ex) {
                                 return regId + "|" + "900";
@@ -197,38 +195,44 @@ public class HttpPushDomainService {
                 throw new RuntimeException("기타 오류");
             }
 
+            log.debug("{} ({}) ::::::::::::::::::: {}", LocalDateTime.now(), Thread.currentThread().getName(), code);
+
             // Push 메시지 전송 실패
             if (!code.equals("200")) {
                 log.debug("Push 메시지 전송 실패 code ::::::::::::::::::: {}", code);
 
-                // code "1112", message "The request Accepted"
-                if (code.equals("202")) {
-                    throw new AcceptedException();
+                switch (code) {
+                    case "202":
+                        // code "1112", message "The request Accepted"
+                        throw new AcceptedException();
 
-                // code "1104", message "Push GW BZadRequest"
-                } else if (code.equals("400")) {
-                    throw new BadRequestException();
+                    case "400":
+                        // code "1104", message "Push GW BZadRequest"
+                        throw new BadRequestException();
 
-                // code "1105", message "Push GW UnAuthorized"
-                } else if (code.equals("401")) {
-                    throw new UnAuthorizedException();
+                    case "401":
+                        // code "1105", message "Push GW UnAuthorized"
+                        throw new UnAuthorizedException();
 
-                // code "1106", message "Push GW Forbidden"
-                } else if (code.equals("403")) {
-                    throw new ForbiddenException();
+                    case "403":
+                        // code "1106", message "Push GW Forbidden"
+                        throw new ForbiddenException();
 
-                // code "1107", message "Push GW Not Found"
-                } else if (code.equals("404")) {
-                    throw new NotFoundException();
+                    case "404":
+                        // code "1107", message "Push GW Not Found"
+                        throw new NotFoundException();
 
-                // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
-                } else if (code.equals("410") || code.equals("412")) {
-                    log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
+                    // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
+                    case "410":
+                    case "412":
+                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
+                        break;
 
-                // 메시지 전송 실패 - Retry 대상
-                } else {
-                    log.debug("메시지 전송 실패 - Retry 대상");
-                    failUsers.add(regId);
+                    // 메시지 전송 실패 - Retry 대상
+                    default:
+                        log.debug("메시지 전송 실패 - Retry 대상");
+                        failUsers.add(regId);
+                        break;
                 }
             }
         }
@@ -257,7 +261,7 @@ public class HttpPushDomainService {
      * @param items 추가할 항목 입력(name!^value)
      * @return Open API 를 호춣 결과 DTO
      */
-    private OpenApiPushResponseDto requestHttpPush(String appId, String serviceId, String pushType, String msg, String regId, List<String> items) {
+    private OpenApiPushResponseDto callOpenAPI(String appId, String serviceId, String pushType, String msg, String regId, List<String> items) {
         log.debug("before msg ::::::::::::::::::::::::::::::: {}", msg);
 
         // 4자리수 넘지 않도록 방어코드

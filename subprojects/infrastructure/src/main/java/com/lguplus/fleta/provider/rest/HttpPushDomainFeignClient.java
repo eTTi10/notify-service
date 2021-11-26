@@ -49,8 +49,9 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
      */
     @Override
     public OpenApiPushResponseDto requestHttpPushSingle(Map<String, String> paramMap) {
-        log.debug("paramMap :::::::::::: {}", paramMap);
         log.debug("base url :::::::::::: {}", getBaseUrl());
+        log.debug("header :::::::::::: {}", getHeaderMap());
+        log.debug("paramMap :::::::::::: {}", paramMap);
 
         return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl()), getHeaderMap(), paramMap);
     }

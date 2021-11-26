@@ -18,8 +18,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ConfigurationProperties(prefix = "http.service")
 public class HttpServiceProps {
 
-    /** 트랜잭션 ID관리용 */
+    /** 트랜잭션 ID관리용(단건, 멀티) */
     public static AtomicInteger singleTransactionIDNum = new AtomicInteger(0);
+
+    /** 트랜잭션 ID관리용(공지) */
+    public static AtomicInteger announceTransactionIDNum = new AtomicInteger(0);
 
     /** http push service-keys */
    private List<Map<String, String>> keys;
