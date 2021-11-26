@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception;
 
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -13,7 +14,9 @@ import java.util.Map;
  * @author Taekuk Song
  * @since 1.0
  */
-public class NotifyRuntimeException extends RuntimeException {
+public abstract class NotifyRuntimeException extends RuntimeException {
+
+    public abstract InnerResponseCodeType getInnerResponseCodeType();
 
     /**
      *

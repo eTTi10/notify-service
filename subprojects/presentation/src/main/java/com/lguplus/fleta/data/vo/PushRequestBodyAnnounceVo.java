@@ -26,8 +26,8 @@ public class PushRequestBodyAnnounceVo {
     @JsonProperty("service_id")
     private String serviceId;
 
-    @NotNull(message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C4.class)
-    @Pattern(regexp = "^[gaGA]]?$", message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C5.class)
+    //@NotNull(message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C4.class)
+    //@Pattern(regexp = "^[gaGA]]?$", message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C5.class)
     @JsonProperty("push_type")
     private String pushType;
 

@@ -1,8 +1,9 @@
 package com.lguplus.fleta.exception.smsagent;
 
 import com.lguplus.fleta.exception.NotifyRuntimeException;
+import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
-public class NoHttpsException extends NotifyRuntimeException {
+public class NoHttpsException extends NotifySmsRuntimeException {
 
 
     public NoHttpsException() {

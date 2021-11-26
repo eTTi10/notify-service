@@ -34,6 +34,22 @@ responseCodeType:
     code: "0500"
     message: "내부 서버 오류"
     httpStatus: "500"
+  OPENAPI_PUSH_SERVER_ERROR:
+    code: "0510"
+    message: "OPEN API 푸시 서버 오류"
+    httpStatus: "200"
+  PUSH_SERVER_ERROR:
+    code: "0511"
+    message: "푸시 서버 오류"
+    httpStatus: "200"
+  SMS_SERVER_ERROR:
+    code: "0512"
+    message: "SMS 서버 오류"
+    httpStatus: "200"
+  MMS_SERVER_ERROR:
+    code: "0513"
+    message: "MMS 푸시 서버 오류"
+    httpStatus: "200"
 
 
 

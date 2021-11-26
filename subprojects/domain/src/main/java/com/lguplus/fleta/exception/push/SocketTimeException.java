@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.push;
 
 
+import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
@@ -9,7 +10,7 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class SocketTimeException extends NotifyRuntimeException {
+public class SocketTimeException extends NotifyPushRuntimeException {
 
     /**
      *
