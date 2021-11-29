@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.mmsagent;
 import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
-import com.lguplus.fleta.data.dto.request.SendMMSRequestDto;
+import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
@@ -35,7 +35,7 @@ public class MmsAgentDomainService {
     private Map<String, ?> mms;//yml파일 mms
     private Map<String, Object> setting;//yml파일 setting
 
-    public SuccessResponseDto sendMmsCode(@NotNull SendMMSRequestDto sendMMSRequestDto) throws Exception {
+    public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) throws Exception {
         //============ yml설정파일 객체생성 ============
         mms = config.getMms();//1레벨 객체
         setting = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
@@ -46,7 +46,7 @@ public class MmsAgentDomainService {
         CallSettingRequestDto prm = CallSettingRequestDto.builder().build();//callSettingApi파라메타
         prm.setSaId((String)setting.get("rest_sa_id"));//ex) MMS:mms SMS:sms
         prm.setStbMac((String)setting.get("rest_stb_mac"));//ex) MMS:mms SMS:sms
-        prm.setCodeId(sendMMSRequestDto.getMmsCd());//ex) M011
+        prm.setCodeId(sendMmsRequestDto.getMmsCd());//ex) M011
         prm.setSvcType((String)setting.get("rest_svc_type"));//ex) MMS:E SMS:I
 
         //setting API 호출하여 메세지 등록
@@ -81,10 +81,10 @@ public class MmsAgentDomainService {
         if(callSettingApi.getResult().getTotalCount() > 0) {
             CallSettingDto settingItem =  settingApiList.get(0);
             MmsRequestDto mmsDto = MmsRequestDto.builder().build();
-            mmsDto.setCtn(sendMMSRequestDto.getCtn());
+            mmsDto.setCtn(sendMmsRequestDto.getCtn());
             mmsDto.setMmsTitle((String)setting.get("rest_code_id"));
             mmsDto.setMmsMsg(settingItem.getCodeName());//메세지
-            mmsDto.setCtn(sendMMSRequestDto.getCtn());
+            mmsDto.setCtn(sendMmsRequestDto.getCtn());
             sendMMS(mmsDto);
         }else{
             returnError("1506");
