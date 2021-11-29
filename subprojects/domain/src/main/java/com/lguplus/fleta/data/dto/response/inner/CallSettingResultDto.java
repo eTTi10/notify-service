@@ -13,13 +13,13 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
 @SuperBuilder
-public class CallSettingResultDto {
+public class CallSettingResultDto implements Serializable{
 
     /** 응답코드 */
-    @Builder.Default private String flag = "0000";
+    private String flag;
 
     /** 응답메시지 */
-    @Builder.Default private String message = "성공";
+    private String message;
 
     /** 레코드수 */
     @JsonProperty("total_count")

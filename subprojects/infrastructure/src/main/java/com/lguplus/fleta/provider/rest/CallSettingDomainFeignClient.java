@@ -7,7 +7,9 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -19,13 +21,12 @@ import java.util.Map;
 @AllArgsConstructor
 public class CallSettingDomainFeignClient implements CallSettingDomainClient {
     private final CallSettingFeignClient api;
-
     /**
      *
      * @return
      */
     @Override
-    @Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
+    //@Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
     public CallSettingResultMapDto  callSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
         parmMap.put("sa_id",parm.getSaId());
@@ -34,12 +35,6 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("svc_type",parm.getSvcType());
 
         CallSettingResultMapDto apiMap = api.callSettingApi(parmMap);
-        //CallSettingResultDto resultMap = (CallSettingResultDto) apiMap.get("result");
-        //List<CallSettingDto> rs = (List<CallSettingDto>) resultMap.get("recordset");
-
-        log.info("\n\n============ [ Start - callSettingApi 전송메세지 목록 ] ============\n\n");
-        log.info(apiMap.toString());
-        log.info("\n\n============ [ End - callSettingApi 전송메세지 목록 ] ============\n\n");
 
         return apiMap;
     };

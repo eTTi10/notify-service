@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 
 
-@FeignClient(name = "mms-agent-rest-message", url = "${mms.setting.rest_url}")
+@FeignClient(name = "mms-agent-rest-message", url = "${yml.mms.setting.rest_url}")
 public interface CallSettingFeignClient {
     /**
      *
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET, value = "${mms.setting.rest_path}", produces = "application/json")
+    @RequestMapping(method = RequestMethod.GET, value = "${yml.mms.setting.rest_path}", produces = "application/json")
     CallSettingResultMapDto callSettingApi(@RequestParam Map<String, String> prm);
 
 
