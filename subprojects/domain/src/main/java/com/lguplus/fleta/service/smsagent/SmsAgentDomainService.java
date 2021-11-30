@@ -1,8 +1,12 @@
 package com.lguplus.fleta.service.smsagent;
 
+import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.smsagent.NotSendTimeException;
 import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -30,6 +35,8 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class SmsAgentDomainService {
+
+    private final CallSettingDomainClient apiClient;
 
     @Value("${check.https}")
     private String propertyCheckHttps;
@@ -50,74 +57,25 @@ public class SmsAgentDomainService {
     private final RetryModuleDomainService retryModuleDomainService;
 
     public SuccessResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) {
+        /*
+        ASIS 히스토리
+        SMSAgentController.sendSmsCode > selectSmsMsg > SmsAgentServiceImpl.callSettingApi > map = service.callSettingApi(log);
+        > 코드명기반의 map전체를 리턴해서 sms_cd와 매치되는것 한개를 취득함
+        > 전체를 모두 가져오는 방식이라서 tobe에서는 사용하지 않고 api에 직접적으로 sms_cd를 던져줘서 1건만 취득
+         */
+        CallSettingRequestDto prm = CallSettingRequestDto.builder().build();//callSettingApi파라메타
+        prm.setSaId("sms");//yml파일 사용할것
+        prm.setStbMac("sms");//yml파일 사용할것
+        prm.setCodeId("M011");//Dto에서 받을것 ex) M011 <--- sendSmsRequestDto에 sms_cd가 보이지 않음
+        prm.setSvcType("I");//yml에서 받을것
+        //setting API 호출하여 메세지 등록
+        CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
+        //메세지목록 조회결과 취득
+        List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+        if(callSettingApi.getResult().getTotalCount() > 0) {
+            CallSettingDto settingItem = settingApiList.get(0);//취득된 1건
+        }
 
-        log.debug("[sms] - [{}]]", sendSmsRequestDto.toString());
-
-//        ResultVO resultVO = new ResultVO();
-
-//        try {
-//            // Http통신 체크
-////            checkHttps(request);
-//
-//            Map<String, String> map = new HashMap<String, String>();
-//            map.put("s_ctn", s_ctn);
-//            map.put("r_ctn", r_ctn);
-//            map.put("msg", msg);
-//
-//            CommonUtil.checkValidation(map);
-//
-//            if ("1".equals(noSendUse)) {
-//                try {
-//
-//                    if (!noSendTime.isEmpty()) {
-//                        Calendar cal = Calendar.getInstance();
-//                        Calendar startCal = Calendar.getInstance();
-//                        Calendar endCal = Calendar.getInstance();
-//
-//                        String[] noSendAry = noSendTime.split("\\|");
-//
-//                        int startTime = Integer.parseInt(noSendAry[0]);
-//                        int endTime = Integer.parseInt(noSendAry[1]);
-//
-//                        startCal.set(Calendar.HOUR_OF_DAY, startTime);
-//                        startCal.set(Calendar.MINUTE, 0);
-//                        startCal.set(Calendar.SECOND, 0);
-//                        startCal.set(Calendar.MILLISECOND, 0);
-//
-//                        if (startTime >= endTime) {
-//                            endCal.add(Calendar.DAY_OF_MONTH, 1);
-//                        }
-//
-//                        endCal.set(Calendar.HOUR_OF_DAY, endTime);
-//                        endCal.set(Calendar.MINUTE, 0);
-//                        endCal.set(Calendar.SECOND, 0);
-//                        endCal.set(Calendar.MILLISECOND, 0);
-//
-//                        if (cal.after(startCal) && cal.before(endCal)) {
-//
-//                            throw new NotSendTimeException("전송 가능한 시간이 아님");
-//                        }
-//                    }
-//                } catch (Exception e) {
-//
-//                    throw new ServerSettingInfoException("서버 설정 정보 오류");
-//                }
-//            }
-//
-//            SuccessResponseDto = SmsProviderDomainService.sendSmsProvider(s_ctn, r_ctn, msg);
-//
-//
-//        } catch (CustomExceptionHandler e) {
-//            cLog.endLog(s_ctn, r_ctn, msg, e.getClass().getSimpleName(), e.getMessage());
-//            throw e;
-//        } catch (Exception e) {
-//            cLog.errorLog(s_ctn, r_ctn, msg, e.getClass().getSimpleName(), e.getMessage());
-//            throw new CustomExceptionHandler(e);
-//        }
-//
-//        //#########[LOG END]#########
-//        cLog.endLog(s_ctn, r_ctn, msg, resultVO.getFlag());
-////        return resultVO;
         return SuccessResponseDto.builder()
                 .build();
 
