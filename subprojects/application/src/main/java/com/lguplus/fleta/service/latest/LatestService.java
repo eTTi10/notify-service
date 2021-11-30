@@ -3,8 +3,6 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
-import io.reactivex.rxjava3.core.Single;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,7 +16,7 @@ public class LatestService {
 
     private final LatestDomainService latestDomainService;
 
-    public  GenericRecordsetResponseDto<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
+    public GenericRecordsetResponseDto<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
         List<LatestDto> result = latestDomainService.getLatestList(latestRequestDto);
 
         return GenericRecordsetResponseDto.<LatestDto>genericRecordsetResponseBuilder()
@@ -44,13 +42,10 @@ public class LatestService {
 
         if(maxCount < checkList.size())return "OVER";//최대값 초과
 
-        //개선된 for문으로 교체할것
-        for (int i = 0; i < checkList.size(); i++) {
-            String catId = checkList.get(i).getCatId();
-            if (catId.equals(latestRequestDto.getCatId())) {
-                return "DUPL";//중복
-            }
+        if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
+            return "DUPL";//중복
         }
+
         return "OK";
     }
 
