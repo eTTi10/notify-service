@@ -1,9 +1,12 @@
 package com.lguplus.fleta.service.smsagent;
 
+import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
 import com.lguplus.fleta.exception.smsagent.NotSendTimeException;
@@ -11,14 +14,13 @@ import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -54,8 +56,20 @@ public class SmsAgentDomainService {
     @Value("${sms.setting.timeout}")
     private String smsSettingTimeout;
 
+    @Value("${sms.setting.rest_sa_id}")
+    private String smsSettingRestSaId;
+
+    @Value("${sms.setting.rest_stb_mac}")
+    private String smsSettingRestStbMac;
+
+    @Value("${sms.setting.rest_code_id}")
+    private String smsSettingRestCodeId;
+
+    @Value("${sms.setting.rest_svc_type}")
+    private String smsSettingRestSvcType;
 
     private final RetryModuleDomainService retryModuleDomainService;
+    private final CallSettingDomainClient apiClient;
 
     public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) {
 
@@ -184,24 +198,23 @@ public class SmsAgentDomainService {
 
         Map<String, String> map = null;
         try{
-            map = callSettingApi();
+            map = callSettingApi(sms_cd);
         }
         catch(java.lang.Exception e){
 
         }
 
         if(null == map || map.size() == 0){
-            log.debug("[selectSmsMsg]Cannot found URL");
+            log.debug("[selectSmsMsg] Cannot found URL");
             return "";
         }
 
-        return map.get(sms_cd);
+        return map.get("sms_cd");
     }
 
 
     @Cacheable(value="smsMessageCacheVaue", key="smsMessageCache")
-    public Map<String,String> callSettingApi() {
-
+    public Map<String,String> callSettingApi(String sms_cd) {
 
         Map<String, String> map = new HashMap<String, String>();
 
@@ -215,99 +228,56 @@ public class SmsAgentDomainService {
                 return null;
             }
 
-            String response = callHttpClient(url, "application/json", method, "UTF-8", null, timeout, timeout);
-            log.debug("[callSettingApi][Call]["+response+"]");
+            //============ Start [setting API 호출 캐시등록] =============
 
-/*
-            JSONObject jObj = (JSONObject)JSONValue.parse(response);
-            JSONArray records = (JSONArray) ((JSONObject)jObj.get("result")).get("recordset");
-            for(int i=0;i < records.size(); i++){
-                JSONObject jo = (JSONObject)records.get(i);
-                String codeId = (String) jo.get("code_id");
-                String codeName = (String) jo.get("code_name");
-                map.put(codeId, codeName);
+            //setting API 호출관련 파라메타 셋팅
+            CallSettingRequestDto prm = CallSettingRequestDto.builder().build();//callSettingApi파라메타
+            prm.setSaId(smsSettingRestSaId);//ex) MMS:mms SMS:sms
+            prm.setStbMac(smsSettingRestStbMac);//ex) MMS:mms SMS:sms
+            prm.setCodeId(sms_cd);//ex) M011
+            prm.setSvcType(smsSettingRestSvcType);//ex) MMS:E SMS:I
+
+            //setting API 호출하여 메세지 등록
+            CallSettingResultMapDto callSettingApi = apiClient.callSettingApi(prm);
+
+            // Send a message
+            String logStr = "\n [Start] ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n";
+            logStr += "\n [ 출발지 : SmsAgentDomainService.sendMmsCode ] \n";
+            logStr += "\n [ 도착지 : CallSettingDomainFeignClient.callSettingApi ] \n";
+            logStr += "\n [ 요청주소 : "+smsSettingRestUrl+smsSettingRestPath+" ] \n";
+            logStr += "\n [ 매개변수 : " + prm.toString() + " ] \n";
+            logStr += "\n ------------- Start 매개변수 가이드 -------------\n";
+            logStr += "\n * sa_id:가입자정보 \n";
+            logStr += "\n * stb_mac:가입자 STB MAC Address \n";
+            logStr += "\n * ctn:발송대상 번호 \n";
+            logStr += "\n * replacement:치환문자 \n";
+            logStr += "\n * mms_cd:MMS 메시지 코드 \n";
+            logStr += "\n   - M001 : 모바일tv 앱 설치안내 문자 \n";
+            logStr += "\n   - M002 : 프로야구 앱 설치안내 문자 \n";
+            logStr += "\n   - M003 : 아이들나라 앱 설치안내 문자 \n";
+            logStr += "\n   - M004 : 골프 앱 설치안내 문자 \n";
+            logStr += "\n   - M005 : 아이돌Live 앱 설치안내 문자 \n";
+            logStr += "\n ------------- End 매개변수 가이드 -------------\n\n";
+            logStr += "\n [ 리턴결과 : " + callSettingApi.toString() + " ] \n";
+            logStr += "\n [End] ##############  ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n\n";
+            log.debug(logStr);
+            //메세지목록 조회결과 취득
+            List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+
+            //============ End [setting API 호출 캐시등록] =============
+
+            if(callSettingApi.getResult().getTotalCount() > 0) {
+
+                log.debug("sms_cd(메시지내용) {} " , settingApiList.get(0).getCodeName());
+                map.put("sms_cd", settingApiList.get(0).getCodeName());
             }
-*/
+
         } catch (Exception e) {
             log.debug("[callSettingApi][Call]["+e.getClass().getName()+"]"+e.getMessage());
             //9999
             throw new RuntimeException("기타 오류");
         }
         return map;
-    }
-
-
-    /**
-     * HttpClient를 이용하여 웹주소를 호출한다.
-     * @param url	예)http://123.123.123.2:80
-     * @param acceptHeader	예)application/xml
-     * @param Method	예)POST
-     * @param encoding	예)UTF-8
-     * @param body	POST,PUT일 경우 BODY영역을 이용해서 데이터를 전달 할 수 있다. 예)<aaaa><bbb>BODY</bbb></aaa>
-     * @param conn_timeout	예)2
-     * @param socket_timeout	예)2
-     * @return
-     * @throws Exception
-     */
-
-    public static String callHttpClient(String url, String acceptHeader, String Method, String encoding, String body, int conn_timeout, int socket_timeout) throws Exception{
-
-
-        String responseBody = "";
-/*
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(socket_timeout)
-                .setConnectTimeout(conn_timeout)
-                .build();
-
-        try {
-            RequestBuilder builder = null;
-            if("POST".equals(Method.toUpperCase()))
-                builder = RequestBuilder.post().setUri(url).setEntity(new StringEntity(body, encoding));
-            else if("PUT".equals(Method.toUpperCase()))
-                builder = RequestBuilder.put().setUri(url).setEntity(new StringEntity(body, encoding));
-            else if("DELETE".equals(Method.toUpperCase()))
-                builder = RequestBuilder.delete().setUri(url);
-            else
-                builder = RequestBuilder.get().setUri(url);
-
-            builder.setHeader(HttpHeaders.ACCEPT, acceptHeader)
-                    .setHeader(HttpHeaders.ACCEPT_CHARSET, encoding)
-                    .setHeader(HttpHeaders.CONTENT_TYPE, acceptHeader)
-                    .setHeader(HttpHeaders.CONTENT_ENCODING, encoding)
-                    .setConfig(requestConfig);
-
-            HttpUriRequest request = builder.build();
-
-            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
-                @Override
-                public String handleResponse(
-                        final HttpResponse response) throws ClientProtocolException, IOException {
-                    int status = response.getStatusLine().getStatusCode();
-                    if (status >= 200 && status < 300) {
-                        HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity) : null;
-                    } else {
-                        throw new ClientProtocolException("Unexpected response status: " + status);
-                    }
-                }
-
-            };
-
-            responseBody = httpclient.execute(request, responseHandler);
-        } catch (ClientProtocolException e) {
-            throw e;
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            try {
-                if(null!=httpclient) httpclient.close();
-            } catch (IOException e) {}
-        }
-*/
-
-        return responseBody;
     }
 
 }
