@@ -50,7 +50,7 @@ public class MmsAgentDomainService {
         prm.setSvcType((String)setting.get("rest_svc_type"));//ex) MMS:E SMS:I
 
         //setting API 호출하여 메세지 등록
-        CallSettingResultMapDto callSettingApi = apiClient.callSettingApi(prm);
+        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
 
         // Send a message
         String logStr = "\n [Start] ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n";
@@ -159,14 +159,6 @@ public class MmsAgentDomainService {
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
 
-        // Send a message
-        /*
-        1. submit에 메세지목록조회해서 가져온 메세지(mmsDto.setMmsMsg)를 왜 전달하지 않는가?
-        2. replacement는 언제 바꿔주는가?
-        3. conn까지 도달했다면 추가로 작업해야할 부분이 있는지?
-        4. 막혀있는 서버를 대신해서 테스트가능한 ip가 있는지?
-        5. 테스트가능 ip가 없다면 최종 생성된 xml파라메타로 유효성 확인이 가능한가?
-        */
         String logStr = "\n [Start] MM7 ############## MMS처리모듈 : MMSCBase implements MMSC ##############\n";
         logStr += "\n [ mmsc.submit(submitReq)에서 (mmsDto.mmsMsg)실제 메세지내용을 사용한 흔적을 찾을수 없음 \n";
         logStr += "\n [ MmsRequestDto mmsDto : " + mmsDto.toString() + "] \n";
@@ -175,7 +167,7 @@ public class MmsAgentDomainService {
         logStr += "\n 1) [ public MM7Response submit(SubmitReq submitReq) throws MM7Error ] XML형태의 파라메타 SubmitReq로 함수호출 \n";
         logStr += "\n    MM7Response rsp = post(submitReq) 클래스 내부의 post함수 호출 \n";
         logStr += "\n 2) [ private MM7Response post(MM7Request request) throws MM7Error] XML형태의 submitReq파라메타를 request로 넘겨주고 post 함수호출 \n";
-        logStr += "\n    이후 프로세스 점검중... \n";
+        logStr += "\n    이후 프로세스 점검중...MM7문서와 전문비교 확인중... \n";
         logStr += "\n [End] MM7 ############## MMS처리모듈 : MMSCBase implements MMSC ##############\n";
         log.info(logStr);
         log.info("\n"+submitReq.toString()+"\n");
