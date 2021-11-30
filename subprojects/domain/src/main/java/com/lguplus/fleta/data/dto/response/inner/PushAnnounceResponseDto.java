@@ -17,15 +17,23 @@ import java.util.Map;
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
+//@Builder
 public class PushAnnounceResponseDto {
 
     /** 응답코드 */
     @JsonProperty("response")
     private ResponseAnnouncement responseAnnouncement;
 
+    public void setErrorCode(String code, String msg) {
+        this.responseAnnouncement = new ResponseAnnouncement();
+        this.responseAnnouncement.setStatusCode(code);
+        this.responseAnnouncement.setStatusMsg(msg);
+    }
+
     @Getter
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @NoArgsConstructor
+    //@Builder
     public static class ResponseAnnouncement {
         @JsonProperty("msg_id")
         private String msgId;
@@ -38,6 +46,14 @@ public class PushAnnounceResponseDto {
 
         @JsonProperty("status_msg")
         private String statusMsg;
+
+        public void setStatusCode(String statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public void setStatusMsg(String msg) {
+            this.statusMsg = msg;
+        }
     }
 
 }

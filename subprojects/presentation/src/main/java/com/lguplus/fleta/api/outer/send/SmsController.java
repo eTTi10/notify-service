@@ -1,12 +1,11 @@
 package com.lguplus.fleta.api.outer.send;
 
-import com.lguplus.fleta.data.dto.request.SendSMSCodeRequestDto;
+import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.vo.SendSMSCodeVo;
-import com.lguplus.fleta.service.send.SMSService;
+import com.lguplus.fleta.data.vo.SendSmsCodeVo;
+import com.lguplus.fleta.service.send.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
@@ -16,16 +15,16 @@ import javax.validation.Valid;
 @RestController
 public class SmsController {
 
-    private final SMSService smsService;
+    private final SmsService smsService;
 
     @PostMapping("/mims/sendSms")
-    public SuccessResponseDto setPayment(@Valid SendSMSCodeVo request) {
+    public SuccessResponseDto sendSmsCode(@Valid SendSmsCodeVo request) {
 
 //        log.debug("sendTime - {}", sendTime);
 
-        SendSMSCodeRequestDto requestDto = request.convert();
+        SendSmsCodeRequestDto requestDto = request.convert();
 
-        return smsService.sendSMSCode(requestDto);
+        return smsService.sendSmsCode(requestDto);
     }
 
 }

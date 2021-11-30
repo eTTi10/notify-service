@@ -12,10 +12,6 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +24,6 @@ public class PushAnnounceDomainService {
 
     private final PushConfig pushConfig;
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
-    //private final ObjectMapper objectMapper = new ObjectMapper();
 
     private AtomicInteger _transactionIDNum = new AtomicInteger(0);
 
@@ -108,6 +103,8 @@ public class PushAnnounceDomainService {
                     throw new ExceptionOccursException();
                 case "503":
                     throw new ServiceUnavailableException();
+                case "5102":
+                    throw new SocketTimeException(); //RuntimeException("Socket Timeout"); //5102
                 default:
                     throw new RuntimeException("기타 오류"); //9999
             }

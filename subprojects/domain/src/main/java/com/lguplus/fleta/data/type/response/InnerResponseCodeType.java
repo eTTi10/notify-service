@@ -22,7 +22,11 @@ public enum InnerResponseCodeType {
     FORBIDDEN,
     NOT_FOUND,
     METHOD_NOT_ALLOWED,
-    INTERNAL_SERVER_ERROR;
+    INTERNAL_SERVER_ERROR,
+    OPENAPI_PUSH_SERVER_ERROR,
+    PUSH_SERVER_ERROR,
+    SMS_SERVER_ERROR,
+    MMS_SERVER_ERROR;
 
     private String code;
     private String message;

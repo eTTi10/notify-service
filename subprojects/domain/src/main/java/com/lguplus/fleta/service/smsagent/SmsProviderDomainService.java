@@ -1,14 +1,18 @@
 package com.lguplus.fleta.service.smsagent;
 
+import com.lguplus.fleta.client.SmsGatewayClient;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,406 +28,127 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class SmsProviderDomainService {
 
-    private static final int BIND = 0;
-    private static final int BIND_ACK = 1;
-    private static final int DELIVER = 2;
-    private static final int DELIVER_ACK = 3;
-    private static final int REPORT = 4;
-    private static final int REPORT_ACK = 5;
-    private static final int LINK_SEND  = 6;
-    private static final int LINK_RECV = 7;
+/*
+    @Value("${agent.ip}")
+    private String agentIp;
 
-    private static final int TIMER_RECONNECT = 0;
-    private static final int TIMER_LINK_CHECK = 1;
-    private static final int TIMER_LINK_RESULT = 2;
-    private static final int TIMER_TIME_OUT = 3;
+    @Value("${agent.port}")
+    private String agentPort;
 
-    private static final int TIME_OUT = 5000;				        // 타임아웃(5초)
-    private static final int RECONNECT_TERM = 1000 * 60 * 3;        // 재접속 시간(3분)
-    private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
-    private static final int LINK_CHECK_TERM = 1000 * 50;           // 링크 체크 주기(50초)
-    private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
+    @Value("${agent.id}")
+    private String agentId;
 
-    private boolean isLinked = false;
-    private boolean isBind = false;
 
-    private String mIpAddress;
-    private String mResult = "";
-    private String mID;
-    private String mPassword;
-    private int mPort;
+    @Value("${agent.password}")
+    private String agentPassword;
+*/
+    public static int mSendTerm;
+    public static LinkedList<SmsGatewayClient> sGatewayQueue = new LinkedList<SmsGatewayClient>();
 
-    private Date mLastSendDate;
+    @PostConstruct
+    private void initGateway() {
 
-    private InputStream mInputStream;
-    private OutputStream mOutputStream;
+        //        String index = StringUtils.defaultIfEmpty(CommonUtil.getSystemProperty("server.index"), "1");
 
-    private Log mFileLog;
-    private Log mStatusLog;
+//        String dir = System.getProperty("user.home");
+        String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
+        log.debug("System.getProperty(server.index):" + index);
 
-    private Socket mSoket;
+//        String[] ipList = Properties.getProperty("agent.ip" + index).split("\\|");
+//        String[] portList = Properties.getProperty("agent.port" + index).split("\\|");
+//        String[] idList = Properties.getProperty("agent.id" + index).split("\\|");
+//        String[] pwList = Properties.getProperty("agent.password" + index).split("\\|");
+//
+//        int length = idList.length;
+//
+//        for (int i = 0; i < length; i++) {
+//            SmsGatewayClient smsGateway = new SmsGatewayClient(ipList[i], portList[i], idList[i], pwList[i]) {
+//            };
+//            sGatewayQueue.offer(smsGateway);
+//        }
 
-    private Map<Integer, Timer> mTimerMap = new HashMap<Integer, Timer>();
+//        mSendTerm = calculateTerm();
+    }
+
+    public static SuccessResponseDto send(String s_ctn, String r_ctn, String msg) throws Exception {
 
 /*
-    public SMSGateway(String ip, String port, String id, String password) {
-        mTimerMap.put(TIMER_RECONNECT, new Timer());
-        mTimerMap.put(TIMER_LINK_CHECK, new Timer());
-        mTimerMap.put(TIMER_LINK_RESULT, new Timer());
-        mTimerMap.put(TIMER_TIME_OUT, new Timer());
-
-        String index = StringUtils.defaultIfEmpty(CommonUtil.getSystemProperty("server.index"), "1");
-        mFileLog = LogFactory.getLog("SmsGateway");
-        mStatusLog = LogFactory.getLog("SmsStatus");
-        mStatusLog.info("SmsGateway" + index);
-        mIpAddress = ip;
-        mPort = Integer.parseInt(port);
-        mID = id;
-        mPassword = password;
-        mLastSendDate = new Date();
-
-        mStatusLog.info("ip:" + ip);
-        mStatusLog.info("port:" + port);
-        mStatusLog.info("id:" + id);
-        mStatusLog.info("password:" + password);
-
-        connectGateway();
-    }
-
-    public boolean isBind() {
-        return isBind;
-    }
-
-    public Date getLastSendDate() {
-        return mLastSendDate;
-    }
-
-    public int getPort() {
-        return mPort;
-    }
-
-    public void clearResult() {
-        mResult = "";
-    }
-
-    private void connectGateway() {
-        mStatusLog.info("Connect Try[" + mPort + "]");
-
-        mTimerMap.get(TIMER_RECONNECT).cancel();
-        mTimerMap.get(TIMER_LINK_CHECK).cancel();
-        mTimerMap.get(TIMER_LINK_RESULT).cancel();
-        mTimerMap.get(TIMER_TIME_OUT).cancel();
-
-        InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
-        try {
-            if (null != mSoket) {
-                mSoket.close();
-                mSoket = null;
-            }
-
-            mSoket = new Socket();
-
-            mSoket.connect(socketAddress, TIME_OUT);
-
-            mInputStream = mSoket.getInputStream();
-            mOutputStream = mSoket.getOutputStream();
-
-            isBind = true;
-
-            mStatusLog.info("Connect Success[" + mPort + "]");
-            mStatusLog.info("Socket Open[" + mPort + "]");
-
-            Thread thread = new Thread(new SmsGatewayTask());
-            thread.start();
-
-            bindGateway();
-        } catch (IOException e) {
-            mStatusLog.error("connectGateway Error");
-            reConnectGateway();
-        }
-    }
-
-    private void reConnectGateway() {
-        mStatusLog.info("ReConnect Try[" + mPort + "]");
-
-        isBind = false;
-
-        mTimerMap.get(TIMER_RECONNECT).cancel();
-        mTimerMap.put(TIMER_RECONNECT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                connectGateway();
-            }
-        };
-
-        mTimerMap.get(TIMER_RECONNECT).schedule(timerTask, RECONNECT_TERM);
-    }
-
-    private void bindGateway() throws IOException {
-        byte[] body = new byte[32];
-        byte[] idBytes = mID.getBytes();
-        byte[] pwdBytes = mPassword.getBytes();
-
-        System.arraycopy(idBytes, 0, body, 0, idBytes.length);
-        System.arraycopy(pwdBytes, 0, body, 16, pwdBytes.length);
-
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(BIND);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
-
-        mOutputStream.write(header);
-        mOutputStream.write(body);
-
-        mStatusLog.info("Bind Try[" + mPort + "]");
-    }
-
-    public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
-        byte[] body = new byte[264];
-
-        byte[] tidBytes = intToByte(4098);
-        byte[] orgAddrBytes = orgAddr.getBytes();
-        byte[] dstAddrBytes = dstAddr.getBytes();
-        byte[] callBackBytes = callBack.getBytes();
-        byte[] messageBytes = message.getBytes("KSC5601");
-        byte[] snBytes = intToByte(sn);
-
-        System.arraycopy(tidBytes, 0, body, 0, tidBytes.length);
-        System.arraycopy(orgAddrBytes, 0, body, 4, orgAddrBytes.length);
-        System.arraycopy(dstAddrBytes, 0, body, 36, dstAddrBytes.length);
-        System.arraycopy(callBackBytes, 0, body, 68, callBackBytes.length);
-        System.arraycopy(messageBytes, 0, body, 100, messageBytes.length);
-        System.arraycopy(snBytes, 0, body, 260, snBytes.length);
-
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(DELIVER);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
-
-        mOutputStream.write(header);
-        mOutputStream.write(body);
-
-        mLastSendDate = new Date();
-
-        mTimerMap.get(TIMER_TIME_OUT).cancel();
-        mTimerMap.put(TIMER_TIME_OUT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                if (mResult.isEmpty()) {
-                    mResult = Properties.getProperty("flag.system_error");
-                }
-            }
-        };
-
-        mTimerMap.get(TIMER_TIME_OUT).schedule(timerTask, TIMEOUT_TERM);
-    }
-
-    private void checkLink() throws IOException {
-        mStatusLog.info("checkLink[" + mPort + "]");
-
-        byte[] header = new byte[8];
-
-        System.arraycopy(intToByte(LINK_SEND), 0, header, 0, 4);
-        System.arraycopy(intToByte(0), 0, header, 4, 4);
-
-        mOutputStream.write(header);
-
-        mTimerMap.get(TIMER_LINK_RESULT).cancel();
-        mTimerMap.put(TIMER_LINK_RESULT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                if (isLinked) {
-                    isLinked = false;
-                } else {
-                    mStatusLog.info("Link Fail[" + mPort + "]");
-                    isBind = false;
-                    connectGateway();
-                }
-            }
-        };
-
-        mTimerMap.get(TIMER_LINK_RESULT).schedule(timerTask, LINK_ERROR_TERM);
-    }
-
-    private void sendReport() throws IOException {
-        byte[] body = intToByte(0);
-
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(REPORT_ACK);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
-
-        mOutputStream.write(header);
-        mOutputStream.write(body);
-    }
-
-    private byte[] intToByte(int value) {
-        ByteBuffer buff = ByteBuffer.allocate(Integer.SIZE / 8);
-        buff.putInt(value);
-        buff.order(ByteOrder.BIG_ENDIAN);
-
-        return buff.array();
-    }
-
-    private int readBufferToInt(int bufferSize) throws IOException {
-        byte[] buffer = new byte[bufferSize];
-
-        int length = mInputStream.read(buffer);
-
-        if (0 < length) {
-            ByteBuffer rHeader = ByteBuffer.wrap(buffer, 0, bufferSize);
-            return rHeader.getInt();
-        } else {
-            return -1;
-        }
-    }
-
-    private String readBufferToString(int bufferSize) throws IOException {
-        byte[] buffer = new byte[bufferSize];
-        int length = mInputStream.read(buffer);
-
-        if (0 < length) {
-            return new String(buffer, 0, bufferSize).trim();
-        } else {
-            return "";
-        }
-    }
-
-    @Async
-    public Future<ResultVO> getResult() {
         ResultVO resultVO = new ResultVO();
+        Future<ResultVO> asyncResult = null;
 
-        while (mResult.isEmpty()) {
+        CustomExceptionHandler exception = new CustomExceptionHandler();
+
+        if (!r_ctn.startsWith("01") || 7 >= r_ctn.length()) {
+            exception.setFlag(Properties.getProperty("flag.phone_number_error"));
+            exception.setMessage(Properties.getProperty("message.phone_number_error"));
+            throw exception;
+        }
+
+        if (80 < msg.getBytes("KSC5601").length) {
+            exception.setFlag(Properties.getProperty("flag.msg_type_error"));
+            exception.setMessage(Properties.getProperty("message.msg_type_error"));
+            throw exception;
+        }
+
+        if (SmsProvider.sGatewayQueue.size() > 0) {
+            SMSGateway smsGateway = SmsProvider.sGatewayQueue.poll();
+            smsGateway.clearResult();
+            long prevSendDate = smsGateway.getLastSendDate().getTime();
+            long currentDate = System.currentTimeMillis();
+
+            if (currentDate - prevSendDate <= SmsProvider.mSendTerm) {
+                exception.setFlag(Properties.getProperty("flag.system_busy"));
+                exception.setMessage(Properties.getProperty("message.system_busy"));
+                SmsProvider.sGatewayQueue.offer(smsGateway);
+                throw exception;
+            }
+
             try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignored) {
-                mStatusLog.error("getResult Error");
-            }
-
-            if (Properties.getProperty("flag.success").equals(mResult)) {
-                resultVO.setFlag(mResult);
-                resultVO.setMessage(Properties.getProperty("message.success"));
-            } else if (Properties.getProperty("flag.system_error").equals(mResult)) {
-                resultVO.setFlag(mResult);
-                resultVO.setMessage(Properties.getProperty("message.system_error"));
-            }
-        }
-
-        clearResult();
-        mTimerMap.get(TIMER_TIME_OUT).cancel();
-        return new AsyncResult<ResultVO>(resultVO);
-    }
-
-    private void readHeader() throws IOException {
-        int type = readBufferToInt(4);
-        int len = readBufferToInt(4);
-        int result;
-
-        String orgAddr;
-        String dstAddr;
-        int sn;
-
-        switch (type) {
-            case BIND_ACK:
-                result = readBufferToInt(4);
-                String prefix = readBufferToString(16);
-
-                isBind = 0 == result;
-
-                if (isBind) {
-                    mTimerMap.get(TIMER_LINK_CHECK).cancel();
-                    mTimerMap.put(TIMER_LINK_CHECK, new Timer());
-                    TimerTask timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            try {
-                                checkLink();
-                            } catch (IOException ignored) {
-                                mStatusLog.error("BIND_ACK Error");
-                            }
-                        }
-                    };
-
-                    mTimerMap.get(TIMER_LINK_CHECK).schedule(timerTask, LINK_CHECK_TERM, LINK_CHECK_TERM);
-
-                    mStatusLog.info("Bind Success[" + mPort + "]");
+                if (smsGateway.isBind()) {
+                    smsGateway.sendMessage(s_ctn, r_ctn, s_ctn, msg, smsGateway.getPort());
+                    asyncResult = smsGateway.getResult();
                 } else {
-                    mStatusLog.info("Bind Fail[" + mPort + "]");
-                    reConnectGateway();
+                    exception.setFlag(Properties.getProperty("flag.system_error"));
+                    exception.setMessage(Properties.getProperty("message.system_error"));
+                    SmsProvider.sGatewayQueue.offer(smsGateway);
+                    throw exception;
                 }
-                break;
-            case DELIVER_ACK:
-                result = readBufferToInt(4);
-                orgAddr = readBufferToString(32);
-                dstAddr = readBufferToString(32);
-                sn = readBufferToInt(4);
+            } catch (IOException e) {
+                exception.setFlag(Properties.getProperty("flag.etc"));
+                exception.setMessage(Properties.getProperty("message.etc"));
+                SmsProvider.sGatewayQueue.offer(smsGateway);
+                throw exception;
+            }
 
-                switch (result) {
-                    case 0:
-                        mResult = Properties.getProperty("flag.success");
-                        break;
-                    case 1:
-                        mResult = Properties.getProperty("flag.system_error");
-                        break;
-                    default:
-                        break;
-                }
-
-                break;
-            case REPORT:
-                result = readBufferToInt(4);
-                orgAddr = readBufferToString(32);
-                dstAddr = readBufferToString(32);
-                sn = readBufferToInt(4);
-                String time = readBufferToString(20);
-                String code = readBufferToString(12);
-
-                StringBuilder resultBuilder = new StringBuilder();
-
-                resultBuilder.append(result).append("|");
-                resultBuilder.append(mPort).append("|");
-                resultBuilder.append(orgAddr).append("|");
-                resultBuilder.append(dstAddr).append("|");
-                resultBuilder.append(sn).append("|");
-                resultBuilder.append(code).append("|");
-                resultBuilder.append(time);
-
-                mFileLog.info(resultBuilder.toString());
-
-                sendReport();
-                break;
-            case LINK_RECV:
-                mStatusLog.info("Link Success[" + mPort + "]");
-                isLinked = true;
-                break;
-            default:
-                break;
+            SmsProvider.sGatewayQueue.offer(smsGateway);
+        } else {
+            resultVO.setFlag(Properties.getProperty("flag.system_busy"));
+            resultVO.setMessage(Properties.getProperty("message.system_busy"));
         }
 
+        if (null != asyncResult) return asyncResult.get();
+*/
+
+//        return resultVO;
+        return SuccessResponseDto.builder().build();
     }
 
-    private class SmsGatewayTask implements Runnable {
-        @Override
-        public void run() {
-            while (isBind) {
-                try {
-                    readHeader();
-                } catch (IOException ignored) {
-                    mStatusLog.error("readHeader Error");
-                    reConnectGateway();
-                }
-            }
+/*
+    private int calculateTerm() {
+        int result = 1000;
+
+        try {
+            BigDecimal smsTPS = new BigDecimal(Properties.getProperty("agent.tps"));
+
+            // (1 / smsTPS) * 1000 + 50
+            result = new BigDecimal(1).divide(smsTPS, 3, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(1000)).add(new BigDecimal(50)).intValue();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        return result;
     }
 */
+
 
 }

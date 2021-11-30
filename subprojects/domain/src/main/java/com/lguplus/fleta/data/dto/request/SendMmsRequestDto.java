@@ -5,15 +5,16 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class SendSMSCodeRequestDto extends CommonRequestDto {
+public class SendMmsRequestDto extends CommonRequestDto{
 
     private String saId;
 
     private String stbMac;
 
-    private String smsCd;
+    private String mmsCd;
 
     private String ctn;
 
     private String replacement;
+
 }
