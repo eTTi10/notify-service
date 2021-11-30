@@ -66,13 +66,18 @@ public class SmsProviderDomainService {
 //        String[] idList = Properties.getProperty("agent.id" + index).split("\\|");
 //        String[] pwList = Properties.getProperty("agent.password" + index).split("\\|");
 
-//        int length = idList.length;
+        String[] ipList = agentIp1.split("\\|");
+        String[] portList = agentPort1.split("\\|");
+        String[] idList = agentId1.split("\\|");
+        String[] pwList = agentPassword1.split("\\|");
 
-//        for (int i = 0; i < length; i++) {
-//            SmsGatewayClient smsGateway = new SmsGatewayClient(ipList[i], portList[i], idList[i], pwList[i]) {
-//            };
-//            sGatewayQueue.offer(smsGateway);
-//        }
+        int length = idList.length;
+
+        for (int i = 0; i < length; i++) {
+            SmsGatewayDomainService smsGateway = new SmsGatewayDomainService(ipList[i], portList[i], idList[i], pwList[i]) {
+            };
+            sGatewayQueue.offer(smsGateway);
+        }
 
         mSendTerm = calculateTerm();
     }
@@ -81,7 +86,6 @@ public class SmsProviderDomainService {
 
         SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
         Future<SmsGatewayResponseDto> asyncResult = null;
-
 
         if (!r_ctn.startsWith("01") || 7 >= r_ctn.length()) {
 
@@ -96,7 +100,9 @@ public class SmsProviderDomainService {
         }
 
         if (SmsProviderDomainService.sGatewayQueue.size() > 0) {
+
             SmsGatewayDomainService smsGateway = SmsProviderDomainService.sGatewayQueue.poll();
+
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
@@ -109,12 +115,20 @@ public class SmsProviderDomainService {
             }
 
             try {
+                log.debug("smsGateway try");
+
+                log.debug("smsGateway.isBind() {}", smsGateway.isBind());
+
                 if (smsGateway.isBind()) {
+
+                    log.debug("smsGateway.isBind()");
 
                     smsGateway.sendMessage(s_ctn, r_ctn, s_ctn, msg, smsGateway.getPort());
                     asyncResult = smsGateway.getResult();
 
                 } else {
+
+                    log.debug("smsGateway.isBind() else");
 
                     SmsProviderDomainService.sGatewayQueue.offer(smsGateway);
                     //1500

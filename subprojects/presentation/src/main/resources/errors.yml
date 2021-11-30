@@ -69,6 +69,8 @@ error:
               ExceedMaxCouponUsageException: "1409"
               CouponNotFoundException: "1410"
             smsagent:
+              SocketException: "1102"
+              SocketTimeOutException: "1103"
               SystemErrorException: "1500"
               MsgTypeErrorException: "1501"
               PhoneNumberErrorException: "1502"

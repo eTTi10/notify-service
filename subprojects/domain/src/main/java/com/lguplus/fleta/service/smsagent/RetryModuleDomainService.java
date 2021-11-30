@@ -4,6 +4,8 @@ import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import com.lguplus.fleta.exception.push.SocketException;
+import com.lguplus.fleta.exception.smsagent.SocketTimeOutException;
 import com.lguplus.fleta.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.net.SocketTimeoutException;
 
 @Slf4j
 @Component
@@ -41,13 +45,6 @@ public class RetryModuleDomainService {
     private int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
     private int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
 
-    public void clear(){
-        callCount = 0;
-        systemEr = 0;
-        busyEr = 0;
-    }
-
-
     public SmsGatewayResponseDto smsSendCode(SmsAgentRequestDto smsAgentRequestDto, boolean encryptYn) {
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
@@ -63,16 +60,41 @@ public class RetryModuleDomainService {
             smsGatewayResponseDto = smsProviderDomainService.send(smsSenderNo
                     , encryptYn ? AesUtil.decryptAES(smsAgentRequestDto.getSmsId()) : smsAgentRequestDto.getSmsId(), sendMsg);
 
-//        } catch (CustomExceptionHandler e) {
-//
-//            log.info("[smsSend][Ex]"+ e.getFlag() + ":" + e.getMessage());
-//
-//
+			//###############TEST
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag("200")
+                    .message("성공")
+                    .build();
+            //###############TEST
+
+        } catch (SocketException ex) {
+
+            log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
+
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag("200")
+                    .message("소켓 에러")
+                    .build();
+
+        } catch (SocketTimeoutException ex) {
+
+            log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
+
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag("200")
+                    .message("소켓 에러")
+                    .build();
+
         } catch (Exception e) {
 
             log.info("[smsSend][Ex]"+ e.getClass().getName() + ":" + e.getMessage());
             //9999
-            throw new RuntimeException("기타 오류");
+
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag("200")
+                    .message("기타 오류")
+                    .build();
+
         }
 
         //retry여부를 판단한다.
@@ -85,9 +107,10 @@ public class RetryModuleDomainService {
             checkRetry = 2;
             busyEr++;
         }
-//        log.info("[smsSend]["+smsVo.getPtDay()+"]["+smsVo.getSmsCd()+"]["+smsVo.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+resultVO.getFlag()+"]["+resultVO.getMessage()+"]");
+
+//        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
+
         if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
-//            return resultVO;
             return smsGatewayResponseDto;
         }else{
             try {
@@ -101,13 +124,20 @@ public class RetryModuleDomainService {
 
     }
 
+
+    private void clear(){
+        callCount = 0;
+        systemEr = 0;
+        busyEr = 0;
+    }
+
     /**
      * 지정된 문자열로 변경하여 리턴한다.
      * @param msg
      * @param replacement
      * @return
      */
-    public static String convertMsg(String msg, String replacement){
+    private static String convertMsg(String msg, String replacement){
 
         if(StringUtils.isEmpty(replacement)) return msg;
         else{

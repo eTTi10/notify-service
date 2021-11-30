@@ -186,6 +186,8 @@ public class SmsGatewayDomainService {
     }
 
     public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
+
+
         byte[] body = new byte[264];
 
         byte[] tidBytes = intToByte(4098);
@@ -304,6 +306,7 @@ public class SmsGatewayDomainService {
 
     @Async
     public Future<SmsGatewayResponseDto> getResult() {
+
         SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
 
         while (mResult.isEmpty()) {
@@ -313,13 +316,17 @@ public class SmsGatewayDomainService {
                 mStatusLog.error("getResult Error");
             }
 
-//            if ("200".equals(mResult)) {
-//                resultVO.(mResult);
-//                resultVO.setMessage("성공");
-//            } else if (flagSystemError.equals(mResult)) {
-//                resultVO.setFlag(mResult);
-//                resultVO.setMessage(flagSystemError);
-//            }
+            if ("200".equals(mResult)) {
+                SmsGatewayResponseDto.builder()
+                        .flag(mResult)
+                        .message("성공")
+                        .build();
+            } else if ("1500".equals(mResult)) {
+                SmsGatewayResponseDto.builder()
+                        .flag(mResult)
+                        .message(messageSystemError)
+                        .build();
+            }
         }
 
         clearResult();

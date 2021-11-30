@@ -148,7 +148,7 @@ public class SmsAgentDomainService {
 
         SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
 
-        try {
+//        try {
 
             String msg = selectSmsMsg(sms_cd);
             if(StringUtils.isEmpty(msg)){
@@ -164,21 +164,16 @@ public class SmsAgentDomainService {
                     .smsMsg(msg)
                     .build();
 
-            smsGatewayResponseDto = sendSmsCode(smsAgentRequestDto, false);
+            smsGatewayResponseDto = retryModuleDomainService.smsSendCode(smsAgentRequestDto, false);
 
-//        } catch (CustomExceptionHandler e) {
-//            log.info("[smsCode] {} {} {} {}", sendSMSCodeRequestDto.toString(), e.getClass().getSimpleName(), e.getCause(), e.getMessage());
-//            throw e;
-        } catch (Exception e) {
-//            cLog.errorLog("[smsCode]",sa_id, stb_mac, sms_cd, replacement, e.getClass().getSimpleName(), e.getMessage());
-//            throw new CustomExceptionHandler(e);
+//        } catch (Exception e) {
 
-            log.info("[smsCode] {} {} {} {}", sendSMSCodeRequestDto.toString(), e.getClass().getSimpleName(), e.getCause(), e.getMessage());
+//            log.info("[smsCode Exception] {} {} {} {}", e.getClass().getSimpleName(), e.getCause(), e.getMessage());
 
             //9999
-            throw new RuntimeException("기타 오류");
+//            throw new RuntimeException("기타 오류");
 
-        }
+//        }
 
         //#########[LOG END]#########
 //        cLog.endLog("[smsCode]",sa_id, stb_mac, sms_cd, replacement, resultVO.getFlag());
@@ -187,14 +182,7 @@ public class SmsAgentDomainService {
         return smsGatewayResponseDto;
     }
 
-    public SmsGatewayResponseDto sendSmsCode(SmsAgentRequestDto smsAgentRequestDto, boolean encryptYn) {
-
-        return retryModuleDomainService.smsSendCode(smsAgentRequestDto, encryptYn);
-
-    }
-
-
-    public String selectSmsMsg(String sms_cd) {
+    private String selectSmsMsg(String sms_cd) {
 
         Map<String, String> map = null;
         try{
@@ -213,8 +201,8 @@ public class SmsAgentDomainService {
     }
 
 
-    @Cacheable(value="smsMessageCacheVaue", key="smsMessageCache")
-    public Map<String,String> callSettingApi(String sms_cd) {
+//    @Cacheable(value="smsMessageCacheValue", key="smsMessageCache")
+    private Map<String,String> callSettingApi(String sms_cd) {
 
         Map<String, String> map = new HashMap<String, String>();
 
@@ -238,7 +226,7 @@ public class SmsAgentDomainService {
             prm.setSvcType(smsSettingRestSvcType);//ex) MMS:E SMS:I
 
             //setting API 호출하여 메세지 등록
-            CallSettingResultMapDto callSettingApi = apiClient.callSettingApi(prm);
+            CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
 
             // Send a message
             String logStr = "\n [Start] ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n";
@@ -264,7 +252,9 @@ public class SmsAgentDomainService {
             //메세지목록 조회결과 취득
             List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
 
-            //============ End [setting API 호출 캐시등록] =============
+            //============ End [setting API 호CallSettingResultMapDto출 캐시등록] =============
+
+            log.debug("sms_cd(메시지내용) {} " , settingApiList.get(0).getCodeName());
 
             if(callSettingApi.getResult().getTotalCount() > 0) {
 
