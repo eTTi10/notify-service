@@ -15,31 +15,21 @@ import java.io.Serializable;
 @SuperBuilder
 public class LatestRequestDto implements PlainTextibleDto, Serializable {
 
-    private static final long serialVersionUID = 1L;//무엇????
+    private String saId; //가입자 번호
 
-    @JsonProperty("sa_id")  //가입자 번호
-    private String saId;
+    private String mac; //가입자 맥주소
 
-    @JsonProperty("mac") //가입자 맥주소
-    private String mac;
+    private String ctn; //전화번호 or 단말 맥 어드레스
 
-    @JsonProperty("ctn") //전화번호 or 단말 맥 어드레스
-    private String ctn;
+    private String catId; //카테고리 아이디
 
-    @JsonProperty("cat_id") //카테고리 아이디
-    private String catId;
+    private String regId; //Push 할 Reg ID
 
-    @JsonProperty("reg_id") //Push 할 Reg ID
-    private String regId;
+    private String catName; //카테고리명
 
-    @JsonProperty("cat_name") //카테고리명
-    private String catName;
+    private String rDate; //등록일시
 
-    @JsonProperty("r_date") //등록일시
-    private String rDate;
-
-    @JsonProperty("category_gb") //카테고리 구분
-    private String categoryGb;
+    private String categoryGb; //카테고리 구분
 
     @Override
     public String toPlainText() {

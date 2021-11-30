@@ -82,7 +82,7 @@ public class MmsAgentDomainService {
             CallSettingDto settingItem =  settingApiList.get(0);
             MmsRequestDto mmsDto = MmsRequestDto.builder().build();
             mmsDto.setCtn(sendMmsRequestDto.getCtn());
-            mmsDto.setMmsTitle((String)setting.get("rest_code_id"));
+            mmsDto.setMmsTitle(prm.getCodeId());
             mmsDto.setMmsMsg(settingItem.getCodeName());//메세지
             mmsDto.setCtn(sendMmsRequestDto.getCtn());
             sendMMS(mmsDto);
@@ -121,8 +121,6 @@ public class MmsAgentDomainService {
         int ranNum = generateNumber(7);
         String transactionID = ranNum+"_"+reqDate;
 
-
-
         // Set submitReq Info
         submitReq.setTransactionId(transactionID);
         submitReq.setVaspId((String)mms.get("vaspid"));
@@ -151,13 +149,30 @@ public class MmsAgentDomainService {
 
         submitReq.setContent(new BasicContent(con1));
 
+
+        // ========================[Start] 테스트코드 ==============================
+		// Add Text Content2
+		UplusContent con2 = new UplusContent("TEST");
+		con2.setContentId("mm7-content");
+		con2.setX_Kmms_SVCCODE("");
+		con2.setX_Kmms_redistribution("");
+		con2.setX_Kmms_TextInput("");
+
+		submitReq.setContent(new BasicContent(con1, con2));
+        // ========================[End] 테스트코드 ==============================
+
+
         try {
-            if("Y".equals((String)mms.get("debug_mode"))) MM7Message.save(submitReq, System.out, new MM7Context());
+            if("Y".equals((String)mms.get("debug_mode"))) {
+                MM7Message.save(submitReq, System.out, new MM7Context());
+            }
         } catch (IOException e) {}
 
         MMSC mmsc = new BasicMMSC(url);
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
+
+        //MM7Response rsp = mmsc.submit(submitReq);//실제 모듈호출
 
         String logStr = "\n [Start] MM7 ############## MMS처리모듈 : MMSCBase implements MMSC ##############\n";
         logStr += "\n [ mmsc.submit(submitReq)에서 (mmsDto.mmsMsg)실제 메세지내용을 사용한 흔적을 찾을수 없음 \n";
@@ -171,8 +186,6 @@ public class MmsAgentDomainService {
         logStr += "\n [End] MM7 ############## MMS처리모듈 : MMSCBase implements MMSC ##############\n";
         log.info(logStr);
         log.info("\n"+submitReq.toString()+"\n");
-
-        MM7Response rsp = mmsc.submit(submitReq);
 
         int statusCode = MM7Response.SC_SUCCESS;
         String statusText = "";

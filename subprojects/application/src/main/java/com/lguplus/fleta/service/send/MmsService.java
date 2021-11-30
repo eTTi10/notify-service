@@ -19,5 +19,4 @@ public class MmsService {
         return mmsAgentDomainService.sendMmsCode(request);
     }
 
-
 }
