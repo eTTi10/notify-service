@@ -3,6 +3,7 @@ package com.lguplus.fleta.api.inner.smsagent;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.vo.SendSmsCodeVo;
 import com.lguplus.fleta.data.vo.SendSmsVo;
 import com.lguplus.fleta.exception.smsagent.NoHttpsException;
@@ -21,6 +22,7 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/notify")
 public class SmsAgentController {
 
     @Value("${check.https}")
@@ -29,7 +31,7 @@ public class SmsAgentController {
     private final SmsAgentService smsAgentService;
 
     @PostMapping("/smsagent/sms")
-    public SuccessResponseDto sendSms(@Valid @RequestBody SendSmsVo requestVo, HttpServletRequest request) {
+    public SmsGatewayResponseDto sendSms(@Valid SendSmsVo requestVo, HttpServletRequest request) {
 
         log.debug("[SMSAgentController] - [{}]]", requestVo.toString());
 
@@ -42,7 +44,7 @@ public class SmsAgentController {
     }
 
     @PostMapping("/smsagent/smsCode")
-    public SuccessResponseDto sendSmsCode(@Valid SendSmsCodeVo requestVo, HttpServletRequest request) {
+    public SmsGatewayResponseDto sendSmsCode(@Valid SendSmsCodeVo requestVo) {
 
         log.debug("SMSAgentController.sendSmsCode() - {}:{}", "SMS발송 처리", requestVo);
 

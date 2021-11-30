@@ -1,7 +1,10 @@
 package com.lguplus.fleta.service.smsagent;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import com.lguplus.fleta.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,25 +17,29 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class RetryModuleDomainService {
 
+    private final static String sep = "\\|";
+
     private int callCount = 0;
     private int systemEr = 0;
     private int busyEr = 0;
 
     @Value("${sms.send.retry}")
-    private String stringRetry;
+    private String smsRetry;
 
     @Value("${sms.send.busy.retry}")
-    private String stringBusyRetry;
+    private String smsBusyRetry;
 
     @Value("${sms.sender.retry.sleep.ms}")
-    private String stringSleepTime;
+    private String smsSleepTime;
 
-    private final SmsMessageManagerDomainService smsMessageManagerDomainService;
+    @Value("${sms.sender.no}")
+    private String smsSenderNo;
+
     private final SmsProviderDomainService smsProviderDomainService;
 
-    private int retry = Integer.parseInt(StringUtils.defaultIfEmpty(stringRetry, "0"));
-    private int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(stringBusyRetry, "5"));
-    private int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(stringSleepTime, "1000"));
+    private int retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
+    private int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
+    private int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
 
     public void clear(){
         callCount = 0;
@@ -41,59 +48,80 @@ public class RetryModuleDomainService {
     }
 
 
-    public SuccessResponseDto smsSendCode(SendSmsCodeRequestDto sendSmsCodeRequestDto, boolean encryptYn, Log log) {
+    public SmsGatewayResponseDto smsSendCode(SmsAgentRequestDto smsAgentRequestDto, boolean encryptYn) {
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
-//        ResultVO resultVO;
-        String sendMsg = "";
-/*
+        String sendMsg;
+
+        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
 
         try {
             callCount++;
-            sendMsg = smsMessageManagerDomainService.convertMsg(smsVo.getSmsMsg(), smsVo.getReplacement());
-            resultVO = smsProviderDomainService.send(Properties.getProperty("sms.sender.no")
-                    , encryptYn ? AesUtil.decryptAES(smsVo.getSmsId()) : smsVo.getSmsId(), sendMsg);
-//			//###############TEST
-//			resultVO = new ResultVO();
-//			resultVO.setFlag(Properties.getProperty("flag.success"));
-//			resultVO.setMessage(Properties.getProperty("message.success"));
-//			//###############TEST
-        } catch (CustomExceptionHandler e) {
-            log.info("[smsSend][Ex]"+ e.getFlag() + ":" + e.getMessage());
-            resultVO = new ResultVO();
-            resultVO.setFlag(e.getFlag());
-            resultVO.setMessage(e.getMessage());
+            sendMsg = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
+
+            smsGatewayResponseDto = smsProviderDomainService.send(smsSenderNo
+                    , encryptYn ? AesUtil.decryptAES(smsAgentRequestDto.getSmsId()) : smsAgentRequestDto.getSmsId(), sendMsg);
+
+//        } catch (CustomExceptionHandler e) {
+//
+//            log.info("[smsSend][Ex]"+ e.getFlag() + ":" + e.getMessage());
+//
+//
         } catch (Exception e) {
+
             log.info("[smsSend][Ex]"+ e.getClass().getName() + ":" + e.getMessage());
-            resultVO = new ResultVO();
-            resultVO.setFlag(Properties.getProperty("flag.etc"));
-            resultVO.setMessage(Properties.getProperty("message.etc"));
+            //9999
+            throw new RuntimeException("기타 오류");
         }
 
         //retry여부를 판단한다.
-        if(Properties.getProperty("flag.system_error").equals(resultVO.getFlag()) || Properties.getProperty("flag.etc").equals(resultVO.getFlag())){
+        if("1500".equals(smsGatewayResponseDto.getFlag()) || "9999".equals(smsGatewayResponseDto.getFlag())){
+            // 시스템 장애이거나 기타오류 일 경우
             checkRetry = 1;
             systemEr++;
-        }else if(Properties.getProperty("flag.system_busy").equals(resultVO.getFlag())){
+        }else if("1503".equals(smsGatewayResponseDto.getFlag())){
+            // 메시지 처리 수용 한계 초과일 경우
             checkRetry = 2;
             busyEr++;
         }
- */
 //        log.info("[smsSend]["+smsVo.getPtDay()+"]["+smsVo.getSmsCd()+"]["+smsVo.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+resultVO.getFlag()+"]["+resultVO.getMessage()+"]");
         if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
 //            return resultVO;
-            return SuccessResponseDto.builder().build();
+            return smsGatewayResponseDto;
         }else{
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {}
 
 
-            return smsSendCode(sendSmsCodeRequestDto, encryptYn, log);
+            return smsSendCode(smsAgentRequestDto, encryptYn);
         }
 
 
     }
+
+    /**
+     * 지정된 문자열로 변경하여 리턴한다.
+     * @param msg
+     * @param replacement
+     * @return
+     */
+    public static String convertMsg(String msg, String replacement){
+
+        if(StringUtils.isEmpty(replacement)) return msg;
+        else{
+            String[] rep = replacement.split(sep);
+            int i = 1;
+            for(String t : rep){
+                String repTxt = "{" + i + "}";
+                msg = msg.replace(repTxt, t);
+                i++;
+            }
+            return msg;
+        }
+    }
+
+
 
 }

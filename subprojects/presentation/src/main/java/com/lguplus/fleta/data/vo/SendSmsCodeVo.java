@@ -31,11 +31,11 @@ public class SendSmsCodeVo {
     @ParamAlias("stb_mac")
     private String stbMac;
 
-    @NotBlank(message = "sms_cd 필수입니다.", groups = Groups.C6.class)
+    @NotBlank(message = "sms_cd 파라미터값이 전달이 안됨.", groups = Groups.C6.class)
     @ParamAlias("sms_cd")
     private String smsCd;
 
-    @NotBlank(message = "ctn 필수입니다.", groups = Groups.C7.class)
+    @NotBlank(message = "ctn 파라미터값이 전달이 안됨", groups = Groups.C7.class)
     @ParamAlias("ctn")
     private String ctn;
 

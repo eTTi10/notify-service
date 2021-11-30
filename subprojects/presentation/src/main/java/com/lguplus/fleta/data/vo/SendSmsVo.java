@@ -1,6 +1,7 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.exception.ParameterMissingException;
 import com.lguplus.fleta.validation.Groups;
@@ -14,15 +15,15 @@ import javax.validation.constraints.NotBlank;
 public class SendSmsVo {
 
     @NotBlank(message = "s_ctn 파라미터값이 전달이 안됨.", groups = Groups.C1.class)
-    @JsonProperty("s_ctn")
+    @ParamAlias("s_ctn")
     private String sCtn;
 
     @NotBlank(message = "r_ctn 파라미터값이 전달이 안됨.", groups = Groups.C2.class)
-    @JsonProperty("r_ctn")
+    @ParamAlias("r_ctn")
     private String rCtn;
 
-    @NotBlank(message = "msg 파라미터값이 전달이 안됨.", payload = ParameterMissingException.class, groups = Groups.C3.class)
-    @JsonProperty("msg")
+    @NotBlank(message = "msg 파라미터값이 전달이 안됨.", groups = Groups.C3.class)
+    @ParamAlias("msg")
     private String msg;
 
     public SendSmsRequestDto convert(){
