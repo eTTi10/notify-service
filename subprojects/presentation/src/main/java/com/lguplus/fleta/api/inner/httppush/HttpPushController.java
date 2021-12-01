@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.vo.HttpPushMultiRequestVo;
 import com.lguplus.fleta.data.vo.HttpPushSingleRequestVo;
 import com.lguplus.fleta.service.httppush.HttpPushService;
@@ -46,7 +47,13 @@ public class HttpPushController {
         log.debug("httpPushResponseDto :::::::::::::::::::: {}", httpPushResponseDto);
         log.debug("==================단건푸시등록 END======================");
 
-        return InnerResponseDto.of(httpPushResponseDto);
+        // 성공
+        if (httpPushResponseDto.getCode().equals("200")) {
+            return InnerResponseDto.of(httpPushResponseDto);
+        }
+
+        // 실패
+        return InnerResponseDto.of(InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR, httpPushResponseDto);
     }
 
     /**
@@ -65,7 +72,13 @@ public class HttpPushController {
         log.debug("httpPushResponseDto :::::::::::::::::::: {}", httpPushResponseDto);
         log.debug("==================멀티푸시등록 END======================");
 
-        return InnerResponseDto.of(httpPushResponseDto);
+        // 성공
+        if (httpPushResponseDto.getCode().equals("200")) {
+            return InnerResponseDto.of(httpPushResponseDto);
+        }
+
+        // 실패
+        return InnerResponseDto.of(InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR, httpPushResponseDto);
     }
 
 }
