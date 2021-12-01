@@ -42,6 +42,16 @@ subprojects {
         testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        //####################### MMS 모듈관련 #########################
+        // https://mvnrepository.com/artifact/org.jdom/jdom
+        // 관련) import org.jdom2.*, Format
+        implementation group: 'org.jdom', name: 'jdom', version: '2.0.2'
+
+        // https://mvnrepository.com/artifact/org.jvnet.mimepull/mimepull
+        // 관련) MIMEConfig, import org.jvnet.mimepull.*
+        implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
+
     }
 
     jacoco {

@@ -14,8 +14,8 @@ sms:
     timeout: '5000'
     request:
       method: GET
-    url: http://hmimstb.uplus.co.kr/hdtv/comm/setting?sa_id=sms&stb_mac=sms&code_id=&svc_type=I
-    rest_url: "http://hmimstb.uplus.co.kr"
+    url: http://hsuxm.uplus.co.kr/hdtv/comm/setting?sa_id=sms&stb_mac=sms&code_id=&svc_type=I
+    rest_url: "http://hsuxm.uplus.co.kr"
     rest_path: "/hdtv/comm/setting"
     rest_sa_id: sms
     rest_stb_mac: sms
@@ -38,4 +38,3 @@ agent:
   id1: test
   ip1: 192.168.233.209|192.168.233.209
   password1: test
-
