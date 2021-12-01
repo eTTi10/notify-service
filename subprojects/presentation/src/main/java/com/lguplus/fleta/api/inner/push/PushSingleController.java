@@ -32,11 +32,11 @@ public class PushSingleController {
      * @param pushRequestBodySingleVo 단건푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @PostMapping(value = "/smartux/v1/push", consumes = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "/smartux/v1/push")
     public InnerResponseDto<PushClientResponseDto> pushRequest(
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
-        log.debug("PushSingleController : {}", pushRequestBodySingleVo);
+        //log.debug("PushSingleController : {}", pushRequestBodySingleVo);
 
         PushRequestSingleDto pushRequestSingleDto = pushRequestBodySingleVo.convert();
 
