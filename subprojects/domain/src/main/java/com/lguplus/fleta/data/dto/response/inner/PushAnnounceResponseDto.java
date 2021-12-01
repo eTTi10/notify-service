@@ -24,7 +24,15 @@ public class PushAnnounceResponseDto {
     @JsonProperty("response")
     private ResponseAnnouncement responseAnnouncement;
 
-    public void setErrorCode(String code, String msg) {
+    /*
+    public void setResponseStatus(String code, String msg) {
+        this.responseAnnouncement = new ResponseAnnouncement();
+        this.responseAnnouncement.setStatusCode(code);
+        this.responseAnnouncement.setStatusMsg(msg);
+    }*/
+
+    public PushAnnounceResponseDto(String code, String msg)
+    {
         this.responseAnnouncement = new ResponseAnnouncement();
         this.responseAnnouncement.setStatusCode(code);
         this.responseAnnouncement.setStatusMsg(msg);
