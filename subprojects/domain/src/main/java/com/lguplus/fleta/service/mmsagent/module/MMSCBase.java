@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 /**
  *
@@ -38,8 +39,9 @@ import java.net.URL;
  */
 @Slf4j
 public abstract class MMSCBase implements MMSC {
-
-	public MMSCBase(String url) {
+	private Map<String, ?> mmsConfig;
+	public MMSCBase(String url, Map<String, ?> mmsConfig) {
+		this.mmsConfig = mmsConfig;
 		setUrl(url);
 	}
 
@@ -66,8 +68,8 @@ public abstract class MMSCBase implements MMSC {
 			conn.setDoOutput(true);
 			conn.setUseCaches(false);
 			
-			conn.setConnectTimeout(Integer.parseInt("3000"));//<== agent.properties 임시 하드코딩 {mms.connecttimeout = 3000}설정값으로 변경할것
-			conn.setReadTimeout(Integer.parseInt("5000"));//<== agent.properties 임시하드 코딩{mms.readtimeout = 5000}
+			conn.setConnectTimeout((int)mmsConfig.get("connecttimeout"));//ex) 3000
+			conn.setReadTimeout((int)mmsConfig.get("readtimeout"));//ex) 5000
 
 			conn.setRequestMethod("POST");
 			conn.setRequestProperty("Content-Type", request.getSoapContentType());

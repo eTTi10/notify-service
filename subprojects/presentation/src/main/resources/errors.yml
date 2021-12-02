@@ -68,6 +68,11 @@ error:
               FailToUseCouponException: "1408"
               ExceedMaxCouponUsageException: "1409"
               CouponNotFoundException: "1410"
+            latest:
+              DeleteNotFoundException: "1410"
+            mmsagent:
+              NotFoundMsgException: "1506"
+              ServerSettingInfoException: "5200"
             smsagent:
               SocketException: "1102"
               SocketTimeOutException: "1103"

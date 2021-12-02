@@ -21,6 +21,7 @@ package com.lguplus.fleta.service.mmsagent.module;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * MMSC implementation using standard java {@link HttpURLConnection} to connect
@@ -29,8 +30,8 @@ import java.net.URL;
  */
 public class BasicMMSC extends MMSCBase {
 
-	public BasicMMSC(String url) {
-		super(url);
+	public BasicMMSC(String url, Map<String, ?> mmsConfig) {
+		super(url, mmsConfig);
 	}
 
 	@Override

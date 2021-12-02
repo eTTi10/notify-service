@@ -40,13 +40,8 @@ public class LatestController {
     @GetMapping(value = "/smartux/latest")
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) throws Exception{
         GenericRecordsetResponseDto<LatestDto> result;
-        try{
-            log.info(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId());
-            LatestRequestDto latestRequestDto = vo.convert();
-            result = latestService.getLatestList(latestRequestDto);
-        } catch (Exception e) {
-            throw e;
-        }
+        LatestRequestDto latestRequestDto = vo.convert();
+        result = latestService.getLatestList(latestRequestDto);
         return result;
     }
 
@@ -105,31 +100,12 @@ public class LatestController {
     @PostMapping("/smartux/latest")
     public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) throws Exception{
         CommonResponseDto result;
+        LatestRequestDto latestRequestDto = vo.convert();
 
-        try {
-            log.info(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId(), vo.getCategoryGb());
-            LatestRequestDto latestRequestDto = vo.convert();
-
-
-            String checkResult = latestService.getLatestCheckList(latestRequestDto);
-
-            //중복&최대등록값 체크 [DUPL:중복, "OVER", "SUCCESS"]
-            if("DUPL".equals(checkResult)){
-                throw new DataAlreadyExistsException("기존 데이터 존재");//8001 message.bedata
-            }
-            if("OVER".equals(checkResult)){
-                throw new ExceedMaxRequestException("최대 등록 갯수 초과");//1201 ExceedMaxRequestException
-            }
-            int insertCnt = latestService.insertLatest(latestRequestDto);
-
-            if (0 < insertCnt) {
-                result = SuccessResponseDto.builder().build();
-            } else {
-                throw new Exception("항목이 등록되지 않았습니다.");
-            }
-        } catch (Exception e) {
-            throw e;
-        }
+        int insertCnt = latestService.insertLatest(latestRequestDto);
+        //} catch (Exception e) {
+        //D:\space\mims-asis\MIMS\smartux\src\main\java\com\dmi\smartux\common\exception 참조해서 에러처리 완료할것
+        result = SuccessResponseDto.builder().build();
         return result;
     }
 

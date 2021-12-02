@@ -19,7 +19,7 @@ import java.util.Map;
 @PropertySource(value = "classpath:mmsagent/mmsagent-test.yml", factory = YamlPropertySourceFactory.class)
 @Component
 @EnableConfigurationProperties
-@ConfigurationProperties(prefix = "yml")
+@ConfigurationProperties(prefix = "mmsroot")
 @Getter
 @Setter
 public class MmsAgentConfig {

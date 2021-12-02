@@ -28,7 +28,7 @@ public class SendMmsVo {
     private String saId;
 
     @ParamAlias("stb_mac")
-    @NotBlank(message = "stb_mac가 입력되지 않았습니다.", groups = Groups.C2.class)//5008
+    @NotBlank(message = "stb_mac가 입력되지 않았습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C2.class)//5008
     @Pattern(regexp = "[a-zA-Z0-9.]*$", message = "stb_mac의 패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C6.class)//5008
     @Size(min=10, message="stb_mac 의 길이가 10보다 작습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C10.class)//5008
     @Size(max=20, message="stb_mac 의 길이가 20보다 큽니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C13.class)//5008
