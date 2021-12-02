@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Http Push FeignClient (Open API 이용)
  *
- * 단건, 멀티, 공지 푸시등록
+ * 단건, 멀티(단건 사용), 공지 푸시등록
  */
 public interface HttpPushDomainClient {
 
@@ -17,6 +17,14 @@ public interface HttpPushDomainClient {
      * @param paramMap 단건 푸시 정보
      * @return 단건 푸시 결과
      */
-    OpenApiPushResponseDto requestHttpPushSingle(Map<String, String> paramMap);
+    OpenApiPushResponseDto requestHttpPushSingle(Map<String, Object> paramMap);
+
+    /**
+     * 공지 푸시
+     *
+     * @param paramMap 공지 푸시 정보
+     * @return 공지 푸시 결과
+     */
+    OpenApiPushResponseDto requestHttpPushAnnounce(Map<String, Object> paramMap);
 
 }

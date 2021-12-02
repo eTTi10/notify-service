@@ -39,6 +39,14 @@ error:
               InvalidExpireTimeException: "1302"
               UrlNotPermittedException: "1303"
               UnauthenticatedException: "1304"
+            httppush:
+              AcceptedException: "1112"
+              BadRequestException: "1104"
+              ExclusionNumberException: "9998"
+              ForbiddenException: "1106"
+              NotFoundException: "1107"
+              ServiceIdNotFoundException: "1115"
+              UnAuthorizedException: "1105"
             push:
               SocketNotFoundException: "1101"
               SocketException: "1102"

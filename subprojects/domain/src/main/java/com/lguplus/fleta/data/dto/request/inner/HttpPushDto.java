@@ -7,7 +7,9 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
-
+/**
+ * HttpPush 관련 DTO
+ */
 @Getter
 @ToString
 @SuperBuilder
@@ -39,5 +41,8 @@ public class HttpPushDto {
 
     /** Json format의 실제 발송 메시지 */
     private String payload;
+
+    /** GCM 만 사용하며, 한번에 GCM으로 보내지는 Push notification request 의 registration_ids 개수 */
+    private String gcmMultiCount;
 
 }
