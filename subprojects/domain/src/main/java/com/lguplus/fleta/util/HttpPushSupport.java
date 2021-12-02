@@ -88,7 +88,7 @@ public class HttpPushSupport {
     /**
      * serviceId 에 해당되는 servicePwd 를 암호화해서 가져온다.
      *
-     * @param serviceId 서비스ID
+     * @param serviceId 서비스 ID
      * @return 암호화된 servicePwd
      */
     private String getEncryptedServicePassword(String serviceId) {
@@ -134,7 +134,7 @@ public class HttpPushSupport {
 
         String transactionId = getTransactionId(transactionNum);
 
-        log.debug("transactionId :::::::: {}", transactionId);
+//        log.debug("transactionId :::::::: {}", transactionId);
 
         // PAYLOAD
         String payload = "";
@@ -147,7 +147,7 @@ public class HttpPushSupport {
 
         // 아이폰("A")
         } else {
-            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload(Pair.of(msg, items));
+            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
             payload = apnOpenApiPayload.apply(Pair.of(msg, items));
         }
@@ -180,7 +180,7 @@ public class HttpPushSupport {
      * @param items 추가할 항목 입력(name!^value)
      * @return 공지 Open API 를 호춣할 생성된 파라미터
      */
-    public Map<String, Object> makeAnnounceParameters(String appId, String serviceId, String pushType, String msg, List<String> items) {
+    public Map<String, Object> makePushParameters(String appId, String serviceId, String pushType, String msg, List<String> items) {
 //        log.debug("before msg ::::::::::::::::::::::::::::::: {}", msg);
 
         String servicePwd = getEncryptedServicePassword(serviceId);
@@ -196,7 +196,7 @@ public class HttpPushSupport {
 
         String transactionId = getTransactionId(transactionNum);
 
-        log.debug("transactionId :::::::: {}", transactionId);
+//        log.debug("transactionId :::::::: {}", transactionId);
 
         // PAYLOAD
         String payload = "";
@@ -227,7 +227,7 @@ public class HttpPushSupport {
 
         // 아이폰("A")
         } else {
-            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload(Pair.of(msg, items));
+            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
             payload = apnOpenApiPayload.apply(Pair.of(msg, items));
         }
@@ -292,13 +292,12 @@ public class HttpPushSupport {
     /**
      * APN(아이폰) 관련 Payload 를 생성해서 Function interface 를 리턴한다.
      *
-     * @param paramPair 메시지와 옵션들이 들어있는 Pair 변수
      * @return APN(아이폰) 관련 Payload 를 생성된  Function interface
      */
-    public Function<Pair<String, List<String>>, String> apnPayload(Pair<String, List<String>> paramPair) {
-        return m -> {
-            String msg = paramPair.getLeft();
-            List<String> items = paramPair.getRight();
+    public Function<Pair<String, List<String>>, String> apnPayload() {
+        return p -> {
+            String msg = p.getLeft();
+            List<String> items = p.getRight();
             StringBuilder sb = new StringBuilder();
             String[] config;
             String tmpCm = "";

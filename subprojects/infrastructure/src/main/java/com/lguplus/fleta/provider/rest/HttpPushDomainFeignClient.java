@@ -1,9 +1,12 @@
 package com.lguplus.fleta.provider.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
+import feign.FeignException;
+import feign.codec.StringDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,8 @@ import java.util.Map;
 public class HttpPushDomainFeignClient implements HttpPushDomainClient {
 
     private final HttpPushFeignClient httpPushFeignClient;
+
+    private final ObjectMapper objectMapper;
 
     @Value("${singlepush.server.ip}")
     private String hostSingle;
@@ -74,7 +79,17 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
             e.printStackTrace();
         }
 
-        return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
+        try {
+            return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
+
+        } catch (FeignException ex) {
+            try {
+                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>() {});
+
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("기타 오류");
+            }
+        }
     }
 
     /**
@@ -93,7 +108,17 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
             e.printStackTrace();
         }
 
-        return httpPushFeignClient.requestHttpPushAnnounce(URI.create(getBaseUrl("A")), getHeaderMap("A"), paramMap);
+        try {
+            return httpPushFeignClient.requestHttpPushAnnounce(URI.create(getBaseUrl("A")), getHeaderMap("A"), paramMap);
+
+        } catch (FeignException ex) {
+            try {
+                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>() {});
+
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("기타 오류");
+            }
+        }
     }
 
     /**
