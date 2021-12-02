@@ -3,6 +3,7 @@ package com.lguplus.fleta.provider.rest;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,9 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
             return new PushAnnounceResponseDto("5102", "RetryableException");
+        }
+        catch (FeignException ex) {
+            return null;
         }
     }
 

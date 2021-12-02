@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.exception.push.PushBizException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
+@Getter
 public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInfo> {
 
     private String host;
@@ -22,10 +24,11 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     private String defaultChannelHost;
     private String destinationIp;
     private String closeSecond;
+    private boolean isLgPush;
 
     private AtomicInteger _channelNum = new AtomicInteger(0);
 
-    public PushSocketConnFactory(String host, String port, String timeout, String serverPort, String defChannelHost, String destIp, String closeSecond) {
+    public PushSocketConnFactory(String host, String port, String timeout, String serverPort, String defChannelHost, String destIp, String closeSecond, boolean isLgPush) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
@@ -33,6 +36,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         this.defaultChannelHost = defChannelHost;
         this.destinationIp = destIp;
         this.closeSecond = closeSecond;
+        this.isLgPush = isLgPush;
     }
 
     @Override
