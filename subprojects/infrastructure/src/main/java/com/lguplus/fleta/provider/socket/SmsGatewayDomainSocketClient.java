@@ -1,38 +1,23 @@
-package com.lguplus.fleta.service.smsagent;
+package com.lguplus.fleta.provider.socket;
 
-import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.client.SmsGatewayClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.*;
-import java.util.concurrent.Future;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SmsGatewayDomainService {
-
-
-    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
-    private String codeSystemErrorException;
-
-    @Value("${error.message.1500}")
-    private String messageSystemError;
+public class SmsGatewayDomainSocketClient implements SmsGatewayClient {
 
     private static final int BIND = 0;
     private static final int BIND_ACK = 1;
@@ -73,16 +58,18 @@ public class SmsGatewayDomainService {
 
     private Socket mSoket;
 
-    private Map<Integer, Timer> mTimerMap = new HashMap<>();
+    private Map<Integer, Timer> mTimerMap = new HashMap<Integer, Timer>();
 
-    public SmsGatewayDomainService(String ip, String port, String id, String password) {
 
+    public SmsGatewayDomainSocketClient(String ip, String port, String id, String password) {
+
+/*
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
 
-        String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
+        String index = StringUtils.defaultIfEmpty(CommonUtil.getSystemProperty("server.index"), "1");
         mFileLog = LogFactory.getLog("SmsGateway");
         mStatusLog = LogFactory.getLog("SmsStatus");
         mStatusLog.info("SmsGateway" + index);
@@ -98,8 +85,14 @@ public class SmsGatewayDomainService {
         mStatusLog.info("password:" + password);
 
         connectGateway();
+*/
     }
 
+    public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) {
+
+    }
+
+    /*
     public boolean isBind() {
         return isBind;
     }
@@ -227,7 +220,7 @@ public class SmsGatewayDomainService {
             @Override
             public void run() {
                 if (mResult.isEmpty()) {
-                    mResult = "1500";
+                    mResult = Properties.getProperty("flag.system_error");
                 }
             }
         };
@@ -310,36 +303,39 @@ public class SmsGatewayDomainService {
     }
 
     @Async
-    public Future<SmsGatewayResponseDto> getResult() {
-
-        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
+    public Future<ResultVO> getResult() {
+        ResultVO resultVO = new ResultVO();
 
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
+
             } catch (InterruptedException ignored) {
+
                 mStatusLog.error("getResult Error");
             }
 
-            if (mResult.equals(InnerResponseCodeType.OK.code())) {
-                SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(InnerResponseCodeType.OK.message())
-                        .build();
-            } else if (mResult.equals(codeSystemErrorException)) {
-                SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(messageSystemError)
-                        .build();
+            if (Properties.getProperty("flag.success").equals(mResult)) {
+
+                resultVO.setFlag(mResult);
+                resultVO.setMessage(Properties.getProperty("message.success"));
+
+            } else if (Properties.getProperty("flag.system_error").equals(mResult)) {
+
+                resultVO.setFlag(mResult);
+                resultVO.setMessage(Properties.getProperty("message.system_error"));
             }
         }
 
         clearResult();
+
         mTimerMap.get(TIMER_TIME_OUT).cancel();
-        return new AsyncResult<SmsGatewayResponseDto>(smsGatewayResponseDto);
+
+        return new AsyncResult<ResultVO>(resultVO);
     }
 
     private void readHeader() throws IOException {
+
         int type = readBufferToInt(4);
         int len = readBufferToInt(4);
         int result;
@@ -359,6 +355,7 @@ public class SmsGatewayDomainService {
                     mTimerMap.get(TIMER_LINK_CHECK).cancel();
                     mTimerMap.put(TIMER_LINK_CHECK, new Timer());
                     TimerTask timerTask = new TimerTask() {
+
                         @Override
                         public void run() {
                             try {
@@ -385,10 +382,10 @@ public class SmsGatewayDomainService {
 
                 switch (result) {
                     case 0:
-                        mResult = "200";
+                        mResult = Properties.getProperty("flag.success");
                         break;
                     case 1:
-                        mResult = "1500";
+                        mResult = Properties.getProperty("flag.system_error");
                         break;
                     default:
                         break;
@@ -440,5 +437,7 @@ public class SmsGatewayDomainService {
             }
         }
     }
+*/
+
 
 }

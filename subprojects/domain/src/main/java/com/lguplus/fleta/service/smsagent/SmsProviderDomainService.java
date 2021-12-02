@@ -1,32 +1,22 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.client.SmsGatewayClient;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.MsgTypeErrorException;
 import com.lguplus.fleta.exception.smsagent.PhoneNumberErrorException;
 import com.lguplus.fleta.exception.smsagent.SystemBusyException;
 import com.lguplus.fleta.exception.smsagent.SystemErrorException;
+import com.lguplus.fleta.properties.SmsAgentProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -36,20 +26,10 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class SmsProviderDomainService {
 
-    @Value("${agent.ip1}")
-    private String agentIp1;
-
-    @Value("${agent.port1}")
-    private String agentPort1;
-
-    @Value("${agent.id1}")
-    private String agentId1;
-
-    @Value("${agent.password1}")
-    private String agentPassword1;
-
     @Value("${agent.tps}")
     private String agentTps;
+
+    private final SmsAgentProps smsAgentProps;
 
     public static int mSendTerm;
     public static LinkedList<SmsGatewayDomainService> sGatewayQueue = new LinkedList<SmsGatewayDomainService>();
@@ -58,18 +38,18 @@ public class SmsProviderDomainService {
     private void initGateway() {
 
         String dir = System.getProperty("user.home");
+        log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
-        log.debug("System.getProperty(server.index):" + index);
+        log.debug("index:" + index);
 
-//        String[] ipList = Properties.getProperty("agent.ip" + index).split("\\|");
-//        String[] portList = Properties.getProperty("agent.port" + index).split("\\|");
-//        String[] idList = Properties.getProperty("agent.id" + index).split("\\|");
-//        String[] pwList = Properties.getProperty("agent.password" + index).split("\\|");
+        Map<String, String> mapServers = smsAgentProps.findMapByIndex(index).orElseThrow();
+        String[] ipList = mapServers.get("ip").split("\\|");
+        String[] portList = mapServers.get("port").split("\\|");
+        String[] idList = mapServers.get("id").split("\\|");
+        String[] pwList = mapServers.get("password").split("\\|");
 
-        String[] ipList = agentIp1.split("\\|");
-        String[] portList = agentPort1.split("\\|");
-        String[] idList = agentId1.split("\\|");
-        String[] pwList = agentPassword1.split("\\|");
+        log.debug("mapServers:"+ mapServers);
+        log.debug("mapServers.get(ip):"+ mapServers.get("ip"));
 
         int length = idList.length;
 
@@ -84,7 +64,6 @@ public class SmsProviderDomainService {
 
     public static SmsGatewayResponseDto send(String s_ctn, String r_ctn, String msg) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
         Future<SmsGatewayResponseDto> asyncResult = null;
 
         if (!r_ctn.startsWith("01") || 7 >= r_ctn.length()) {
@@ -121,14 +100,12 @@ public class SmsProviderDomainService {
 
                 if (smsGateway.isBind()) {
 
-                    log.debug("smsGateway.isBind()");
+                    log.debug("smsGateway isBind : true");
 
                     smsGateway.sendMessage(s_ctn, r_ctn, s_ctn, msg, smsGateway.getPort());
                     asyncResult = smsGateway.getResult();
 
                 } else {
-
-                    log.debug("smsGateway.isBind() else");
 
                     SmsProviderDomainService.sGatewayQueue.offer(smsGateway);
                     //1500
@@ -159,7 +136,7 @@ public class SmsProviderDomainService {
             BigDecimal smsTPS = new BigDecimal(agentTps);
 
             // (1 / smsTPS) * 1000 + 50
-            result = new BigDecimal(1).divide(smsTPS, 3, BigDecimal.ROUND_DOWN).multiply(new BigDecimal(1000)).add(new BigDecimal(50)).intValue();
+            result = new BigDecimal(1).divide(smsTPS, 3, RoundingMode.DOWN).multiply(new BigDecimal(1000)).add(new BigDecimal(50)).intValue();
         } catch (Exception e) {
             e.printStackTrace();
         }

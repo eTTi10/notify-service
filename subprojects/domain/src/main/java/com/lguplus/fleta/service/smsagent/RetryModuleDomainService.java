@@ -1,20 +1,16 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.push.SocketException;
 import com.lguplus.fleta.exception.smsagent.SocketTimeOutException;
 import com.lguplus.fleta.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.net.SocketTimeoutException;
 
 @Slf4j
 @Component
@@ -39,6 +35,30 @@ public class RetryModuleDomainService {
     @Value("${sms.sender.no}")
     private String smsSenderNo;
 
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SocketException}")
+    private String codeSocketException;
+
+    @Value("${error.message.5101}")
+    private String messageSocketException;
+
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SocketTimeOutException}")
+    private String codeSocketTimeOutException;
+
+    @Value("${error.message.5102}")
+    private String messageSocketTimeOutException;
+
+    @Value("${error.flag.java.lang.Throwable}")
+    private String codeRunTimeException;
+
+    @Value("${error.message.9999}")
+    private String messageRunTimeException;
+
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
+    private String codeSystemErrorException;
+
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemBusyException}")
+    private String codeSystemBusyException;
+
     private final SmsProviderDomainService smsProviderDomainService;
 
     private int retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
@@ -50,68 +70,65 @@ public class RetryModuleDomainService {
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
         String sendMsg;
+        String responseCode = "";
+        String responseMessage = "";
 
-        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
 
         try {
             callCount++;
             sendMsg = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
 
-            smsGatewayResponseDto = smsProviderDomainService.send(smsSenderNo
+            return smsProviderDomainService.send(smsSenderNo
                     , encryptYn ? AesUtil.decryptAES(smsAgentRequestDto.getSmsId()) : smsAgentRequestDto.getSmsId(), sendMsg);
 
-			//###############TEST
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag("200")
-                    .message("성공")
-                    .build();
-            //###############TEST
+//			###############TEST
+//            responseCode = InnerResponseCodeType.OK.code();
+//            responseMessage = InnerResponseCodeType.OK.message();
+//            ###############TEST
 
         } catch (SocketException ex) {
 
             log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
 
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag("200")
-                    .message("소켓 에러")
-                    .build();
+            responseCode = codeSocketException;
+            responseMessage = messageSocketException;
 
-        } catch (SocketTimeoutException ex) {
+        } catch (SocketTimeOutException ex) {
 
             log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
 
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag("200")
-                    .message("소켓 에러")
-                    .build();
+            responseCode = codeSocketTimeOutException;
+            responseMessage = messageSocketTimeOutException;
 
         } catch (Exception e) {
 
-            log.info("[smsSend][Ex]"+ e.getClass().getName() + ":" + e.getMessage());
+            log.info("[smsSend][Exception]"+ e.getClass().getName() + ":" + e.getMessage());
             //9999
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag("200")
-                    .message("기타 오류")
-                    .build();
+            responseCode = codeRunTimeException;
+            responseMessage = messageRunTimeException;
 
         }
 
         //retry여부를 판단한다.
-        if("1500".equals(smsGatewayResponseDto.getFlag()) || "9999".equals(smsGatewayResponseDto.getFlag())){
+        if( responseCode.equals(codeSystemErrorException) || responseCode.equals(codeRunTimeException) ){
             // 시스템 장애이거나 기타오류 일 경우
             checkRetry = 1;
             systemEr++;
-        }else if("1503".equals(smsGatewayResponseDto.getFlag())){
+
+        }else if( responseCode.equals(codeSystemBusyException) ){
             // 메시지 처리 수용 한계 초과일 경우
             checkRetry = 2;
             busyEr++;
         }
 
 //        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
-
+        //재도시에 해당되지 않는 경우 || 재시도설정횟수보다 재시도한 횟수가 클 경우 || 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
         if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
-            return smsGatewayResponseDto;
+
+            return SmsGatewayResponseDto.builder()
+                    .flag(responseCode)
+                    .message(responseMessage)
+                    .build();
         }else{
             try {
                 Thread.sleep(sleepTime);
@@ -139,7 +156,9 @@ public class RetryModuleDomainService {
      */
     private static String convertMsg(String msg, String replacement){
 
-        if(StringUtils.isEmpty(replacement)) return msg;
+        if(StringUtils.isEmpty(replacement)) {
+            return msg;
+        }
         else{
             String[] rep = replacement.split(sep);
             int i = 1;

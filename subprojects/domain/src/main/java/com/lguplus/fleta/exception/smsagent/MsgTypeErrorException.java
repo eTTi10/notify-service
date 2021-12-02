@@ -4,7 +4,6 @@ import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
 public class MsgTypeErrorException extends NotifySmsRuntimeException {
 
-
     public MsgTypeErrorException() {
         super();
     }
