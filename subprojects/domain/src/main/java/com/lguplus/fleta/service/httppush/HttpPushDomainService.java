@@ -1,7 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
 import com.lguplus.fleta.client.HttpPushDomainClient;
-import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
@@ -15,8 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -32,8 +33,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class HttpPushDomainService {
 
     private final HttpPushDomainClient httpPushDomainClient;
-
-    private final HttpServiceProps httpServiceProps;
 
     private final HttpPushSupport httpPushSupport;
 
