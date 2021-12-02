@@ -1,5 +1,6 @@
-package com.lguplus.fleta.exception.push;
+package com.lguplus.fleta.exception.httppush;
 
+import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 
 /**
@@ -8,7 +9,7 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Minwoo Lee
  * @since 1.0
  */
-public class ExclusionNumberException extends NotifyPushRuntimeException {
+public class ExclusionNumberException extends NotifyHttpPushRuntimeException {
 
     /**
      *

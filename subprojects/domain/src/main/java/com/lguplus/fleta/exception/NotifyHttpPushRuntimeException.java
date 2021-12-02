@@ -8,17 +8,17 @@ import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
  * @author Taekuk Song
  * @since 1.0
  */
-public class NotifyOpenApiRuntimeException extends NotifyRuntimeException {
+public class NotifyHttpPushRuntimeException extends NotifyRuntimeException {
 
     public InnerResponseCodeType getInnerResponseCodeType()
     {
-        return InnerResponseCodeType.OPENAPI_PUSH_SERVER_ERROR;
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
     }
 
     /**
      *
      */
-    public NotifyOpenApiRuntimeException() {
+    public NotifyHttpPushRuntimeException() {
 
         super();
     }
@@ -27,7 +27,7 @@ public class NotifyOpenApiRuntimeException extends NotifyRuntimeException {
      *
      * @param message
      */
-    public NotifyOpenApiRuntimeException(final String message) {
+    public NotifyHttpPushRuntimeException(final String message) {
 
         super(message);
     }
@@ -37,7 +37,7 @@ public class NotifyOpenApiRuntimeException extends NotifyRuntimeException {
      * @param message
      * @param cause
      */
-    public NotifyOpenApiRuntimeException(final String message, final Throwable cause) {
+    public NotifyHttpPushRuntimeException(final String message, final Throwable cause) {
 
         super(message, cause);
     }
@@ -46,7 +46,7 @@ public class NotifyOpenApiRuntimeException extends NotifyRuntimeException {
      *
      * @param cause
      */
-    public NotifyOpenApiRuntimeException(final Throwable cause) {
+    public NotifyHttpPushRuntimeException(final Throwable cause) {
 
         super(cause);
     }

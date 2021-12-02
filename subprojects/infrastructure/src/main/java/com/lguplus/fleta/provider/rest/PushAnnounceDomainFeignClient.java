@@ -1,22 +1,14 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
-import feign.Logger;
-import feign.RequestInterceptor;
-import feign.RequestTemplate;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,10 +54,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
         }
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
-
-            PushAnnounceResponseDto dto = new PushAnnounceResponseDto();
-            dto.setErrorCode("5102", "RetryableException");
-            return dto;
+            return new PushAnnounceResponseDto("5102", "RetryableException");
         }
     }
 

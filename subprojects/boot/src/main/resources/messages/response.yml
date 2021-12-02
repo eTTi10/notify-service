@@ -34,9 +34,9 @@ responseCodeType:
     code: "0500"
     message: "내부 서버 오류"
     httpStatus: "500"
-  OPENAPI_PUSH_SERVER_ERROR:
+  HTTP_PUSH_SERVER_ERROR:
     code: "0510"
-    message: "OPEN API 푸시 서버 오류"
+    message: "HTTP 푸시 서버 오류"
     httpStatus: "200"
   PUSH_SERVER_ERROR:
     code: "0511"
