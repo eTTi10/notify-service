@@ -23,7 +23,6 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class SmsGatewayDomainService {
 
@@ -117,6 +116,7 @@ public class SmsGatewayDomainService {
     }
 
     private void connectGateway() {
+
         mStatusLog.info("Connect Try[" + mPort + "]");
 
         mTimerMap.get(TIMER_RECONNECT).cancel();
@@ -125,6 +125,7 @@ public class SmsGatewayDomainService {
         mTimerMap.get(TIMER_TIME_OUT).cancel();
 
         InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
+
         try {
             if (null != mSoket) {
                 mSoket.close();
@@ -154,6 +155,7 @@ public class SmsGatewayDomainService {
     }
 
     private void reConnectGateway() {
+
         mStatusLog.info("ReConnect Try[" + mPort + "]");
 
         isBind = false;
@@ -171,6 +173,7 @@ public class SmsGatewayDomainService {
     }
 
     private void bindGateway() throws IOException {
+
         byte[] body = new byte[32];
         byte[] idBytes = mID.getBytes();
         byte[] pwdBytes = mPassword.getBytes();
@@ -236,6 +239,7 @@ public class SmsGatewayDomainService {
     }
 
     private void checkLink() throws IOException {
+
         mStatusLog.info("checkLink[" + mPort + "]");
 
         byte[] header = new byte[8];
@@ -264,6 +268,7 @@ public class SmsGatewayDomainService {
     }
 
     private void sendReport() throws IOException {
+
         byte[] body = intToByte(0);
 
         byte[] header = new byte[8];
@@ -278,6 +283,7 @@ public class SmsGatewayDomainService {
     }
 
     private byte[] intToByte(int value) {
+
         ByteBuffer buff = ByteBuffer.allocate(Integer.SIZE / 8);
         buff.putInt(value);
         buff.order(ByteOrder.BIG_ENDIAN);
@@ -286,6 +292,7 @@ public class SmsGatewayDomainService {
     }
 
     private int readBufferToInt(int bufferSize) throws IOException {
+
         byte[] buffer = new byte[bufferSize];
 
         int length = mInputStream.read(buffer);
@@ -299,6 +306,7 @@ public class SmsGatewayDomainService {
     }
 
     private String readBufferToString(int bufferSize) throws IOException {
+
         byte[] buffer = new byte[bufferSize];
         int length = mInputStream.read(buffer);
 

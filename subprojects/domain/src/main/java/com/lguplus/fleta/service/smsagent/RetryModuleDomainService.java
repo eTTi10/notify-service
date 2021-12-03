@@ -3,7 +3,6 @@ package com.lguplus.fleta.service.smsagent;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
-import com.lguplus.fleta.exception.push.SocketException;
 import com.lguplus.fleta.exception.smsagent.SocketTimeOutException;
 import com.lguplus.fleta.util.AesUtil;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 @Slf4j
 @Component
@@ -82,8 +84,8 @@ public class RetryModuleDomainService {
                     , encryptYn ? AesUtil.decryptAES(smsAgentRequestDto.getSmsId()) : smsAgentRequestDto.getSmsId(), sendMsg);
 
 //			###############TEST
-//            responseCode = InnerResponseCodeType.OK.code();
-//            responseMessage = InnerResponseCodeType.OK.message();
+//            responseCode = "0000";
+//            responseMessage = "성공";
 //            ###############TEST
 
         } catch (SocketException ex) {
@@ -93,9 +95,9 @@ public class RetryModuleDomainService {
             responseCode = codeSocketException;
             responseMessage = messageSocketException;
 
-        } catch (SocketTimeOutException ex) {
+        } catch (SocketTimeoutException ex) {
 
-            log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
+            log.info("[smsSend][SocketTimeoutException]"+ ex.getCause() + ":" + ex.getMessage());
 
             responseCode = codeSocketTimeOutException;
             responseMessage = messageSocketTimeOutException;
