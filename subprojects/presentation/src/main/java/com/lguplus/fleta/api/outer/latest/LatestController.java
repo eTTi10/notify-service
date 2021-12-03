@@ -2,20 +2,20 @@ package com.lguplus.fleta.api.outer.latest;
 
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.dto.response.*;
+import com.lguplus.fleta.data.dto.response.CommonResponseDto;
+import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.vo.LatestPostRequestVo;
 import com.lguplus.fleta.data.vo.LatestSearchRequestVo;
-import com.lguplus.fleta.exception.ExceedMaxRequestException;
-import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.service.latest.LatestService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.Locale;
 
 /**
  * 최신회 Controller
@@ -59,29 +59,9 @@ public class LatestController {
      */
     @DeleteMapping("/smartux/latest")
     public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) throws Exception{
-        //ASIS확인검토 - SmartUXException exception = new SmartUXException();
-        //ASIS확인검토 - CLog cLog = new CLog(LogFactory.getLog(TAG), request);
-        log.info("/latest deleteLatest()");
-        CommonResponseDto result;
-
-        try {
-            log.info(vo.getSaId(), vo.getMac(), vo.getCtn(), vo.getCatId());
-
-            LatestRequestDto latestRequestDto = vo.convert();
-            int deleteCnt = latestService.deleteLatest(latestRequestDto);
-
-            if (0 < deleteCnt) {
-                //ASIS확인검토필요
-                result = SuccessResponseDto.builder().build();
-            } else {
-                //ASIS확인검토필요
-                throw new Exception("삭제된 항목이 없습니다. flag:flag.deleteNotFound, message:message.deleteNotFound");
-                //throw new Exception("flag:flag.deleteNotFound, message:message.deleteNotFound");
-            }
-        } catch (Exception e) {
-            throw e;
-        }
-        return result;
+        LatestRequestDto latestRequestDto = vo.convert();
+        int deleteCnt = latestService.deleteLatest(latestRequestDto);
+        return SuccessResponseDto.builder().build();
     }
 
 
@@ -99,14 +79,9 @@ public class LatestController {
      */
     @PostMapping("/smartux/latest")
     public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) throws Exception{
-        CommonResponseDto result;
         LatestRequestDto latestRequestDto = vo.convert();
-
-        int insertCnt = latestService.insertLatest(latestRequestDto);
-        //} catch (Exception e) {
-        //D:\space\mims-asis\MIMS\smartux\src\main\java\com\dmi\smartux\common\exception 참조해서 에러처리 완료할것
-        result = SuccessResponseDto.builder().build();
-        return result;
+        latestService.insertLatest(latestRequestDto);
+        return SuccessResponseDto.builder().build();
     }
 
 }

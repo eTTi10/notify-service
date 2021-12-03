@@ -1,6 +1,5 @@
 package com.lguplus.fleta.service.latest;
 
-import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;

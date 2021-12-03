@@ -68,7 +68,6 @@ public class RetryModuleDomainService {
             //###############TEST
 
         } catch (SocketException ex) {
-
             log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
 
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
