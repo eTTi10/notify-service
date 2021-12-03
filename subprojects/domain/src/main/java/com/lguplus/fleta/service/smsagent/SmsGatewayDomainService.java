@@ -150,7 +150,7 @@ public class SmsGatewayDomainService {
             bindGateway();
         } catch (IOException e) {
             mStatusLog.error("connectGateway Error");
-            reConnectGateway();
+            //reConnectGateway(); <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
         }
     }
 

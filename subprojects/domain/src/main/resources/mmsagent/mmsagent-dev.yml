@@ -1,4 +1,4 @@
-yml:
+mmsroot:
     mms:
         X_Kmms_SVCCODE: 1
         X_Kmms_TextInput: 1

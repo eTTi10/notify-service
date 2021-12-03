@@ -76,6 +76,13 @@ error:
               FailToUseCouponException: "1408"
               ExceedMaxCouponUsageException: "1409"
               CouponNotFoundException: "1410"
+            latest:
+              DeleteNotFoundException: "1410"
+              JpaSocketException: "5101"
+              JpaSocketTimeoutException: "5102"
+            mmsagent:
+              NotFoundMsgException: "1506"
+              ServerSettingInfoException: "5200"
             smsagent:
               SystemErrorException: "1500"
               MsgTypeErrorException: "1501"
