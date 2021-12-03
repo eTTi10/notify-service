@@ -3,7 +3,7 @@ package com.lguplus.fleta.exception;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 
 /**
- * Exception for error flag 1112
+ * Exception for error flag 5012
  *
  * @author Taekuk Song
  * @since 1.0

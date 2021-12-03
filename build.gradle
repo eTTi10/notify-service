@@ -43,6 +43,10 @@ subprojects {
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
 
+        //MapStruct
+        compileOnly 'org.mapstruct:mapstruct:1.4.2.Final'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
         //####################### MMS 모듈관련 #########################
         // https://mvnrepository.com/artifact/org.jdom/jdom
         // 관련) import org.jdom2.*, Format
