@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.socket;
 
-import com.lguplus.fleta.client.PushSingleDomainClient;
+import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,8 @@ import java.util.*;
 @Slf4j
 @ToString
 @Component
-public class PushSingleSocketClient implements PushSingleDomainClient {
+@EnableScheduling
+public class PushSingleSocketClient implements PushSingleClient {
 
     //Pool Config
     @Value("${push-comm.push.socket.max}")
@@ -75,14 +77,18 @@ public class PushSingleSocketClient implements PushSingleDomainClient {
     @Value("${push-comm.lgpush.service_id}")
     private String lgPushServiceId;
 
+    @Value("${push-comm.push.call.retryCnt}")
+    private String pushCallRetryCnt;
+    private int iPushCallRetryCnt;
+
     //Pool
     private List<GenericObjectPool<PushSocketInfo>> poolList;
 
     /**
-     * Push Announcement 푸시
+     * Push Single 푸시
      *
-     * @param paramMap Push Announcement 푸시 정보
-     * @return Push Announcement 푸시 결과
+     * @param paramMap Push Single 푸시 정보
+     * @return Push Single 푸시 결과
      */
     @Override
     public PushSingleResponseDto requestPushSingle(Map<String, String> paramMap) {
@@ -114,6 +120,7 @@ public class PushSingleSocketClient implements PushSingleDomainClient {
             if (socketInfo != null)
                 pool.returnObject(socketInfo);
         }
+
     }
 
     @PostConstruct
@@ -127,6 +134,8 @@ public class PushSingleSocketClient implements PushSingleDomainClient {
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(lg_host, lg_port, lg_timeout, lg_channelPort, lg_defaultChannelHost, lg_destinationIp, lg_closeSecond, true)
                 , getPoolConfig(Integer.valueOf(lgSocketMax), Integer.valueOf(lgSocketMin))));
+
+        iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
 
     }
 
