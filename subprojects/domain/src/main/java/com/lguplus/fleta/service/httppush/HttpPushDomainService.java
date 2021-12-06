@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * Http Push Component
  *
- * 단건, 멀티, 공지 푸시등록
+ * 단건, 멀티 푸시등록
  */
 @Slf4j
 @Component
@@ -43,6 +43,12 @@ public class HttpPushDomainService {
 
     @Value("${multi.push.reject.regList}")
     private String exception;
+
+    @Value("${error.flag.com.lguplus.fleta.exception.push.SendingFailedException}")
+    private String sendingFailedExceptionCode;
+
+    @Value("${error.message.1130}")
+    private String sendingFailedExceptionMsg;
 
     /**
      * 단건푸시등록
@@ -200,7 +206,7 @@ public class HttpPushDomainService {
                         throw new AcceptedException();
 
                     case "400":
-                        // code "1104", message "Push GW BZadRequest"
+                        // code "1104", message "Push GW BadRequest"
                         throw new BadRequestException();
 
                     case "401":
@@ -215,10 +221,10 @@ public class HttpPushDomainService {
                         // code "1107", message "Push GW Not Found"
                         throw new NotFoundException();
 
-                    // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
+                    // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함
                     case "410":
                     case "412":
-                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함");
+                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함");
                         break;
 
                     // 메시지 전송 실패 - Retry 대상
@@ -235,10 +241,10 @@ public class HttpPushDomainService {
             return HttpPushResponseDto.builder().build();
         }
 
-        // 메시지 전송이 한건이라도 실패한 경우
+        // 메시지 전송이 한건이라도 실패한 경우 ["1130" "메시지 전송 실패"]
         return HttpPushResponseDto.builder()
-                .code("1130")
-                .message("메시지 전송 실패")
+                .code(sendingFailedExceptionCode)
+                .message(sendingFailedExceptionMsg)
                 .failUsers(failUsers)
                 .build();
     }

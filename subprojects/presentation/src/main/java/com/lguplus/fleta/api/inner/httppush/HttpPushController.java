@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.mapper.HttpPushSingleMapper;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.vo.HttpPushMultiRequestVo;
 import com.lguplus.fleta.data.vo.HttpPushSingleRequestVo;
@@ -30,6 +31,8 @@ public class HttpPushController {
 
     private final HttpPushService httpPushService;
 
+    private final HttpPushSingleMapper httpPushSingleMapper;
+
 
     /**
      * 단건푸시등록
@@ -40,7 +43,10 @@ public class HttpPushController {
     @PostMapping(value = "/httppush/single")
     public InnerResponseDto<HttpPushResponseDto> requestHttpPushSingle(@RequestBody @Valid HttpPushSingleRequestVo httpPushSingleRequestVo) {
         log.debug("==================단건푸시등록 BEGIN======================");
-        HttpPushSingleRequestDto httpPushSingleRequestDto = httpPushSingleRequestVo.convert();
+//        HttpPushSingleRequestDto httpPushSingleRequestDto = httpPushSingleRequestVo.convert();
+        HttpPushSingleRequestDto httpPushSingleRequestDto = httpPushSingleMapper.toDto(httpPushSingleRequestVo);
+
+        log.debug("mapstruct httpPushSingleRequestDto :::::::::::::::::::::::::: {}", httpPushSingleRequestDto);
 
         HttpPushResponseDto httpPushResponseDto = httpPushService.requestHttpPushSingle(httpPushSingleRequestDto);
 

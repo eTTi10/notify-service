@@ -5,6 +5,8 @@ import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
+import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
 import com.lguplus.fleta.data.vo.LatestPostRequestVo;
 import com.lguplus.fleta.data.vo.LatestSearchRequestVo;
 import com.lguplus.fleta.service.latest.LatestService;
@@ -24,6 +26,8 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 public class LatestController {
+    private final LatestSearchRequestMapper latestSearchRequestMapper;
+    private final LatestPostRequestMapper latestPostRequestMapper;
 
     private final LatestService latestService;
     /**
@@ -35,12 +39,11 @@ public class LatestController {
      * cat_id 카테고리 아이디
      * @return 최신회 알림 리스트
      * @throws Exception
-     * 기준참조 - programming-service\subprojects\presentation\src\main\java\com\lguplus\fleta\api\outer\menunoti
      */
     @GetMapping(value = "/smartux/latest")
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) throws Exception{
         GenericRecordsetResponseDto<LatestDto> result;
-        LatestRequestDto latestRequestDto = vo.convert();
+        LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         result = latestService.getLatestList(latestRequestDto);
         return result;
     }
@@ -59,7 +62,7 @@ public class LatestController {
      */
     @DeleteMapping("/smartux/latest")
     public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) throws Exception{
-        LatestRequestDto latestRequestDto = vo.convert();
+        LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         int deleteCnt = latestService.deleteLatest(latestRequestDto);
         return SuccessResponseDto.builder().build();
     }
@@ -79,7 +82,7 @@ public class LatestController {
      */
     @PostMapping("/smartux/latest")
     public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) throws Exception{
-        LatestRequestDto latestRequestDto = vo.convert();
+        LatestRequestDto latestRequestDto = latestPostRequestMapper.toDto(vo);
         latestService.insertLatest(latestRequestDto);
         return SuccessResponseDto.builder().build();
     }
