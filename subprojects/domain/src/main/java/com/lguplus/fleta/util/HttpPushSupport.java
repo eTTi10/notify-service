@@ -141,7 +141,7 @@ public class HttpPushSupport {
 
         // 안드로이드
         if (pushType.equals("G")) {
-            Function<String, String> gcmPushOpenApiPayload = m -> "{" + replacePayload(msg) + "}";
+            Function<String, String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
 
             payload = gcmPushOpenApiPayload.apply(msg);
 
@@ -218,7 +218,7 @@ public class HttpPushSupport {
                     }
                 }
 
-                return Pair.of("{" + replacePayload(msg) + "}", tmpGcmMultiCount);
+                return Pair.of("{" + replacePayload(m) + "}", tmpGcmMultiCount);
             };
 
             Pair<String, String> tmpPair = gcmAnnounceOpenApiPayload.apply(msg);
@@ -251,12 +251,12 @@ public class HttpPushSupport {
     }
 
     /**
-     * Open API 를 호출하기 위한 파라미터를 만든다.
+     * Open API 를 호출하기 위한 푸시맵을 만든다.
      *
      * @param httpPushDto HttpPush 관련 DTO
      * @param kind 푸시 종류 [S:(단건, 멀티), A:공지]
      * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @return 생성된 파라미터
+     * @return 생성된 푸시맵
      */
     private Map<String, Object> makePushMap(HttpPushDto httpPushDto, String kind, String pushType) {
         Map<String, Object> pushMap = new HashMap<>();

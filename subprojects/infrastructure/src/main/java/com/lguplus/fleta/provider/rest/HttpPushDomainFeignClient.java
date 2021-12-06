@@ -83,8 +83,10 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
             return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
 
         } catch (FeignException ex) {
+            log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
+
             try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>() {});
+                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
 
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("기타 오류");
@@ -113,7 +115,7 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
 
         } catch (FeignException ex) {
             try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>() {});
+                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
 
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("기타 오류");

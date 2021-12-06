@@ -30,7 +30,7 @@ public class HttpPushMultiRequestVo {
     @JsonProperty("service_id")
     private String serviceId;
 
-    /** Push발송 타입 (G: 안드로이드, A: 아이폰) */
+    /** Push 발송 타입 (G: 안드로이드, A: 아이폰) */
     @NotNull(message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C4.class)
     @Pattern(regexp = "^[gaGA]$", message = "push_type 파라미터는 값이 G 나 A 이어야 함", groups = Groups.C4.class)
     @JsonProperty("push_type")

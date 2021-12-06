@@ -25,7 +25,7 @@ public class HttpPushMultiRequestDto {
     /** 서비스 등록시 부여받은 Unique ID */
     private String serviceId;
 
-    /** Push발송 타입 (G: 안드로이드, A: 아이폰) */
+    /** Push 발송 타입 (G: 안드로이드, A: 아이폰) */
     @Builder.Default private String pushType = "G";
 
     /** 보낼 메시지 */
