@@ -3,6 +3,9 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
+import com.lguplus.fleta.data.entity.LatestCheckEntity;
+import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
@@ -17,16 +20,18 @@ import org.springframework.stereotype.Component;
 
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class LatestDomainService {
+    private final LatestMapper latestMapper;
     private final LatestRepository latestRepository;
 
-    @Value("@{latestroot.latest.maxCount}")
-    private String maxCount;
+    @Value("${latestroot.latest.maxCount}")
+    private String maxCnt;
 
     /**
      * 최신회 정보조회
@@ -34,7 +39,13 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
-        return latestRepository.getLatestList(latestRequestDto);
+        List<LatestEntity> rs = latestRepository.getLatestList(latestRequestDto);
+        List<LatestDto> resultList = new ArrayList<LatestDto>();
+        rs.forEach(e->{
+            LatestDto item = latestMapper.toDto(e);
+            resultList.add(item);
+        });
+        return resultList;
     }
 
 
@@ -44,14 +55,17 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
-        List<LatestDto> checkList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestCheckEntity> checkList = latestRepository.getLatestCheckList(latestRequestDto);
         LatestCheckDto resultLatestCheckDto = new LatestCheckDto();
+
         resultLatestCheckDto.setCode(resultLatestCheckDto.SUCCESS_CODE);
+
         //int maxCount = ;//yml 속성에서 가져올 것 latest.maxCount = 5 속성에 값이 없다면 기본은 5
-        if(Integer.parseInt(maxCount) < checkList.size())resultLatestCheckDto.setCode(resultLatestCheckDto.OVER_CODE);//최대값 초과
+        if(Integer.parseInt(maxCnt) < checkList.size())resultLatestCheckDto.setCode(resultLatestCheckDto.OVER_CODE);//최대값 초과
         if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             resultLatestCheckDto.setCode(resultLatestCheckDto.DUPL_CODE);//중복
         }
+
         return resultLatestCheckDto;
     }
 
