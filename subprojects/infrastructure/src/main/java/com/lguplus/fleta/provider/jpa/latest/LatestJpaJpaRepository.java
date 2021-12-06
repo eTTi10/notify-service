@@ -34,7 +34,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @return
      */
     @Override
-    public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
+    public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
         String sql = "SELECT SA_ID, MAC, CTN, REG_ID, CAT_ID, CAT_NAME, R_DATE, CATEGORY_GB \n" +
                 "FROM SMARTUX.PT_UX_LATEST \n" +
                 "WHERE  SA_ID = "+sqlStr(latestRequestDto.getSaId())+" " +
@@ -47,20 +47,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
 
         List<LatestEntity> rs = (List<LatestEntity>) em.createNativeQuery(sql, LatestEntity.class).getResultList();
 
-        List<LatestDto> resultList = new ArrayList<LatestDto>();
-
-        rs.forEach(e->{
-            LatestDto item = LatestDto.builder().build();
-            item.setSaId(e.getSaId());
-            item.setMac(e.getCatId());
-            item.setCtn(e.getCtn());
-            item.setCatId(e.getCatId());
-            item.setCatName(e.getCatName());
-            item.setRDate(e.getRDate());
-            item.setCategoryGb(e.getCategoryGb());
-            resultList.add(item);
-        });
-        return resultList;
+        return rs;
     }
 
     /**
@@ -69,7 +56,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @return
      */
     @Override
-    public List<LatestDto> getLatestCheckList(LatestRequestDto latestRequestDto) {
+    public List<LatestCheckEntity> getLatestCheckList(LatestRequestDto latestRequestDto) {
         String sql = "SELECT SA_ID, MAC, CTN, CAT_ID \n" +
                 "FROM SMARTUX.PT_UX_LATEST \n" +
                 "WHERE  SA_ID = :saId " +
@@ -81,14 +68,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 .setParameter("mac",latestRequestDto.getMac())
                 .setParameter("ctn",latestRequestDto.getCtn())
                 .getResultList();
-        List<LatestDto> resultList = new ArrayList<LatestDto>();
-
-        rs.forEach(e->{
-            LatestDto item = LatestDto.builder().build();
-            item.setCatId(e.getCatId());
-            resultList.add(item);
-        });
-        return resultList;
+        return rs;
     }
 
     /**

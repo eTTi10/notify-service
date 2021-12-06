@@ -29,7 +29,6 @@ public class LatestService {
         return result;
     }
 
-
     /**
      * 최신회 등록
      * @param latestRequestDto
