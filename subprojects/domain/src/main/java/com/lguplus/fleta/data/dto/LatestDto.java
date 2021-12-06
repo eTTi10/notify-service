@@ -11,8 +11,6 @@ import java.io.Serializable;
 @SuperBuilder
 public class LatestDto implements PlainTextibleDto, Serializable {
 
-    private static final long serialVersionUID = 1L;//무엇????
-
     @JsonProperty("sa_id")  //가입자 번호
     private String saId;
 

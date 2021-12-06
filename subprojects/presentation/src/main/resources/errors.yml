@@ -76,6 +76,13 @@ error:
               FailToUseCouponException: "1408"
               ExceedMaxCouponUsageException: "1409"
               CouponNotFoundException: "1410"
+            latest:
+              DeleteNotFoundException: "1410"
+              JpaSocketException: "5101"
+              JpaSocketTimeoutException: "5102"
+            mmsagent:
+              NotFoundMsgException: "1506"
+              ServerSettingInfoException: "5200"
             smsagent:
               SocketException: "1102"
               SocketTimeOutException: "1103"
@@ -183,6 +190,8 @@ error:
     "5013": "파라미터에 공백이 포함됨"
     "5014": "파라미터 값에 영문,숫자만 포함되어야 함"
     "5017": "요청 정보 허용 범위 이하"
+    "5101": "소켓 에러"
+    "5102": "소켓 타임 아웃 에러"
     "5200": "서버 설정 정보 오류"
     "5400": "HTTPS 통신이 아닙니다"
     "6000": "버전값이 같습니다."
