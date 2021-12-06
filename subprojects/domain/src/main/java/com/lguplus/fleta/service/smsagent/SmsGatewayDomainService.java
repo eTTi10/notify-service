@@ -23,6 +23,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class SmsGatewayDomainService {
 
@@ -96,6 +97,9 @@ public class SmsGatewayDomainService {
         mStatusLog.info("id:" + id);
         mStatusLog.info("password:" + password);
 
+        mStatusLog.info("codeSystemErrorException:" + codeSystemErrorException);
+        mStatusLog.info("messageSystemError:" + messageSystemError);
+
         connectGateway();
     }
 
@@ -144,6 +148,7 @@ public class SmsGatewayDomainService {
             mStatusLog.info("Connect Success[" + mPort + "]");
             mStatusLog.info("Socket Open[" + mPort + "]");
 
+            // 게이트웨이에 접속해서 바인딩 시도하는 쓰레드
             Thread thread = new Thread(new SmsGatewayTask());
             thread.start();
 
@@ -329,15 +334,15 @@ public class SmsGatewayDomainService {
                 mStatusLog.error("getResult Error");
             }
 
-            if (mResult.equals(InnerResponseCodeType.OK.code())) {
-                SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(InnerResponseCodeType.OK.message())
+            if (mResult.equals("0000")) {
+                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                        .flag("0000")
+                        .message("성공")
                         .build();
-            } else if (mResult.equals(codeSystemErrorException)) {
-                SmsGatewayResponseDto.builder()
+            } else if (mResult.equals("1500")) {
+                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                         .flag(mResult)
-                        .message(messageSystemError)
+                        .message("시스템 장애")
                         .build();
             }
         }
@@ -358,8 +363,11 @@ public class SmsGatewayDomainService {
 
         switch (type) {
             case BIND_ACK:
+
                 result = readBufferToInt(4);
                 String prefix = readBufferToString(16);
+
+                mStatusLog.info("readHeader() BIND_ACK result:"+result);
 
                 isBind = 0 == result;
 
@@ -390,6 +398,8 @@ public class SmsGatewayDomainService {
                 orgAddr = readBufferToString(32);
                 dstAddr = readBufferToString(32);
                 sn = readBufferToInt(4);
+
+                mStatusLog.info("readHeader() DELIVER_ACK result:"+result);
 
                 switch (result) {
                     case 0:
@@ -435,6 +445,7 @@ public class SmsGatewayDomainService {
 
     }
 
+    //게이트웨이에 바인딩될 때까지 게이트웨이 접속을 무제한으로 시도함 
     private class SmsGatewayTask implements Runnable {
         @Override
         public void run() {

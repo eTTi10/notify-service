@@ -2,8 +2,6 @@ package com.lguplus.fleta.service.smsagent;
 
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
-import com.lguplus.fleta.exception.smsagent.SocketTimeOutException;
 import com.lguplus.fleta.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,73 +61,80 @@ public class RetryModuleDomainService {
 
     private final SmsProviderDomainService smsProviderDomainService;
 
-    private int retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
-    private int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
-    private int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
+    private int retry;
+    private int busyRetry;
+    private int sleepTime;
 
     public SmsGatewayResponseDto smsSendCode(SmsAgentRequestDto smsAgentRequestDto, boolean encryptYn) {
 
+        retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
+        busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
+        sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
+
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
-        String sendMsg;
-        String responseCode = "";
-        String responseMessage = "";
+        String sendMsg = "";
 
+        SmsGatewayResponseDto smsGatewayResponseDto;
 
         try {
             callCount++;
             sendMsg = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
 
-            return smsProviderDomainService.send(smsSenderNo
+            smsGatewayResponseDto = smsProviderDomainService.send(smsSenderNo
                     , encryptYn ? AesUtil.decryptAES(smsAgentRequestDto.getSmsId()) : smsAgentRequestDto.getSmsId(), sendMsg);
 
 //			###############TEST
-//            responseCode = "0000";
-//            responseMessage = "성공";
+//            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+//                    .flag("0000")
+//                    .message("성공")
+//                    .build();
 //            ###############TEST
 
         } catch (SocketException ex) {
             log.info("[smsSend][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
 
-            responseCode = codeSocketException;
-            responseMessage = messageSocketException;
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(codeSocketException)
+                    .message(messageSocketException)
+                    .build();
 
         } catch (SocketTimeoutException ex) {
 
             log.info("[smsSend][SocketTimeoutException]"+ ex.getCause() + ":" + ex.getMessage());
 
-            responseCode = codeSocketTimeOutException;
-            responseMessage = messageSocketTimeOutException;
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(codeSocketTimeOutException)
+                    .message(messageSocketTimeOutException)
+                    .build();
 
         } catch (Exception e) {
 
-            log.info("[smsSend][Exception]"+ e.getClass().getName() + ":" + e.getMessage());
+            log.info("[smsSend][Ex]" + codeRunTimeException + " : " + e.getMessage() + " name : " + e.getClass().getName() + ", cause : " + e.getCause());
             //9999
-            responseCode = codeRunTimeException;
-            responseMessage = messageRunTimeException;
-
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(codeRunTimeException)
+                    .message(messageRunTimeException)
+                    .build();
         }
 
         //retry여부를 판단한다.
-        if( responseCode.equals(codeSystemErrorException) || responseCode.equals(codeRunTimeException) ){
+        if( smsGatewayResponseDto.getFlag().equals(codeSystemErrorException) || smsGatewayResponseDto.getFlag().equals(codeRunTimeException) ){
             // 시스템 장애이거나 기타오류 일 경우
             checkRetry = 1;
             systemEr++;
 
-        }else if( responseCode.equals(codeSystemBusyException) ){
+        }else if( smsGatewayResponseDto.getFlag().equals(codeSystemBusyException) ){
             // 메시지 처리 수용 한계 초과일 경우
             checkRetry = 2;
             busyEr++;
         }
 
-//        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"][busyEr:"+busyEr+"]["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
+        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
         //재도시에 해당되지 않는 경우 || 재시도설정횟수보다 재시도한 횟수가 클 경우 || 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
         if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
 
-            return SmsGatewayResponseDto.builder()
-                    .flag(responseCode)
-                    .message(responseMessage)
-                    .build();
+            return smsGatewayResponseDto;
         }else{
             try {
                 Thread.sleep(sleepTime);

@@ -36,8 +36,8 @@ agent:
   tps: '1'
   servers:
     - index: 1
-      ip: 210.124.166.239|192.168.233.209
-      port: 8187|8114
+      ip: localhost|210.124.166.239
+      port: 7777|8187
       id: test
       password: test
     - index: 2

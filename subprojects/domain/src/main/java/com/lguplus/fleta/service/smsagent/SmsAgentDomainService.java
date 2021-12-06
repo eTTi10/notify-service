@@ -63,6 +63,12 @@ public class SmsAgentDomainService {
     @Value("${sms.setting.rest_svc_type}")
     private String smsSettingRestSvcType;
 
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
+    private String codeSystemErrorException;
+
+    @Value("${error.message.1500}")
+    private String messageSystemError;
+
     private final RetryModuleDomainService retryModuleDomainService;
     private final CallSettingDomainClient apiClient;
 
@@ -150,6 +156,8 @@ public class SmsAgentDomainService {
 
         //#########[LOG SET]#########
         log.debug ("[smsCode] - {}", sendSMSCodeRequestDto.toString());
+        log.debug("codeSystemErrorException - [{}]]", codeSystemErrorException);
+        log.debug("messageSystemError - [{}]]", messageSystemError);
         String sms_cd = sendSMSCodeRequestDto.getSmsCd();
 
         try {

@@ -1,17 +1,16 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
 import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class PersonalizationService {
 
     private final PersonalizationDomainService personalizationDomainService;

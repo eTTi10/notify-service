@@ -64,7 +64,7 @@ public class SmsProviderDomainService {
 
     public static SmsGatewayResponseDto send(String s_ctn, String r_ctn, String msg) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        Future<SmsGatewayResponseDto> asyncResult = null;
+        Future<SmsGatewayResponseDto> asyncResult;
 
         if (!r_ctn.startsWith("01") || 7 >= r_ctn.length()) {
 
@@ -94,13 +94,8 @@ public class SmsProviderDomainService {
             }
 
             try {
-                log.debug("smsGateway try");
-
-                log.debug("smsGateway.isBind() {}", smsGateway.isBind());
 
                 if (smsGateway.isBind()) {
-
-                    log.debug("smsGateway isBind : true");
 
                     smsGateway.sendMessage(s_ctn, r_ctn, s_ctn, msg, smsGateway.getPort());
                     asyncResult = smsGateway.getResult();
@@ -125,8 +120,7 @@ public class SmsProviderDomainService {
         }
 
         if (null != asyncResult) return asyncResult.get();
-
-        return SmsGatewayResponseDto.builder().build();
+        else throw new RuntimeException("기타 오류");
     }
 
     private int calculateTerm() {
