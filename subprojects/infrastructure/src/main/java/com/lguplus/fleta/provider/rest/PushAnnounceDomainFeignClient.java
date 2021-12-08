@@ -5,13 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
-import com.lguplus.fleta.exception.httppush.*;
+import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +47,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
      * @return Push Announcement 푸시 결과
      */
     @Override
-    public PushAnnounceResponseDto requestAnnouncement(Map<String, String> paramMap) {
+    public PushAnnouncementResponseDto requestAnnouncement(Map<String, String> paramMap) {
         //log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
         //log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
 
@@ -57,20 +55,23 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
         sendMap.put("request", paramMap);
 
         try {
-            return pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
+            Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
+            Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
+            return objectMapper.convertValue(stateMap, PushAnnouncementResponseDto.class);
         }
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
-            return new PushAnnounceResponseDto("5102", "RetryableException");
+            return PushAnnouncementResponseDto.builder().statusCode("5102").build();
         }
         catch (FeignException ex) {
-            //return new PushAnnounceResponseDto("5103", "FeignException");
             log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
 
             try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<PushAnnounceResponseDto>(){});
+                Map<String,Object> retMap = objectMapper.readValue(ex.contentUTF8(),  new TypeReference<Map<String,Object>>(){});
+                Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
+                return objectMapper.convertValue(stateMap, PushAnnouncementResponseDto.class);
             } catch (JsonProcessingException e) {
-                return new PushAnnounceResponseDto("5103", "FeignException");
+                return PushAnnouncementResponseDto.builder().statusCode("5103").build();
             }
         }
     }

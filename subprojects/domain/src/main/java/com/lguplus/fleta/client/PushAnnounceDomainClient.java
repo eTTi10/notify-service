@@ -1,7 +1,6 @@
 package com.lguplus.fleta.client;
 
-import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
 
 import java.util.Map;
 
@@ -18,6 +17,6 @@ public interface PushAnnounceDomainClient {
      * @param paramMap Push Announcement 정보
      * @return Push Announcement 결과
      */
-    PushAnnounceResponseDto requestAnnouncement(Map<String, String> paramMap);
+    PushAnnouncementResponseDto requestAnnouncement(Map<String, String> paramMap);
 
 }

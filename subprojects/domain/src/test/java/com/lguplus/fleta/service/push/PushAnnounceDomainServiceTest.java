@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
@@ -14,8 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +22,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +60,7 @@ class PushAnnounceDomainServiceTest {
     void requestAnnouncement() {
         //normal case
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
-        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto("200", ""));
+        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushAnnouncementResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         Assertions.assertTrue("200".equals(responseDto.getCode()));
@@ -87,7 +84,7 @@ class PushAnnounceDomainServiceTest {
         //normal case lgpush
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
         given( pushConfig.getServiceLinkType(anyString()) ).willReturn("LGUPUSH_OLD");
-        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto("200", ""));
+        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushAnnouncementResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         Assertions.assertTrue("200".equals(responseDto.getCode()));
@@ -102,7 +99,7 @@ class PushAnnounceDomainServiceTest {
 
         int count = 0;
         for(String code : codeList) {
-            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto(code, ""));
+            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushAnnouncementResponseDto.builder().statusCode(code).build());
 
             Exception thrown = assertThrows(NotifyPushRuntimeException.class, () -> {
                 PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
@@ -124,7 +121,7 @@ class PushAnnounceDomainServiceTest {
 
         int count = 0;
         for(String code : codeList) {
-            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto(code, ""));
+            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushAnnouncementResponseDto.builder().statusCode(code).build());
 
             Exception thrown = assertThrows(RuntimeException.class, () -> {
                 PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);

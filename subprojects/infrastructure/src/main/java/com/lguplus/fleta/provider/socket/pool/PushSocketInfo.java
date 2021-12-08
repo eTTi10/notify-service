@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
 import lombok.Getter;
 import lombok.Setter;
@@ -124,76 +124,7 @@ public class PushSocketInfo {
         }
     }
 
-/*
-    public void openChannel() throws PushBizException {
-        try {
-            byte[] byte_DestinationIP = new byte[16];
-            System.arraycopy(destIp.getBytes(encoding), 0, byte_DestinationIP, 0, destIp.getBytes(encoding).length);
-
-            log.trace("[OpenSocket]byteTotalLen=" + PUSH_MSG_HEADER_LEN); //64
-
-            byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN];
-            System.arraycopy(Ints.toByteArray(1), 0, sendHeader, 0, 4);
-            System.arraycopy(this.getChannelID().getBytes(encoding), 0, sendHeader, 16, 14);
-            System.arraycopy(byte_DestinationIP, 0, sendHeader, 32, 16);
-            System.arraycopy(Ints.toByteArray(0), 0, sendHeader, 60, 4);
-
-            this.getPushDataOut().write(sendHeader);
-            this.getPushDataOut().flush();
-
-            log.trace("======================= Header =========================");
-            //Header
-            byte[] byte_header = new byte[PUSH_MSG_HEADER_LEN];
-            this.getPushDataIn().read(byte_header, 0, PUSH_MSG_HEADER_LEN);
-
-            log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byte_header));
-            log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byte_header, 16, 16));
-            log.trace("[OpenSocket] 서버 응답 ChannelId = " + getEncodeStr(byte_header, 32, 14));
-
-            int response_DataLength = byteToInt(byte_header, PUSH_MSG_HEADER_LEN - 4);
-            log.trace("[OpenSocket] 서버 응답 response_DataLength = " + response_DataLength);
-
-            log.trace("======================= Body =========================");
-            byte[] byte_body = new byte[response_DataLength];
-            this.getPushDataIn().read(byte_body, 0, byte_body.length);
-
-            String responseCode = getEncodeStr(byte_body, 0, 2);
-            log.trace("[OpenSocket] 서버 응답 response Code = " + responseCode);
-
-            byte[] bResponseState = new byte[2];
-            System.arraycopy(byte_body, 2, bResponseState, 0, bResponseState.length);
-            short responseState = byteToShort(bResponseState);
-            log.trace("[OpenSocket] 서버 응답 response Status Code = " + responseState);
-
-            if ("SC".equals(responseCode)) {
-                log.trace("[OpenSocket]ChannelConnectionRequest 성공");
-                log.trace("[" + this.getChannelID() + "][OPEN_E][] - [SUCCESS]");
-
-                isOpened = true;
-                socketTime = Instant.now().getEpochSecond();
-            } else {
-                log.trace("[OpenSocket]ChannelConnectionRequest 실패");
-                isOpened = false;
-            }
-
-            //log.trace("[OpenSocket] Read Available Count = {}", this.getPushDataIn().available());
-
-        } catch (ConnectException e) {
-            log.trace("[setNoti][ConnectException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            throw new PushBizException(-100, e.getClass().getName(), e);
-        } catch (java.net.SocketException e) {
-            log.trace("[setNoti][SocketException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            throw new PushBizException(-200, e.getClass().getName(), e);
-        } catch (SocketTimeoutException e) {
-            log.trace("[setNoti][SocketTimeoutException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            throw new PushBizException(-300, e.getClass().getName(), e);
-        } catch (Exception e) {
-            log.trace("[setNoti][Exception][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            throw new PushBizException(-400, e.getClass().getName(), e);
-        }
-    }
-*/
-    public PushAnnounceResponseDto sendPushNotice(final Map<String, String> pushBody) throws PushBizException {
+    public PushAnnouncementResponseDto sendPushNotice(final Map<String, String> pushBody) throws PushBizException {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -277,7 +208,7 @@ public class PushSocketInfo {
                     //failCount = 0;
 
                     //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
-                    return new PushAnnounceResponseDto(status_code, statusmsg);
+                    return PushAnnouncementResponseDto.builder().statusCode(status_code).statusMsg(statusmsg).build();//new PushAnnounceResponseDto(status_code, statusmsg);
                 }
             } else if ("FA".equals(responseCode)) {
                 log.trace("[setNoti]ChannelConnectionRequest 실패1");
@@ -290,11 +221,11 @@ public class PushSocketInfo {
 
                     failCount++;
                     //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
-                    return new PushAnnounceResponseDto("FA", "" +responseState);
+                    return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("" +responseState).build();//new PushAnnounceResponseDto("FA", "" +responseState);
                 }
             } else {
                 log.trace("[setNoti]ChannelConnectionRequest 실패2");
-                return new PushAnnounceResponseDto("FA", "Internal Error");
+                return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//new PushAnnounceResponseDto("FA", "Internal Error");
             }
 
             //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
@@ -319,7 +250,7 @@ public class PushSocketInfo {
 
         failCount++;
 
-        return new PushAnnounceResponseDto("FA", "Internal Error");
+        return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//return new PushAnnounceResponseDto("FA", "Internal Error");
     }
 
     public void closeSocket() {

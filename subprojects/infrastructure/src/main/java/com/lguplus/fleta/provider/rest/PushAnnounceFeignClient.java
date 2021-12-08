@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
 import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +23,6 @@ public interface PushAnnounceFeignClient {
      * @return 푸시 결과
      */
     @PostMapping(value = "${push-comm.announce.server.url}")
-    PushAnnounceResponseDto requestAnnouncement(URI baseUri, @RequestBody Map<String, Map<String, String>> paramMap) throws RetryableException;
+    Map<String, Object> requestAnnouncement(URI baseUri, @RequestBody Map<String, Map<String, String>> paramMap) throws RetryableException;
 
 }
