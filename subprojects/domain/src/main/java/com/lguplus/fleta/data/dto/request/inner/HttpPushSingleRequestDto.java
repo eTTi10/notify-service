@@ -16,7 +16,6 @@ import java.util.List;
  *
  */
 @Getter
-@Setter
 @ToString
 @SuperBuilder
 public class HttpPushSingleRequestDto {

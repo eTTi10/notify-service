@@ -2,11 +2,13 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,7 +24,8 @@ public class OpenApiPushResponseDto {
 
     /** 응답코드 */
     @JsonProperty("RETURN_CODE")
-    private String returnCode;
+    @Builder.Default
+    private String returnCode = "200";
 
     /** Transaction ID (YYYYMMDD+Sequence Number(4byte)) */
     @JsonProperty("PUSH_ID")
@@ -38,6 +41,7 @@ public class OpenApiPushResponseDto {
 
     /** 결과 코드 및 메시지 ({CODE: 코드, MESSAGE: 메시지}) */
     @JsonProperty("ERROR")
-    private Map<String, String> error;
+    @Builder.Default
+    private Map<String, String> error = new HashMap<>();
 
 }
