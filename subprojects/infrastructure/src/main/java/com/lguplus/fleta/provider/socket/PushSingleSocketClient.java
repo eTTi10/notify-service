@@ -130,11 +130,11 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(host, port, timeout, channelPort, defaultChannelHost, destinationIp, closeSecond, false)
                 , getPoolConfig(Integer.valueOf(socketMax), Integer.valueOf(socketMin))));
-
+/*
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(lg_host, lg_port, lg_timeout, lg_channelPort, lg_defaultChannelHost, lg_destinationIp, lg_closeSecond, true)
                 , getPoolConfig(Integer.valueOf(lgSocketMax), Integer.valueOf(lgSocketMin))));
-
+*/
         iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
 
     }
@@ -173,7 +173,7 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestOnReturn(true);
         poolConfig.setTestWhileIdle(true);
-        poolConfig.setTimeBetweenEvictionRunsMillis(20 * 1000);
+        poolConfig.setTimeBetweenEvictionRunsMillis(30 * 1000);
 
         return poolConfig;
     }

@@ -89,7 +89,7 @@ public class PushMultiSocketClient implements PushMultiClient {
 
     @PostConstruct
     public void initialize() {
-
+/*
         iServerPort = Integer.parseInt(serverPort);
         iSocketTimeout = Integer.parseInt(socketTimeout);
         iCallRetryCnt = Integer.parseInt(callRetryCnt);
@@ -114,6 +114,7 @@ public class PushMultiSocketClient implements PushMultiClient {
                 });
 
         connect();
+        */
     }
 
     /*
@@ -125,7 +126,7 @@ public class PushMultiSocketClient implements PushMultiClient {
 
     @PreDestroy
     public void destroy() {
-        disconnect();
+        //disconnect();
     }
 
     private void connect() {
