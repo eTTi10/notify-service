@@ -5,10 +5,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
+import com.lguplus.fleta.exception.httppush.*;
 import feign.FeignException;
-import feign.codec.StringDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -89,38 +90,35 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
                 return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
 
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("기타 오류");
+                switch (ex.status()) {
+                    case HttpStatus.SC_ACCEPTED:
+                        // code "1112", message "The request Accepted"
+                        throw new AcceptedException();
+
+                    case HttpStatus.SC_BAD_REQUEST:
+                        // code "1104", message "Push GW BadRequest"
+                        throw new BadRequestException();
+
+                    case HttpStatus.SC_UNAUTHORIZED:
+                        // code "1105", message "Push GW UnAuthorized"
+                        throw new UnAuthorizedException();
+
+                    case HttpStatus.SC_FORBIDDEN:
+                        // code "1106", message "Push GW Forbidden"
+                        throw new ForbiddenException();
+
+                    case HttpStatus.SC_NOT_FOUND:
+                        // code "1107", message "Push GW Not Found"
+                        throw new NotFoundException();
+
+                    // 메시지 전송 실패 - Retry 대상
+                    default:
+                        break;
+                }
             }
         }
-    }
 
-    /**
-     * 공지 푸시
-     *
-     * @param paramMap 공지 푸시 정보
-     * @return 공지 푸시 결과
-     */
-    @Override
-    public OpenApiPushResponseDto requestHttpPushAnnounce(Map<String, Object> paramMap) {
-//        log.debug("base url :::::::::::: {}", getBaseUrl("A"));
-//        log.debug("header :::::::::::: {}", getHeaderMap("A"));
-        try {
-            log.debug("paramMap :::::::::::: \n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(paramMap));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            return httpPushFeignClient.requestHttpPushAnnounce(URI.create(getBaseUrl("A")), getHeaderMap("A"), paramMap);
-
-        } catch (FeignException ex) {
-            try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
-
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("기타 오류");
-            }
-        }
+        return null;
     }
 
     /**
@@ -132,11 +130,9 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
         // 단건, 멀티
         if (kind.equals("S")) {
             return protocolSingle + "://" + hostSingle + ":" + (protocolSingle.equals("http") ? httpPortSingle : httpsPortSingle);
-
-        // 공지
-        } else {
-            return protocolAnnounce + "://" + hostAnnounce + ":" + (protocolAnnounce.equals("http") ? httpPortAnnounce : httpsPortAnnounce);
         }
+
+        return null;
     }
 
     /**

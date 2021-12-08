@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.exception.push.PushBizException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -13,6 +14,7 @@ import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
+@Getter
 public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInfo> {
 
     private String host;
@@ -22,10 +24,11 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     private String defaultChannelHost;
     private String destinationIp;
     private String closeSecond;
+    private boolean isLgPush;
 
     private AtomicInteger _channelNum = new AtomicInteger(0);
 
-    public PushSocketConnFactory(String host, String port, String timeout, String serverPort, String defChannelHost, String destIp, String closeSecond) {
+    public PushSocketConnFactory(String host, String port, String timeout, String serverPort, String defChannelHost, String destIp, String closeSecond, boolean isLgPush) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
@@ -33,6 +36,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         this.defaultChannelHost = defChannelHost;
         this.destinationIp = destIp;
         this.closeSecond = closeSecond;
+        this.isLgPush = isLgPush;
     }
 
     @Override
@@ -42,10 +46,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         try {
             socketInfo.openSocket(host, Integer.parseInt(port), Integer.parseInt(timeout), getChannelId(), destinationIp);
-            log.debug("=== factory create SocketInfo : {}", socketInfo);
+            log.debug("=== factory create Socket : {}", socketInfo);
         } catch (PushBizException e) {
             e.printStackTrace();
-            log.debug("=== factory create SocketInfo failure: {}", socketInfo);
+            log.debug("=== factory create Socket failure: {}", socketInfo);
         }
 
         return socketInfo;
@@ -56,21 +60,38 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         PushSocketInfo socketInfo = p.getObject();
 
+        if(socketInfo.getPushSocket().getInetAddress() == null) {
+            return false;
+        }
+
         //log.debug("=== factory validateObject SocketInfo #1: {}", p.getObject());
         if(!socketInfo.getPushSocket().isConnected())
             return false;
 
-        if(!socketInfo.isOpened())
+        /*
+        if(!socketInfo.isOpened()) {
+            //Reconnect
+            try {
+                socketInfo.openChannel();
+            }  catch (PushBizException e) {
+                e.printStackTrace();
+                log.debug("=== factory Reconnect SocketInfo failure: {}", socketInfo);
+            }
+        }
+        */
+
+        if(!socketInfo.isOpened()) {
             return false;
+        }
+
+        if(socketInfo.getFailCount() > 0) {
+            return false;
+        }
 
         long lastTime = socketInfo.getSocketTime();
         long currTime = Instant.now().getEpochSecond();
 
-        if(lastTime > 0 && Integer.parseInt(closeSecond) < (currTime - lastTime)) {
-            return false;
-        }
-
-        if(!socketInfo.isSC()) {
+        if(lastTime > 0 && Integer.parseInt(closeSecond) <= (currTime - lastTime)) {
             return false;
         }
 
@@ -86,8 +107,9 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @Override
     public void destroyObject(PooledObject<PushSocketInfo> p) throws Exception {
         PushSocketInfo socketInfo = p.getObject();
+        log.debug("=== factory destroy Socket : {}", socketInfo);
         socketInfo.closeSocket();
-        log.debug("=== factory destroyObject SocketInfo : {}", socketInfo);
+        //log.debug("=== factory destroyObject SocketInfo : {}", socketInfo);
     }
 
     private String getChannelId() {

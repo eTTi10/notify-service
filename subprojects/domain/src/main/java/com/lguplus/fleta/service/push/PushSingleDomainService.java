@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.client.PushSingleDomainClient;
+import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PushSingleDomainService {
 
     private final PushConfig pushConfig;
-    private final PushSingleDomainClient pushSingleDomainClient;
+    private final PushSingleClient pushSingleClient;
 
     @Value("${push-comm.push.old.lgupush.pushAppId}")
     private String oldLgPushAppId;
@@ -75,7 +75,7 @@ public class PushSingleDomainService {
             }
         });
 
-        pushSingleDomainClient.requestPushSingle(paramMap);
+        pushSingleClient.requestPushSingle(paramMap);
 
         return PushClientResponseDto.builder().build();
     }
