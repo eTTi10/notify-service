@@ -3,3 +3,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.5'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
 }
+
+test {
+    useJUnitPlatform()
+}
