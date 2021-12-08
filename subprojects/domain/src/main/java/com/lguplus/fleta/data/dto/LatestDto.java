@@ -2,12 +2,18 @@ package com.lguplus.fleta.data.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
+import io.swagger.annotations.ApiModel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
-@Data
+//@Data
+@ApiModel
+@NoArgsConstructor
+@Getter
 @SuperBuilder
 public class LatestDto implements PlainTextibleDto, Serializable {
 

@@ -1,4 +1,11 @@
+plugins {
+}
+
 dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.16.3'
     implementation 'org.redisson:redisson-spring-data-25:3.16.3'
+}
+
+test {
+    useJUnitPlatform()
 }
