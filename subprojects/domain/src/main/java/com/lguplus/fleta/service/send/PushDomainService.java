@@ -17,7 +17,6 @@ import java.util.Map;
 public class PushDomainService {
 
     private final PersonalizationDomainClient personalizationDomainClient;
-    private final PushRepository pushRepository;
 
     public RegIdDto getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
