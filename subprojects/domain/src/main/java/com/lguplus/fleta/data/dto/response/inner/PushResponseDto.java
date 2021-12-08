@@ -12,7 +12,9 @@ import lombok.*;
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+//{status_code=200, push_id=-, status_msg=-, msg_id=-}
 public class PushResponseDto {
     @JsonProperty("msg_id")
     private String msgId;

@@ -56,7 +56,8 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
 
         try {
             Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
-            Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
+            Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
+
             return objectMapper.convertValue(stateMap, PushResponseDto.class);
         }
         catch (RetryableException ex) {
@@ -68,7 +69,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
 
             try {
                 Map<String,Object> retMap = objectMapper.readValue(ex.contentUTF8(),  new TypeReference<Map<String,Object>>(){});
-                Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
+                Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
                 return objectMapper.convertValue(stateMap, PushResponseDto.class);
             } catch (JsonProcessingException e) {
                 return PushResponseDto.builder().statusCode("5103").build();
