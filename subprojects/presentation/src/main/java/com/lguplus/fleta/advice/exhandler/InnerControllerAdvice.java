@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
@@ -32,6 +34,11 @@ public class InnerControllerAdvice {
 
     public InnerControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
         this.errorResponseResolver = errorResponseResolver;
+    }
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.initDirectFieldAccess();
     }
 
     /**

@@ -5,7 +5,9 @@ import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +28,12 @@ public class OuterControllerAdvice {
     public OuterControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
 
         this.errorResponseResolver = errorResponseResolver;
+    }
+
+    @InitBinder
+    public void initBinder(final WebDataBinder binder) {
+
+        binder.initDirectFieldAccess();
     }
 
     /**

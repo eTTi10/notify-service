@@ -27,7 +27,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class LatestController {
     private final LatestSearchRequestMapper latestSearchRequestMapper;
-    private final LatestPostRequestMapper latestPostRequestMapper;
+    //private final LatestPostRequestMapper latestPostRequestMapper;
 
     private final LatestService latestService;
     /**
@@ -41,7 +41,7 @@ public class LatestController {
      * @throws Exception
      */
     @GetMapping(value = "/smartux/latest")
-    public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) throws Exception{
+    public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
         GenericRecordsetResponseDto<LatestDto> result;
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         result = latestService.getLatestList(latestRequestDto);
@@ -60,13 +60,14 @@ public class LatestController {
      * @throws Exception
      * 기준참조 - none
      */
+    /*
     @DeleteMapping("/smartux/latest")
-    public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) throws Exception{
+    public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) {
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         int deleteCnt = latestService.deleteLatest(latestRequestDto);
         return SuccessResponseDto.builder().build();
     }
-
+    */
 
     /**
      * 최신회 알림 등록 API
@@ -80,11 +81,12 @@ public class LatestController {
      * @return 성공여부&메세지
      * @throws Exception
      */
+    /*
     @PostMapping("/smartux/latest")
-    public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) throws Exception{
+    public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) {
         LatestRequestDto latestRequestDto = latestPostRequestMapper.toDto(vo);
         latestService.insertLatest(latestRequestDto);
         return SuccessResponseDto.builder().build();
     }
-
+    */
 }
