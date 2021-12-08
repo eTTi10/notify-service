@@ -35,7 +35,7 @@ public class PushMultiController {
      * @param pushRequestParamMultiVo Announcement 푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @PostMapping(value = "/smartux/v1/push/multi", consumes = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "/notify/push/multi", consumes = MediaType.APPLICATION_XML_VALUE)
     public InnerResponseDto<?> multiPushRequest(
             @Valid PushRequestParamMultiVo pushRequestParamMultiVo,
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {

@@ -67,6 +67,7 @@ error:
               MaxRequestOverException: "1120"
               SendingFailedException: "1130"
               ExclusionNumberException: "9998"
+              PushEtcException: "9999"
             coupon:
               ExceedMaxCouponRequestException: "1400"
               DuplicatedCouponRequestException: "1401"

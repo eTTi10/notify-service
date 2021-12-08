@@ -1,12 +1,17 @@
 package com.lguplus.fleta.provider.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.exception.httppush.*;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +31,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
 
     private final PushAnnounceFeignClient pushAnnounceFeignClient;
     private final PushConfig pushConfig;
+    private final ObjectMapper objectMapper;
 
     @Value("${push-comm.announce.server.ip}")
     private String host;
@@ -58,7 +64,14 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             return new PushAnnounceResponseDto("5102", "RetryableException");
         }
         catch (FeignException ex) {
-            return new PushAnnounceResponseDto("5103", "FeignException");
+            //return new PushAnnounceResponseDto("5103", "FeignException");
+            log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
+
+            try {
+                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<PushAnnounceResponseDto>(){});
+            } catch (JsonProcessingException e) {
+                return new PushAnnounceResponseDto("5103", "FeignException");
+            }
         }
     }
 
