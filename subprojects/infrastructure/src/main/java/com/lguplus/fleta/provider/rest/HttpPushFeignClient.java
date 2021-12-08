@@ -28,15 +28,4 @@ public interface HttpPushFeignClient {
     @PostMapping(value = "/restapi/push/single/servicekey")
     OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestHeader Map<String, String> headerMap, @RequestBody Map<String, Object> paramMap);
 
-    /**
-     * 공지 푸시
-     *
-     * @param baseUri uri 정보
-     * @param paramMap 공지 푸시 정보
-     * @return 공지 푸시 결과
-     */
-//    @PostMapping(value = "/settings/restapi/push/announce")
-    @PostMapping(value = "/restapi/push/announce")
-    OpenApiPushResponseDto requestHttpPushAnnounce(URI baseUri, @RequestHeader Map<String, String> headerMap, @RequestBody Map<String, Object> paramMap);
-
 }
