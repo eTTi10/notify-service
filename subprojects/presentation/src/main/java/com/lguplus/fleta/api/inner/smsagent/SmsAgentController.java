@@ -3,6 +3,7 @@ package com.lguplus.fleta.api.inner.smsagent;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.vo.SendSmsCodeVo;
 import com.lguplus.fleta.data.vo.SendSmsVo;
@@ -30,8 +31,15 @@ public class SmsAgentController {
 
     private final SmsAgentService smsAgentService;
 
+
+    /**
+     * sms전송(
+     * @param requestVo
+     * @param request
+     * @return
+     */
     @PostMapping("/smsagent/sms")
-    public SmsGatewayResponseDto sendSms(@Valid SendSmsVo requestVo, HttpServletRequest request) {
+    public InnerResponseDto<SmsGatewayResponseDto> sendSms(@Valid SendSmsVo requestVo, HttpServletRequest request) {
 
         log.debug("[SMSAgentController] - [{}]]", requestVo.toString());
 
@@ -40,28 +48,17 @@ public class SmsAgentController {
 
         SendSmsRequestDto requestDto = requestVo.convert();
 
-        return smsAgentService.sendSms(requestDto);
+        return InnerResponseDto.of(smsAgentService.sendSms(requestDto));
     }
 
     @PostMapping("/smsagent/smsCode")
-    public SmsGatewayResponseDto sendSmsCode(@Valid SendSmsCodeVo requestVo) {
+    public InnerResponseDto<SmsGatewayResponseDto> sendSmsCode(@Valid SendSmsCodeVo requestVo) {
 
         log.debug("SMSAgentController.sendSmsCode() - {}:{}", "SMS발송 처리", requestVo);
 
         SendSmsCodeRequestDto requestDto = requestVo.convert();
 
-        return smsAgentService.sendSmsCode(requestDto);
-    }
-
-    /**
-     * 삭제
-     * 요구사항정의서에 없음
-     * @return HttpServletRequest 결과
-     */
-    @RequestMapping(value = "/smsCode", method = RequestMethod.DELETE)
-    public SuccessResponseDto deleteCacheSmsMsg(HttpServletRequest request) {
-
-        return SuccessResponseDto.builder().build();
+        return InnerResponseDto.of(smsAgentService.sendSmsCode(requestDto));
     }
 
     /**

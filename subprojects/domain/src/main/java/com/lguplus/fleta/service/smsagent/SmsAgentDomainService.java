@@ -8,9 +8,7 @@ import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
-import com.lguplus.fleta.exception.smsagent.NotSendTimeException;
-import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
+import com.lguplus.fleta.exception.smsagent.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,10 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -68,18 +63,27 @@ public class SmsAgentDomainService {
     @Value("${sms.setting.rest_svc_type}")
     private String smsSettingRestSvcType;
 
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
+    private String codeSystemErrorException;
+
+    @Value("${error.message.1500}")
+    private String messageSystemError;
+
     private final RetryModuleDomainService retryModuleDomainService;
     private final CallSettingDomainClient apiClient;
 
+    /**
+     * 문자발송(문자내용으로발송)
+     * @param sendSmsRequestDto
+     * @return SmsGatewayResponseDto
+     */
     public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) {
 
-        log.debug("[sms] - [{}]]", sendSmsRequestDto.toString());
+        log.debug("[sendSms] - [{}]]", sendSmsRequestDto.toString());
 
         String s_ctn = sendSmsRequestDto.getSCtn();
         String r_ctn = sendSmsRequestDto.getRCtn();
         String msg = sendSmsRequestDto.getMsg();
-
-        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
 
         try {
 
@@ -122,33 +126,41 @@ public class SmsAgentDomainService {
                 }
             }
 
-            smsGatewayResponseDto = SmsProviderDomainService.send(s_ctn, r_ctn, msg);
+            return SmsProviderDomainService.send(s_ctn, r_ctn, msg);
 
+        } catch (SocketException ex) {
 
-//        } catch (CustomExceptionHandler e) {
-//            cLog.endLog(s_ctn, r_ctn, msg, e.getClass().getSimpleName(), e.getMessage());
-//            throw e;
+            log.info("[SmsAgentDomainService][SocketException]"+ ex.getCause() + ":" + ex.getMessage());
+            throw new SocketException();
+
+        } catch (SocketTimeOutException ex) {
+
+            log.info("[SmsAgentDomainService][SocketTimeOutException]"+ ex.getCause() + ":" + ex.getMessage());
+            throw new SocketTimeOutException();
+
         } catch (Exception e) {
-//            cLog.errorLog(s_ctn, r_ctn, msg, e.getClass().getSimpleName(), e.getMessage());
-//            throw new CustomExceptionHandler(e);
+
+            log.info("[SmsAgentDomainService][Ex]"+ e.getClass().getName() + ":" + e.getMessage());
+            throw new RuntimeException("기타오류");
         }
 
-        //#########[LOG END]#########
-//        cLog.endLog(s_ctn, r_ctn, msg, resultVO.getFlag());
-//        return resultVO;
-        return smsGatewayResponseDto;
 
     }
 
+    /**
+     * 문자발송(코드로발송)
+     * @param sendSMSCodeRequestDto
+     * @return SmsGatewayResponseDto
+     */
     public SmsGatewayResponseDto sendSmsCode(SendSmsCodeRequestDto sendSMSCodeRequestDto) {
 
         //#########[LOG SET]#########
         log.debug ("[smsCode] - {}", sendSMSCodeRequestDto.toString());
+        log.debug("codeSystemErrorException - [{}]]", codeSystemErrorException);
+        log.debug("messageSystemError - [{}]]", messageSystemError);
         String sms_cd = sendSMSCodeRequestDto.getSmsCd();
 
-        SmsGatewayResponseDto smsGatewayResponseDto = new SmsGatewayResponseDto();
-
-//        try {
+        try {
 
             String msg = selectSmsMsg(sms_cd);
             if(StringUtils.isEmpty(msg)){
@@ -164,24 +176,26 @@ public class SmsAgentDomainService {
                     .smsMsg(msg)
                     .build();
 
-            smsGatewayResponseDto = retryModuleDomainService.smsSendCode(smsAgentRequestDto, false);
+            return retryModuleDomainService.smsSendCode(smsAgentRequestDto, false);
 
-//        } catch (Exception e) {
+        } catch (Exception e) {
 
-//            log.info("[smsCode Exception] {} {} {} {}", e.getClass().getSimpleName(), e.getCause(), e.getMessage());
+            log.info("[smsCode Exception] {} {} {} {}", e.getClass().getSimpleName(), e.getCause(), e.getMessage());
 
-            //9999
-//            throw new RuntimeException("기타 오류");
+            throw new RuntimeException("기타 오류");
 
-//        }
+        }
 
         //#########[LOG END]#########
 //        cLog.endLog("[smsCode]",sa_id, stb_mac, sms_cd, replacement, resultVO.getFlag());
-//        return resultVO;
 
-        return smsGatewayResponseDto;
     }
 
+    /**
+     * 문자내용 가져온다
+      * @param sms_cd
+     * @return String 문자내용
+     */
     private String selectSmsMsg(String sms_cd) {
 
         Map<String, String> map = null;
@@ -201,6 +215,11 @@ public class SmsAgentDomainService {
     }
 
 
+    /**
+     * API호출하여 리스트 중 원하는 문자내용만 리턴
+     * @param sms_cd
+     * @return Map<sms_cd, 문자내용>
+     */
 //    @Cacheable(value="smsMessageCacheValue", key="smsMessageCache")
     private Map<String,String> callSettingApi(String sms_cd) {
 
@@ -228,33 +247,10 @@ public class SmsAgentDomainService {
             //setting API 호출하여 메세지 등록
             CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
 
-            // Send a message
-            String logStr = "\n [Start] ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n";
-            logStr += "\n [ 출발지 : SmsAgentDomainService.sendMmsCode ] \n";
-            logStr += "\n [ 도착지 : CallSettingDomainFeignClient.callSettingApi ] \n";
-            logStr += "\n [ 요청주소 : "+smsSettingRestUrl+smsSettingRestPath+" ] \n";
-            logStr += "\n [ 매개변수 : " + prm.toString() + " ] \n";
-            logStr += "\n ------------- Start 매개변수 가이드 -------------\n";
-            logStr += "\n * sa_id:가입자정보 \n";
-            logStr += "\n * stb_mac:가입자 STB MAC Address \n";
-            logStr += "\n * ctn:발송대상 번호 \n";
-            logStr += "\n * replacement:치환문자 \n";
-            logStr += "\n * mms_cd:MMS 메시지 코드 \n";
-            logStr += "\n   - M001 : 모바일tv 앱 설치안내 문자 \n";
-            logStr += "\n   - M002 : 프로야구 앱 설치안내 문자 \n";
-            logStr += "\n   - M003 : 아이들나라 앱 설치안내 문자 \n";
-            logStr += "\n   - M004 : 골프 앱 설치안내 문자 \n";
-            logStr += "\n   - M005 : 아이돌Live 앱 설치안내 문자 \n";
-            logStr += "\n ------------- End 매개변수 가이드 -------------\n\n";
-            logStr += "\n [ 리턴결과 : " + callSettingApi.toString() + " ] \n";
-            logStr += "\n [End] ##############  ############## callSettingApi로 FeignClient 메세지목록 호출 ############## \n\n";
-            log.debug(logStr);
             //메세지목록 조회결과 취득
             List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
 
             //============ End [setting API 호CallSettingResultMapDto출 캐시등록] =============
-
-            log.debug("sms_cd(메시지내용) {} " , settingApiList.get(0).getCodeName());
 
             if(callSettingApi.getResult().getTotalCount() > 0) {
 

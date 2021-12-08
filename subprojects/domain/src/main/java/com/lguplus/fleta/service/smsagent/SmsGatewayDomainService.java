@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +28,9 @@ import java.util.concurrent.Future;
 public class SmsGatewayDomainService {
 
 
-//    @Value("${com.lguplus.fleta.exception.smsagent.SystemErrorException}")
-//    private String flagSystemError;
-//
+    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
+    private String codeSystemErrorException;
+
     @Value("${error.message.1500}")
     private String messageSystemError;
 
@@ -91,6 +91,15 @@ public class SmsGatewayDomainService {
         mID = id;
         mPassword = password;
         mLastSendDate = new Date();
+
+        mStatusLog.info("ip:" + ip);
+        mStatusLog.info("port:" + port);
+        mStatusLog.info("id:" + id);
+        mStatusLog.info("password:" + password);
+
+        mStatusLog.info("codeSystemErrorException:" + codeSystemErrorException);
+        mStatusLog.info("messageSystemError:" + messageSystemError);
+
         connectGateway();
     }
 
@@ -111,6 +120,7 @@ public class SmsGatewayDomainService {
     }
 
     private void connectGateway() {
+
         mStatusLog.info("Connect Try[" + mPort + "]");
 
         mTimerMap.get(TIMER_RECONNECT).cancel();
@@ -119,6 +129,7 @@ public class SmsGatewayDomainService {
         mTimerMap.get(TIMER_TIME_OUT).cancel();
 
         InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
+
         try {
             if (null != mSoket) {
                 mSoket.close();
@@ -137,6 +148,7 @@ public class SmsGatewayDomainService {
             mStatusLog.info("Connect Success[" + mPort + "]");
             mStatusLog.info("Socket Open[" + mPort + "]");
 
+            // 게이트웨이에 접속해서 바인딩 시도하는 쓰레드
             Thread thread = new Thread(new SmsGatewayTask());
             thread.start();
 
@@ -148,6 +160,7 @@ public class SmsGatewayDomainService {
     }
 
     private void reConnectGateway() {
+
         mStatusLog.info("ReConnect Try[" + mPort + "]");
 
         isBind = false;
@@ -165,6 +178,7 @@ public class SmsGatewayDomainService {
     }
 
     private void bindGateway() throws IOException {
+
         byte[] body = new byte[32];
         byte[] idBytes = mID.getBytes();
         byte[] pwdBytes = mPassword.getBytes();
@@ -186,7 +200,6 @@ public class SmsGatewayDomainService {
     }
 
     public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
-
 
         byte[] body = new byte[264];
 
@@ -231,6 +244,7 @@ public class SmsGatewayDomainService {
     }
 
     private void checkLink() throws IOException {
+
         mStatusLog.info("checkLink[" + mPort + "]");
 
         byte[] header = new byte[8];
@@ -259,6 +273,7 @@ public class SmsGatewayDomainService {
     }
 
     private void sendReport() throws IOException {
+
         byte[] body = intToByte(0);
 
         byte[] header = new byte[8];
@@ -273,6 +288,7 @@ public class SmsGatewayDomainService {
     }
 
     private byte[] intToByte(int value) {
+
         ByteBuffer buff = ByteBuffer.allocate(Integer.SIZE / 8);
         buff.putInt(value);
         buff.order(ByteOrder.BIG_ENDIAN);
@@ -281,6 +297,7 @@ public class SmsGatewayDomainService {
     }
 
     private int readBufferToInt(int bufferSize) throws IOException {
+
         byte[] buffer = new byte[bufferSize];
 
         int length = mInputStream.read(buffer);
@@ -294,6 +311,7 @@ public class SmsGatewayDomainService {
     }
 
     private String readBufferToString(int bufferSize) throws IOException {
+
         byte[] buffer = new byte[bufferSize];
         int length = mInputStream.read(buffer);
 
@@ -316,15 +334,15 @@ public class SmsGatewayDomainService {
                 mStatusLog.error("getResult Error");
             }
 
-            if ("200".equals(mResult)) {
-                SmsGatewayResponseDto.builder()
-                        .flag(mResult)
+            if (mResult.equals("0000")) {
+                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                        .flag("0000")
                         .message("성공")
                         .build();
-            } else if ("1500".equals(mResult)) {
-                SmsGatewayResponseDto.builder()
+            } else if (mResult.equals("1500")) {
+                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                         .flag(mResult)
-                        .message(messageSystemError)
+                        .message("시스템 장애")
                         .build();
             }
         }
@@ -345,8 +363,11 @@ public class SmsGatewayDomainService {
 
         switch (type) {
             case BIND_ACK:
+
                 result = readBufferToInt(4);
                 String prefix = readBufferToString(16);
+
+                mStatusLog.info("readHeader() BIND_ACK result:"+result);
 
                 isBind = 0 == result;
 
@@ -377,6 +398,8 @@ public class SmsGatewayDomainService {
                 orgAddr = readBufferToString(32);
                 dstAddr = readBufferToString(32);
                 sn = readBufferToInt(4);
+
+                mStatusLog.info("readHeader() DELIVER_ACK result:"+result);
 
                 switch (result) {
                     case 0:
@@ -422,6 +445,7 @@ public class SmsGatewayDomainService {
 
     }
 
+    //게이트웨이에 바인딩될 때까지 게이트웨이 접속을 무제한으로 시도함 
     private class SmsGatewayTask implements Runnable {
         @Override
         public void run() {

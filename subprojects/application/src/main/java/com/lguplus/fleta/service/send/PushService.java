@@ -3,13 +3,9 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.entity.RegistrationIdEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Slf4j
 @Service

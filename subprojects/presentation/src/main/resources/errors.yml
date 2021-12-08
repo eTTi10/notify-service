@@ -98,14 +98,14 @@ error:
               DatabaseException: "8999"
               MmsServiceException: "9998"
             smsagent:
-              SocketException: "1102"
-              SocketTimeOutException: "1103"
               SystemErrorException: "1500"
               MsgTypeErrorException: "1501"
               PhoneNumberErrorException: "1502"
               SystemBusyException: "1503"
               NotSendTimeException: "1504"
               NotFoundMsgException: "1506"
+              SocketException: "5101"
+              SocketTimeOutException: "5102"
               ServerSettingInfoException: "5200"
               NoHttpsException: "5400"
             stat:
