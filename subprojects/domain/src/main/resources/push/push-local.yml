@@ -20,8 +20,8 @@ push-comm:
       reqCnt: '100'
     socket:
       max: '50' # 20
-      close_secend: '90'
-      min: '5'
+      close_secend: '120'
+      min: '2'
       channelID: P0Agt # PsAgt
       timeout: '5000' # 2000
       channelNum: '0000'
