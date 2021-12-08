@@ -23,19 +23,15 @@ public class LatestService {
                 .recordset(result)
                 .build();
     }
-
+    /*
     public  int deleteLatest(LatestRequestDto latestRequestDto) {
         int result = latestDomainService.deleteLatest(latestRequestDto);
         return result;
     }
 
-    /**
-     * 최신회 등록
-     * @param latestRequestDto
-     * @return int
-     */
     public  int insertLatest(LatestRequestDto latestRequestDto) {
         int result = latestDomainService.insertLatest(latestRequestDto);
         return result;
     }
+    */
 }

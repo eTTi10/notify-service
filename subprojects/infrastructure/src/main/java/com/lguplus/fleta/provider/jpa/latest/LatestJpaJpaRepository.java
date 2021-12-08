@@ -41,12 +41,13 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 " AND  MAC = "+sqlStr(latestRequestDto.getMac())+" " +
                 " AND  CTN = "+sqlStr(latestRequestDto.getCtn())+" ";
         if(!StringUtils.isEmpty(latestRequestDto.getCatId())) {
-            sql += " AND CAT_ID = "+sqlStr(latestRequestDto.getCatId())+" ";
+            sql += " AND CAT_ID = :saId ";
         }
         sql += "ORDER BY SA_ID, MAC, CTN";
 
-        List<LatestEntity> rs = (List<LatestEntity>) em.createNativeQuery(sql, LatestEntity.class).getResultList();
-
+        List<LatestEntity> rs = (List<LatestEntity>) em.createNativeQuery(sql, LatestEntity.class)
+                .setParameter("saId",latestRequestDto.getSaId())
+                .getResultList();
         return rs;
     }
 
@@ -55,6 +56,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @param latestRequestDto
      * @return
      */
+    /*
     @Override
     public List<LatestCheckEntity> getLatestCheckList(LatestRequestDto latestRequestDto) {
         String sql = "SELECT SA_ID, MAC, CTN, CAT_ID \n" +
@@ -70,12 +72,13 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 .getResultList();
         return rs;
     }
-
+    */
     /**
      * 최신회 삭제
      * @param latestRequestDto
      * @return
      */
+    /*
     @Override
     @Modifying
     @Transactional
@@ -95,7 +98,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
         int execCnt = nativeQuery.executeUpdate();
         return execCnt;
     }
-
+    */
 
 
     /**
@@ -103,6 +106,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @param latestRequestDto
      * @return
      */
+    /*
     @Override
     @Modifying
     @Transactional
@@ -131,5 +135,5 @@ public class LatestJpaJpaRepository implements LatestRepository {
         return execCnt;
 
     }
-
+    */
 }
