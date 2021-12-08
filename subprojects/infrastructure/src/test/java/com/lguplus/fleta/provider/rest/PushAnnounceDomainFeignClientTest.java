@@ -1,5 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -28,11 +29,14 @@ class PushAnnounceDomainFeignClientTest {
     @Mock
     private PushAnnounceFeignClient pushAnnounceFeignClient;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     Map<String, String> paramMap;
 
     @BeforeEach
     void setUp() {
-        pushAnnounceDomainFeignClient = new PushAnnounceDomainFeignClient(pushAnnounceFeignClient, pushConfig);
+        pushAnnounceDomainFeignClient = new PushAnnounceDomainFeignClient(pushAnnounceFeignClient, pushConfig, objectMapper);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");

@@ -32,7 +32,7 @@ public class PushSingleController {
      * @param pushRequestBodySingleVo 단건푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @PostMapping(value = "/smartux/v1/push")
+    @PostMapping(value = "/notify/push/single")
     public InnerResponseDto<PushClientResponseDto> pushRequest(
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
