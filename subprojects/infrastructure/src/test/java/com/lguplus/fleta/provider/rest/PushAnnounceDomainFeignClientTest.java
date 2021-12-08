@@ -2,7 +2,7 @@ package com.lguplus.fleta.provider.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.PushConfig;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,10 +62,20 @@ class PushAnnounceDomainFeignClientTest {
 
     @Test
     void requestAnnouncement() {
-        given( pushAnnounceFeignClient.requestAnnouncement(any(), anyMap()) ).willReturn(new PushAnnounceResponseDto("200", ""));
 
-        PushAnnounceResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
-        Assertions.assertTrue("200".equals(responseDto.getResponseAnnouncement().getStatusCode()));
+        Map<String, Object>  retMap = new HashMap<>();
+        Map<String, Object>  contMap = new HashMap<>();
+        retMap.put("response", contMap);
+        contMap.put("msg_id", "-");
+        contMap.put("push_id", "-");
+        contMap.put("status_msg", "-");
+        contMap.put("status_code", "200");
+
+        given( pushAnnounceFeignClient.requestAnnouncement(any(), anyMap()) ).willReturn(retMap);
+
+        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        Assertions.assertTrue("200".equals(responseDto.getStatusCode()));
+
     }
 
 }

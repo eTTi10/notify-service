@@ -1,7 +1,7 @@
 package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.client.PushSingleClient;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
 import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
@@ -101,9 +101,9 @@ public class PushSingleSocketClient implements PushSingleClient {
 
         try {
             socketInfo = pool.borrowObject();
-            PushAnnounceResponseDto retDto = socketInfo.sendPushNotice(paramMap);
+            PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
-            return getSingleResponseDto(retDto.getResponseAnnouncement().getStatusCode(), retDto.getResponseAnnouncement().getStatusMsg());
+            return getSingleResponseDto(retDto.getStatusCode(), retDto.getStatusMsg());
 
         } catch (NoSuchElementException e) {
             //e.printStackTrace();
