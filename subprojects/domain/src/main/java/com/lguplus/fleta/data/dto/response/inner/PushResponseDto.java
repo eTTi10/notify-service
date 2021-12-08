@@ -13,7 +13,7 @@ import lombok.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @Builder
-public class PushAnnouncementResponseDto {
+public class PushResponseDto {
     @JsonProperty("msg_id")
     private String msgId;
 

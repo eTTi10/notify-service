@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
      * @return Push Announcement 푸시 결과
      */
     @Override
-    public PushAnnouncementResponseDto requestAnnouncement(Map<String, String> paramMap) {
+    public PushResponseDto requestAnnouncement(Map<String, String> paramMap) {
         //log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
         //log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
 
@@ -57,11 +57,11 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
         try {
             Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
             Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
-            return objectMapper.convertValue(stateMap, PushAnnouncementResponseDto.class);
+            return objectMapper.convertValue(stateMap, PushResponseDto.class);
         }
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
-            return PushAnnouncementResponseDto.builder().statusCode("5102").build();
+            return PushResponseDto.builder().statusCode("5102").build();
         }
         catch (FeignException ex) {
             log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
@@ -69,9 +69,9 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             try {
                 Map<String,Object> retMap = objectMapper.readValue(ex.contentUTF8(),  new TypeReference<Map<String,Object>>(){});
                 Map<String,Object> stateMap = (Map<String,Object>)retMap.get("response");
-                return objectMapper.convertValue(stateMap, PushAnnouncementResponseDto.class);
+                return objectMapper.convertValue(stateMap, PushResponseDto.class);
             } catch (JsonProcessingException e) {
-                return PushAnnouncementResponseDto.builder().statusCode("5103").build();
+                return PushResponseDto.builder().statusCode("5103").build();
             }
         }
     }

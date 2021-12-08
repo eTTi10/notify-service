@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
 import lombok.Getter;
 import lombok.Setter;
@@ -124,7 +124,7 @@ public class PushSocketInfo {
         }
     }
 
-    public PushAnnouncementResponseDto sendPushNotice(final Map<String, String> pushBody) throws PushBizException {
+    public PushResponseDto sendPushNotice(final Map<String, String> pushBody) throws PushBizException {
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -208,7 +208,7 @@ public class PushSocketInfo {
                     //failCount = 0;
 
                     //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
-                    return PushAnnouncementResponseDto.builder().statusCode(status_code).statusMsg(statusmsg).build();//new PushAnnounceResponseDto(status_code, statusmsg);
+                    return PushResponseDto.builder().statusCode(status_code).statusMsg(statusmsg).build();//new PushAnnounceResponseDto(status_code, statusmsg);
                 }
             } else if ("FA".equals(responseCode)) {
                 log.trace("[setNoti]ChannelConnectionRequest 실패1");
@@ -221,11 +221,11 @@ public class PushSocketInfo {
 
                     failCount++;
                     //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
-                    return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("" +responseState).build();//new PushAnnounceResponseDto("FA", "" +responseState);
+                    return PushResponseDto.builder().statusCode("FA").statusMsg("" +responseState).build();//new PushAnnounceResponseDto("FA", "" +responseState);
                 }
             } else {
                 log.trace("[setNoti]ChannelConnectionRequest 실패2");
-                return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//new PushAnnounceResponseDto("FA", "Internal Error");
+                return PushResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//new PushAnnounceResponseDto("FA", "Internal Error");
             }
 
             //log.trace("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
@@ -250,7 +250,7 @@ public class PushSocketInfo {
 
         failCount++;
 
-        return PushAnnouncementResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//return new PushAnnounceResponseDto("FA", "Internal Error");
+        return PushResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();//return new PushAnnounceResponseDto("FA", "Internal Error");
     }
 
     public void closeSocket() {

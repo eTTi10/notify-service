@@ -2,7 +2,7 @@ package com.lguplus.fleta.provider.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.PushConfig;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnouncementResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +73,7 @@ class PushAnnounceDomainFeignClientTest {
 
         given( pushAnnounceFeignClient.requestAnnouncement(any(), anyMap()) ).willReturn(retMap);
 
-        PushAnnouncementResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
         Assertions.assertTrue("200".equals(responseDto.getStatusCode()));
 
     }
