@@ -37,7 +37,8 @@ public class PushSocketInfo {
 
     private long socketTime = -1;
     private boolean isOpened = false;
-    private boolean isSC = true;
+    //private boolean isSC = true;
+    private int failCount = 0;
 
     public PushSocketInfo(Socket pushSocket) {
         this.pushSocket = pushSocket;
@@ -192,7 +193,7 @@ public class PushSocketInfo {
                     }
 
                     socketTime = Instant.now().getEpochSecond();
-                    isSC = true;
+                    failCount = 0;
 
                     //log.debug("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
                     return new PushAnnounceResponseDto(status_code, statusmsg);
@@ -206,7 +207,7 @@ public class PushSocketInfo {
                     short responseState = byteToShort(bResponseState);
                     log.debug("[setNoti] 서버 응답 response Status Code = " + responseState);
 
-                    isSC = false;
+                    failCount++;
                     //log.debug("[setNoti] Read Available Count = {}", this.getPushDataIn().available());
                     return new PushAnnounceResponseDto("FA", "" +responseState);
                 }
@@ -231,7 +232,7 @@ public class PushSocketInfo {
             throw new PushBizException(-400, e.getClass().getName(), e);
         }
 
-        isSC = false;
+        failCount++;
 
         return new PushAnnounceResponseDto("FA", "Internal Error");
     }

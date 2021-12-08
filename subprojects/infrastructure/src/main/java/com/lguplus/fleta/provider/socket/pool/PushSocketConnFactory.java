@@ -67,14 +67,14 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         if(!socketInfo.isOpened())
             return false;
 
+        if(socketInfo.getFailCount() > 0) {
+            return false;
+        }
+
         long lastTime = socketInfo.getSocketTime();
         long currTime = Instant.now().getEpochSecond();
 
         if(lastTime > 0 && Integer.parseInt(closeSecond) < (currTime - lastTime)) {
-            return false;
-        }
-
-        if(!socketInfo.isSC()) {
             return false;
         }
 

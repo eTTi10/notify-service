@@ -58,7 +58,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             return new PushAnnounceResponseDto("5102", "RetryableException");
         }
         catch (FeignException ex) {
-            return null;
+            return new PushAnnounceResponseDto("5103", "FeignException");
         }
     }
 
