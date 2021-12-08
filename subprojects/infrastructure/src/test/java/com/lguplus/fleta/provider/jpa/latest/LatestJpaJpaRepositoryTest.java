@@ -19,7 +19,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Repository.class))
+@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LatestJpaJpaRepository.class))
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ImportAutoConfiguration(InfrastructureConfig.class)
 @Slf4j
@@ -37,10 +37,20 @@ class LatestJpaJpaRepositoryTest {
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021").build();
-        log.info("1111111111");
         List<LatestEntity> responseList = latestRepository.getLatestList(latestRequestDto);
 
         assertThat(responseList.size()).isGreaterThan(0);   // 결과 리스트가 있는지 확인
+
+        // Mock Object
+        LatestRequestDto latestRequestDto2 = LatestRequestDto.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("").build();
+        List<LatestEntity> responseList2 = latestRepository.getLatestList(latestRequestDto2);
+
+        assertThat(responseList2.size()).isGreaterThan(0);   // 결과 리스트가 있는지 확인
+
         log.info("LatestJpaJpaRepositoryTest.getLatestList End");
     }
 
