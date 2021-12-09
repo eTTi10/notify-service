@@ -1,22 +1,7 @@
-package com.lguplus.fleta.provider.rest.multipush;
+package com.lguplus.fleta.provider.socket.multi;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.util.ByteProcessor;
+public class ByteUtil {
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
-import java.nio.channels.GatheringByteChannel;
-import java.nio.channels.ScatteringByteChannel;
-import java.nio.charset.Charset;
-
-public class ByteUtil
-{
     private ByteUtil(){}
 
     public static final byte[] short2byteN(short s)
@@ -30,7 +15,7 @@ public class ByteUtil
 
         return dest;
     }
-    
+
     public static final byte[] short2byte(short s)
     {
         byte dest[] = new byte[2];
@@ -86,17 +71,17 @@ public class ByteUtil
     }
     public static final int getint(byte src[], int offset)
     {
-        return 
-            (src[offset] & 0xff) << 24 | 
-            (src[offset + 1] & 0xff) << 16 | 
-            (src[offset + 2] & 0xff) << 8 | 
-            src[offset + 3] & 0xff;
+        return
+                (src[offset] & 0xff) << 24 |
+                        (src[offset + 1] & 0xff) << 16 |
+                        (src[offset + 2] & 0xff) << 8 |
+                        src[offset + 3] & 0xff;
     }
     public static final long getlong(byte src[], int offset)
     {
-        return 
-            (long)getint(src, offset) << 32 | 
-            (long)getint(src, offset + 4) & 0xffffffffL;
+        return
+                (long)getint(src, offset) << 32 |
+                        (long)getint(src, offset + 4) & 0xffffffffL;
     }
     public static final float getfloat(byte src[], int offset)
     {
@@ -172,6 +157,5 @@ public class ByteUtil
                 return false;
         return true;
     }
-    
-    
+
 }

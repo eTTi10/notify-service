@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.mapper.PushRequestAnnounceMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -51,6 +52,9 @@ class PushAnnounceControllerTest {
     @MockBean
     private PushAnnouncementService pushAnnouncementService;
 
+    @MockBean
+    private PushRequestAnnounceMapper pushRequestAnnounceMapper;
+
     private final ObjectMapper MAPPER = new ObjectMapper()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -86,7 +90,7 @@ class PushAnnounceControllerTest {
         log.debug("===: " + requestContent);
 
         MvcResult mvcResult = mvc.perform(
-                MockMvcRequestBuilders.post("/smartux/v1/announcement")
+                MockMvcRequestBuilders.post("/notify/push/announcement")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")

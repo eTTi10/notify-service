@@ -1,8 +1,5 @@
 package com.lguplus.fleta.provider.socket.multi;
 
-import com.lguplus.fleta.provider.rest.multipush.ByteUtil;
-import com.lguplus.fleta.provider.rest.multipush.MessageInfo;
-import com.lguplus.fleta.provider.rest.multipush.MsgEntityCommon;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;

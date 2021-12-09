@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
-import com.lguplus.fleta.data.dto.response.inner.PushAnnounceResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import lombok.RequiredArgsConstructor;
@@ -69,11 +69,11 @@ public class PushAnnounceDomainService {
         });
 
         //2. Send Announcement Push
-        PushAnnounceResponseDto pushAnnounceResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
+        PushResponseDto pushAnnounceResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
 
         //3. Send Result
-        String status_code = pushAnnounceResponseDto.getResponseAnnouncement().getStatusCode();
-        String status_msg = pushAnnounceResponseDto.getResponseAnnouncement().getStatusMsg();
+        String status_code = pushAnnounceResponseDto.getStatusCode();
+        String status_msg = pushAnnounceResponseDto.getStatusMsg();
         log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+status_code+"]["+status_msg+"]");
 
         if(status_code.equals("200")){
@@ -104,9 +104,11 @@ public class PushAnnounceDomainService {
                 case "503":
                     throw new ServiceUnavailableException();
                 case "5102":
-                    throw new SocketTimeException(); //RuntimeException("Socket Timeout"); //5102
+                    throw new SocketTimeException();
+                case "5103": //FeignException
+                    throw new SocketException();
                 default:
-                    throw new RuntimeException("기타 오류"); //9999
+                    throw new PushEtcException();//("기타 오류"); //9999
             }
         }
 
