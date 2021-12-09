@@ -1,8 +1,5 @@
 package com.lguplus.fleta.provider.socket.multi;
 
-import com.lguplus.fleta.provider.rest.multipush.MessageInfo;
-import com.lguplus.fleta.provider.rest.multipush.MessageService;
-import com.lguplus.fleta.provider.rest.multipush.MsgEntityCommon;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -16,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 public class NettyHandlerTobe extends ChannelInboundHandlerAdapter {
 
     //private static final AttributeKey<MessageInfo> SERVER_STATE = AttributeKey.valueOf("MessageInfo.state");
-    private MessageService messageService = null;
+    //private MessageService messageService = null;
 
     public void NettyHandler() {
-        messageService = MessageService.getInstance();
+    //messageService = MessageService.getInstance();
     }
 
     @Override
@@ -40,7 +37,8 @@ public class NettyHandlerTobe extends ChannelInboundHandlerAdapter {
         }
         else if (message.getMessageID() == MsgEntityCommon.COMMAND_REQUEST_ACK) {
             // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            messageService.putMessageInfo(message.getTransactionID(), message);
+            //TODO
+            // messageService.putMessageInfo(message.getTransactionID(), message);
         }
 
         log.debug("[NettyHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageID() + ", " +
