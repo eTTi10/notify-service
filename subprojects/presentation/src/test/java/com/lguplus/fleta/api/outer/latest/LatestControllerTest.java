@@ -101,7 +101,7 @@ class LatestControllerTest {
         params.add("ctn", "01055805424");
         params.add("catId", "T3021");
 
-        MvcResult mvcResult = mockMvc.perform(get("/smartux/latest")
+        MvcResult mvcResult = mockMvc.perform(get("/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
                         .queryParams(params)
                 ).andExpect(status().isOk())

@@ -29,11 +29,11 @@ public class LatestController {
 
     @ApiOperation(value="최신회 알림 조회", notes="최신회 알림을 조회한다.")
     @ApiImplicitParams(value={
-            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="sa_id",         value="순번: 1<br>자리수: 12<br>설명:가입번호", example = "500058151453"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="stb_mac",       value="순번: 2<br>자리수: 20<br>설명: 맥주소", example="001c.627e.039c"),
+            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="sa_id",   value="순번: 1<br>자리수: 12<br>설명:가입번호", example = "500058151453"),
+            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="stb_mac", value="순번: 2<br>자리수: 20<br>설명: 맥주소", example="001c.627e.039c"),
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",     value="순번: 전화번호 or 단말 맥 어드레스<br>ex) S001, S002" , example="01055805424"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="cat_id",   value="순번: 5<br>자리수: <br>설명: 카테고리 아이디", example="T3021")})
-    @GetMapping(value = "/smartux/latest")
+            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="cat_id",  value="순번: 5<br>자리수: <br>설명: 카테고리 아이디", example="T3021")})
+    @GetMapping(value = "/comm/latest")
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
         GenericRecordsetResponseDto<LatestDto> result;
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
@@ -54,7 +54,7 @@ public class LatestController {
      * 기준참조 - none
      */
     /*
-    @DeleteMapping("/smartux/latest")
+    @DeleteMapping("/comm/latest")
     public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) {
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         int deleteCnt = latestService.deleteLatest(latestRequestDto);
@@ -75,7 +75,7 @@ public class LatestController {
      * @throws Exception
      */
     /*
-    @PostMapping("/smartux/latest")
+    @PostMapping("/comm/latest")
     public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) {
         LatestRequestDto latestRequestDto = latestPostRequestMapper.toDto(vo);
         latestService.insertLatest(latestRequestDto);
