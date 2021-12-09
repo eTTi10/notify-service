@@ -227,6 +227,7 @@ project(':infrastructure') {
     dependencies {
         implementation project(':domain')
         implementation project(':infrastructure-di')
+        testImplementation project(':boot')
     }
     bootJar { enabled = false }
     jar { enabled = true }

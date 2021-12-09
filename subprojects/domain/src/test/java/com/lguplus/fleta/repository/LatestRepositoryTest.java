@@ -1,40 +1,49 @@
-package com.lguplus.fleta.service.latest;
+package com.lguplus.fleta.repository;
+
 
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.mapper.LatestMapper;
+import com.lguplus.fleta.service.latest.LatestDomainService;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 @Slf4j
-class LatestServiceTest {
-    @Mock
-    LatestDomainService latestDomainService;
+class LatestRepositoryTest {
 
     @InjectMocks
-    LatestService latestService;
+    LatestDomainService latestDomainService;
+
+    @Mock
+    LatestMapper latestMapper;
+
+    @Mock
+    LatestRepository latestRepository;
 
     @BeforeEach
-    void getLatestListSetUp() {
+    void setUp() {
+        latestDomainService = new LatestDomainService(latestMapper, latestRepository);
+    }
 
+    @Test
+    @DisplayName("LatestRepositoryTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
+    void getLatestList() {
         LatestEntity rs1 = new LatestEntity();
         JunitTestUtils.setValue(rs1, "saId", "500058151453");
         JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
@@ -45,37 +54,27 @@ class LatestServiceTest {
         JunitTestUtils.setValue(rs1, "rDate", "2014-11-09 13:18:14.000");
         JunitTestUtils.setValue(rs1, "categoryGb", "");
 
-        List<LatestEntity> rs = List.of(rs1);
-        List<LatestDto> resultList = new ArrayList<LatestDto>();
+        List<LatestEntity> list = List.of(rs1);
 
-        rs.forEach(e -> {
-            LatestDto item = LatestDto.builder()
-                    .saId(e.getSaId())
-                    .mac(e.getMac())
-                    .ctn(e.getCtn())
-                    .catId(e.getCatId())
-                    .catName(e.getCatName())
-                    .rDate(e.getRDate())
-                    .categoryGb(e.getCategoryGb())
-                    .build();
+        List<LatestDto> resultList = new ArrayList<LatestDto>();
+        list.forEach(e->{
+            LatestDto item = latestMapper.toDto(e);
             resultList.add(item);
         });
 
+        // Mock Method
         given(latestDomainService.getLatestList(any())).willReturn(resultList);
-    }
 
-    @Test
-    @DisplayName("LatestServiceTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
-    void getLatestList() {
+        // Mock Object
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021").build();
 
-        String resultFlag = latestService.getLatestList(latestRequestDto).getFlag();
-        log.info(latestService.getLatestList(latestRequestDto).getMessage());
-        Assertions.assertTrue("0000".equals(resultFlag));
-        log.info("LatestServiceTest End");
+        List<LatestDto> responseList = latestDomainService.getLatestList(latestRequestDto);
+        assertThat(responseList.size()).isEqualTo(resultList.size()); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
+
+        log.info("LatestRepositoryTest.getLatestList End");
     }
 }
