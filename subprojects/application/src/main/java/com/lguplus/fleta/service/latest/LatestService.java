@@ -23,7 +23,7 @@ public class LatestService {
                 .recordset(result)
                 .build();
     }
-    /*
+
     public  int deleteLatest(LatestRequestDto latestRequestDto) {
         int result = latestDomainService.deleteLatest(latestRequestDto);
         return result;
@@ -33,5 +33,5 @@ public class LatestService {
         int result = latestDomainService.insertLatest(latestRequestDto);
         return result;
     }
-    */
+
 }
