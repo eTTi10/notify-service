@@ -69,11 +69,11 @@ public class PushAnnounceDomainService {
         });
 
         //2. Send Announcement Push
-        PushResponseDto pushAnnounceResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
+        PushResponseDto pushResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
 
         //3. Send Result
-        String status_code = pushAnnounceResponseDto.getStatusCode();
-        String status_msg = pushAnnounceResponseDto.getStatusMsg();
+        String status_code = pushResponseDto.getStatusCode();
+        String status_msg = pushResponseDto.getStatusMsg();
         log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+status_code+"]["+status_msg+"]");
 
         if(status_code.equals("200")){
