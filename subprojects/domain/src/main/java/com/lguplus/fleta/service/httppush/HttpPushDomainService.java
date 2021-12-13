@@ -70,22 +70,10 @@ public class HttpPushDomainService {
 
         Map<String, Object> paramMap = httpPushSupport.makePushParameters(appId, serviceId, pushType, msg, regId, items);
 
-        OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushSingle(paramMap);
-
-        if (openApiPushResponseDto == null) {
-            return null;
-        }
+        httpPushDomainClient.requestHttpPushSingle(paramMap);
 
         // 성공
-        if (openApiPushResponseDto.getReturnCode().equals("200")) {
-            return HttpPushResponseDto.builder().build();
-        }
-
-        // 실패
-        return HttpPushResponseDto.builder()
-                .code(openApiPushResponseDto.getReturnCode())
-                .message(openApiPushResponseDto.getError().get("MESSAGE"))
-                .build();
+        return HttpPushResponseDto.builder().build();
     }
 
 }
