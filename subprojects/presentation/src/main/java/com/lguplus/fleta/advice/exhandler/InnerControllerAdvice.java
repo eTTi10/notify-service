@@ -65,7 +65,7 @@ public class InnerControllerAdvice {
 
     @ExceptionHandler(NotifyRuntimeException.class)
     public ResponseEntity<InnerResponseDto<ErrorResponseDto>> pushRuntimeExceptionHandler(NotifyRuntimeException ex) {
-        log.debug("[pushRuntimeExceptionHandler] ex:", ex);
+        log.debug("[NotifyRuntimeException] ex:", ex);
 
         ErrorResponseDto errorResponseDto = errorResponseResolver.resolve(ex);
 

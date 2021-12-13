@@ -42,9 +42,4 @@ public class FeignConfig {
         return new ResponseEntityDecoder(new SpringDecoder(getObjectFactory()));
     }
 
-    @Bean
-    @Profile({"local"})
-    Logger.Level feignLoggerLevel() {
-        return Logger.Level.FULL;//NONE, BASIC, HEADERS, FULL
-    }
 }

@@ -65,16 +65,4 @@ public class HttpPushSingleRequestVo {
     @ApiModelProperty(position = 6, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
     private List<String> items;
 
-
-    /*public HttpPushSingleRequestDto convert() {
-        return HttpPushSingleRequestDto.builder()
-                .appId(getAppId())
-                .serviceId(getServiceId())
-                .pushType(getPushType().toUpperCase())
-                .msg(getMsg())
-                .items(getItems())
-                .users(getUsers())
-                .build();
-    }*/
-
 }
