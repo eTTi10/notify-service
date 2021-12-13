@@ -181,7 +181,6 @@ project(':presentation') {
     dependencies {
         implementation project(':application')
         implementation project(':domain')
-        //implementation project(':infrastructure-di')
     }
     bootJar { enabled = false }
     jar { enabled = true }
@@ -190,7 +189,6 @@ project(':presentation') {
 project(':application') {
     dependencies {
         implementation project(':domain')
-        //implementation project(':infrastructure-di')
     }
     bootJar { enabled = false }
     jar { enabled = true }
@@ -207,14 +205,6 @@ project(':domain') {
 project(':infrastructure') {
     dependencies {
         implementation project(':domain')
-        implementation project(':infrastructure-di')
-    }
-    bootJar { enabled = false }
-    jar { enabled = true }
-}
-
-project(':infrastructure-di') {
-    dependencies {
     }
     bootJar { enabled = false }
     jar { enabled = true }
