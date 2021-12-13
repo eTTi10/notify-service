@@ -26,13 +26,13 @@ public class SendSmsVo {
     @ParamAlias("msg")
     private String msg;
 
-    public SendSmsRequestDto convert(){
+/*    public SendSmsRequestDto convert(){
 
         return SendSmsRequestDto.builder()
                 .sCtn(getSCtn().replace("-", "").replace(".", ""))
                 .rCtn(getRCtn().replace("-", "").replace(".", ""))
                 .msg(getMsg())
                 .build();
-    }
+    }*/
 
 }
