@@ -30,6 +30,17 @@ public class PushDomainService {
         return regIdDto;
     }
 
+    public RegIdDto getRegistrationIDbyCtn(SendPushCodeRequestDto sendPushCodeRequestDto) {
+
+        Map<String, String> inputMap = new HashMap<>();
+
+        inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
+        inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
+
+//        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseGet(RegIdDto::new);
+        RegIdDto regIdDto = personalizationDomainClient.getRegistrationID(inputMap);
+        return regIdDto;
+    }
 
 /*
     private final String changeNodeName = "reg_id";
