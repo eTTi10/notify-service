@@ -42,7 +42,7 @@ public class SendSmsCodeVo {
     @ParamAlias("replacement")
     private String replacement;
 
-    public SendSmsCodeRequestDto convert(){
+/*    public SendSmsCodeRequestDto convert(){
 
         return SendSmsCodeRequestDto.builder()
                 .saId(getSaId())
@@ -51,6 +51,6 @@ public class SendSmsCodeVo {
                 .ctn(getCtn())
                 .replacement(getReplacement())
                 .build();
-    }
+    }*/
 
 }

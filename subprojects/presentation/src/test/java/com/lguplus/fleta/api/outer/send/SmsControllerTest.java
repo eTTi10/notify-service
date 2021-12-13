@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.mapper.SendSmsCodeMapper;
 import com.lguplus.fleta.service.send.SmsService;
@@ -56,13 +57,10 @@ class SmsControllerTest {
     void setUp() {
 
         // Mock Dto
-        SmsGatewayResponseDto smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                .flag("0000")
-                .message("성공")
-                .build();
+        SuccessResponseDto successResponseDto = SuccessResponseDto.builder().build();
 
         // Mock Method
-        given(smsService.sendSmsCode(any())).willReturn(smsGatewayResponseDto);
+        given(smsService.sendSmsCode(any())).willReturn(successResponseDto);
 
         //
     }
