@@ -40,24 +40,14 @@ public class PushRequestBodyAnnounceVo {
     /** 보낼 메시지 */
     @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
     @JsonProperty("msg")
-    @ApiModelProperty(position = 4, example = "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", value = "보낼 메시지")
+    @ApiModelProperty(position = 4, example = "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"", value = "보낼 메시지")
     private String msg;
 
     /** 추가할 항목 입력(name!^value) */
-    @NotEmpty(message = "필수 BODY DATA 미존재[items]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C6.class)
+    //@NotEmpty(message = "필수 BODY DATA 미존재[items]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C6.class)
     //@Size(max = 1, message = "최대 호출횟수 초과", groups = Groups.C8.class)  // 1120
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
     private List<String> items;
-/*
-    public PushRequestAnnounceDto convert() {
-        return PushRequestAnnounceDto.builder()
-                .appId(getAppId())
-                .serviceId(getServiceId())
-                .pushType(getPushType())
-                .msg(getMsg())
-                .items(getItems())
-                .build();
-    }
-*/
+
 }
