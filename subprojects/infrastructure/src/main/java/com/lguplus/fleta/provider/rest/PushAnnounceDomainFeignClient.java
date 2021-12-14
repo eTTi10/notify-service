@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
+import com.lguplus.fleta.data.mapper.PushMapper;
 import feign.FeignException;
 import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
     private final PushAnnounceFeignClient pushAnnounceFeignClient;
     private final PushConfig pushConfig;
     private final ObjectMapper objectMapper;
+    private final PushMapper pushMapper;
 
     @Value("${push-comm.announce.server.ip}")
     private String host;
@@ -48,8 +50,6 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
      */
     @Override
     public PushResponseDto requestAnnouncement(Map<String, String> paramMap) {
-        //log.debug("requestAnnouncement:paramMap :::::::::::: {}", paramMap);
-        //log.debug("base url :::::::::::: {}", getBaseUrl(paramMap.get("service_id")));
 
         Map<String, Map<String, String>> sendMap = new HashMap<>();
         sendMap.put("request", paramMap);
@@ -58,7 +58,10 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
             Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
 
-            return objectMapper.convertValue(stateMap, PushResponseDto.class);
+            //String json = objectMapper.writeValueAsString(stateMap);
+            //log.debug("==json:" + json);
+
+            return pushMapper.toResponseDto(stateMap);
         }
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
@@ -70,11 +73,15 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             try {
                 Map<String,Object> retMap = objectMapper.readValue(ex.contentUTF8(),  new TypeReference<Map<String,Object>>(){});
                 Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
-                return objectMapper.convertValue(stateMap, PushResponseDto.class);
+
+                return pushMapper.toResponseDto(stateMap);
             } catch (JsonProcessingException e) {
                 return PushResponseDto.builder().statusCode("5103").build();
             }
-        }
+        } /* catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        } */
     }
 
     /**

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.data.mapper.PushRequestAnnounceMapper;
+import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
@@ -23,28 +23,24 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest
-@ContextConfiguration(classes = {PushAnnounceController.class
+@ContextConfiguration(classes = {PushServiceController.class
         , ArgumentResolverConfig.class
         , MessageConverterConfig.class})
 @Slf4j
-class PushAnnounceControllerTest {
+class PushServiceControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -53,7 +49,7 @@ class PushAnnounceControllerTest {
     private PushAnnouncementService pushAnnouncementService;
 
     @MockBean
-    private PushRequestAnnounceMapper pushRequestAnnounceMapper;
+    private PushRequestMapper pushRequestMapper;
 
     private final ObjectMapper MAPPER = new ObjectMapper()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)

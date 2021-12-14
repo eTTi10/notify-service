@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.client.PushSingleClient;
+import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
@@ -11,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -81,6 +84,10 @@ public class PushSingleSocketClient implements PushSingleClient {
     private String pushCallRetryCnt;
     private int iPushCallRetryCnt;
 
+    @Value("${push-comm.push.delay.time}")
+    private String pushIntervalTime;
+    private long measureIntervalMillis;
+
     //Pool
     private List<GenericObjectPool<PushSocketInfo>> poolList;
 
@@ -137,6 +144,8 @@ public class PushSingleSocketClient implements PushSingleClient {
 */
         iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
 
+        measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
+
     }
 
     @Scheduled(fixedDelay = 1000 * 20)
@@ -177,6 +186,37 @@ public class PushSingleSocketClient implements PushSingleClient {
 
         return poolConfig;
     }
+
+    @Override
+    @Cacheable(value="PUSH_CACHE", key="'statistics.'+#serviceId")
+    public PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
+        log.debug("getPushStatus: init : " + System.currentTimeMillis());
+
+        PushStatDto pushStatDto = PushStatDto.builder()
+                .serviceId(serviceId)
+                .measureIntervalMillis(measureIntervalMillis)
+                .measurePushCount(measurePushCount)
+                .measureStartMillis(measureStartMillis)
+                .build();
+        log.debug("getPushStatus: {}", pushStatDto);
+        return pushStatDto;
+    }
+
+    @Override
+    @CachePut(value="PUSH_CACHE", key="'statistics.'+#serviceId")
+    public PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
+
+        PushStatDto pushStatDto = PushStatDto.builder()
+                .serviceId(serviceId)
+                .measureIntervalMillis(measureIntervalMillis)
+                .measurePushCount(measurePushCount)
+                .measureStartMillis(measureStartMillis)
+                .build();
+        log.debug("putPushStatus: {}", pushStatDto);
+
+        return pushStatDto;
+    }
+
 
 
 }

@@ -2,18 +2,19 @@ package com.lguplus.fleta.service.push;
 
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.config.PushConfig;
+import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -35,6 +36,22 @@ public class PushSingleDomainService {
 
     private AtomicInteger _transactionIDNum1 = new AtomicInteger(0);
     private AtomicInteger _transactionIDNum2 = new AtomicInteger(0);
+
+    private Map<String,Object> requestLock;
+    private Map<String,Object> progressLock;
+    private Map<String, Long> pushProgressCnt;
+
+    @PostConstruct
+    public void initialize(){
+
+        requestLock = pushConfig.getServiceMap();
+        progressLock = pushConfig.getServiceMap();
+
+        pushProgressCnt = new Hashtable<>();
+
+        progressLock.forEach((serviceId, value) -> pushProgressCnt.put(serviceId, 0L));
+
+    }
 
     /**
      * 단건푸시등록
@@ -97,6 +114,55 @@ public class PushSingleDomainService {
             }
             return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", _transactionIDNum2.incrementAndGet());
         }
+    }
+
+    private ImmutablePair<Long, Long> getPushCountInterval(String serviceId) {
+
+        synchronized(requestLock.get(serviceId)) {
+            long resultCnt = 0;
+            long timeoutgap = 0;
+            long curTimeMillis = System.currentTimeMillis();
+            long processCount = getPushProcessCount(serviceId, 0, false);
+
+            // Get ProcessCount, 측정 기준 시간
+            PushStatDto pushStatDto = pushSingleClient.getPushStatus(serviceId, processCount, curTimeMillis);
+
+            // Get 측정 기준 시간 지나침
+            timeoutgap = pushStatDto.getIntervalTimeGap();
+            if(pushStatDto.isIntervalOver()) {
+                pushStatDto = pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
+            }
+            else {
+                resultCnt = pushStatDto.getMeasurePushCount();
+            }
+
+            pushSingleClient.putPushStatus(serviceId, ++resultCnt, pushStatDto.getMeasureStartMillis());
+
+            ImmutablePair<Long, Long> pair = new ImmutablePair<>(resultCnt, timeoutgap);
+            //Long key = pair.getKey();
+            //Long value = pair.getValue();
+            return pair;
+        }
+
+    }
+
+    private Long getPushProcessCount(String serviceId, int changeVal, boolean reset) {
+
+        if ( changeVal != 0 || reset) {
+            synchronized (progressLock.get(serviceId)) {
+                if (changeVal != 0) {
+                    pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
+                }
+                if (reset) {
+                    pushProgressCnt.put(serviceId, 0L);
+                }
+                return pushProgressCnt.get(serviceId);
+            }
+        }
+        else {
+            return pushProgressCnt.get(serviceId);
+        }
+
     }
 
 }
