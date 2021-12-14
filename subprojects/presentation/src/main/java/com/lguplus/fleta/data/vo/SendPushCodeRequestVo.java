@@ -58,5 +58,12 @@ public class SendPushCodeRequestVo {
     @ParamAlias("service_type")
     private String serviceType;
 
+    public String getRegType() {
+        return StringUtils.defaultIfEmpty(regType,"1");
+    }
+
+    public String getServiceType() {
+        return StringUtils.defaultIfEmpty(serviceType,"H");
+    }
 
 }

@@ -4,19 +4,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import com.lguplus.fleta.validation.Groups;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
-@NotBlank(message = "request 가 Null 혹은 빈값 입니다.", groups = Groups.C1.class)
 @JacksonXmlRootElement(localName = "request")
 public class SendPushCodeRequestBodyVo {
 
+    @NotNull(message = "reserve 가 Null 혹은 빈값 입니다.")
     @JacksonXmlProperty(localName = "reserve")
     private Reserve reserve;
 
@@ -45,8 +41,8 @@ public class SendPushCodeRequestBodyVo {
                 .regId(sendPushCodeRequestVo.getRegId())
                 .pushType(sendPushCodeRequestVo.getPushType())
                 .sendCode(sendPushCodeRequestVo.getSendCode())
-                .regType(Optional.ofNullable(sendPushCodeRequestVo.getRegType()).orElse("1"))
-                .serviceType(Optional.ofNullable(sendPushCodeRequestVo.getServiceType()).orElse("H"))
+                .regType(sendPushCodeRequestVo.getRegType())
+                .serviceType(sendPushCodeRequestVo.getServiceType())
                 .address(reserve.address)
                 .unumber(reserve.unumber)
                 .reqDate(reserve.reqDate)
