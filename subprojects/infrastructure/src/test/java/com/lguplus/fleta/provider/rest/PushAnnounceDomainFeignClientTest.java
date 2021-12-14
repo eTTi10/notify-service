@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
+import feign.FeignException;
+import feign.Request;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.Assertions;
@@ -15,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -39,6 +43,7 @@ class PushAnnounceDomainFeignClientTest{
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     Map<String, String> paramMap;
+    String jsonNormal;
 
     @BeforeEach
     void setUp() {
@@ -63,9 +68,13 @@ class PushAnnounceDomainFeignClientTest{
                 paramMap.put(item[0], item[1]);
             }
         });
+
+        jsonNormal = "{\"response\" : {\"msg_id\" : \"PUSH_ANNOUNCEMENT\",\"push_id\" : \"202112140001\",\"status_code\" : \"201\",\"status_msg\" : \"OK\"}}";
+
     }
 
 
+    //@Disabled("")
     @Test
     void requestAnnouncement()  {
 
@@ -86,8 +95,51 @@ class PushAnnounceDomainFeignClientTest{
 
         PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
 
-        Assertions.assertTrue("200".equals("200"));
+        Assertions.assertTrue("200".equals(responseDto.getStatusCode()));
+    }
 
+    @Test
+    void requestAnnouncement_ex1()  {
+        FeignException ex = new FeignExceptionEx(("<" + jsonNormal).getBytes(StandardCharsets.UTF_8));
+        given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
+        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        Assertions.assertTrue("5103".equals(responseDto.getStatusCode()));
+    }
+
+    @Test
+    void requestAnnouncement_ex2()  {
+        FeignException ex = new FeignExceptionEx(jsonNormal.getBytes(StandardCharsets.UTF_8));
+        given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
+
+        PushResponseDto mockDto = PushResponseDto.builder().statusCode("201").build();
+        given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
+
+        PushResponseDto  responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        Assertions.assertTrue("201".equals(responseDto.getStatusCode()));
+    }
+
+    @Test
+    void requestAnnouncement_ex3()  {
+        Map<String, Collection<String>> headers = new HashMap<>();
+        Request request = feign.Request.create(Request.HttpMethod.POST, "localhost:8080", headers, "---".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8, null);
+
+        RetryableException ex = new RetryableExceptionEx(request);
+        given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
+
+        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        Assertions.assertTrue("5102".equals(responseDto.getStatusCode()));
+    }
+
+    static class FeignExceptionEx extends FeignException {
+        protected FeignExceptionEx( byte[] responseBody) {
+            super(0, "-", responseBody);
+        }
+    }
+
+    static class RetryableExceptionEx extends RetryableException {
+        public RetryableExceptionEx(Request request) {
+            super(0, "-", Request.HttpMethod.POST, null, request);
+        }
     }
 
 }

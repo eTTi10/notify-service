@@ -70,6 +70,15 @@ public class PushConfig {
         return propertiesPushServiceLinkType.get(serviceId);
     }
 
+    public Map<String, Object> getServiceMap() {
+        Map<String,Object> serviceMap = new HashMap<>();
+        propertiesPushService.forEach((key, value) -> {
+            serviceMap.put(key, new Object());
+        });
+
+        return serviceMap;
+    }
+
     // Service Password
     private String getSha512Pwd(String servicePwd) {
         // service_pwd : SHA512 암호화

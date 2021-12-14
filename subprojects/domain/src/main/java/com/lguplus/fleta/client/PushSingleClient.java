@@ -1,5 +1,6 @@
 package com.lguplus.fleta.client;
 
+import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 
 import java.util.Map;
@@ -18,5 +19,9 @@ public interface PushSingleClient {
      * @return Push 단건 결과
      */
     PushSingleResponseDto requestPushSingle(Map<String, String> paramMap);
+
+    PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis);
+
+    PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis);
 
 }
