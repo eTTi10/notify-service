@@ -5,8 +5,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
+import com.lguplus.fleta.exception.httppush.*;
 import feign.FeignException;
-import feign.codec.StringDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,54 +73,14 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
     public OpenApiPushResponseDto requestHttpPushSingle(Map<String, Object> paramMap) {
 //        log.debug("base url :::::::::::: {}", getBaseUrl("S"));
 //        log.debug("header :::::::::::: {}", getHeaderMap("S"));
-        try {
+
+        /*try {
             log.debug("paramMap :::::::::::: \n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(paramMap));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        try {
-            return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
-
-        } catch (FeignException ex) {
-            log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
-
-            try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
-
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("기타 오류");
-            }
-        }
-    }
-
-    /**
-     * 공지 푸시
-     *
-     * @param paramMap 공지 푸시 정보
-     * @return 공지 푸시 결과
-     */
-    @Override
-    public OpenApiPushResponseDto requestHttpPushAnnounce(Map<String, Object> paramMap) {
-//        log.debug("base url :::::::::::: {}", getBaseUrl("A"));
-//        log.debug("header :::::::::::: {}", getHeaderMap("A"));
-        try {
-            log.debug("paramMap :::::::::::: \n{}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(paramMap));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            return httpPushFeignClient.requestHttpPushAnnounce(URI.create(getBaseUrl("A")), getHeaderMap("A"), paramMap);
-
-        } catch (FeignException ex) {
-            try {
-                return objectMapper.readValue(ex.contentUTF8(), new TypeReference<OpenApiPushResponseDto>(){});
-
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException("기타 오류");
-            }
-        }
+        return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
     }
 
     /**
@@ -130,13 +90,7 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
      */
     private String getBaseUrl(String kind) {
         // 단건, 멀티
-        if (kind.equals("S")) {
-            return protocolSingle + "://" + hostSingle + ":" + (protocolSingle.equals("http") ? httpPortSingle : httpsPortSingle);
-
-        // 공지
-        } else {
-            return protocolAnnounce + "://" + hostAnnounce + ":" + (protocolAnnounce.equals("http") ? httpPortAnnounce : httpsPortAnnounce);
-        }
+        return protocolSingle + "://" + hostSingle + ":" + httpPortSingle;
     }
 
     /**
@@ -150,7 +104,8 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
         headerMap.put(HttpHeaders.ACCEPT_CHARSET, "utf-8");
         headerMap.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         headerMap.put(HttpHeaders.CONTENT_ENCODING, "utf-8");
-        headerMap.put(HttpHeaders.AUTHORIZATION, kind.equals("S") ? authorizationSingle : authorizationAnnounce);
+        headerMap.put(HttpHeaders.AUTHORIZATION, authorizationSingle);
+//        headerMap.put(HttpHeaders.AUTHORIZATION, kind.equals("S") ? authorizationSingle : authorizationAnnounce);
 
         return headerMap;
     }

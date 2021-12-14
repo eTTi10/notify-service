@@ -2,6 +2,8 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -12,8 +14,8 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
-@SuperBuilder
+@AllArgsConstructor
+@Builder
 public class PushSingleResponseDto {
 
     /** 응답코드 */
@@ -22,8 +24,8 @@ public class PushSingleResponseDto {
 
     @Getter
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @NoArgsConstructor
-    @SuperBuilder
+    @AllArgsConstructor
+    @Builder
     public static class ResponseSingle {
         @JsonProperty("msg_id")
         private String msgId;
