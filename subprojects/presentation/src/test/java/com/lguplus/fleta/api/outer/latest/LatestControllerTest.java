@@ -81,6 +81,7 @@ class LatestControllerTest {
                     .rDate(e.getRDate())
                     .categoryGb(e.getCategoryGb())
                     .build();
+            resultList.add(item);
         });
 
         GenericRecordsetResponseDto<LatestDto> result = GenericRecordsetResponseDto.<LatestDto>genericRecordsetResponseBuilder()
@@ -89,20 +90,18 @@ class LatestControllerTest {
                 .build();
 
         given(latestService.getLatestList(any())).willReturn(result);
-
     }
 
     @Test
-    @DisplayName("정상적으로 리스트 데이터를 수신하는지 확인")
+    @DisplayName("LatestControllerTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
     void getLatestList() throws Exception {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("saId", "500058151453");
         params.add("mac", "001c.627e.039c");
         params.add("ctn", "01055805424");
         params.add("catId", "T3021");
-        System.out.println("444");
 
-        MvcResult mvcResult = mockMvc.perform(get("/smartux/latest")
+        MvcResult mvcResult = mockMvc.perform(get("/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
                         .queryParams(params)
                 ).andExpect(status().isOk())
