@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.net.URI;
+import java.sql.SQLException;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.*;

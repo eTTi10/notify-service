@@ -31,7 +31,7 @@ public class LatestDomainService {
     private final LatestRepository latestRepository;
 
     @Value("${latestroot.latest.maxCount}")
-    private String maxCnt;
+    private int maxCnt;
 
     /**
      * 최신회 정보조회
@@ -60,12 +60,12 @@ public class LatestDomainService {
 
         resultLatestCheckDto.setCode(resultLatestCheckDto.SUCCESS_CODE);
 
-        //int maxCount = ;//yml 속성에서 가져올 것 latest.maxCount = 5 속성에 값이 없다면 기본은 5
-        if(Integer.parseInt(maxCnt) < checkList.size())resultLatestCheckDto.setCode(resultLatestCheckDto.OVER_CODE);//최대값 초과
         if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
-            resultLatestCheckDto.setCode(resultLatestCheckDto.DUPL_CODE);//중복
-        }
+            throw new DuplicateKeyException("기존 데이터 존재");//1201;//중복
 
+        }else if(maxCnt < checkList.size()) {
+            throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과
+        }
         return resultLatestCheckDto;
     }
 
@@ -76,14 +76,15 @@ public class LatestDomainService {
      */
     public int deleteLatest(LatestRequestDto latestRequestDto) {
         int deleteCnt = latestRepository.deleteLatest(latestRequestDto);
-        try {
+//        try {
             if (0 >= deleteCnt) {
                 throw new DeleteNotFoundException("삭제대상없음");//1410
+            } else {
+                return deleteCnt;
             }
-        } catch (Exception e) {
-            throw new RuntimeException();
-        }
-        return latestRepository.deleteLatest(latestRequestDto);
+//        } catch (Exception e) {
+//            throw new RuntimeException();
+//        }
     }
 
     /**
@@ -95,21 +96,11 @@ public class LatestDomainService {
         int insertCnt = 0;
         LatestCheckDto check = getLatestCheckList(latestRequestDto);
 
-        if(check.DUPL_CODE.equals(check.getCode())) {
-            throw new DuplicateKeyException("기존 데이터 존재");//1201
-        };
-        if(check.OVER_CODE.equals(check.getCode())) {
-            throw new ExceedMaxRequestException("최대 등록 갯수 초과");//8001 최대 등록 갯수 초과
-        };
         try {
             insertCnt = latestRepository.insertLatest(latestRequestDto);
         }catch(Exception e){
             if(e instanceof BadSqlGrammarException){
                 throw new DatabaseException();//8999 DB에러
-            }else if(e instanceof SocketException){
-                throw new JpaSocketException("소켓 에러");//5101 소켓 에러
-            }else if(e instanceof SocketTimeoutException){
-                throw new JpaSocketException("소켓 타임 아웃 에러");//5102 소켓 타임 아웃 에러
             }else{
                 throw new RuntimeException();
             }
