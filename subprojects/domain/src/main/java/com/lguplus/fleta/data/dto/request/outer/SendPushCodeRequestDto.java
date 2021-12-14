@@ -26,4 +26,11 @@ public class SendPushCodeRequestDto {
 
     private String serviceType;
 
+    private String address;
+
+    private String unumber;
+
+    private String reqDate;
+
+    private List<String> items;
 }

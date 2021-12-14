@@ -1,6 +1,7 @@
 package com.lguplus.fleta.api.outer.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.mapper.SendSmsCodeMapper;
 import com.lguplus.fleta.data.vo.SendSmsCodeVo;
@@ -16,7 +17,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
-@Api(tags = "sendSmsCode", description = "SMS 발송요청")
+@Api(tags = "SendSmsCode", description = "SMS 발송요청")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -38,7 +39,7 @@ public class SmsController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true, name="ctn",     value="순번: 4<br>자리수: <br>설명: 수신휴대폰번호", example="01051603997"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="replacement",   value="순번: 5<br>자리수: <br>설명: 대체문구", example="http://google.com/start/we09gn2ks")})
     @PostMapping("/mims/sendSms")
-    public SmsGatewayResponseDto sendSmsCode(@ApiIgnore @Valid SendSmsCodeVo request) {
+    public SuccessResponseDto sendSmsCode(@ApiIgnore @Valid SendSmsCodeVo request) {
 
         SendSmsCodeRequestDto requestDto = sendSmsCodeMapper.toDto(request);
 

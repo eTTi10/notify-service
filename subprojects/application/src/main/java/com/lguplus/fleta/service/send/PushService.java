@@ -1,11 +1,21 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.RegistrationIdResponseDto;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
+import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+import com.lguplus.fleta.service.httppush.HttpPushDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -13,19 +23,33 @@ import org.springframework.stereotype.Service;
 public class PushService {
 
     private final PushDomainService pushDomainService;
+    private final HttpPushDomainService httpPushDomainService;
+    public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-    public RegistrationIdResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+//        String registrationId = pushDomainService.getRegistrationID(sendPushCodeRequestDto).getRegId();
+//         TODO Personalization Domain의 서비스가 가능할 때 Fein으로 연결하고 아래는 주석처리
+        String registrationId = "M00020200205";
+        List<String> users = new ArrayList<>();
+        users.add(registrationId);
 
-
-        //TODO http push domain service에 연결 21.11.17 moutlaw
-//        String status = httpPushSingleDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-        String registrationId = pushDomainService.getRegistrationID(sendPushCodeRequestDto).getRegId();
-
-        log.debug("PushService - sendPushCode() - registrationId : " + registrationId);
-
-        return RegistrationIdResponseDto.builder()
-                .regId(registrationId)
+        HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
+                .appId("")
+                .serviceId("")
+                .pushType("")
+                .msg("")
+                .users(users)
                 .build();
+
+        HttpPushResponseDto httpPushResponseDto =  httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+
+        if (httpPushResponseDto.getCode().equals("200")) {
+            //"성공"
+            return SuccessResponseDto.builder().build();
+        }
+        else {
+            throw new NotifyHttpPushRuntimeException();
+        }
+
     }
 
 

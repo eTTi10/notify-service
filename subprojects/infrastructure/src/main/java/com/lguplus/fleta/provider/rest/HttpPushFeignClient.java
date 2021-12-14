@@ -1,5 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
+import com.lguplus.fleta.config.HttpPushFeignConfig;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,7 +15,7 @@ import java.util.Map;
  *
  * 단건, 멀티, 공지 푸시등록
  */
-@FeignClient(name = "httppush", url = "${singlepush.server.ip}")
+@FeignClient(name = "httppush", url = "${singlepush.server.ip}", configuration = HttpPushFeignConfig.class)
 public interface HttpPushFeignClient {
 
     /**
