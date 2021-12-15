@@ -129,7 +129,31 @@ class LatestControllerTest {
 
 
     //####################### Start 알림삭제 ######################
+    @Test
+    @DisplayName("LatestControllerTest.deleteLatest 정상적으로 데이터를 삭제하는지 확인")
+    void deleteLatest() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500058151453");
+        params.add("mac", "001c.627e.039c");
+        params.add("ctn", "01055805424");
+        params.add("catId", "T3021");
 
+        MvcResult mvcResult = mockMvc.perform(delete("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.deleteLatest End");
+    }
     //####################### End 알림삭제 ######################
 
 

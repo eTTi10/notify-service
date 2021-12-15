@@ -81,6 +81,22 @@ class LatestServiceTest {
 
     //####################### Start 알림삭제 ######################
 
+    @Test
+    @DisplayName("LatestServiceTest.deleteLatest 정상적으로 리스트 데이터를 삭제하는지 확인")
+    void deleteLatest() {
+        given(latestDomainService.deleteLatest(any())).willReturn(1);
+
+        LatestRequestDto latestRequestDto = LatestRequestDto.builder()
+                .saId("500023630832")
+                .mac("001c.6284.30a4")
+                .ctn("01080808526")
+                .catId("M0241").build();
+
+        int resultCnt = latestService.deleteLatest(latestRequestDto);
+        log.info("삭제테스트-resultCnt:"+resultCnt);
+        Assertions.assertTrue(1 == resultCnt);
+        log.info("LatestServiceTest.deleteLatest End");
+    }
     //####################### End 알림삭제 ######################
 
 
