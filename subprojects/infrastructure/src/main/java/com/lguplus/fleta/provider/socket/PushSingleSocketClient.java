@@ -59,6 +59,8 @@ public class PushSingleSocketClient implements PushSingleClient {
     private String destinationIp;
     @Value("${push-comm.push.socket.close_secend}")
     private String closeSecond;
+    @Value("${push-comm.push.socket.initCnt}")
+    private String pushSocketInitCnt;
 
     //LG Push
     @Value("${push-comm.lgpush.server.ip}")
@@ -75,6 +77,8 @@ public class PushSingleSocketClient implements PushSingleClient {
     private String lg_destinationIp;
     @Value("${push-comm.lgpush.socket.close_secend}")
     private String lg_closeSecond;
+    @Value("${push-comm.lgpush.socket.initCnt}")
+    private String lg_pushSocketInitCnt;
 
     //LG Push Service ID
     @Value("${push-comm.lgpush.service_id}")
@@ -137,14 +141,17 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(host, port, timeout, channelPort, defaultChannelHost, destinationIp, closeSecond, false)
                 , getPoolConfig(Integer.valueOf(socketMax), Integer.valueOf(socketMin))));
-/*
+
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(lg_host, lg_port, lg_timeout, lg_channelPort, lg_defaultChannelHost, lg_destinationIp, lg_closeSecond, true)
                 , getPoolConfig(Integer.valueOf(lgSocketMax), Integer.valueOf(lgSocketMin))));
-*/
+
         iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
+
+        // Init Socket
+        poolList.forEach(p -> initPoolSocketInfo(p, ((PushSocketConnFactory)p.getFactory()).isLgPush() ? Integer.parseInt(lg_pushSocketInitCnt) : Integer.parseInt(pushSocketInitCnt)));
 
     }
 
@@ -156,7 +163,7 @@ public class PushSingleSocketClient implements PushSingleClient {
 
         poolList.forEach(p -> {
             //p.evict();
-            log.info("socketClientSch: Hdtv Time:{} Active{}/Idle{}/Wait{}", strDate,
+            log.debug("socketClientSch: Hdtv Time:{} Active{}/Idle{}/Wait{}", strDate,
                     p.getNumActive(), p.getNumIdle(), p.getNumWaiters());
         });
     }
@@ -176,15 +183,30 @@ public class PushSingleSocketClient implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<PushSocketInfo>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal);
-        poolConfig.setMinIdle(minIdle);
+        poolConfig.setMaxTotal(maxTotal);//200);
+        poolConfig.setMaxIdle(maxTotal);//200);
+        poolConfig.setMinIdle(minIdle);//50);
         poolConfig.setBlockWhenExhausted(false);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setTestOnBorrow(true);
-        poolConfig.setTestOnReturn(true);
-        poolConfig.setTestWhileIdle(true);
-        poolConfig.setTimeBetweenEvictionRunsMillis(30 * 1000);
+        poolConfig.setTestOnReturn(true);//true);
+        poolConfig.setTestWhileIdle(true);//true);
+        poolConfig.setTimeBetweenEvictionRunsMillis(20 * 1000);
 
         return poolConfig;
+    }
+
+    private void initPoolSocketInfo(GenericObjectPool<PushSocketInfo> pool, int initCnt) {
+        List<PushSocketInfo> socketInfoList = new ArrayList<>();
+        try {
+            for(int i=0; i<initCnt; i++) {
+                socketInfoList.add(pool.borrowObject());
+            }
+            for(int i=0; i<initCnt; i++) {
+                pool.returnObject(socketInfoList.get(i));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -198,7 +220,7 @@ public class PushSingleSocketClient implements PushSingleClient {
                 .measurePushCount(measurePushCount)
                 .measureStartMillis(measureStartMillis)
                 .build();
-        log.debug("getPushStatus: {}", pushStatDto);
+        //log.debug("getPushStatus: {}", pushStatDto);
         return pushStatDto;
     }
 
@@ -212,7 +234,7 @@ public class PushSingleSocketClient implements PushSingleClient {
                 .measurePushCount(measurePushCount)
                 .measureStartMillis(measureStartMillis)
                 .build();
-        log.debug("putPushStatus: {}", pushStatDto);
+        //log.debug("putPushStatus: {}", pushStatDto);
 
         return pushStatDto;
     }

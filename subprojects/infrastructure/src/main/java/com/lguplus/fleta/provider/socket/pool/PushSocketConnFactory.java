@@ -126,6 +126,9 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
             hostname = defaultChannelHost;
         }
 
+        hostname = hostname.replace("DESKTOP-", "");
+        hostname = hostname + hostname;
+
         String channelHostNm = (hostname + "00000000").substring(0, 6);
         String channelPortNm = (channelPort + "0000").substring(0, 4);
 
