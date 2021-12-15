@@ -3,7 +3,6 @@ package com.lguplus.fleta.data.dto.response.inner;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,10 +11,12 @@ import java.util.Map;
  * Http Push 에서 사용하는 Open API 푸시 호출 공통 응답결과 DTO
  *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@SuperBuilder
 public class OpenApiPushResponseDto {
 
     /** 응답코드 */
