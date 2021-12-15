@@ -30,7 +30,6 @@ public class LatestJpaJpaRepository implements LatestRepository {
     @Override
     public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
         String catId = latestRequestDto.getCatId();
-        if(StringUtils.isEmpty(catId)){catId="";};
         String sql = "SELECT SA_ID, MAC, CTN, REG_ID, CAT_ID, CAT_NAME, R_DATE, CATEGORY_GB \n" +
                 "FROM SMARTUX.PT_UX_LATEST \n" +
                 " WHERE  SA_ID = :saId " +

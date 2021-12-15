@@ -87,7 +87,12 @@ class LatestDomainServiceTest {
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
-                .catId("T3021").build();
+                .catId("T3021")
+                .regId("500023630832")
+                .catName("놀라운 대회 스타킹")
+                .rDate("")
+                .categoryGb("-")
+                .build();
         SQLException sqlException = new SQLException();
         given(latestRepository.insertLatest(any())).willThrow(new BadSqlGrammarException("task","sql", sqlException));
         Exception thrown = assertThrows(DatabaseException.class, () -> {
@@ -106,7 +111,12 @@ class LatestDomainServiceTest {
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
-                .catId("T3021").build();
+                .catId("T3021")
+                .regId("500023630832")
+                .catName("놀라운 대회 스타킹")
+                .rDate("")
+                .categoryGb("-")
+                .build();
         given(latestRepository.insertLatest(any())).willThrow(new RuntimeException());
         Exception thrown = assertThrows(RuntimeException.class, () -> {
             latestDomainService.insertLatest(latestRequestDto);

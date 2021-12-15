@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.lguplus.fleta.data.dto.PlainTextibleDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
+import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.Serializable;
 
@@ -21,7 +23,8 @@ public class LatestRequestDto implements PlainTextibleDto, Serializable {
 
     private String ctn; //전화번호 or 단말 맥 어드레스
 
-    private String catId; //카테고리 아이디
+    @Builder.Default
+    private String catId = ""; //카테고리 아이디
 
     private String regId; //Push 할 Reg ID
 
