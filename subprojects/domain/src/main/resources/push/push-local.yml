@@ -19,9 +19,9 @@ push-comm:
       cacheName: pushDelayCnt
       reqCnt: '100'
     socket:
-      max: '50' # 20
+      max: '300' # 20
       close_secend: '120'
-      min: '2'
+      min: '100'
       channelID: P0Agt # PsAgt
       timeout: '5000' # 2000
       channelNum: '0000'
@@ -57,8 +57,8 @@ push-comm:
       ip: 211.115.75.227
       port: '8100'
     socket:
-      max: '50'
-      min: '5'
+      max: '200'
+      min: '30'
       close_secend: '90'
       initCnt: '3'
       channelNum: '0000'
@@ -82,12 +82,12 @@ push-service:
       service_pwd: lguplushdtvgcm
   key8:
     push:
-      service_pwd: lguplusuflix
       service_id: '30015'
+      service_pwd: lguplusuflix
   key9:
     push:
-      service_pwd: lguplushdtvapns
       service_id: '30021'
+      service_pwd: lguplushdtvapns
   key10:
     push:
       service_id: '30022'
@@ -107,8 +107,8 @@ push-service:
       service_pwd: musicshow_gcm
   key14:
     push:
-      service_pwd: musicshow_apns
       service_id: '30107'
+      service_pwd: musicshow_apns
   key15:
     push:
       service_id: '30105'
@@ -119,9 +119,9 @@ push-service:
       service_pwd: ugolf_APNS
   key17:
     push:
-      service_pwd: uvrapp_gcm
       service_id: '30112'
+      service_pwd: uvrapp_gcm
   key18:
     push:
-      service_pwd: lguplus_game_live
       service_id: '30125'
+      service_pwd: lguplus_game_live

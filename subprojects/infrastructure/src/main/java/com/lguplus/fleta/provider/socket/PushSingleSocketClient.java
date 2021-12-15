@@ -137,11 +137,11 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(host, port, timeout, channelPort, defaultChannelHost, destinationIp, closeSecond, false)
                 , getPoolConfig(Integer.valueOf(socketMax), Integer.valueOf(socketMin))));
-/*
+
         poolList.add(new GenericObjectPool<PushSocketInfo>(
                 new PushSocketConnFactory(lg_host, lg_port, lg_timeout, lg_channelPort, lg_defaultChannelHost, lg_destinationIp, lg_closeSecond, true)
                 , getPoolConfig(Integer.valueOf(lgSocketMax), Integer.valueOf(lgSocketMin))));
-*/
+
         iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
@@ -176,12 +176,13 @@ public class PushSingleSocketClient implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<PushSocketInfo>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal);
-        poolConfig.setMinIdle(minIdle);
+        poolConfig.setMaxTotal(maxTotal);//200);
+        poolConfig.setMaxIdle(maxTotal);//200);
+        poolConfig.setMinIdle(minIdle);//50);
         poolConfig.setBlockWhenExhausted(false);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setTestOnBorrow(true);
-        poolConfig.setTestOnReturn(true);
-        poolConfig.setTestWhileIdle(true);
+        poolConfig.setTestOnReturn(false);//true);
+        poolConfig.setTestWhileIdle(false);//true);
         poolConfig.setTimeBetweenEvictionRunsMillis(30 * 1000);
 
         return poolConfig;

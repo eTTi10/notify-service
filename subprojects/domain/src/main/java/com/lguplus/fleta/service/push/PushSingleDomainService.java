@@ -5,6 +5,7 @@ import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +73,7 @@ public class PushSingleDomainService {
 
         String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
         if (servicePwd == null) {
+            log.error("ServiceId Not Found:" + dto.getServiceId());
             throw new ServiceIdNotFoundException();
         }
         paramMap.put("service_passwd", servicePwd);
@@ -92,9 +94,12 @@ public class PushSingleDomainService {
             }
         });
 
-        pushSingleClient.requestPushSingle(paramMap);
-
-        return PushClientResponseDto.builder().build();
+        PushSingleResponseDto pushSingleResponseDto = pushSingleClient.requestPushSingle(paramMap);
+        return PushClientResponseDto.builder()
+                .code(pushSingleResponseDto.getResponseData().getStatusCode())
+                .message(pushSingleResponseDto.getResponseData().getStatusMsg())
+                .build();
+        //return PushClientResponseDto.builder().build();
     }
 
     private boolean isLgPushServiceId(String serviceId) {
