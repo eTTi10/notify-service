@@ -2,7 +2,6 @@ package com.lguplus.fleta.service.latest;
 
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -13,13 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -32,8 +29,9 @@ class LatestServiceTest {
     @InjectMocks
     LatestService latestService;
 
+    //####################### Start 알림조회 ######################
     @BeforeEach
-    void getLatestListSetUp() {
+    void getLatestListBefore() {
 
         LatestEntity rs1 = new LatestEntity();
         JunitTestUtils.setValue(rs1, "saId", "500058151453");
@@ -76,6 +74,44 @@ class LatestServiceTest {
         String resultFlag = latestService.getLatestList(latestRequestDto).getFlag();
         log.info(latestService.getLatestList(latestRequestDto).getMessage());
         Assertions.assertTrue("0000".equals(resultFlag));
-        log.info("LatestServiceTest End");
+        log.info("LatestServiceTest.getLatestList End");
     }
+    //####################### End 알림조회 ######################
+
+
+    //####################### Start 알림삭제 ######################
+
+    //####################### End 알림삭제 ######################
+
+
+
+
+    //####################### Start 알림등록 ######################
+    @BeforeEach
+    void insertLatestBefore() {
+        List<LatestDto> resultList = new ArrayList<LatestDto>();
+        given(latestDomainService.getLatestList(any())).willReturn(resultList);
+    }
+
+    @Test
+    @DisplayName("LatestControllerTest.insertLatest 정상적으로 데이터를 등록하는지 확인")
+    void insertLatest() {
+        given(latestDomainService.insertLatest(any())).willReturn(1);
+
+        LatestRequestDto latestRequestDto = LatestRequestDto.builder()
+                .saId("500023630832")
+                .mac("001c.6284.30a4")
+                .ctn("01080808526")
+                .catId("M0241")
+                .regId("500023630832")
+                .catName("신 삼국지 32회")
+                .rDate("2014-10-27 16:19:38.000")
+                .categoryGb("").build();
+
+        int resultCnt = latestService.insertLatest(latestRequestDto);
+        log.info(resultCnt+"::::::::resultCnt");
+        Assertions.assertTrue(1 == resultCnt);
+        log.info("LatestServiceTest.insertLatest End");
+    }
+    //####################### End 알림등록 ######################
 }
