@@ -61,9 +61,6 @@ class LatestControllerTest {
     private LatestPostRequestMapper latestPostRequestMapper;
 
 
-
-
-    //####################### Start 알림조회 ######################
     @BeforeEach
     void getLatestListBefore() throws Exception {
 
@@ -99,7 +96,46 @@ class LatestControllerTest {
                 .build();
 
         given(latestService.getLatestList(any())).willReturn(result);
+
     }
+
+
+    //####################### Start 알림등록 ######################
+    @Test
+    @DisplayName("LatestControllerTest.insertLatest 정상적으로 데이터를 등록하는지 확인")
+    void insertLatest() throws Exception {
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500023630832");
+        params.add("mac", "001c.6284.30a4");
+        params.add("ctn", "01080808526");
+        params.add("catId", "M0241");
+        params.add("regId", "500023630832");
+        params.add("catName", "신 삼국지 32회");
+        params.add("rDate", "2014-10-27 16:19:38.000");
+        params.add("categoryGb", "");
+
+        MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.insertLatest End");
+    }
+    //####################### End 알림등록 ######################
+
+
+    //####################### Start 알림조회 ######################
+
 
     @Test
     @DisplayName("LatestControllerTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
@@ -115,6 +151,7 @@ class LatestControllerTest {
                         .queryParams(params)
                 ).andExpect(status().isOk())
                 .andReturn();
+
         MockHttpServletResponse response = mvcResult.getResponse();
         int status = response.getStatus();
         String responseString = response.getContentAsString();
@@ -157,36 +194,5 @@ class LatestControllerTest {
     //####################### End 알림삭제 ######################
 
 
-    //####################### Start 알림등록 ######################
-    @Test
-    @DisplayName("LatestControllerTest.deleteLatest 정상적으로 데이터를 등록하는지 확인")
-    void insertLatest() throws Exception {
 
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("saId", "500023630832");
-        params.add("mac", "001c.6284.30a4");
-        params.add("ctn", "01080808526");
-        params.add("catId", "M0241");
-        params.add("regId", "500023630832");
-        params.add("catName", "신 삼국지 32회");
-        params.add("rDate", "2014-10-27 16:19:38.000");
-        params.add("categoryGb", "");
-
-        MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
-                        .accept(MediaType.APPLICATION_JSON)
-                        .queryParams(params)
-                ).andExpect(status().isOk())
-                .andReturn();
-
-        MockHttpServletResponse response = mvcResult.getResponse();
-        int status = response.getStatus();
-        String responseString = response.getContentAsString();
-
-        assertThat(status).isEqualTo(200);
-        assertThat(responseString).contains("0000");
-
-        log.info("RESULT >> ["+responseString+"]");
-        log.info("LatestControllerTest.insertLatest End");
-    }
-    //####################### End 알림삭제 ######################
 }
