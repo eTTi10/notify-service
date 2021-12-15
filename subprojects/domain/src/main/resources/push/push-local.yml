@@ -17,15 +17,15 @@ push-comm:
     delay:
       time: '1'
       cacheName: pushDelayCnt
-      reqCnt: '100'
+      reqCnt: '100' # '100'
     socket:
       max: '300' # 20
-      close_secend: '120'
-      min: '100'
-      channelID: P0Agt # PsAgt
-      timeout: '5000' # 2000
+      close_secend: '170'
+      min: '150'
+      channelID: PsAgt # PsAgt
+      timeout: '2000' # 2000
       channelNum: '0000'
-      initCnt: '3'
+      initCnt: '50'
     #Multi Push 호출 시 TPS 값 설정
     multi:
       socket:
@@ -60,7 +60,7 @@ push-comm:
       max: '200'
       min: '30'
       close_secend: '90'
-      initCnt: '3'
+      initCnt: '20'
       channelNum: '0000'
       timeout: '2000'
       channelID: PsAgt
