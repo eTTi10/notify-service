@@ -4,10 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.swing.text.MaskFormatter;
@@ -19,10 +16,12 @@ import java.util.Map;
  * Http Push 에서 사용하는 공통 응답결과 DTO
  *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@SuperBuilder
 @ApiModel(value = "Http Push 응답결과 DTO", description = "Http Push 에서 사용하는 공통 응답결과 DTO")
 public class HttpPushResponseDto {
 
