@@ -61,7 +61,7 @@ public class HttpPushSupport {
             digest.update(password.getBytes(StandardCharsets.UTF_8));
             return String.format("%0128x", new BigInteger(1, digest.digest()));
 
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("기타 오류");
         }
     }
@@ -171,86 +171,6 @@ public class HttpPushSupport {
     }
 
     /**
-     * 공지 Open API 를 호춣할 파라미터를 만든다.
-     *
-     * @param appId 어플리케이션 ID
-     * @param serviceId 서비스 등록시 부여받은 Unique ID
-     * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @param msg 보낼 메시지
-     * @param items 추가할 항목 입력(name!^value)
-     * @return 공지 Open API 를 호춣할 생성된 파라미터
-     */
-    public Map<String, Object> makePushParameters(String appId, String serviceId, String pushType, String msg, List<String> items) {
-//        log.debug("before msg ::::::::::::::::::::::::::::::: {}", msg);
-
-        String servicePwd = getEncryptedServicePassword(serviceId);
-
-        // 4자리수 넘지 않도록 방어코드
-        if (HttpServiceProps.announceTransactionIDNum.get() >= 9999) {
-            HttpServiceProps.announceTransactionIDNum.set(0);
-        }
-
-//        log.debug("transactionDate :::::::: {}", transactionDate);
-
-        int transactionNum = HttpServiceProps.announceTransactionIDNum.incrementAndGet();
-
-        String transactionId = getTransactionId(transactionNum);
-
-//        log.debug("transactionId :::::::: {}", transactionId);
-
-        // PAYLOAD
-        String payload = "";
-        String gcmMultiCount = HttpServiceProps.GCM_MULTI_COUNT;
-
-        // 안드로이드
-        if (pushType.equals("G")) {
-            Function<String, Pair<String, String>> gcmAnnounceOpenApiPayload = m -> {
-                String[] config;
-                String tmpGcmMultiCount = "";
-
-                for (String item : items) {
-                    config = item.split("!\\^");
-
-                    if (config.length >= 2) {
-                        if (config[0].equalsIgnoreCase("gcm_multi_count")) {
-                            tmpGcmMultiCount = config[1];
-                        }
-                    }
-                }
-
-                return Pair.of("{" + replacePayload(m) + "}", tmpGcmMultiCount);
-            };
-
-            Pair<String, String> tmpPair = gcmAnnounceOpenApiPayload.apply(msg);
-            payload = tmpPair.getLeft();
-            gcmMultiCount = tmpPair.getRight();
-
-        // 아이폰("A")
-        } else {
-            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
-
-            payload = apnOpenApiPayload.apply(Pair.of(msg, items));
-        }
-
-//        log.debug("after msg ::::::::::::::::::::::::::::::: {}", payload);
-
-        HttpPushDto httpPushDto = HttpPushDto.builder()
-                .requestPart(HttpServiceProps.ANNOUNCE_REQUEST_PART)
-                .requestTime(getRequestTime())
-                .pushId(transactionId)
-                .serviceId(serviceId)
-                .servicePass(servicePwd)
-                .applicationId(appId)
-                .payload(payload)
-                .gcmMultiCount(gcmMultiCount)
-                .build();
-
-//        log.debug("HttpPushDto ::::::::::::::::::::::::::: {}", httpPushDto);
-
-        return makePushMap(httpPushDto, "A", pushType);
-    }
-
-    /**
      * Open API 를 호출하기 위한 푸시맵을 만든다.
      *
      * @param httpPushDto HttpPush 관련 DTO
@@ -274,17 +194,8 @@ public class HttpPushSupport {
         }
 
         // 단건, 멀티
-        if (kind.equals("S")) {
-            pushMap.put("SERVICE_KEY", httpPushDto.getServiceKey());
-            pushMap.put("SUB_SERVICE_ID", httpPushDto.getSubServiceId());
-
-        // 공지
-        } else {
-            // GCM(안드로이드)
-            if (pushType.equals("G")) {
-                pushMap.put("GCM_MULTI_COUNT", httpPushDto.getGcmMultiCount());
-            }
-        }
+        pushMap.put("SERVICE_KEY", httpPushDto.getServiceKey());
+        pushMap.put("SUB_SERVICE_ID", httpPushDto.getSubServiceId());
 
         return pushMap;
     }

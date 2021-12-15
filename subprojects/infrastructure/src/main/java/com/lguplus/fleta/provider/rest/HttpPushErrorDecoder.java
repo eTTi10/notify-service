@@ -12,7 +12,7 @@ public class HttpPushErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        log.debug("{} 에러 발생 :::::::::::::: {} body:\n{}", methodKey, response.status(), response.body());
+        log.debug("\n{} 에러 발생 :::::::::::::: status: {}\nbody: {}", methodKey, response.status(), response.body());
 
         switch (response.status()) {
             case 202:
