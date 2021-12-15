@@ -9,8 +9,6 @@ import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
-import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
-import com.lguplus.fleta.exception.latest.JpaSocketException;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.stereotype.Component;
 
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,18 +70,19 @@ public class LatestDomainService {
      * @param latestRequestDto 최신회 정보삭제를 위한 DTO                                                                                                                                                                                 +
      * @return 삭제건수
      */
+    /*
     public int deleteLatest(LatestRequestDto latestRequestDto) {
         int deleteCnt = latestRepository.deleteLatest(latestRequestDto);
-//        try {
+        try {
             if (0 >= deleteCnt) {
                 throw new DeleteNotFoundException("삭제대상없음");//1410
-            } else {
-                return deleteCnt;
             }
-//        } catch (Exception e) {
-//            throw new RuntimeException();
-//        }
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
+        return latestRepository.deleteLatest(latestRequestDto);
     }
+    */
 
     /**
      * 최신회 정보등록
@@ -107,5 +104,4 @@ public class LatestDomainService {
         }
         return insertCnt;
     }
-
 }

@@ -155,22 +155,6 @@ class LatestJpaJpaRepositoryTest {
 
 
     //####################### Start 알람 리스트삭제 테스트 ######################
-    @Test
-    @DisplayName("LatestJpaJpaRepositoryTest.deleteLatest 정상적으로 리스트 데이터를 등록하는지 확인")
-    void deleteLatest() {
-        log.info(GET_UUID);
-        // Mock Object
-        LatestRequestDto latestRequestDto = LatestRequestDto.builder()
-                .saId(GET_UUID)
-                .mac(MAC)
-                .ctn(CTN)
-                .catId(CAT_ID)
-                .build();
-        int resultCnt = latestRepository.deleteLatest(latestRequestDto);
-        // 결과값은 0건 또는 1건
-        assertThat(resultCnt == 1);
 
-        log.info("LatestJpaJpaRepositoryTest.deleteLatest End");
-    }
     //####################### End 알람 리스트삭제 테스트 ######################
 }

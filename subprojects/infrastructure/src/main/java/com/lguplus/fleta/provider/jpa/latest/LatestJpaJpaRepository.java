@@ -73,6 +73,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @param latestRequestDto
      * @return
      */
+    /*
     @Override
     @Modifying
     @Transactional
@@ -92,6 +93,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
         int execCnt = nativeQuery.executeUpdate();
         return execCnt;
     }
+    */
 
 
     /**
@@ -127,5 +129,4 @@ public class LatestJpaJpaRepository implements LatestRepository {
         return execCnt;
 
     }
-
 }
