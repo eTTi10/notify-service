@@ -17,7 +17,7 @@ public class MmsService {
 
     private final MmsAgentDomainService mmsAgentDomainService;
 
-    public SuccessResponseDto sendMms(SendMmsRequestDto request)  throws Exception{
+    public SuccessResponseDto sendMms(SendMmsRequestDto request) {
 
         return mmsAgentDomainService.sendMmsCode(request);
     }
