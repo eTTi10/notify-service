@@ -5,9 +5,8 @@ import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
-import com.lguplus.fleta.exception.push.MaxRequestOverException;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
+import com.lguplus.fleta.exception.push.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -16,7 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -40,6 +42,13 @@ public class PushSingleDomainService {
     private String pushDelayReqCnt;
     private Long lPushDelayReqCnt;
 
+    @Value("${push-comm.push.call.retryCnt}")
+    private String pushCallRetryCnt;
+    private int iPushCallRetryCnt;
+
+    @Value("${push-comm.retry.exclud.codeList}")
+    private String retryExcludeCodeList;
+
     private AtomicInteger _transactionIDNum1 = new AtomicInteger(0);
     private AtomicInteger _transactionIDNum2 = new AtomicInteger(0);
 
@@ -51,6 +60,7 @@ public class PushSingleDomainService {
     public void initialize(){
 
         lPushDelayReqCnt = Long.parseLong(pushDelayReqCnt);
+        iPushCallRetryCnt = Integer.parseInt(pushCallRetryCnt);
 
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
@@ -77,11 +87,11 @@ public class PushSingleDomainService {
 
         // 처리량 초과
         if (pushCnt > lPushDelayReqCnt) {
-            log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000-pushWaitTime);
+            log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime);
 
             // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
             // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
-            if(lPushDelayReqCnt * 2 < pushCnt) {
+            if (lPushDelayReqCnt * 2 < pushCnt) {
                 resetPushProgressCnt(dto.getServiceId());
             }
             throw new MaxRequestOverException();
@@ -107,32 +117,82 @@ public class PushSingleDomainService {
         }
         paramMap.put("service_passwd", servicePwd);
 
-        if("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+        if ("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
             paramMap.put("push_app_id", oldLgPushAppId);
             paramMap.put("noti_type", oldLgPushNotiType);
-            paramMap.put("regist_id", dto.getRegId());//dto.getServiceKey());
-        }
-        else {
-            paramMap.put("service_key", dto.getRegId());//dto.getServiceKey());
+            paramMap.put("regist_id", dto.getRegId());
+        } else {
+            paramMap.put("service_key", dto.getRegId());
         }
 
         dto.getItems().forEach(e -> {
             String[] item = e.split("\\!\\^");
-            if(item.length >= 2){
+            if (item.length >= 2) {
                 paramMap.put(item[0], item[1]);
             }
         });
 
-        setPushProgressCnt(dto.getServiceId(), +1);
+        PushResponseDto pushResponseDto = null;
 
-        PushSingleResponseDto pushSingleResponseDto = pushSingleClient.requestPushSingle(paramMap);
+        //2. Send Push
+        for (int i = 0; i < iPushCallRetryCnt; i++) {
 
-        setPushProgressCnt(dto.getServiceId(), -1);
+            setPushProgressCnt(dto.getServiceId(), +1);
 
-        return PushClientResponseDto.builder()
-                .code(pushSingleResponseDto.getResponseData().getStatusCode())
-                .message(pushSingleResponseDto.getResponseData().getStatusMsg())
+            pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
+
+            setPushProgressCnt(dto.getServiceId(), -1);
+
+            //3. Send Result
+            String status_code = pushResponseDto.getStatusCode();
+            //String status_msg = pushResponseDto.getStatusMsg();
+
+            if (status_code.equals("200")) {
+                log.debug("[requestPushSingle][" + status_code + "] [SUCCESS]");
+            } else {
+                log.debug("[requestPushSingle][" + status_code + "] [FAIL]");
+
+                boolean isRetryExclude = isRetryExcludeCode(status_code);
+
+                if (!isRetryExclude && (i + 1) < iPushCallRetryCnt) {
+                    continue;
+                }
+
+                //실패
+                switch (status_code) {
+                    case "202":
+                        throw new AcceptedException();
+                    case "400":
+                        throw new BadRequestException();
+                    case "401":
+                        throw new UnAuthorizedException();
+                    case "403":
+                        throw new ForbiddenException();
+                    case "404":
+                        throw new NotFoundException();
+                    case "410":
+                        throw new NotExistRegistIdException();
+                    case "412":
+                        throw new PreConditionFailedException();
+                    case "500":
+                        throw new InternalErrorException();
+                    case "502":
+                        throw new ExceptionOccursException();
+                    case "503":
+                        throw new ServiceUnavailableException();
+                    case "5102":
+                        throw new SocketTimeException();
+                    case "5103": //FeignException
+                        throw new SocketException();
+                    default:
+                        throw new PushEtcException();//("기타 오류"); //9999
+                }
+            }
+        }
+
+        return PushClientResponseDto.builder().code(pushResponseDto.getStatusCode()).message(pushResponseDto.getStatusMsg())
                 .build();
+
     }
 
     private boolean isLgPushServiceId(String serviceId) {
@@ -213,6 +273,10 @@ public class PushSingleDomainService {
         synchronized (progressLock.get(serviceId)) {
             pushProgressCnt.put(serviceId, 0L);
         }
+    }
+
+    private boolean isRetryExcludeCode(String code) {
+        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
     }
 
 }

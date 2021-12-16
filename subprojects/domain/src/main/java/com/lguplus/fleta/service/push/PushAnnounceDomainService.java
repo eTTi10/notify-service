@@ -77,9 +77,9 @@ public class PushAnnounceDomainService {
         log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+status_code+"]["+status_msg+"]");
 
         if(status_code.equals("200")){
-            log.info("[pushAnnouncement]["+status_code+"] [SUCCESS]");
-        }else{
-            log.info("[pushAnnouncement]["+status_code+"] [FAIL]");
+            log.debug("[pushAnnouncement]["+status_code+"] [SUCCESS]");
+        } else {
+            log.debug("[pushAnnouncement]["+status_code+"] [FAIL]");
 
             //실패
             switch (status_code) {
