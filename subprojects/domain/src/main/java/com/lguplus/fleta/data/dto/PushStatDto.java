@@ -20,6 +20,14 @@ public class PushStatDto implements Serializable {
     private long measurePushCount;
     private long measureStartMillis;
 
+    public void setMeasurePushCount(long measurePushCount) {
+        this.measurePushCount = measurePushCount;
+    }
+
+    public void setMeasureStartMillis(long measureStartMillis) {
+        this.measureStartMillis = measureStartMillis;
+    }
+
     public boolean isIntervalOver() {
         return (getIntervalTimeGap() >= measureIntervalMillis);
     }

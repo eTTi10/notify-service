@@ -46,10 +46,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         try {
             socketInfo.openSocket(host, Integer.parseInt(port), Integer.parseInt(timeout), getChannelId(), destinationIp);
-            log.debug("=== factory create Socket : {}", socketInfo);
+            log.trace("=== factory create Socket : {}", socketInfo);
         } catch (PushBizException e) {
             e.printStackTrace();
-            log.debug("=== factory create Socket failure: {}", socketInfo);
+            log.info("=== factory create Socket failure: {}", socketInfo);
         }
 
         return socketInfo;
@@ -107,7 +107,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @Override
     public void destroyObject(PooledObject<PushSocketInfo> p) throws Exception {
         PushSocketInfo socketInfo = p.getObject();
-        log.debug("=== factory destroy Socket : {}", socketInfo);
+        log.trace("=== factory destroy Socket : {}", socketInfo);
         socketInfo.closeSocket();
         //log.debug("=== factory destroyObject SocketInfo : {}", socketInfo);
     }
@@ -125,6 +125,9 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
             e.printStackTrace();
             hostname = defaultChannelHost;
         }
+
+        hostname = hostname.replace("DESKTOP-", "");
+        hostname = hostname + hostname;
 
         String channelHostNm = (hostname + "00000000").substring(0, 6);
         String channelPortNm = (channelPort + "0000").substring(0, 4);

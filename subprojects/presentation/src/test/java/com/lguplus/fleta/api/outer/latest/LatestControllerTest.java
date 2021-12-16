@@ -6,6 +6,7 @@ import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
 import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
 import com.lguplus.fleta.service.latest.LatestService;
 import com.lguplus.fleta.util.JunitTestUtils;
@@ -23,6 +24,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -32,7 +34,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,15 +57,22 @@ class LatestControllerTest {
     @MockBean
     private LatestSearchRequestMapper latestSearchRequestMapper;
 
+    @MockBean
+    private LatestPostRequestMapper latestPostRequestMapper;
+
+
+
+
+    //####################### Start 알림조회 ######################
     @BeforeEach
-    void setUp() throws Exception {
+    void getLatestListBefore() throws Exception {
 
         LatestEntity rs1 = new LatestEntity();
         JunitTestUtils.setValue(rs1, "saId", "500058151453");
         JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
         JunitTestUtils.setValue(rs1, "ctn", "01055805424");
         JunitTestUtils.setValue(rs1, "catId", "T3021");
-        JunitTestUtils.setValue(rs1, "regId", "500023630832");
+        JunitTestUtils.setValue(rs1, "regId", "500058151453");
         JunitTestUtils.setValue(rs1, "catName", "놀라운 대회 스타킹");
         JunitTestUtils.setValue(rs1, "rDate", "2014-11-09 13:18:14.000");
         JunitTestUtils.setValue(rs1, "categoryGb", "");
@@ -114,7 +123,46 @@ class LatestControllerTest {
         assertThat(responseString).contains("0000");
 
         log.info("RESULT >> ["+responseString+"]");
-        log.info("LatestControllerTest End");
+        log.info("LatestControllerTest.getLatestList End");
     }
+    //####################### End 알림조회 ######################
 
+
+    //####################### Start 알림삭제 ######################
+
+    //####################### End 알림삭제 ######################
+
+
+    //####################### Start 알림등록 ######################
+    @Test
+    @DisplayName("LatestControllerTest.deleteLatest 정상적으로 데이터를 등록하는지 확인")
+    void insertLatest() throws Exception {
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500023630832");
+        params.add("mac", "001c.6284.30a4");
+        params.add("ctn", "01080808526");
+        params.add("catId", "M0241");
+        params.add("regId", "500023630832");
+        params.add("catName", "신 삼국지 32회");
+        params.add("rDate", "2014-10-27 16:19:38.000");
+        params.add("categoryGb", "");
+
+        MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.insertLatest End");
+    }
+    //####################### End 알림삭제 ######################
 }
