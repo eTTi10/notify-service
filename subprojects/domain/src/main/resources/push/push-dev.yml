@@ -19,13 +19,13 @@ push-comm:
       cacheName: pushDelayCnt
       reqCnt: '100' # '100'
     socket:
-      max: '300' # 20
+      max: '100' # 20
       close_secend: '170'
-      min: '150'
+      min: '20'
       channelID: PsAgt # PsAgt
       timeout: '2000' # 2000
       channelNum: '0000'
-      initCnt: '50'
+      initCnt: '20'
     #Multi Push 호출 시 TPS 값 설정
     multi:
       socket:
@@ -57,10 +57,10 @@ push-comm:
       ip: 211.115.75.227
       port: '8100'
     socket:
-      max: '200'
-      min: '30'
+      max: '50'
+      min: '10'
       close_secend: '90'
-      initCnt: '20'
+      initCnt: '10'
       channelNum: '0000'
       timeout: '2000'
       channelID: PsAgt

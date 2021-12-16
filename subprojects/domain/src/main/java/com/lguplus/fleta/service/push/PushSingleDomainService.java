@@ -49,12 +49,15 @@ public class PushSingleDomainService {
     @Value("${push-comm.retry.exclud.codeList}")
     private String retryExcludeCodeList;
 
+    private final int abnormalRequestTimeMills = 3000;
+
     private AtomicInteger _transactionIDNum1 = new AtomicInteger(0);
     private AtomicInteger _transactionIDNum2 = new AtomicInteger(0);
 
     private Map<String,Object> requestLock;
     private Map<String,Object> progressLock;
-    private Map<String, Long> pushProgressCnt;
+    private Map<String, Long> pushProgressCnt = new Hashtable<>();
+    //private Map<String, Long> progressTimeMills = new HashMap<>();
 
     @PostConstruct
     public void initialize(){
@@ -65,7 +68,10 @@ public class PushSingleDomainService {
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
 
-        pushProgressCnt = new Hashtable<>();
+        /*
+        progressLock.forEach((key, value) -> {
+            progressTimeMills.put(key, 0L);
+        });*/
 
         progressLock.forEach((serviceId, value) -> resetPushProgressCnt(serviceId));
 
@@ -79,6 +85,9 @@ public class PushSingleDomainService {
      */
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
         //log.debug("requestPushSingle ::::::::::::::: {}", dto);
+
+        // 비정상 호출 제거
+        //checkPushRequestMills(dto.getServiceId());
 
         // 서비스별 초당 처리 건수 오류 처리
         ImmutablePair<Long, Long> requstInfo = getPushCountInterval(dto.getServiceId());
@@ -137,20 +146,22 @@ public class PushSingleDomainService {
         //2. Send Push
         for (int i = 0; i < iPushCallRetryCnt; i++) {
 
-            setPushProgressCnt(dto.getServiceId(), +1);
-
-            pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
-
-            setPushProgressCnt(dto.getServiceId(), -1);
+            try {
+                setPushProgressCnt(dto.getServiceId(), +1);
+                pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
+            }
+            finally {
+                setPushProgressCnt(dto.getServiceId(), -1);
+            }
 
             //3. Send Result
             String status_code = pushResponseDto.getStatusCode();
             //String status_msg = pushResponseDto.getStatusMsg();
 
             if (status_code.equals("200")) {
-                log.debug("[requestPushSingle][" + status_code + "] [SUCCESS]");
+                log.trace("[requestPushSingle][" + status_code + "] [SUCCESS]");
             } else {
-                log.debug("[requestPushSingle][" + status_code + "] [FAIL]");
+                log.trace("[requestPushSingle][" + status_code + "] [FAIL]");
 
                 boolean isRetryExclude = isRetryExcludeCode(status_code);
 
@@ -192,7 +203,6 @@ public class PushSingleDomainService {
 
         return PushClientResponseDto.builder().code(pushResponseDto.getStatusCode()).message(pushResponseDto.getStatusMsg())
                 .build();
-
     }
 
     private boolean isLgPushServiceId(String serviceId) {
@@ -227,7 +237,7 @@ public class PushSingleDomainService {
             PushStatDto pushStatDto = pushSingleClient.getPushStatus(serviceId, processCount, curTimeMillis);
 
             // 비정상적으로 TimeGap이 크다면
-            if(curTimeMillis - pushStatDto.getMeasureStartMillis() > 5000) {
+            if(curTimeMillis - pushStatDto.getMeasureStartMillis() > abnormalRequestTimeMills) {
                 pushStatDto = pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
             }
 
@@ -276,7 +286,21 @@ public class PushSingleDomainService {
     }
 
     private boolean isRetryExcludeCode(String code) {
-        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
+        return true;
+        //return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
     }
+/*
+    private void checkPushRequestMills(String serviceId) {
+        synchronized (progressLock.get(serviceId)) {
+            long currTime = System.currentTimeMillis();
+            long lastTime = progressTimeMills.get(serviceId);
+            progressTimeMills.put(serviceId, currTime);
 
+            if (lastTime == 0 || (currTime - lastTime) > abnormalRequestTimeMills) {
+                log.debug("==> set : setPushRequestMills : lastTime:{}, gap:{}", lastTime, (currTime - lastTime));
+                pushSingleClient.putPushStatus(serviceId, 0, currTime);
+            }
+        }
+    }
+*/
 }
