@@ -36,13 +36,17 @@ public class MmsAgentDomainService {
     private Map<String, Object> settingConfig;//yml파일 setting
 
 
-
+    /**
+     * 전송메세지를 취득후 MM7모듈함수를 실행
+     * @param sendMmsRequestDto
+     * @return
+     */
     public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) {
-        //============ yml설정파일 객체생성 ============
+        //yml설정파일 객체생성
         mmsConfig = config.getMms();//1레벨 객체
         settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
-        //============ Start [setting API 호출 캐시등록] =============
 
+        //Start [setting API 호출 캐시등록]
         CallSettingDto settingItem =  getMmsCallSettingApi(
             (String)settingConfig.get("rest_sa_id"), //callSettingApi파라메타
             (String)settingConfig.get("rest_stb_mac"), //ex) MMS:mms SMS:sms
@@ -97,6 +101,10 @@ public class MmsAgentDomainService {
         return settingItem;
     }
 
+    /**
+     * 에러처리
+     * @param errorCode
+     */
     private void returnService(@NotNull String errorCode) {
         log.error("{errorCode:"+errorCode+"}");
         switch (errorCode){
