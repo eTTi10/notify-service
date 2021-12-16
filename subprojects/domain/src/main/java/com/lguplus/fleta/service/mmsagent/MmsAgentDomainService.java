@@ -27,7 +27,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 /**
- * ################### 개발중 입니다. 리뷰대상이 아닙니다. #####################
+ * ################### 개발중 입니다. 잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
  */
 public class MmsAgentDomainService {
     private final CallSettingDomainClient apiClient;
