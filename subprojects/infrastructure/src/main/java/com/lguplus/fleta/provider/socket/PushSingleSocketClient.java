@@ -102,7 +102,7 @@ public class PushSingleSocketClient implements PushSingleClient {
      * @return Push Single 푸시 결과
      */
     @Override
-    public PushSingleResponseDto requestPushSingle(Map<String, String> paramMap) {
+    public PushResponseDto requestPushSingle(Map<String, String> paramMap) {
 
         PushSocketInfo socketInfo = null;
         boolean bIsLgPush = lgPushServiceId.equals(paramMap.get("service_id"));
@@ -114,19 +114,18 @@ public class PushSingleSocketClient implements PushSingleClient {
             socketInfo = pool.borrowObject();
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
-            return getSingleResponseDto(retDto.getStatusCode(), retDto.getStatusMsg());
-
+            return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
         } catch (NoSuchElementException e) {
             //e.printStackTrace();
             log.error(e.toString());
-            return getSingleResponseDto("500", "Exception Occurs");
+            return PushResponseDto.builder().statusCode("500").statusMsg("Exception Occurs").build();
         } catch (PushBizException e) {
             //e.printStackTrace();
             log.error(e.toString());
-            return getSingleResponseDto("503", "Service Unavailable");
+            return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
         } catch (Exception e) {
             log.error(e.toString());
-            return getSingleResponseDto("500", "Internal Error");
+            return PushResponseDto.builder().statusCode("500").statusMsg("Internal Error").build();
         } finally {
             if (socketInfo != null)
                 pool.returnObject(socketInfo);
@@ -151,7 +150,7 @@ public class PushSingleSocketClient implements PushSingleClient {
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
         // Init Socket
-        poolList.forEach(p -> initPoolSocketInfo(p, ((PushSocketConnFactory)p.getFactory()).isLgPush() ? Integer.parseInt(lg_pushSocketInitCnt) : Integer.parseInt(pushSocketInitCnt)));
+        //poolList.forEach(p -> initPoolSocketInfo(p, ((PushSocketConnFactory)p.getFactory()).isLgPush() ? Integer.parseInt(lg_pushSocketInitCnt) : Integer.parseInt(pushSocketInitCnt)));
 
     }
 
