@@ -182,7 +182,7 @@ public class PushSocketInfo {
 
                     try {
                         if (Long.parseLong(pushBody.get("push_id")) % 1000 == 0) {
-                            log.debug("[setNoti]  서버 응답 JSON {} : {}", pushBody.get("push_id"), retJsonMsg);
+                            //log.debug("[setNoti]  서버 응답 JSON {} : {}", pushBody.get("push_id"), retJsonMsg);
                         }
                     }catch (NumberFormatException e) {
                         e.printStackTrace();

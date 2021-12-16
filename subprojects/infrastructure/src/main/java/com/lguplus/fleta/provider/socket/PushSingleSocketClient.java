@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.*;
 
 /**
@@ -111,7 +112,17 @@ public class PushSingleSocketClient implements PushSingleClient {
                 .findFirst().get();
 
         try {
-            socketInfo = pool.borrowObject();
+            synchronized (pool) {
+                long stopWatchStart = System.currentTimeMillis();
+
+                socketInfo = pool.borrowObject();
+
+                long stopWatchEnd = System.currentTimeMillis();
+
+                if((stopWatchEnd - stopWatchStart) > 100) {
+                    log.debug("pool-Exhausted: time:{}, {}", (stopWatchEnd - stopWatchStart), socketInfo.getChannelID());
+                }
+            }
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
@@ -182,18 +193,21 @@ public class PushSingleSocketClient implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<PushSocketInfo>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal);//200);
-        poolConfig.setMaxIdle(maxTotal);//200);
-        poolConfig.setMinIdle(minIdle);//50);
-        poolConfig.setBlockWhenExhausted(false);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
+        poolConfig.setMaxTotal(maxTotal); //100
+        poolConfig.setMaxIdle(maxTotal);  //100
+        poolConfig.setMinIdle(minIdle);   //20
+        poolConfig.setBlockWhenExhausted(true);//false);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestOnReturn(true);//true);
         poolConfig.setTestWhileIdle(true);//true);
-        poolConfig.setTimeBetweenEvictionRunsMillis(20 * 1000);
+        poolConfig.setLifo(false); //false : FIFO, default: LIFO
+        poolConfig.setTimeBetweenEvictionRunsMillis(10 * 1000);
+        //poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(10));
 
         return poolConfig;
     }
 
+    /*
     private void initPoolSocketInfo(GenericObjectPool<PushSocketInfo> pool, int initCnt) {
         List<PushSocketInfo> socketInfoList = new ArrayList<>();
         try {
@@ -207,9 +221,10 @@ public class PushSingleSocketClient implements PushSingleClient {
             e.printStackTrace();
         }
     }
+    */
 
     @Override
-    @Cacheable(value="PUSH_CACHE", key="'statistics.'+#serviceId")
+    @Cacheable(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
     public PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
         log.debug("getPushStatus: init : " + System.currentTimeMillis());
 
@@ -224,7 +239,7 @@ public class PushSingleSocketClient implements PushSingleClient {
     }
 
     @Override
-    @CachePut(value="PUSH_CACHE", key="'statistics.'+#serviceId")
+    @CachePut(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
     public PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
 
         PushStatDto pushStatDto = PushStatDto.builder()
@@ -237,7 +252,5 @@ public class PushSingleSocketClient implements PushSingleClient {
 
         return pushStatDto;
     }
-
-
 
 }
