@@ -27,6 +27,6 @@ public interface HttpPushFeignClient {
      */
 //    @PostMapping(value = "/settings/restapi/push/single/servicekey")
     @PostMapping(value = "/restapi/push/single/servicekey")
-    OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestHeader Map<String, String> headerMap, @RequestBody Map<String, Object> paramMap);
+    OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestBody Map<String, Object> paramMap);
 
 }
