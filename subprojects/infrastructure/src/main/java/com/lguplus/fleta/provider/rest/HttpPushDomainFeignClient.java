@@ -44,9 +44,6 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
     @Value("${singlepush.server.port2}")
     private String httpsPortSingle;
 
-    @Value("${singlepush.server.auth}")
-    private String authorizationSingle;
-
     @Value("${announce.server.ip}")
     private String hostAnnounce;
 
@@ -58,9 +55,6 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
 
     @Value("${announce.server.port2}")
     private String httpsPortAnnounce;
-
-    @Value("${announce.server.auth}")
-    private String authorizationAnnounce;
 
 
     /**
@@ -80,7 +74,7 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
             e.printStackTrace();
         }*/
 
-        return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), getHeaderMap("S"), paramMap);
+        return httpPushFeignClient.requestHttpPushSingle(URI.create(getBaseUrl("S")), paramMap);
     }
 
     /**
@@ -91,23 +85,6 @@ public class HttpPushDomainFeignClient implements HttpPushDomainClient {
     private String getBaseUrl(String kind) {
         // 단건, 멀티
         return protocolSingle + "://" + hostSingle + ":" + httpPortSingle;
-    }
-
-    /**
-     * 기본 Header 정보를 가져온다.
-     *
-     * @return 기본 Header 정보
-     */
-    private Map<String, String> getHeaderMap(String kind) {
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headerMap.put(HttpHeaders.ACCEPT_CHARSET, "utf-8");
-        headerMap.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        headerMap.put(HttpHeaders.CONTENT_ENCODING, "utf-8");
-        headerMap.put(HttpHeaders.AUTHORIZATION, authorizationSingle);
-//        headerMap.put(HttpHeaders.AUTHORIZATION, kind.equals("S") ? authorizationSingle : authorizationAnnounce);
-
-        return headerMap;
     }
 
 }
