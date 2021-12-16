@@ -148,14 +148,60 @@ apns:
     O: '30106'
     B: '30134'
     C: '30107'
-
+#FCM POS추가발송대상
+fcm:
+  extra:
+    send: Y
+    target: '21006'
+    serviceid: '20002'
+    appid: smartuxapp
 pushinfo:
   sendcodes:
+    ######U+tv -> 모바일tv 페어링 요청 푸시######
     - sendcode: "P001"
       gcm.payload.body: '"result":{"noti_type":"PA_TM", "address":"[+address]", "unumber":"[+unumber]","req_date":"[+req_date]","ctn":"[+ctn]","trans_id":"[+trans_id]"}'
       apns.payload.body: '"body":"U+tv에서 연결을 요청했습니다"'
       apns.payload.item: 'cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]'
       param.list: 'address|unumber|req_date|ctn|trans_id'
+      pos.send: 'N'
+    ######U+tv -> 모바일tv VOD 이어보기 정보 알림######
+    - sendcode: "P002"
+      gcm.payload.body: '"result":{"noti_type":"MFUP", "cont_type":"VOD", "album_id":"[+album_id]", "link_flag":"[+link_flag]", "name":"[+name]", "reqtime":"[+reqtime]", "playtime":"[+playtime]", "intent":"[+intent_url]"}'
+      apns.payload.body: '"body":"U+tv에서 보던 영상을 휴대폰으로 이어보세요"'
+      apns.payload.item: 'cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]'
+      param.list: 'album_id|link_flag|name|reqtime|playtime|intent_url'
+      pos.send: 'N'
+  serviceTargets:
+    - serviceTarget: default
+      gcm.appid:  hdtv_GCM01
+      gcm.serviceid: 20014
+      apns.appid: hdtv_APNS1
+      apns.serviceid: 30005
+    - serviceTarget: B
+      gcm.appid:  lguplus_base_fcm
+      gcm.serviceid: 30133
+      apns.appid: lguplus_base_apns
+      apns.serviceid: 30134
+    - serviceTarget: K
+      gcm.appid:  lguplus_mobilekids_fcm
+      gcm.serviceid: 30135
+      apns.appid: lguplus_mobilekids_apns
+      apns.serviceid: 30136
+    - serviceTarget: O
+      gcm.appid:  ugolf_APNS
+      gcm.serviceid: 30135
+      apns.appid: ugolf_APNS
+      apns.serviceid: 30106
+    - serviceTarget: C
+      gcm.appid:  musicshow_gcm
+      gcm.serviceid: 30104
+      apns.appid: musicshow_apns
+      apns.serviceid: 30107
+    - serviceTarget: TV
+      gcm.appid:  smart_uxapp_fcm
+      gcm.serviceid: 30128
+      apns.appid: smart_uxapp_fcm
+      apns.serviceid: 30128
 
 
 
