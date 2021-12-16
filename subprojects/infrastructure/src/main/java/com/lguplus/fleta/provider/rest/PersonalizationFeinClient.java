@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-//@FeignClient(name="personalization", url="${service.personalization.url}")
-@FeignClient(name="personalization", url="http://localhost:8080")
+@FeignClient(name="personalization", url="${service.personalization.url}")
 public interface PersonalizationFeinClient {
 
     @GetMapping(value="/personalization/registrationId", produces = "application/json", consumes = "application/json")

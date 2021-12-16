@@ -47,7 +47,7 @@ error:
               NotFoundException: "1107"
               ServiceIdNotFoundException: "1115"
               UnAuthorizedException: "1105"
-              InvalidSendCodeException: "9990"
+              InvalidSendPushCodeException: "9990"
             push:
               SocketNotFoundException: "1101"
               SocketException: "1102"
@@ -217,6 +217,6 @@ error:
     "8001": "DB 요청 데이터 존재"
     "8002": "DB 요청 데이터 미존재"
     "8999": "DB 에러"
-    "9990": "send code 미지원"
+    "9990": "sendpushcode 미지원"
     "9998": "발송제한번호"
     "9999": "기타 에러"
