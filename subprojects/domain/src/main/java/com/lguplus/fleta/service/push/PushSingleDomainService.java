@@ -5,6 +5,8 @@ import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
+import com.lguplus.fleta.exception.push.MaxRequestOverException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,10 @@ public class PushSingleDomainService {
     @Value("${push-comm.lgpush.service_id}")
     private String lgPushServceId;
 
+    @Value("${push-comm.push.delay.reqCnt}")
+    private String pushDelayReqCnt;
+    private Long lPushDelayReqCnt;
+
     private AtomicInteger _transactionIDNum1 = new AtomicInteger(0);
     private AtomicInteger _transactionIDNum2 = new AtomicInteger(0);
 
@@ -44,12 +50,14 @@ public class PushSingleDomainService {
     @PostConstruct
     public void initialize(){
 
+        lPushDelayReqCnt = Long.parseLong(pushDelayReqCnt);
+
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
 
         pushProgressCnt = new Hashtable<>();
 
-        progressLock.forEach((serviceId, value) -> pushProgressCnt.put(serviceId, 0L));
+        progressLock.forEach((serviceId, value) -> resetPushProgressCnt(serviceId));
 
     }
 
@@ -60,7 +68,29 @@ public class PushSingleDomainService {
      * @return 단건푸시등록 결과
      */
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
-        //log.debug("PushRequestSingleDto ::::::::::::::: {}", dto);
+        //log.debug("requestPushSingle ::::::::::::::: {}", dto);
+
+        // 서비스별 초당 처리 건수 오류 처리
+        ImmutablePair<Long, Long> requstInfo = getPushCountInterval(dto.getServiceId());
+        long pushCnt = requstInfo.getLeft();
+        long pushWaitTime = requstInfo.getRight();//Mili Seconds
+
+        // 처리량 초과
+        if (pushCnt > lPushDelayReqCnt) {
+            log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000-pushWaitTime);
+
+            // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
+            // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
+            if(lPushDelayReqCnt * 2 < pushCnt) {
+                resetPushProgressCnt(dto.getServiceId());
+            }
+            throw new MaxRequestOverException();
+            /*return PushClientResponseDto.builder()
+                    .code("max-count-over")
+                    .message("max-count-over")
+                    .build();
+             */
+        }
 
         //1. Make Message
         Map<String, String> paramMap = new HashMap<>();
@@ -72,6 +102,7 @@ public class PushSingleDomainService {
 
         String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
         if (servicePwd == null) {
+            log.error("ServiceId Not Found:" + dto.getServiceId());
             throw new ServiceIdNotFoundException();
         }
         paramMap.put("service_passwd", servicePwd);
@@ -92,9 +123,16 @@ public class PushSingleDomainService {
             }
         });
 
-        pushSingleClient.requestPushSingle(paramMap);
+        setPushProgressCnt(dto.getServiceId(), +1);
 
-        return PushClientResponseDto.builder().build();
+        PushSingleResponseDto pushSingleResponseDto = pushSingleClient.requestPushSingle(paramMap);
+
+        setPushProgressCnt(dto.getServiceId(), -1);
+
+        return PushClientResponseDto.builder()
+                .code(pushSingleResponseDto.getResponseData().getStatusCode())
+                .message(pushSingleResponseDto.getResponseData().getStatusMsg())
+                .build();
     }
 
     private boolean isLgPushServiceId(String serviceId) {
@@ -116,53 +154,65 @@ public class PushSingleDomainService {
         }
     }
 
+    // Service ID 별 초당 Push 건수
+    // 1Service ID => 100/1sec
     private ImmutablePair<Long, Long> getPushCountInterval(String serviceId) {
 
         synchronized(requestLock.get(serviceId)) {
             long resultCnt = 0;
-            long timeoutgap = 0;
             long curTimeMillis = System.currentTimeMillis();
-            long processCount = getPushProcessCount(serviceId, 0, false);
+            long processCount = getPushProcessCount(serviceId);
 
             // Get ProcessCount, 측정 기준 시간
             PushStatDto pushStatDto = pushSingleClient.getPushStatus(serviceId, processCount, curTimeMillis);
 
-            // Get 측정 기준 시간 지나침
-            timeoutgap = pushStatDto.getIntervalTimeGap();
-            if(pushStatDto.isIntervalOver()) {
+            // 비정상적으로 TimeGap이 크다면
+            if(curTimeMillis - pushStatDto.getMeasureStartMillis() > 5000) {
                 pushStatDto = pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
+            }
+
+            // Get 측정 기준 시간 지나침
+            long timeoutgap = pushStatDto.getIntervalTimeGap();
+            if(pushStatDto.isIntervalOver()) {
+                //log.debug(":: getPushCountInterval isIntervalOver timeoutgap={}", timeoutgap);
+                pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
+                pushStatDto.setMeasurePushCount(processCount);
+                pushStatDto.setMeasureStartMillis(curTimeMillis);
             }
             else {
                 resultCnt = pushStatDto.getMeasurePushCount();
+                //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis);
             }
 
             pushSingleClient.putPushStatus(serviceId, ++resultCnt, pushStatDto.getMeasureStartMillis());
+            //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis());
 
             ImmutablePair<Long, Long> pair = new ImmutablePair<>(resultCnt, timeoutgap);
-            //Long key = pair.getKey();
-            //Long value = pair.getValue();
+
             return pair;
         }
 
     }
 
-    private Long getPushProcessCount(String serviceId, int changeVal, boolean reset) {
-
-        if ( changeVal != 0 || reset) {
-            synchronized (progressLock.get(serviceId)) {
-                if (changeVal != 0) {
-                    pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
-                }
-                if (reset) {
-                    pushProgressCnt.put(serviceId, 0L);
-                }
-                return pushProgressCnt.get(serviceId);
-            }
-        }
-        else {
+    //Push Count
+    private Long getPushProcessCount(String serviceId) {
+        synchronized (progressLock.get(serviceId)) {
             return pushProgressCnt.get(serviceId);
         }
+    }
 
+    private void setPushProgressCnt(String serviceId, int changeVal) {
+        synchronized (progressLock.get(serviceId)) {
+            if (changeVal != 0) {
+                pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
+            }
+        }
+    }
+
+    private void resetPushProgressCnt(String serviceId) {
+        synchronized (progressLock.get(serviceId)) {
+            pushProgressCnt.put(serviceId, 0L);
+        }
     }
 
 }

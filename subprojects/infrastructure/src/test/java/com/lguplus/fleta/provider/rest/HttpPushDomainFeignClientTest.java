@@ -41,7 +41,7 @@ class HttpPushDomainFeignClientTest {
         // given
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").build();
 
-        given(httpPushFeignClient.requestHttpPushSingle(any(), anyMap(), anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushFeignClient.requestHttpPushSingle(any(), anyMap())).willReturn(openApiPushResponseDto);
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("app_id", "lguplushdtvgcm");
