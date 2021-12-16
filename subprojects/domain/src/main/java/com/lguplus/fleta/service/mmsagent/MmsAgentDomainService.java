@@ -26,6 +26,9 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+/**
+ * ################### 개발중 입니다. 리뷰대상이 아닙니다. #####################
+ */
 public class MmsAgentDomainService {
     private final CallSettingDomainClient apiClient;
     private final MmsAgentConfig config;

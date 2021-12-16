@@ -19,39 +19,18 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+/**
+ * ################### 개발중 입니다. 리뷰대상이 아닙니다. #####################
+ */
 public class MmsController {
 
     private final MmsService smsService;
 
     /**
-     * MMS전송요청
-     * mms_cd
-     * M001 : 모바일tv 앱 설치안내 문자
-     * M002 : 프로야구 앱 설치안내 문자
-     * M003 : 아이들나라 앱 설치안내 문자
-     * M004 : 골프 앱 설치안내 문자
-     * M005 : 아이돌Live 앱 설치안내 문자
-     *
-     * sa_id:가입자정보
-     * stb_mac:가입자 STB MAC Address
-     * mms_cd:MMS 메시지 코드
-     * ctn:발송대상 번호
-     * replacement:치환문자
-     *
-     * replacement
-     * 치환하고자 하는 값 입력
-     * 예) 김철수|냉장고
-     * #모바일로 페어링 요청 알림 MMS발송일 경우 트랜젝션 ID 입력 됨
-     *
+     * 개발중 입니다. 리뷰 대상이 아닙니다.
      * @param request
      * @return
      * @throws Exception
-     */
-
-    /**
-     * MIMS.IPTV037 SMS발송요청
-     * @param request
-     * @return SmsGatewayResponseDto
      */
     @ApiOperation(value="MMS 발송요청", notes="MMS발송을 Agent Server에 요청한다.")
     @ApiImplicitParams(value={

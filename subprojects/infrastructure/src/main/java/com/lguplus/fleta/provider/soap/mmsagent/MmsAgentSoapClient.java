@@ -18,6 +18,9 @@ import java.util.Map;
 
 @Slf4j
 @Component
+/**
+ * ################### 개발중 입니다. 리뷰대상이 아닙니다. #####################
+ */
 public class MmsAgentSoapClient implements MmsAgentDomainClient {
     private Map<String, ?> mms;//설정 및 속성
 

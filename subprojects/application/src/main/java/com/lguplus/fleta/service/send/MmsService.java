@@ -10,6 +10,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @AllArgsConstructor
+/**
+ * ################### 개발중 입니다. 리뷰대상이 아닙니다. #####################
+ */
 public class MmsService {
 
     private final MmsAgentDomainService mmsAgentDomainService;
