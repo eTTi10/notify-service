@@ -3,11 +3,14 @@ package com.lguplus.fleta.data.dto.request.outer;
 import com.lguplus.fleta.data.type.CarrierType;
 import com.lguplus.fleta.data.type.DeviceInfo;
 import com.lguplus.fleta.data.type.NetworkInfo;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
-@SuperBuilder
+@ToString
 public class UXSimpleJoinSmsRequestDto {
 
     /** 가입자 번호 */
