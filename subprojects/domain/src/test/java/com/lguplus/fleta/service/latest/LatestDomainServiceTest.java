@@ -295,7 +295,40 @@ class LatestDomainServiceTest {
 
 
     //####################### Start 알림삭제 ######################
+    @Test
+    @DisplayName("LatestServiceTest.deleteLatest 정상적으로 리스트 데이터를 삭제하는지 확인")
+    void deleteLatest() {
+        given(latestRepository.deleteLatest(any())).willReturn(1);
 
+        LatestRequestDto latestRequestDto = LatestRequestDto.builder()
+                .saId("500023630832")
+                .mac("001c.6284.30a4")
+                .ctn("01080808526")
+                .catId("M0241").build();
+
+        int deleteCnt = latestDomainService.deleteLatest(latestRequestDto);
+        Assertions.assertTrue(1 == deleteCnt);
+
+        log.info("LatestServiceTest.deleteLatest End");
+    }
+
+
+    @Test
+    @DisplayName("LatestServiceTest.deleteLatestDeleteNotFoundException 예외 처리 되는지 확인")
+    void deleteLatestDeleteNotFoundException() {
+
+        Exception exception = null;
+        try {
+            given(latestDomainService.deleteLatest(any())).willReturn(0);
+        }catch(Exception e){
+            log.info("DeleteNotFoundException타입의 에러가 발생함");
+            exception = e;
+        }
+        assertThat(exception).isInstanceOf(DeleteNotFoundException.class);
+        assertThat(exception).isInstanceOf(RuntimeException.class);
+
+        log.info("LatestServiceTest.deleteLatestDeleteNotFoundException End");
+    }
 
     //####################### End 알림삭제 ######################
 
