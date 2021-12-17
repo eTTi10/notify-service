@@ -1,11 +1,13 @@
 package com.lguplus.fleta.data.dto.request;
 
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
-@SuperBuilder
-public class SendSmsCodeRequestDto extends CommonRequestDto {
+public class SendSmsCodeRequestDto {
 
     private String saId;
 
