@@ -1,8 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -10,9 +8,11 @@ import java.util.List;
 /**
  * HttpPush 관련 DTO
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
 @ToString
-@SuperBuilder
 public class HttpPushDto {
 
     /** Push 요청 서버 타입 */

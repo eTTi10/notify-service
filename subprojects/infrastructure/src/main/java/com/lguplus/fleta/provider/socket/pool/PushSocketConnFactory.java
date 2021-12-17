@@ -46,10 +46,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         try {
             socketInfo.openSocket(host, Integer.parseInt(port), Integer.parseInt(timeout), getChannelId(), destinationIp);
-            log.trace("=== factory create Socket : {}", socketInfo);
+            log.debug("=== factory create Socket : {}", socketInfo);
         } catch (PushBizException e) {
             e.printStackTrace();
-            log.info("=== factory create Socket failure: {}", socketInfo);
+            log.debug("=== factory create Socket failure: {}", socketInfo);
         }
 
         return socketInfo;
@@ -59,6 +59,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     public boolean validateObject(PooledObject<PushSocketInfo> p) {
 
         PushSocketInfo socketInfo = p.getObject();
+
+        if(socketInfo.getPushSocket() == null) {
+            return false;
+        }
 
         if(socketInfo.getPushSocket().getInetAddress() == null) {
             return false;
@@ -91,6 +95,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         long lastTime = socketInfo.getSocketTime();
         long currTime = Instant.now().getEpochSecond();
 
+        if(lastTime < 0) {
+            return false;
+        }
+
         if(lastTime > 0 && Integer.parseInt(closeSecond) <= (currTime - lastTime)) {
             return false;
         }
@@ -107,7 +115,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @Override
     public void destroyObject(PooledObject<PushSocketInfo> p) throws Exception {
         PushSocketInfo socketInfo = p.getObject();
-        log.trace("=== factory destroy Socket : {}", socketInfo);
+        log.debug("=== factory destroy Socket : {}", socketInfo);
         socketInfo.closeSocket();
         //log.debug("=== factory destroyObject SocketInfo : {}", socketInfo);
     }

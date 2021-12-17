@@ -3,18 +3,16 @@ package com.lguplus.fleta.data.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import io.swagger.annotations.ApiModel;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
-//@Data
-@ApiModel
-@NoArgsConstructor
+@ApiModel(value = "최신회 알림조회", description = "최신회 알림조회 리턴")
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
-@SuperBuilder
 public class LatestDto implements PlainTextibleDto, Serializable {
 
     @JsonProperty("sa_id")  //가입자 번호

@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -9,7 +8,9 @@ import java.util.List;
 
 @Getter
 @ToString
-@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class PushRequestSingleDto {
 
     private String appId;
