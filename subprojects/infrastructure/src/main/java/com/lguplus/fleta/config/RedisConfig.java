@@ -18,6 +18,7 @@ public class RedisConfig {
                 .cacheDefaults( RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofHours(24)) // Default TTL 값은 24시간
                         .disableCachingNullValues()
+                        .prefixCacheNameWith("NY::")
                         //.serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())))
                         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new JdkSerializationRedisSerializer())));
     }
