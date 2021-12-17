@@ -8,8 +8,10 @@ import lombok.experimental.SuperBuilder;
  * apiClient.callSettingApi통해서 가져온 메세지 내용을 기반으로
  * mms전송처리 전문을 생성해주는 Dto
  */
-@Data
-@SuperBuilder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class MmsRequestDto {
     private String ctn;
     private String mmsTitle;

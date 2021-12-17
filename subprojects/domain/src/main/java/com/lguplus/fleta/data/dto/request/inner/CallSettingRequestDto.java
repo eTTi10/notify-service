@@ -1,16 +1,14 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lguplus.fleta.data.dto.PlainTextibleDto;
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
-import lombok.Data;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 import java.io.Serializable;
-
-@Data
-@SuperBuilder
-public class CallSettingRequestDto implements PlainTextibleDto, Serializable {
+@Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class CallSettingRequestDto implements Serializable {
 
     @JsonProperty("sa_id")
     private String saId;
@@ -24,9 +22,4 @@ public class CallSettingRequestDto implements PlainTextibleDto, Serializable {
     @JsonProperty("svc_type")
     private String svcType;
 
-    @Override
-    public String toPlainText() {
-        return String.join(CommonResponseDto.Separator.COLUMN
-                , getSaId(), getStbMac(), getCodeId(), getSvcType());
-    }
 }

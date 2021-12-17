@@ -1,14 +1,10 @@
 package com.lguplus.fleta.data.dto;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.*;
 
-@Data
-@SuperBuilder
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class LatestCheckDto {
     public static final String DUPL_CODE = "DUPL";
     public static final String OVER_CODE = "OVER";
