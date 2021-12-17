@@ -7,7 +7,7 @@ import lombok.*;
  * Push 응답결과 DTO
  *
  */
-//@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter

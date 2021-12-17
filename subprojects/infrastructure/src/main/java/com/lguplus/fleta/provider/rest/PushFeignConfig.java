@@ -18,25 +18,23 @@ public class PushFeignConfig {
 
     @Value("${push-comm.announce.server.encoding}")
     private String contentEncoding;
-
+/*
     @Bean
     Logger.Level feignLoggerLevel() {
         return Logger.Level.FULL;
     }
+*/
 
     @Bean
     public RequestInterceptor requestInterceptor() {
-        return new RequestInterceptor() {
-            @Override
-            public void apply(RequestTemplate template) {
-                //Header
-                template.header("Content-Type", contentType);
-                template.header("Accept", contentType);
-                template.header("Accept-Charset", contentEncoding);
-                template.header("Content-Encoding", contentEncoding);
-                //template.header("header_1", "value_1");
-                //requestTemplate.header("Authorization", String.format("%s %s", "auth", "========auth_key============"));
-            }
+        return template -> {
+            //Header
+            template.header("Content-Type", contentType);
+            template.header("Accept", contentType);
+            template.header("Accept-Charset", contentEncoding);
+            template.header("Content-Encoding", contentEncoding);
+            //template.header("header_1", "value_1");
+            //requestTemplate.header("Authorization", String.format("%s %s", "auth", "========auth_key============"));
         };
     }
 

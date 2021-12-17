@@ -1,15 +1,15 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import lombok.Getter;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 import java.util.List;
 
 
 @Getter
 @ToString
-@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class PushRequestAnnounceDto {
 
     private String appId;
