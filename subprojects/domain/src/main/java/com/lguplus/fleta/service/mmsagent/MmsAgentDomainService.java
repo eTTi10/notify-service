@@ -13,8 +13,6 @@ import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.exception.mmsagent.*;
 import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
 import com.sun.istack.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -43,12 +41,12 @@ public class MmsAgentDomainService {
         //============ Start [setting API 호출 캐시등록] =============
 
         //setting API 호출관련 파라메타 셋팅
-        CallSettingRequestDto prm = CallSettingRequestDto.builder().build();//callSettingApi파라메타
-        prm.setSaId((String)settingConfig.get("rest_sa_id"));//ex) MMS:mms SMS:sms
-        prm.setStbMac((String)settingConfig.get("rest_stb_mac"));//ex) MMS:mms SMS:sms
-        prm.setCodeId(sendMmsRequestDto.getMmsCd());//ex) M011
-        prm.setSvcType((String)settingConfig.get("rest_svc_type"));//ex) MMS:E SMS:I
-
+        CallSettingRequestDto prm = CallSettingRequestDto.builder()//callSettingApi파라메타
+                .saId((String)settingConfig.get("rest_sa_id"))//ex) MMS:mms SMS:sms
+                .stbMac((String)settingConfig.get("rest_stb_mac"))//ex) MMS:mms SMS:sms
+                .codeId(sendMmsRequestDto.getMmsCd())//ex) M011
+                .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
+                .build();
         //setting API 호출하여 캐시에 메세지 등록후 출력
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
 
@@ -57,12 +55,12 @@ public class MmsAgentDomainService {
 
         if(callSettingApi.getResult().getTotalCount() > 0) {
             CallSettingDto settingItem =  settingApiList.get(0);
-            MmsRequestDto mmsDto = MmsRequestDto.builder().build();
-            mmsDto.setCtn(sendMmsRequestDto.getCtn());
-            mmsDto.setMmsTitle(prm.getCodeId());
-            mmsDto.setMmsMsg(settingItem.getCodeName());//메세지
-            mmsDto.setCtn(sendMmsRequestDto.getCtn());
-
+            MmsRequestDto mmsDto = MmsRequestDto.builder()
+                    .ctn(sendMmsRequestDto.getCtn())
+                    .mmsTitle(sendMmsRequestDto.getMmsCd())
+                    .mmsMsg(settingItem.getCodeName())//메세지
+                    .ctn(sendMmsRequestDto.getCtn())
+                    .build();
             String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
             returnService(returnMmsCode);
         }else{

@@ -52,9 +52,7 @@ public class LatestDomainService {
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
         List<LatestCheckEntity> checkList = latestRepository.getLatestCheckList(latestRequestDto);
-        LatestCheckDto resultLatestCheckDto = new LatestCheckDto();
-
-        resultLatestCheckDto.setCode(resultLatestCheckDto.SUCCESS_CODE);
+        LatestCheckDto resultLatestCheckDto = LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
 
         if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             throw new DuplicateKeyException("기존 데이터 존재");//1201;//중복
@@ -91,7 +89,7 @@ public class LatestDomainService {
      */
     public int insertLatest(LatestRequestDto latestRequestDto) {
         int insertCnt = 0;
-        LatestCheckDto check = getLatestCheckList(latestRequestDto);
+        getLatestCheckList(latestRequestDto);
 
         try {
             insertCnt = latestRepository.insertLatest(latestRequestDto);
