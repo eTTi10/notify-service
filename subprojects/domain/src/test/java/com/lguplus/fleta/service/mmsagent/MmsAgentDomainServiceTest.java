@@ -1,11 +1,17 @@
 package com.lguplus.fleta.service.mmsagent;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.MmsAgentDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +21,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,14 +45,16 @@ class MmsAgentDomainServiceTest {
     @Mock
     MmsAgentConfig mmsAgentConfig;
 
+
     private Map<String, ?> mmsConfig;//yml파일 mms
     private Map<String, Object> settingConfig;//yml파일 setting
 
-    private static final String sa_id = "M14070200159";
-    private static final String stb_mac = "9893.cc1f.e11c";
-    private static final String mms_cd = "M011";
+    private static final String saId = "M14070200159";
+    private static final String stbMac = "9893.cc1f.e11c";
+    private static final String mmsCd = "M011";
     private static final String ctn = "01025851531";
     private static final String replacement = "영희|컴퓨터";
+    private static final String svcType = "E";
 
     @BeforeEach
     void setUp() {
@@ -82,17 +93,81 @@ class MmsAgentDomainServiceTest {
 
     @Test
     void getMmsCallSettingApi() {
-       //CallSettingDto callSettingDto = new CallSettingDto.builder()
+        CallSettingDto dto = CallSettingDto.builder()
+                .codeId("M011")
+                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .build();
+        List<CallSettingDto> rs = new ArrayList<>();
+        rs.add(dto);
 
-       //given( mmsAgentDomainService.getMmsCallSettingApi(sa_id, "mms", mms_cd, "E").willReturn(statusMessage);
+        CallSettingResultDto result = CallSettingResultDto.builder()
+                .recordset(rs)
+                .build();
+
+        CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()
+                .result(result)
+                .build();
+
+        given( apiClient.mmsCallSettingApi(any())).willReturn(callSettingDto);
+
+
+       // CallSettingDto setingDto = mmsAgentDomainService.(saId, "mms", mmsCd, "E");
+
+
+//        /** 응답코드 */
+//        private String flag;
+//
+//        /** 응답메시지 */
+//        private String message;
+//
+//        /** 레코드수 */
+//        @JsonProperty("total_count")
+//        @Builder.Default private int totalCount = 0;
+//
+//
+//        /** 사용자그룹 */
+//        @JsonProperty("memberGroup")
+//        private String memberGroup;
+//
+//        /** 리스트 */
+//        @JsonProperty("recordset")
+//        private List<CallSettingDto> recordset;
+
+        // SuccessResponseDto responseDto = mmsAgentDomainService.sendMmsCode(sa_id, "mms", mms_cd, "E");
+        /*
+
+        //setting API 호출관련 파라메타 셋팅
+        CallSettingRequestDto prm = CallSettingRequestDto.builder()
+                .saId(saId)//ex) MMS:mms SMS:sms
+                .stbMac(stbMac)//ex) MMS:mms SMS:sms
+                .codeId(codeId)//ex) M011
+                .svcType(svcType)//ex) MMS:E SMS:I
+                .build();
+        //setting API 호출하여 캐시에 메세지 등록후 출력
+        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
+
+
+
+
+        //setting API 호출관련 파라메타 셋팅
+        CallSettingRequestDto prm = CallSettingRequestDto.builder()
+                .saId(saId)//ex) MMS:mms SMS:sms
+                .stbMac(stbMac)//ex) MMS:mms SMS:sms
+                .codeId(mmsCd)//ex) M011
+                .svcType(svcType)//ex) MMS:E SMS:I
+                .build();
+        //setting API 호출하여 캐시에 메세지 등록후 출력
+        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
+
+         */
     }
 
     @Test
     void sendMmsCode() {
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
-                .saId(sa_id)
-                .stbMac(stb_mac)
-                .mmsCd(mms_cd)
+                .saId(saId)
+                .stbMac(stbMac)
+                .mmsCd(mmsCd)
                 .ctn(ctn)
                 .replacement(replacement)
                 .build();
