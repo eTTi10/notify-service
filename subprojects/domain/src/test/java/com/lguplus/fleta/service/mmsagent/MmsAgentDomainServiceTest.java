@@ -106,12 +106,9 @@ class MmsAgentDomainServiceTest {
                 .mmsRep(sendMmsRequestDto.getCtn())
                 .build();
 
-
         String statusMessage = "";
 
         given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn(statusMessage);
-
-
 
         SuccessResponseDto responseDto = mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         Assertions.assertTrue("1000".equals(responseDto.getFlag()));
