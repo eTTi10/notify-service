@@ -1,10 +1,7 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
@@ -13,10 +10,11 @@ import java.util.List;
  * 멀티푸시등록 요청 DTO
  *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 @Getter
-@Setter
 @ToString
-@SuperBuilder
 public class HttpPushMultiRequestDto {
 
     /** 어플리케이션 ID */
