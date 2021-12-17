@@ -1,18 +1,11 @@
 package com.lguplus.fleta.service.mmsagent;
 
 import com.lguplus.fleta.client.CallSettingDomainClient;
-import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.client.MmsAgentDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
-import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.service.latest.LatestDomainService;
-import com.lguplus.fleta.service.push.PushAnnounceDomainService;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,9 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)

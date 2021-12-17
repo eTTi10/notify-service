@@ -33,15 +33,16 @@ class LatestServiceTest {
     @BeforeEach
     void getLatestListBefore() {
 
-        LatestEntity rs1 = new LatestEntity();
-        JunitTestUtils.setValue(rs1, "saId", "500058151453");
-        JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs1, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs1, "catId", "T3021");
-        JunitTestUtils.setValue(rs1, "regId", "500023630832");
-        JunitTestUtils.setValue(rs1, "catName", "놀라운 대회 스타킹");
-        JunitTestUtils.setValue(rs1, "rDate", "2014-11-09 13:18:14.000");
-        JunitTestUtils.setValue(rs1, "categoryGb", "");
+        LatestEntity rs1 = LatestEntity.builder()
+                        .saId("500058151453")
+                        .mac("001c.627e.039c")
+                        .ctn("01055805424")
+                        .catId("T3021")
+                        .regId("500023630832")
+                        .catName("놀라운 대회 스타킹")
+                        .rDate("2014-11-09 13:18:14.000")
+                        .categoryGb("")
+                        .build();
 
         List<LatestEntity> rs = List.of(rs1);
         List<LatestDto> resultList = new ArrayList<LatestDto>();

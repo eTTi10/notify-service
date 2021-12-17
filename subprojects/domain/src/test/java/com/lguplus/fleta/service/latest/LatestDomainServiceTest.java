@@ -1,4 +1,4 @@
-package com.lguplus.fleta.service.latest;
+package com.lguplus.fleta.repository;
 
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
@@ -10,8 +10,7 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
-import com.lguplus.fleta.exception.latest.JpaSocketException;
-import com.lguplus.fleta.repository.LatestRepository;
+import com.lguplus.fleta.service.latest.LatestDomainService;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-import java.net.SocketException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -132,15 +130,16 @@ class LatestDomainServiceTest {
     @Test
     @DisplayName("LatestRepositoryTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
     void getLatestList() {
-        LatestEntity rs1 = new LatestEntity();
-        JunitTestUtils.setValue(rs1, "saId", "500058151453");
-        JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs1, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs1, "catId", "T3021");
-        JunitTestUtils.setValue(rs1, "regId", "500023630832");
-        JunitTestUtils.setValue(rs1, "catName", "놀라운 대회 스타킹");
-        JunitTestUtils.setValue(rs1, "rDate", "2014-11-09 13:18:14.000");
-        JunitTestUtils.setValue(rs1, "categoryGb", "");
+        LatestEntity rs1 = LatestEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3021")
+                .regId("500023630832")
+                .catName("놀라운 대회 스타킹")
+                .rDate("2014-11-09 13:18:14.000")
+                .categoryGb("")
+                .build();
         List<LatestEntity> list = List.of(rs1);
 
         // Mock Method
@@ -166,9 +165,9 @@ class LatestDomainServiceTest {
     @DisplayName("LatestRepositoryTest.getLatestCheckList0 정상적으로 체크리스트 데이터를 수신하는지 확인")
     void getLatestCheckList0() {
         // Mock Method
-        LatestCheckDto checkDto = new LatestCheckDto();
+        LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = new LatestCheckEntity();
+        LatestCheckEntity rs1 = LatestCheckEntity.builder().build();
         List<LatestCheckEntity> list = List.of();
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
@@ -187,19 +186,22 @@ class LatestDomainServiceTest {
     @DisplayName("LatestRepositoryTest.getLatestCheckList_DuplicateKeyException 중복체크 조건이 잘 실행되는지 확인")
     void getLatestCheckList_DuplicateKeyException() {
         // --------- Mock Method 강제 에러 연출 ---------
-        LatestCheckDto checkDto = new LatestCheckDto();
+        LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs1, "saId", "500058151453");
-        JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs1, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs1, "catId", "T3021");
-        
-        LatestCheckEntity rs2 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs2, "saId", "500058151453");
-        JunitTestUtils.setValue(rs2, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs2, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs2, "catId", "T3021");
+        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3021")
+                .build();
+
+        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3021")
+                .build();
+
         List<LatestCheckEntity> list = List.of(rs1, rs2);
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
@@ -224,43 +226,51 @@ class LatestDomainServiceTest {
         /*
         [중복조건] SELECT CAT_ID FROM PT_UX_LATEST WHERE SA_ID=#saID# AND MAC=#mac# AND CTN=#ctn#
         */
-        LatestCheckDto checkDto = new LatestCheckDto();
+        LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs1, "saId", "500058151453");
-        JunitTestUtils.setValue(rs1, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs1, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs1, "catId", "T3021");
+        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3021")
+                .build();
 
-        LatestCheckEntity rs2 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs2, "saId", "500058151453");
-        JunitTestUtils.setValue(rs2, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs2, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs2, "catId", "T3022");
+        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3022")
+                .build();
 
-        LatestCheckEntity rs3 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs3, "saId", "500058151453");
-        JunitTestUtils.setValue(rs3, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs3, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs3, "catId", "T3023");
+        LatestCheckEntity rs3 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3023")
+                .build();
 
-        LatestCheckEntity rs4 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs4, "saId", "500058151453");
-        JunitTestUtils.setValue(rs4, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs4, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs4, "catId", "T3024");
+        LatestCheckEntity rs4 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3024")
+                .build();
 
-        LatestCheckEntity rs5 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs5, "saId", "500058151453");
-        JunitTestUtils.setValue(rs5, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs5, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs5, "catId", "T3025");
 
-        LatestCheckEntity rs6 = new LatestCheckEntity();
-        JunitTestUtils.setValue(rs6, "saId", "500058151453");
-        JunitTestUtils.setValue(rs6, "mac", "001c.627e.039c");
-        JunitTestUtils.setValue(rs6, "ctn", "01055805424");
-        JunitTestUtils.setValue(rs6, "catId", "T3026");
+        LatestCheckEntity rs5 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3025")
+                .build();
+
+        LatestCheckEntity rs6 = LatestCheckEntity.builder()
+                .saId("500058151453")
+                .mac("001c.627e.039c")
+                .ctn("01055805424")
+                .catId("T3026")
+                .build();
+
 
         List<LatestCheckEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
 
@@ -285,40 +295,7 @@ class LatestDomainServiceTest {
 
 
     //####################### Start 알림삭제 ######################
-    @Test
-    @DisplayName("LatestServiceTest.deleteLatest 정상적으로 리스트 데이터를 삭제하는지 확인")
-    void deleteLatest() {
-        given(latestRepository.deleteLatest(any())).willReturn(1);
 
-        LatestRequestDto latestRequestDto = LatestRequestDto.builder()
-                .saId("500023630832")
-                .mac("001c.6284.30a4")
-                .ctn("01080808526")
-                .catId("M0241").build();
-
-        int deleteCnt = latestDomainService.deleteLatest(latestRequestDto);
-        Assertions.assertTrue(1 == deleteCnt);
-
-        log.info("LatestServiceTest.deleteLatest End");
-    }
-
-
-    @Test
-    @DisplayName("LatestServiceTest.deleteLatestDeleteNotFoundException 예외 처리 되는지 확인")
-    void deleteLatestDeleteNotFoundException() {
-
-        Exception exception = null;
-        try {
-             given(latestDomainService.deleteLatest(any())).willReturn(0);
-        }catch(Exception e){
-            log.info("DeleteNotFoundException타입의 에러가 발생함");
-            exception = e;
-        }
-        assertThat(exception).isInstanceOf(DeleteNotFoundException.class);
-        assertThat(exception).isInstanceOf(RuntimeException.class);
-
-        log.info("LatestServiceTest.deleteLatestDeleteNotFoundException End");
-    }
 
     //####################### End 알림삭제 ######################
 

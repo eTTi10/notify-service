@@ -30,23 +30,64 @@ import java.util.Map;
 public class MmsAgentDomainService {
     private final CallSettingDomainClient apiClient;
     private final MmsAgentConfig config;
-    private Map<String, ?> mmsConfig;//yml파일 mms
-    private Map<String, Object> settingConfig;//yml파일 setting
     private final MmsAgentDomainClient mmsSoap;
 
-    public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) throws Exception {
-        //============ yml설정파일 객체생성 ============
+    private Map<String, ?> mmsConfig;//yml파일 mms
+    private Map<String, Object> settingConfig;//yml파일 setting
+
+
+    /**
+     * 전송메세지를 취득후 MM7모듈함수를 실행
+     * @param sendMmsRequestDto
+     * @return
+     */
+    public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) {
+        //yml설정파일 객체생성
         mmsConfig = config.getMms();//1레벨 객체
         settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
-        //============ Start [setting API 호출 캐시등록] =============
+
+        //Start [setting API 호출 캐시등록]
+        CallSettingDto settingItem =  getMmsCallSettingApi(
+                (String)settingConfig.get("rest_sa_id"), //callSettingApi파라메타
+                (String)settingConfig.get("rest_stb_mac"), //ex) MMS:mms SMS:sms
+                sendMmsRequestDto.getMmsCd(), //ex) M011
+                (String)settingConfig.get("rest_svc_type") //ex) MMS:E SMS:I
+        );
+
+        MmsRequestDto mmsDto = MmsRequestDto.builder()
+                .ctn(sendMmsRequestDto.getCtn())
+                .mmsTitle(sendMmsRequestDto.getMmsCd())
+                .mmsMsg(settingItem.getCodeName())//메세지
+                .mmsRep(sendMmsRequestDto.getCtn())
+                .build();
+
+        String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
+
+        if(!returnMmsCode.equals("1000")){
+            returnService(returnMmsCode);
+        }
+
+        return SuccessResponseDto.builder().build();
+    }
+
+    /**
+     * 전송할 MMS메세지 취득
+     * @param saId
+     * @param stbMac
+     * @param codeId
+     * @param svcType
+     * @return
+     */
+    private CallSettingDto getMmsCallSettingApi(String saId, String stbMac, String codeId, String svcType){
+        CallSettingDto settingItem = null;
 
         //setting API 호출관련 파라메타 셋팅
-        CallSettingRequestDto prm = CallSettingRequestDto.builder()//callSettingApi파라메타
-                .saId((String)settingConfig.get("rest_sa_id"))//ex) MMS:mms SMS:sms
-                .stbMac((String)settingConfig.get("rest_stb_mac"))//ex) MMS:mms SMS:sms
-                .codeId(sendMmsRequestDto.getMmsCd())//ex) M011
-                .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
-                .build();
+        CallSettingRequestDto prm = CallSettingRequestDto.builder()
+            .saId(saId)//ex) MMS:mms SMS:sms
+            .stbMac(stbMac)//ex) MMS:mms SMS:sms
+            .codeId(codeId)//ex) M011
+            .svcType(svcType)//ex) MMS:E SMS:I
+            .build();
         //setting API 호출하여 캐시에 메세지 등록후 출력
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
 
@@ -54,22 +95,14 @@ public class MmsAgentDomainService {
         List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
 
         if(callSettingApi.getResult().getTotalCount() > 0) {
-            CallSettingDto settingItem =  settingApiList.get(0);
-            MmsRequestDto mmsDto = MmsRequestDto.builder()
-                    .ctn(sendMmsRequestDto.getCtn())
-                    .mmsTitle(sendMmsRequestDto.getMmsCd())
-                    .mmsMsg(settingItem.getCodeName())//메세지
-                    .ctn(sendMmsRequestDto.getCtn())
-                    .build();
-            String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
-            returnService(returnMmsCode);
+            settingItem =  settingApiList.get(0);
         }else{
-            returnService("1506");
+            returnService("1506");//해당 코드에 존재하는 메시지가 없음
         }
-        return SuccessResponseDto.builder().build();
+        return settingItem;
     }
 
-    private void returnService(@NotNull String errorCode) throws Exception {
+    private void returnService(@NotNull String errorCode) {
         log.error("{errorCode:"+errorCode+"}");
         switch (errorCode){
             case "0001":
@@ -105,7 +138,7 @@ public class MmsAgentDomainService {
             case "9998":
                 throw new MmsServiceException();//MM7 Service Error
             default :
-                throw new Exception();//기타에러
+                throw new RuntimeException();//기타에러
         }
     }
 
