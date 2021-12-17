@@ -82,7 +82,7 @@ public class PushAnnounceDomainService {
             log.debug("[pushAnnouncement]["+statusCode+"] [FAIL]");
 
             //실패
-            PushSingleDomainService.getPushClientResponseDto(statusCode);
+            getPushClientResponseDto(statusCode);
         }
 
         return PushClientResponseDto.builder().build();
@@ -94,6 +94,38 @@ public class PushAnnounceDomainService {
             return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.get());
         }
         return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.incrementAndGet());
+    }
+
+
+    private PushClientResponseDto getPushClientResponseDto(String statusCode) {
+        switch (statusCode) {
+            case "202":
+                throw new AcceptedException();
+            case "400":
+                throw new BadRequestException();
+            case "401":
+                throw new UnAuthorizedException();
+            case "403":
+                throw new ForbiddenException();
+            case "404":
+                throw new NotFoundException();
+            case "410":
+                throw new NotExistRegistIdException();
+            case "412":
+                throw new PreConditionFailedException();
+            case "500":
+                throw new InternalErrorException();
+            case "502":
+                throw new ExceptionOccursException();
+            case "503":
+                throw new ServiceUnavailableException();
+            case "5102":
+                throw new SocketTimeException();
+            case "5103": //FeignException
+                throw new SocketException();
+            default:
+                throw new PushEtcException();//("기타 오류"); //9999
+        }
     }
 
 }
