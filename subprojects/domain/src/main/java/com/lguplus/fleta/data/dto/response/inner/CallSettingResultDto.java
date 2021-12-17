@@ -11,8 +11,9 @@ import java.util.List;
 @Getter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
-@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class CallSettingResultDto implements Serializable{
 
     /** 응답코드 */

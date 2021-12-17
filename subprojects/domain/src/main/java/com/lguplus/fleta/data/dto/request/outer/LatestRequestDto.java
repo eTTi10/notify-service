@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.lguplus.fleta.data.dto.PlainTextibleDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
 @Getter
-@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class LatestRequestDto implements PlainTextibleDto, Serializable {
 
     private String saId; //가입자 번호
