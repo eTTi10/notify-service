@@ -1,15 +1,13 @@
 package com.lguplus.fleta.data.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 
 import java.io.Serializable;
 
-@AllArgsConstructor
 @Getter
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @ToString
 public class PushStatDto implements Serializable {

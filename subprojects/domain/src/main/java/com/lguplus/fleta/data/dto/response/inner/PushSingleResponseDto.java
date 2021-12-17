@@ -2,10 +2,7 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 /**
@@ -14,7 +11,8 @@ import lombok.experimental.SuperBuilder;
  */
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class PushSingleResponseDto {
 
@@ -24,7 +22,8 @@ public class PushSingleResponseDto {
 
     @Getter
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    @AllArgsConstructor
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
     public static class ResponseSingle {
         @JsonProperty("msg_id")
