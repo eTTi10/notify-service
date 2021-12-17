@@ -19,7 +19,7 @@ push-comm:
       cacheName: pushDelayCnt
       reqCnt: '100' # '100'
     socket:
-      max: '100' # 20
+      max: '80' # 20
       close_secend: '170'
       min: '20'
       channelID: PsAgt # PsAgt

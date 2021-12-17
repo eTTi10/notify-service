@@ -1,10 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
@@ -57,17 +53,4 @@ public class PushRequestBodyMultiVo {
     @ApiModelProperty(position = 6, example = "[MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=]", value = "사용자 ID")
     private List<String> users;
 
-    /*
-    public PushRequestMultiDto convert(PushRequestParamMultiVo pushRequestParamMultiVo) {
-
-        return PushRequestMultiDto.builder()
-                .appId(pushRequestParamMultiVo.getAppId())
-                .serviceId(pushRequestParamMultiVo.getServiceId())
-                .pushType(pushRequestParamMultiVo.getPushType())
-                .multiCount(pushRequestParamMultiVo.getMultiCount())
-                .msg(getMsg())
-                .items(getItems())
-                .users(getUsers())
-                .build();
-    }*/
 }

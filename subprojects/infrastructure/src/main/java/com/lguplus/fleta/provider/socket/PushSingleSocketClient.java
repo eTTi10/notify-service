@@ -3,7 +3,6 @@ package com.lguplus.fleta.provider.socket;
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
 import com.lguplus.fleta.exception.push.PushBizException;
 import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
@@ -15,13 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.*;
 
 /**
@@ -65,21 +62,21 @@ public class PushSingleSocketClient implements PushSingleClient {
 
     //LG Push
     @Value("${push-comm.lgpush.server.ip}")
-    private String lg_host;
+    private String lgHost;
     @Value("${push-comm.lgpush.server.port}")
-    private String lg_port;
+    private String lgPort;
     @Value("${push-comm.lgpush.socket.timeout}")
-    private String lg_timeout;
+    private String lgTimeout;
     @Value("${server.port}")
-    private String lg_channelPort;
+    private String lgChannelPort;
     @Value("${push-comm.lgpush.socket.channelID}")
-    private String lg_defaultChannelHost;
+    private String lgDefaultChannelHost;
     @Value("${push-comm.lgpush.cp.destination_ip}")
-    private String lg_destinationIp;
+    private String lgDestinationIp;
     @Value("${push-comm.lgpush.socket.close_secend}")
-    private String lg_closeSecond;
+    private String lgCloseSecond;
     @Value("${push-comm.lgpush.socket.initCnt}")
-    private String lg_pushSocketInitCnt;
+    private String lgPushSocketInitCnt;
 
     //LG Push Service ID
     @Value("${push-comm.lgpush.service_id}")
@@ -111,27 +108,17 @@ public class PushSingleSocketClient implements PushSingleClient {
         GenericObjectPool<PushSocketInfo> pool = poolList.stream().filter(p->((PushSocketConnFactory)p.getFactory()).isLgPush() == bIsLgPush)
                 .findFirst().get();
 
-        try {
-            synchronized (pool) {
-                long stopWatchStart = System.currentTimeMillis();
+        try
+        {
+            socketInfo = pool.borrowObject();
 
-                socketInfo = pool.borrowObject();
-
-                long stopWatchEnd = System.currentTimeMillis();
-
-                if((stopWatchEnd - stopWatchStart) > 100) {
-                    log.debug("pool-Exhausted: time:{}, {}", (stopWatchEnd - stopWatchStart), socketInfo.getChannelID());
-                }
-            }
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
         } catch (NoSuchElementException e) {
-            //e.printStackTrace();
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("500").statusMsg("Exception Occurs").build();
         } catch (PushBizException e) {
-            //e.printStackTrace();
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
         } catch (Exception e) {
@@ -147,110 +134,86 @@ public class PushSingleSocketClient implements PushSingleClient {
     @PostConstruct
     public void initialize() {
 
+        PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
+                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(channelPort))
+                .defaultChannelHost(defaultChannelHost).closeSecond(Integer.parseInt(closeSecond)).destinationIp(destinationIp)
+                .isLgPush(false).build();
+
+        PushSocketConnFactory.PushServerInfoVo pushServerInfoVoLg = PushSocketConnFactory.PushServerInfoVo.builder()
+                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(lgChannelPort))
+                .defaultChannelHost(lgDefaultChannelHost).closeSecond(Integer.parseInt(lgCloseSecond)).destinationIp(lgDestinationIp)
+                .isLgPush(true).build();
+
         poolList = new ArrayList<>();
-        poolList.add(new GenericObjectPool<PushSocketInfo>(
-                new PushSocketConnFactory(host, port, timeout, channelPort, defaultChannelHost, destinationIp, closeSecond, false)
-                , getPoolConfig(Integer.valueOf(socketMax), Integer.valueOf(socketMin))));
+        poolList.add(new GenericObjectPool<>(
+                new PushSocketConnFactory(pushServerInfoVo)
+                , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin))));
 
-        poolList.add(new GenericObjectPool<PushSocketInfo>(
-                new PushSocketConnFactory(lg_host, lg_port, lg_timeout, lg_channelPort, lg_defaultChannelHost, lg_destinationIp, lg_closeSecond, true)
-                , getPoolConfig(Integer.valueOf(lgSocketMax), Integer.valueOf(lgSocketMin))));
+        poolList.add(new GenericObjectPool<>(
+                new PushSocketConnFactory(pushServerInfoVoLg)
+                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin))));
 
-        iPushCallRetryCnt = Integer.valueOf(pushCallRetryCnt);
+        iPushCallRetryCnt = Integer.parseInt(pushCallRetryCnt);
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
-        // Init Socket
-        //poolList.forEach(p -> initPoolSocketInfo(p, ((PushSocketConnFactory)p.getFactory()).isLgPush() ? Integer.parseInt(lg_pushSocketInitCnt) : Integer.parseInt(pushSocketInitCnt)));
-
     }
 
-    @Scheduled(fixedDelay = 1000 * 20)
+    //@Scheduled(fixedDelay = 1000 * 20)
     public void socketClientSch() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Date now = new Date();
         String strDate = sdf.format(now);
 
-        poolList.forEach(p -> {
-            //p.evict();
-            log.debug("socketClientSch: Hdtv Time:{} Active{}/Idle{}/Wait{}", strDate,
-                    p.getNumActive(), p.getNumIdle(), p.getNumWaiters());
-        });
+        poolList.forEach(p -> log.debug("socketClientSch: Hdtv Time:{} Active{}/Idle{}", strDate, p.getNumActive(), p.getNumIdle()));
     }
 
     @PreDestroy
     public void destroy() {
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close");
-        poolList.forEach(p -> p.close());
-
+        poolList.forEach(GenericObjectPool::close);
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close ...");
     }
 
-    private PushSingleResponseDto getSingleResponseDto(String code, String msg) {
-        return PushSingleResponseDto.builder().responseData(PushSingleResponseDto.ResponseSingle.builder().statusCode(code).statusMsg(msg).build()).build();
-    }
-
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
-        GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<PushSocketInfo>();
+        GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setJmxEnabled(false);
         poolConfig.setMaxTotal(maxTotal); //100
         poolConfig.setMaxIdle(maxTotal);  //100
         poolConfig.setMinIdle(minIdle);   //20
-        poolConfig.setBlockWhenExhausted(true);//false);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
+        poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setTestOnBorrow(true);
-        poolConfig.setTestOnReturn(true);//true);
-        poolConfig.setTestWhileIdle(true);//true);
+        poolConfig.setTestOnReturn(true);
+        poolConfig.setTestWhileIdle(true);
         poolConfig.setLifo(false); //false : FIFO, default: LIFO
-        poolConfig.setTimeBetweenEvictionRunsMillis(10 * 1000);
-        //poolConfig.setTimeBetweenEvictionRuns(Duration.ofSeconds(10));
+        poolConfig.setTimeBetweenEvictionRunsMillis(10 * 1000L);
 
         return poolConfig;
     }
-
-    /*
-    private void initPoolSocketInfo(GenericObjectPool<PushSocketInfo> pool, int initCnt) {
-        List<PushSocketInfo> socketInfoList = new ArrayList<>();
-        try {
-            for(int i=0; i<initCnt; i++) {
-                socketInfoList.add(pool.borrowObject());
-            }
-            for(int i=0; i<initCnt; i++) {
-                pool.returnObject(socketInfoList.get(i));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
     @Override
     @Cacheable(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
     public PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
         log.debug("getPushStatus: init : " + System.currentTimeMillis());
 
-        PushStatDto pushStatDto = PushStatDto.builder()
+        return PushStatDto.builder()
                 .serviceId(serviceId)
                 .measureIntervalMillis(measureIntervalMillis)
                 .measurePushCount(measurePushCount)
                 .measureStartMillis(measureStartMillis)
                 .build();
-        //log.debug("getPushStatus: {}", pushStatDto);
-        return pushStatDto;
     }
 
     @Override
     @CachePut(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
     public PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
 
-        PushStatDto pushStatDto = PushStatDto.builder()
+        return PushStatDto.builder()
                 .serviceId(serviceId)
                 .measureIntervalMillis(measureIntervalMillis)
                 .measurePushCount(measurePushCount)
                 .measureStartMillis(measureStartMillis)
                 .build();
-        //log.debug("putPushStatus: {}", pushStatDto);
-
-        return pushStatDto;
     }
 
 }
