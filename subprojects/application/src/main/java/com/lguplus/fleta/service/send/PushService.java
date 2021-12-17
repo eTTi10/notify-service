@@ -203,8 +203,6 @@ public class PushService {
 
                 }
 
-                pushParam ="push_type="+ pushType + "&service_id=" + serviceId + "&app_id=" + appId;
-                log.debug("sendPushCtn pushParam : {}", pushParam);
                 log.debug("sendPushCtn payload : {} {} {}", payload, payloadItem, regId);
 
                 //HTTP PUSH 호출
