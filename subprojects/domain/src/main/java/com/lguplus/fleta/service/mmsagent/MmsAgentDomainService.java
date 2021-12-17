@@ -54,11 +54,12 @@ public class MmsAgentDomainService {
             (String)settingConfig.get("rest_svc_type") //ex) MMS:E SMS:I
         );
 
-        MmsRequestDto mmsDto = MmsRequestDto.builder().build();
-        mmsDto.setCtn(sendMmsRequestDto.getCtn());
-        mmsDto.setMmsTitle(sendMmsRequestDto.getMmsCd());
-        mmsDto.setMmsMsg(settingItem.getCodeName());//메세지
-        mmsDto.setCtn(sendMmsRequestDto.getCtn());
+        MmsRequestDto mmsDto = MmsRequestDto.builder()
+        .ctn(sendMmsRequestDto.getCtn())
+        .mmsTitle(sendMmsRequestDto.getMmsCd())
+        .mmsMsg(settingItem.getCodeName())//메세지
+        .mmsRep(sendMmsRequestDto.getCtn())
+        .build();
 
         String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
 

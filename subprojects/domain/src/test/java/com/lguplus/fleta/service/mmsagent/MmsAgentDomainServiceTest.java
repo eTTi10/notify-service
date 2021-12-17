@@ -7,6 +7,7 @@ import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.service.latest.LatestDomainService;
@@ -90,6 +91,13 @@ class MmsAgentDomainServiceTest {
     }
 
     @Test
+    void getMmsCallSettingApi() {
+       //CallSettingDto callSettingDto = new CallSettingDto.builder()
+
+       //given( mmsAgentDomainService.getMmsCallSettingApi(sa_id, "mms", mms_cd, "E").willReturn(statusMessage);
+    }
+
+    @Test
     void sendMmsCode() {
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
                 .saId(sa_id)
@@ -100,14 +108,13 @@ class MmsAgentDomainServiceTest {
                 .build();
 
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
-        /*
+
         MmsRequestDto mmsDto = MmsRequestDto.builder()
-                        .ctn(sendMmsRequestDto.getCtn())
-                                .mmsTitle(sendMmsRequestDto.)
-        mmsDto.setCtn(sendMmsRequestDto.getCtn());
-        mmsDto.setMmsTitle(sendMmsRequestDto.getMmsCd());
-        mmsDto.setMmsMsg(sendMmsRequestDto.);//메세지
-        mmsDto.setCtn(sendMmsRequestDto.getCtn());
+                .ctn(sendMmsRequestDto.getCtn())
+                .mmsTitle(sendMmsRequestDto.getMmsCd())
+                .mmsMsg("MMS메세지")//메세지
+                .mmsRep(sendMmsRequestDto.getCtn())
+                .build();
 
 
         String statusMessage = "";
@@ -118,8 +125,9 @@ class MmsAgentDomainServiceTest {
 
         SuccessResponseDto responseDto = mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         Assertions.assertTrue("1000".equals(responseDto.getFlag()));
-        */
+
     }
+
 
 
 }
