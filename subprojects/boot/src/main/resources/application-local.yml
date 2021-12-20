@@ -14,9 +14,17 @@ server:
 spring:
   datasource:
     hikari:
-      jdbc-url: jdbc:postgresql://localhost:5432/postgres
+      #driver-class-name: org.postgresql.Driver
+
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
       username: postgres
-      password: postgres
+      password: devadmin!
+
+      #platform: postgres
+      #auto-commit: false
+      #connection-test-query: SELECT 1
+      #transaction-isolation: TRANSACTION_READ_UNCOMMITTED
+      maximum-pool-size: 4
   jpa:
     database: postgresql
     hibernate:
@@ -28,19 +36,48 @@ spring:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
-        format_sql: true
+        format_sql: "false"
         jdbc:
           lob:
             non_contextual_creation: true
-    show-sql: true
+    show-sql: false
 
+  ## Cache - Redis
+#  cache:
+#    type: redis
+#  redis:
+#    database: 0
+#    host: 132.145.90.37
+#    port: 6379
+#    password: votmdnjem@1
+#    timeout: 3000
+#    redisson:
+#      config: |
+#        singleServerConfig:
+#          address: redis://${spring.redis.host}:${spring.redis.port}
+#          password: ${spring.redis.password}
+#          database: ${spring.redis.database}
+#          connectTimeout: ${spring.redis.timeout}
   ## Cache - Redis
   cache:
     type: redis
   redis:
     database: 0
-    host: localhost
+    host: 127.0.0.1
+    #host: 132.145.90.37
     port: 6379
+    password: votmdnjem@1
+    timeout: 3000
+    redisson:
+      config: |
+        singleServerConfig:
+          address: redis://${spring.redis.host}:${spring.redis.port}
+          password: ${spring.redis.password}
+          database: ${spring.redis.database}
+          connectTimeout: ${spring.redis.timeout}
+  # Message Stream - Kafka
+  kafka:
+    bootstrap-servers: b-1.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-2.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-3.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-5.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092
 
 
 
@@ -57,9 +94,27 @@ logging:
 
 
 ############################################
+####  Management
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+
+
+############################################
 #### Other Domain Application Service
 service:
-  vodlookup:
-    url: http://vodlookup.fleta.com
   programming:
     url: http://programming.fleta.com
+  searchword:
+    url: http://searchword.fleta.com
+  settings:
+    url: http://settings.fleta.com
+  vodlookup:
+    url: http://vodlookup.fleta.com
+  channel:
+    url: http://channel.fleta.com
+  personalization:
+    url: http://personalization.fleta.com

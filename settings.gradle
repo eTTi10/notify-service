@@ -1,4 +1,4 @@
-rootProject.name = 'msa-boilerplate'
+rootProject.name = 'notify-service'
 
 include 'boot'
 include 'presentation'

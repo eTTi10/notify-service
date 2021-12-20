@@ -28,7 +28,7 @@ public class LogInterceptor implements HandlerInterceptor {
 
         MDC.put("traceId", uuid);
 
-        log.info("[{}][{}][{}] Request", method, requestUri, queryString);
+        //log.info("[{}][{}][{}] Request", method, requestUri, queryString);
         return true;
     }
 
@@ -36,7 +36,7 @@ public class LogInterceptor implements HandlerInterceptor {
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
         String method = request.getMethod();
         String requestUri = request.getRequestURI();
-        log.info("[{}][{}] PostHandle", method, requestUri);
+        //log.info("[{}][{}] PostHandle", method, requestUri);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class LogInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
         String requestUri = request.getRequestURI();
         Long responseTime = (Long) request.getAttribute(RESPONSE_TIME);
-        log.info("[{}][{}] Response {}ms", method, requestUri, responseTime);
+        //log.info("[{}][{}] Response {}ms", method, requestUri, responseTime);
 
         MDC.clear();
 

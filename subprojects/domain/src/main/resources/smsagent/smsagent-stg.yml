@@ -1,0 +1,62 @@
+#SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
+
+sms:
+  sender:
+    "no": '101'
+    retry:
+      sleep:
+        ms: '1000'
+  send:
+    retry: '1'
+    busy:
+      retry: '3'
+  setting:
+    timeout: '5000'
+    request:
+      method: GET
+    url: http://hsuxm.uplus.co.kr/hdtv/comm/setting?sa_id=sms&stb_mac=sms&code_id=&svc_type=I
+    rest_url: "http://hsuxm.uplus.co.kr"
+    rest_path: "/hdtv/comm/setting"
+    rest_sa_id: sms
+    rest_stb_mac: sms
+    rest_code_id:
+    rest_svc_type: I
+
+#https 예외 사용 여부 (1 : 사용 / 0 : 미사용)
+check:
+  https: '0'
+
+# agent.no.send.use 전송 예외 사용 여부 (1 : 사용 / 0 : 미사용)
+# agent.no.sendtime 전송 예외 시간(시작시간|종료시간)
+agent:
+  "no":
+    send:
+      use: "0"
+    sendtime: 23|06
+  port1: 8187|8114
+  tps: '1'
+  id1: test
+  ip1: 210.124.166.239|192.168.233.209
+  password1: test
+  servers:
+    - index: 1
+      ip: 210.124.166.239|192.168.233.209
+      port: 8187|8114
+      id: test
+      password: test
+    - index: 2
+      ip: 192.168.239.109
+      port: 8554
+      id: hdtv
+      password: uflix4
+    - index: 3
+      ip: 192.168.239.109
+      port: 8555
+      id: hdtv
+      password: uflix5
+    - index: 4
+      ip: 192.168.239.109
+      port: 8556
+      id: hdtv
+      password: uflix6
+

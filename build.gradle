@@ -29,16 +29,33 @@ subprojects {
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
-        implementation 'org.apache.commons:commons-lang3:3.11'
+        implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.5'
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
+
+        implementation "io.springfox:springfox-swagger2:2.9.2"
+        implementation "io.springfox:springfox-swagger-ui:2.9.2"
+        implementation 'org.apache.commons:commons-lang3:3.11'
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
-        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
-
+        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        //MapStruct
+        compileOnly 'org.mapstruct:mapstruct:1.4.2.Final'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
+        //####################### MMS 모듈관련 #########################
+        // https://mvnrepository.com/artifact/org.jdom/jdom
+        // 관련) import org.jdom2.*, Format
+        implementation group: 'org.jdom', name: 'jdom', version: '2.0.2'
+
+        // https://mvnrepository.com/artifact/org.jvnet.mimepull/mimepull
+        // 관련) MIMEConfig, import org.jvnet.mimepull.*
+        implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
+
     }
 
     jacoco {
@@ -109,6 +126,8 @@ subprojects {
                         'com.lguplus.fleta.exception.*',
                         'com.lguplus.fleta.filter.*',
                         'com.lguplus.fleta.interceptor.*',
+                        'com.lguplus.fleta.exhandler.*',
+                        'com.lguplus.fleta.validation.*',
                 ]
             }
         }
@@ -205,6 +224,7 @@ project(':domain') {
 project(':infrastructure') {
     dependencies {
         implementation project(':domain')
+        testImplementation project(':boot')
     }
     bootJar { enabled = false }
     jar { enabled = true }

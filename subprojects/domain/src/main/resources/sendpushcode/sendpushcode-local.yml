@@ -1,0 +1,207 @@
+mims:
+  server:
+    portList: '8085'
+    ipList: 127.0.0.1
+  access:
+    service:
+      type: C|F|N|I
+    before:
+      id: PIB
+    dir: /NAS_DATA/web/smartux/videolte/access/
+    display:
+      type: M|P|T
+  cache:
+    nas:
+      folder: /NAS_DATA/web/smartux/mims/sync_file_cache
+    local:
+      folder: /app/mims/file_cache
+tvpoint:
+  getpoint:
+    method: GET
+    url: /tpagent/point
+  setpoint:
+    method: POST
+    url: /tpagent/point
+  timeout: '30000'
+  check:
+    https: '0'
+  port: '80'
+  host: http://asuxm.uplus.co.kr
+tvpoint2:
+  getpoint:
+    url: /tpagent/tvpoint/point
+    method: GET
+  list:
+    method: GET
+    url: /tpagent/tvpoint/list
+  setpoint:
+    url: /tpagent/tvpoint/point
+    method: POST
+  cancel:
+    method: DELETE
+    url: /tpagent/tvpoint/point
+  check:
+    https: '0'
+  port: '80'
+  timeout: '30000'
+  host: http://asuxm.uplus.co.kr
+param:
+  list:
+    T003: svc_id|name|service_type|ctn|intent_url|link_flag
+    T002: album_id|album_series|cate_series|name|duration|playtime|service_type|ctn|intent_url|link_flag
+    T001: service_type|ctn|pin
+    P002: album_id|link_flag|name|reqtime|playtime|intent_url
+    P001: address|unumber|req_date|ctn|trans_id
+    P003: svc_id|name|intent_url
+    pos:
+      C003: ''
+      T003: svc_id|link_flag
+      T001: ''
+      T002: album_id|link_flag
+    C003: service_type|
+    C002: service_type|
+    C001: service_type|
+gcm:
+  payload:
+    body:
+      pos:
+        C003: '"result":{"name":"","data":"","noti_type":"PA_CANCEL"}'
+        T002: '"result":{"noti_type":"FUP","cont_type":"VOD","cat_id":"","album_id":"[+album_id]","album_series":"","cate_series":"","album_name":"","duration":"","playtime":"","data":{"LINK_FLAG":"[+link_flag]"}}'
+        T001: '"result":{"name":"","data":"","noti_type":"PAIR"}'
+        T003: '"result":{"noti_type":"FUP","cont_type":"REAL","svc_id":"[+svc_id]","data":{"LINK_FLAG":"[+link_flag]"}}'
+      T001: '"result":{"noti_type":"PAIR","service_type":"[+service_type]","ctn":"[+ctn]","pin":"[+pin]"}'
+      T002: '"result":{"noti_type":"FUP","cont_type":"VOD","album_id":"[+album_id]","album_series":"[+album_series]","cate_series":"[+cate_series]","name":"[+name]","duration":"[+duration]","playtime":"[+playtime]","service_type":"[+service_type]","ctn":"[+ctn]","data":{"LINK_FLAG":"[+link_flag]",
+        "intent_url":"[+intent_url]"}}'
+      T003: '"result":{"noti_type":"FUP","cont_type":"REAL","svc_id":"[+svc_id]","name":"[+name]","service_type":"[+service_type]","ctn":"[+ctn]","data":{"LINK_FLAG":"[+link_flag]",
+        "intent_url":"[+intent_url]"}}'
+      C001: '"result":{"noti_type":"PA_COMPL","service_type":"[+service_type]"}'
+      C002: '"result":{"noti_type":"PA_CLEAR","service_type":"[+service_type]"}'
+      C003: '"result":{"noti_type":"PA_CANCEL","service_type":"[+service_type]"}'
+      P003: '"result":{"noti_type":"MFUP", "cont_type":"REAL", "svc_id":"[+svc_id]",
+        "name":"[+name]", "intent":"[+intent_url]"}'
+      P001: '"result":{"noti_type":"PA_TM", "address":"[+address]", "unumber":"[+unumber]","req_date":"[+req_date]","ctn":"[+ctn]","trans_id":"[+trans_id]"}'
+      P002: '"result":{"noti_type":"MFUP", "cont_type":"VOD", "album_id":"[+album_id]",
+        "link_flag":"[+link_flag]", "name":"[+name]", "reqtime":"[+reqtime]", "playtime":"[+playtime]",
+        "intent":"[+intent_url]"}'
+  serviceid:
+    TV: '30128'
+    nodeValue: '20014'
+    K: '30135'
+    O: '30105'
+    C: '30104'
+    B: '30133'
+  appid:
+    K: lguplus_mobilekids_fcm
+    B: lguplus_base_fcm
+    C: musicshow_gcm
+    TV: smart_uxapp_fcm
+    nodeValue: hdtv_GCM01
+    O: ugolf_GCM
+apns:
+  payload:
+    body:
+      C003: ''
+      C002: !!binary |-
+        ImJvZHkiOiJVK3R2w6zCmcKAIMOswpfCsMOqwrLCsMOswp3ChCDDrcKVwrTDrMKgwpzDrcKWwojDrMKKwrXDq8KLwojDq8KLwqQi
+      C001: !!binary |-
+        ImJvZHkiOiJVK3R2w6zCmcKAIMOswpfCsMOqwrLCsMOtwpbCiMOsworCtcOrwovCiMOrwovCpCI=
+      P001: !!binary |-
+        ImJvZHkiOiJVK3R2w6zCl8KQw6zChMKcIMOswpfCsMOqwrLCsMOswp3ChCDDrMKawpTDrMKywq3DrcKWwojDrMKKwrXDq8KLwojDq8KLwqQi
+      P003: !!binary |-
+        ImJvZHkiOiJVK3R2w6zCl8KQw6zChMKcIMOrwrPCtMOrwo3CmCDDrMKLwqTDrMKLwpzDqsKwwoQgw6zCscKEw6vChMKQw6zCncKEIMOtwpzCtMOrwozCgMOtwo/CsMOswpzCvMOrwqHCnCDDrMKdwrTDrMKWwrTDq8KzwrTDrMKEwrjDrMKawpQi
+      P002: !!binary |-
+        ImJvZHkiOiJVK3R2w6zCl8KQw6zChMKcIMOrwrPCtMOrwo3CmCDDrMKYwoHDrMKDwoHDrMKdwoQgw63CnMK0w6vCjMKAw63Cj8Kww6zCnMK8w6vCocKcIMOswp3CtMOswpbCtMOrwrPCtMOswoTCuMOswprClCI=
+      pos:
+        C003: ''
+        T001: ''
+        T003: ''
+        T002: ''
+      T003: ''
+      T002: ''
+      T001: ''
+    item:
+      pos:
+        T003: ''
+        T001: ''
+        T002: ''
+        C003: ''
+      P001: cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]
+      P002: cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]
+      P003: cm!^MFUP|REAL|[+svc_id]|[+name]|[+intent_url]
+      C002: cm!^PA_CLEAR|[+service_type]
+      C003: ''
+      C001: cm!^PA_COMPL|[+service_type]
+      T001: ''
+      T002: ''
+      T003: ''
+  appid:
+    TV: smart_uxapp_fcm
+    nodeValue: hdtv_APNS1
+    C: musicshow_apns
+    B: lguplus_base_apns
+    K: lguplus_mobilekids_apns
+    O: ugolf_APNS
+  serviceid:
+    nodeValue: '30005'
+    TV: '30128'
+    K: '30136'
+    O: '30106'
+    B: '30134'
+    C: '30107'
+#FCM POS추가발송대상
+fcm:
+  extra:
+    send: Y
+    target: '21006'
+    serviceid: '20002'
+    appid: smartuxapp
+pushinfo:
+  sendcodes:
+    ######U+tv -> 모바일tv 페어링 요청 푸시######
+    - sendcode: "P001"
+      gcm.payload.body: '"result":{"noti_type":"PA_TM", "address":"[+address]", "unumber":"[+unumber]","req_date":"[+req_date]","ctn":"[+ctn]","trans_id":"[+trans_id]"}'
+      apns.payload.body: '"body":"U+tv에서 연결을 요청했습니다"'
+      apns.payload.item: 'cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]'
+      param.list: 'address|unumber|req_date|ctn|trans_id'
+      pos.send: 'N'
+    ######U+tv -> 모바일tv VOD 이어보기 정보 알림######
+    - sendcode: "P002"
+      gcm.payload.body: '"result":{"noti_type":"MFUP", "cont_type":"VOD", "album_id":"[+album_id]", "link_flag":"[+link_flag]", "name":"[+name]", "reqtime":"[+reqtime]", "playtime":"[+playtime]", "intent":"[+intent_url]"}'
+      apns.payload.body: '"body":"U+tv에서 보던 영상을 휴대폰으로 이어보세요"'
+      apns.payload.item: 'cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]'
+      param.list: 'album_id|link_flag|name|reqtime|playtime|intent_url'
+      pos.send: 'N'
+  serviceTargets:
+    - serviceTarget: default
+      gcm.appid:  hdtv_GCM01
+      gcm.serviceid: 20014
+      apns.appid: hdtv_APNS1
+      apns.serviceid: 30005
+    - serviceTarget: B
+      gcm.appid:  lguplus_base_fcm
+      gcm.serviceid: 30133
+      apns.appid: lguplus_base_apns
+      apns.serviceid: 30134
+    - serviceTarget: K
+      gcm.appid:  lguplus_mobilekids_fcm
+      gcm.serviceid: 30135
+      apns.appid: lguplus_mobilekids_apns
+      apns.serviceid: 30136
+    - serviceTarget: O
+      gcm.appid:  ugolf_APNS
+      gcm.serviceid: 30135
+      apns.appid: ugolf_APNS
+      apns.serviceid: 30106
+    - serviceTarget: C
+      gcm.appid:  musicshow_gcm
+      gcm.serviceid: 30104
+      apns.appid: musicshow_apns
+      apns.serviceid: 30107
+    - serviceTarget: TV
+      gcm.appid:  smart_uxapp_fcm
+      gcm.serviceid: 30128
+      apns.appid: smart_uxapp_fcm
+      apns.serviceid: 30128
+
+
+
