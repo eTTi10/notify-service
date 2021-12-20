@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @ToString
-@SuperBuilder
+@Builder
 public class SmsAgentRequestDto {
 
     /**  */
