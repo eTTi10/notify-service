@@ -41,6 +41,8 @@ public class PushService {
 
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
+        HttpPushResponseDto httpPushResponseDto = null;
+
         String saId = sendPushCodeRequestDto.getSendCode();
         String stbMac = sendPushCodeRequestDto.getStbMac();
         String regId = sendPushCodeRequestDto.getRegId();
@@ -219,63 +221,67 @@ public class PushService {
                 List<String> users = new ArrayList<>();
                 users.add(regId);
 
-                HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                        .appId(appId)
-                        .serviceId(serviceId)
-                        .pushType(pushType)
-                        .msg(payload)
-                        .users(users)
-                        .items(items)
-                        .build();
+                try {
 
-                HttpPushResponseDto httpPushResponseDto =  httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+                    HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
+                            .appId(appId)
+                            .serviceId(serviceId)
+                            .pushType(pushType)
+                            .msg(payload)
+                            .users(users)
+                            .items(items)
+                            .build();
 
-                if (serviceTarget.equals("TV") && httpPushResponseDto.getCode().equals("200")) {
-                    //"성공"
-                    resultFcm = true;
+                    httpPushResponseDto = httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+
+                    if (serviceTarget.equals("TV") && httpPushResponseDto.getCode().equals("200")) {
+                        //"성공"
+                        resultFcm = true;
+                    }
                 }
-
+                catch(NotifyHttpPushRuntimeException e) {
+                    log.debug("exception:" + e);
+                }
 
 
                 //추가 발송 셋팅 (소켓)
                 //푸시의 대상타입이 U+tv이고  send_code에 대한 설정값이 추가발송에 해당하는 경우
                 if(serviceTarget.equals("TV") && extraSendYn.equals("Y") ){
 
-                    regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
-//                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
+//                    regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
+                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
 
                     payloadPos.replace("\"", "\\\"");
 
                     //소켓 PUSH 호출
                     PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                             .appId(extraAppId)
-                            .serviceId(extraServiceId)
+//                            .serviceId(extraServiceId)
+                            .serviceId("30015")
                             .pushType("L")
                             .msg(payload)
                             .regId(regId)
                             .items(items)
                             .build();
 
-                    try {
+                    log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
 
                         PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+
+                        log.debug("pushClientResponseDto:"+ pushClientResponseDto);
 
                         if (pushClientResponseDto.getCode().equals("200")) {
                             //"성공"
                             resultPos = true;
                         }
 
-                        log.debug("extra sendPush Request POS : {} {} {} {}", saId, stbMac, pushClientResponseDto.getCode(), pushClientResponseDto.getMessage());
-                    }
-                    catch (Exception e) {
-                        log.debug("e.getMessage:"+ e.getMessage());
-                    }
+                        log.debug("pushClientResponseDto : {}", pushClientResponseDto);
 
 
                 }
 
 
-                log.debug("sendPushCtn Request : {} {} {} {} {}", saId, stbMac, httpPushResponseDto.getCode(), httpPushResponseDto.getMessage(), httpPushResponseDto.getFailUsers());
+                log.debug("sendPushCtn Request : {}", httpPushResponseDto);
 
                 if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
 
@@ -298,7 +304,7 @@ public class PushService {
             if(serviceTarget == null || serviceType.equals("")){
                 sType = "H";
             }else {
-                sType = serviceType;
+                sType = serviceTarget;
             }
 
             if(chk1001 > 1 && pushTypeList.length > 1) {
