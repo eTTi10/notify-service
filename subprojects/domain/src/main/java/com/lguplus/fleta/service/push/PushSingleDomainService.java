@@ -80,25 +80,7 @@ public class PushSingleDomainService {
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
 
         // 서비스별 초당 처리 건수 오류 처리
-        ImmutablePair<Long, Long> requstInfo = getPushCountInterval(dto.getServiceId());
-        long pushCnt = requstInfo.getLeft();
-        //long pushWaitTime = requstInfo.getRight();//Mili Seconds
-
-        // 처리량 초과
-        if (pushCnt > lPushDelayReqCnt) {
-            //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime);
-
-            // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
-            // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
-            if (lPushDelayReqCnt * 2 < pushCnt) {
-                resetPushProgressCnt(dto.getServiceId());
-            }
-           // throw new MaxRequestOverException();
-            return PushClientResponseDto.builder()
-                    .code("max-count-over")
-                    .message("max-count-over")
-                    .build();
-        }
+        checkThroughput(dto.getServiceId());
 
         //1. Make Message
         Map<String, String> paramMap = new HashMap<>();
@@ -161,9 +143,8 @@ public class PushSingleDomainService {
                 }
 
                 //실패
-                //return getPushClientResponseDto(status_code);
-                return PushClientResponseDto.builder().code(statusCode).message("Error")
-                        .build();
+                exceptionHandler(statusCode);
+                //return PushClientResponseDto.builder().code(statusCode).message("Error").build()
             }
         }
 
@@ -171,7 +152,26 @@ public class PushSingleDomainService {
                 .build();
     }
 
-    static PushClientResponseDto getPushClientResponseDto(String statusCode) {
+    private void checkThroughput(String serviceId) {
+        // 서비스별 초당 처리 건수 오류 처리
+        ImmutablePair<Long, Long> requstInfo = getPushCountInterval(serviceId);
+        long pushCnt = requstInfo.getLeft();
+        //long pushWaitTime = requstInfo.getRight() //Mili Seconds
+
+        // 처리량 초과
+        if (pushCnt > lPushDelayReqCnt) {
+            //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime)
+
+            // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
+            // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
+            if (lPushDelayReqCnt * 2 < pushCnt) {
+                resetPushProgressCnt(serviceId);
+            }
+            throw new MaxRequestOverException();
+        }
+    }
+
+    private void exceptionHandler(String statusCode) {
         switch (statusCode) {
             case "202":
                 throw new AcceptedException();
@@ -251,11 +251,11 @@ public class PushSingleDomainService {
             }
             else {
                 resultCnt = pushStatDto.getMeasurePushCount();
-                //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis);
+                //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis)
             }
 
             pushSingleClient.putPushStatus(serviceId, ++resultCnt, pushStatDto.getMeasureStartMillis());
-            //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis());
+            //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis())
 
             return new ImmutablePair<>(resultCnt, timeoutgap);
         }
@@ -284,8 +284,7 @@ public class PushSingleDomainService {
     }
 
     private boolean isRetryExcludeCode(String code) {
-        return true;
-        //return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
+        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
     }
 
 }

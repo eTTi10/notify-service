@@ -31,6 +31,8 @@ public class PushSocketInfo {
     private static final int PUSH_MSG_HEADER_LEN = 64;
     private static final String PUSH_ID_NM = "push_id";
     private static final String RESPONSE_ID_NM = "response";
+    private static final String RESPONSE_STATUS_CD = "status_code";
+    private static final String RESPONSE_STATUS_MSG = "statusmsg";
 
     private long socketTime = -1;
     private boolean isOpened = false;
@@ -255,12 +257,12 @@ public class PushSocketInfo {
                         JsonNode jsonNodeR = objectMapper.readTree(retJsonMsg);
 
                         String statusCode = "";
-                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has("statusCode")) {
-                            statusCode = jsonNodeR.get(RESPONSE_ID_NM).get("statusCode").asText();
-                        }
                         String statusMsg = "";
-                        if (jsonNodeR != null && jsonNodeR.get(RESPONSE_ID_NM).has("statusmsg")) {
-                            statusMsg = jsonNodeR.get(RESPONSE_ID_NM).get("statusmsg").asText();
+
+                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM)) {
+                            JsonNode jsonNodeStatus = jsonNodeR.get(RESPONSE_ID_NM);
+                            statusCode = jsonNodeStatus.has(RESPONSE_STATUS_CD) ? jsonNodeStatus.get(RESPONSE_STATUS_CD).asText() : "";
+                            statusMsg = jsonNodeStatus.has(RESPONSE_STATUS_MSG) ? jsonNodeStatus.get(RESPONSE_STATUS_MSG).asText() : "";
                         }
 
                         socketTime = Instant.now().getEpochSecond();
