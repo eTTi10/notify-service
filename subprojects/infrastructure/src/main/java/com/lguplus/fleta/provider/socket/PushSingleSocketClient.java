@@ -93,6 +93,9 @@ public class PushSingleSocketClient implements PushSingleClient {
     //Pool
     private List<GenericObjectPool<PushSocketInfo>> poolList;
 
+    private static final int HDTV_PUSH_IDX = 0;
+    private static final int LG_PUSH_IDX = 0;
+
     /**
      * Push Single 푸시
      *
@@ -105,8 +108,9 @@ public class PushSingleSocketClient implements PushSingleClient {
         PushSocketInfo socketInfo = null;
         boolean bIsLgPush = lgPushServiceId.equals(paramMap.get("service_id"));
 
-        GenericObjectPool<PushSocketInfo> pool = poolList.stream().filter(p->((PushSocketConnFactory)p.getFactory()).isLgPush() == bIsLgPush)
-                .findFirst().get();
+        //GenericObjectPool<PushSocketInfo> pool = poolList.stream().filter(p->((PushSocketConnFactory)p.getFactory()).isLgPush() == bIsLgPush)
+        //        .findFirst().get()
+        GenericObjectPool<PushSocketInfo> pool = poolList.get(bIsLgPush ? LG_PUSH_IDX : HDTV_PUSH_IDX);
 
         try
         {

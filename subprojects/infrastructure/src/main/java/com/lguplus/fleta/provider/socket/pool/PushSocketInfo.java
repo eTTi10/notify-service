@@ -288,10 +288,7 @@ public class PushSocketInfo {
                     failCount++;
                     return PushResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();
             }
-        } catch (JsonProcessingException e) {
-            failCount++;
-            throw new PushBizException(-400, e.getClass().getName(), e);
-        } catch (UnsupportedEncodingException e) {
+        } catch (JsonProcessingException | UnsupportedEncodingException e) {
             failCount++;
             throw new PushBizException(-400, e.getClass().getName(), e);
         }
