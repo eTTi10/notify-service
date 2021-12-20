@@ -1,7 +1,7 @@
 package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.exception.push.PushBizException;
-import lombok.Getter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -17,26 +17,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInfo> {
 
-    private String host;
-    private String port;
-    private String timeout;
-    private String channelPort;
-    private String defaultChannelHost;
-    private String destinationIp;
-    private String closeSecond;
-    private boolean isLgPush;
+    private final PushServerInfoVo serverInfo;
 
-    private AtomicInteger _channelNum = new AtomicInteger(0);
+    private final AtomicInteger commChannelNum = new AtomicInteger(0);
 
-    public PushSocketConnFactory(String host, String port, String timeout, String serverPort, String defChannelHost, String destIp, String closeSecond, boolean isLgPush) {
-        this.host = host;
-        this.port = port;
-        this.timeout = timeout;
-        this.channelPort = serverPort;
-        this.defaultChannelHost = defChannelHost;
-        this.destinationIp = destIp;
-        this.closeSecond = closeSecond;
-        this.isLgPush = isLgPush;
+    public PushSocketConnFactory(PushServerInfoVo pushServerInfoVo) {
+        this.serverInfo = pushServerInfoVo;
     }
 
     @Override
@@ -45,7 +31,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         PushSocketInfo socketInfo = new PushSocketInfo(new Socket());
 
         try {
-            socketInfo.openSocket(host, Integer.parseInt(port), Integer.parseInt(timeout), getChannelId(), destinationIp);
+            socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
             log.trace("=== factory create Socket : {}", socketInfo);
         } catch (PushBizException e) {
             e.printStackTrace();
@@ -59,52 +45,20 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     public boolean validateObject(PooledObject<PushSocketInfo> p) {
 
         PushSocketInfo socketInfo = p.getObject();
+        Socket socket = socketInfo.getPushSocket();
 
-        if(socketInfo.getPushSocket() == null) {
-            return false;
-        }
-
-        if(socketInfo.getPushSocket().getInetAddress() == null) {
-            return false;
-        }
-
-        //log.debug("=== factory validateObject SocketInfo #1: {}", p.getObject());
-        if(!socketInfo.getPushSocket().isConnected())
-            return false;
-
-        /*
-        if(!socketInfo.isOpened()) {
-            //Reconnect
-            try {
-                socketInfo.openChannel();
-            }  catch (PushBizException e) {
-                e.printStackTrace();
-                log.debug("=== factory Reconnect SocketInfo failure: {}", socketInfo);
-            }
-        }
-        */
-
-        if(!socketInfo.isOpened()) {
-            return false;
-        }
-
-        if(socketInfo.getFailCount() > 0) {
+        if(socket == null || socket.getInetAddress() == null || !socket.isConnected()
+                || !socketInfo.isOpened() ||  socketInfo.getFailCount() > 0
+                || socketInfo.getSocketTime() == -1)
+        {
             return false;
         }
 
         long lastTime = socketInfo.getSocketTime();
         long currTime = Instant.now().getEpochSecond();
 
-        if(lastTime < 0) {
-            return false;
-        }
+        return serverInfo.getCloseSecond() > (currTime - lastTime);
 
-        if(lastTime > 0 && Integer.parseInt(closeSecond) <= (currTime - lastTime)) {
-            return false;
-        }
-
-        //log.debug("=== factory validateObject SocketInfo #2: {} true", p.getObject());
-        return true;
     }
 
     @Override
@@ -113,37 +67,52 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     }
 
     @Override
-    public void destroyObject(PooledObject<PushSocketInfo> p) throws Exception {
+    public void destroyObject(PooledObject<PushSocketInfo> p) {
         PushSocketInfo socketInfo = p.getObject();
         log.trace("=== factory destroy Socket : {}", socketInfo);
         socketInfo.closeSocket();
-        //log.debug("=== factory destroyObject SocketInfo : {}", socketInfo);
     }
 
     private String getChannelId() {
-        if(_channelNum.get() >= 9999) {
-            _channelNum.set(0);
+        if(commChannelNum.get() >= 9999) {
+            commChannelNum.set(0);
         }
 
-        String hostname = null;
+        String hostname;
         try {
             InetAddress addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
         } catch (UnknownHostException e) {
             e.printStackTrace();
-            hostname = defaultChannelHost;
+            hostname = serverInfo.getDefaultChannelHost();
         }
 
         hostname = hostname.replace("DESKTOP-", "");
         hostname = hostname + hostname;
 
         String channelHostNm = (hostname + "00000000").substring(0, 6);
-        String channelPortNm = (channelPort + "0000").substring(0, 4);
+        String channelPortNm = (serverInfo.getChannelPort() + "0000").substring(0, 4);
 
-        String channelId = channelHostNm + channelPortNm + String.format("%04d", _channelNum.incrementAndGet());
-        //log.debug("channelId : {}", channelId);
+        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
+    }
 
-        return channelId;
+    public boolean isLgPush() {
+        return this.serverInfo.isLgPush();
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    public static class PushServerInfoVo {
+        private String host;
+        private int port;
+        private int timeout;
+        private int channelPort;
+        private String defaultChannelHost;
+        private String destinationIp;
+        private int closeSecond;
+        private boolean isLgPush;
     }
 
 
