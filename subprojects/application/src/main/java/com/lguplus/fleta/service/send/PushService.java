@@ -3,11 +3,11 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
+import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpPushDomainService;
@@ -25,9 +25,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PushService {
 
-    @Value("${fcm.extra.target}")
-    private String extraTarget;
-
     @Value("${fcm.extra.serviceid}")
     private String extraServiceId;
 
@@ -42,7 +39,7 @@ public class PushService {
     private final PushSingleDomainService pushSingleDomainService;
     private final SendPushCodeProps sendPushCodeProps;
 
-    public SuccessResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
+    public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         String saId = sendPushCodeRequestDto.getSendCode();
         String stbMac = sendPushCodeRequestDto.getStbMac();
@@ -52,9 +49,11 @@ public class PushService {
         String regType = sendPushCodeRequestDto.getRegType();
         String serviceType = sendPushCodeRequestDto.getServiceType();
         List items = sendPushCodeRequestDto.getItems();
+
         String[]  pushTypeList;
         String[]  serviceTypeList;
         String[]  pushParamList;
+
         Map<String, String> paramMap = new HashMap<String, String>();
         String msg = "";
         String payload ="";
@@ -106,8 +105,15 @@ public class PushService {
         /*FCM POS 추가발송 설정값 체크*/
         String extraSendYn = StringUtils.defaultIfEmpty(pushInfoMap.get("pos.send"), fcmExtraSend);
 
+        SendPushResponseDto sendPushResponseDto;
+        ArrayList<PushServiceResultDto> serviceResultvoList = new ArrayList<>();
+
         for(int k=0; k<serviceTypeList.length; k++) {
 
+            String sType = "";
+            String sFlag = "0000";
+            String sMessage = "성공";
+            
             String serviceTarget = serviceTypeList[k];
 
             log.debug("serviceTarget: {} ", serviceTarget);
@@ -121,6 +127,8 @@ public class PushService {
             for(int i=0; i<pushTypeList.length; i++){
 
                 pushType = pushTypeList[i];
+                resultFcm = false;
+                resultPos = false;
 
                 //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
                 if(pushType.equals("G") || serviceTarget.equals("TV")) {
@@ -226,9 +234,8 @@ public class PushService {
                     //"성공"
                     resultFcm = true;
                 }
-                else {
-                    throw new NotifyHttpPushRuntimeException();
-                }
+
+
 
                 //추가 발송 셋팅 (소켓)
                 //푸시의 대상타입이 U+tv이고  send_code에 대한 설정값이 추가발송에 해당하는 경우
@@ -249,39 +256,122 @@ public class PushService {
                             .items(items)
                             .build();
 
-                    PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+                    try {
 
-                    if (pushClientResponseDto.getCode().equals("200")) {
-                        //"성공"
-                        resultPos = true;
+                        PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+
+                        if (pushClientResponseDto.getCode().equals("200")) {
+                            //"성공"
+                            resultPos = true;
+                        }
+
+                        log.debug("extra sendPush Request POS : {} {} {} {}", saId, stbMac, pushClientResponseDto.getCode(), pushClientResponseDto.getMessage());
+                    }
+                    catch (Exception e) {
+                        log.debug("e.getMessage:"+ e.getMessage());
                     }
 
-
-                    log.debug("extra sendPush Request POS : {} {} {} {}", saId, stbMac, pushClientResponseDto.getCode(), pushClientResponseDto.getMessage());
 
                 }
 
 
-
                 log.debug("sendPushCtn Request : {} {} {} {} {}", saId, stbMac, httpPushResponseDto.getCode(), httpPushResponseDto.getMessage(), httpPushResponseDto.getFailUsers());
 
+                if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
+
+                    if ( httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108") ){
+                        chk1001++;
+                    } else {
+                        resultCode = false;
+                    }
+
+                    // 	failcode = "P"+listOut.item(j).getTextContent();
+                    failcode = httpPushResponseDto.getCode();
+                    failCount++;
+                    failMessage = httpPushResponseDto.getMessage();
+                }
 
             } // pushType for end
 
 
 
+            if(serviceTarget == null || serviceType.equals("")){
+                sType = "H";
+            }else {
+                sType = serviceType;
+            }
 
+            if(chk1001 > 1 && pushTypeList.length > 1) {
+                sFlag = "1001";
+                sMessage = "Push GW Precondition Failed or Not Exist RegistID";
+                check1001falg = true;
+            } else if( failCount < 2 && pushTypeList.length > 1){
+                sFlag = "0000";
+                sMessage = "성공";
+                SuccessCheckFlag = true;
+            } else if( !resultCode && pushTypeList.length > 1 ) {
+                sFlag = failcode;
+                sMessage = failMessage;
+            }else{
+                if(failCount == 0) {
+                    sFlag = "0000";
+                    sMessage = "성공";
+                    SuccessCheckFlag = true;
+                }else if (chk1001 > 0){
+                    sFlag = "1001";
+                    sMessage = "Push GW Precondition Failed or Not Exist RegistID";
+                    check1001falg = true;
+                } else {
+                    sFlag = failcode;
+                    sMessage = failMessage;
+                }
+            }
 
+            if(firstFailcode.equals("")) {
+                firstFailcode = failcode;
+            }
+
+            if(firstFailmessage.equals("")) {
+                firstFailmessage = failMessage;
+            }
+
+            PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder().sType(sType).sFlag(sFlag).sMessage(sMessage).build();
+            serviceResultvoList.add(pushServiceResultDto);
 
         }	// serviceType for end
 
 
-        // TODO 성공 조건 로직 구성해야 함
-        if (resultFcm == true) {
-            return SuccessResponseDto.builder().build();
-        }
-        else {
-            throw new NotifyPushRuntimeException();
+        //성공일 경우
+        if(SuccessCheckFlag) {
+
+            return SendPushResponseDto.builder()
+                    .flag("0000")
+                    .message("성공")
+                    .service(serviceResultvoList)
+                    .build();
+
+        } else if(!SuccessCheckFlag && serviceTypeList.length > 1) {
+
+            if(check1001falg){
+
+                return SendPushResponseDto.builder()
+                        .flag("1001")
+                        .message("Push GW Precondition Failed or Not Exist RegistID")
+                        .service(serviceResultvoList)
+                        .build();
+            }else{
+                return SendPushResponseDto.builder()
+                        .flag(firstFailcode)
+                        .message(firstFailmessage)
+                        .service(serviceResultvoList)
+                        .build();
+            }
+        }else {
+            return SendPushResponseDto.builder()
+                    .flag(failcode)
+                    .message(failMessage)
+                    .service(serviceResultvoList)
+                    .build();
         }
 
     }
