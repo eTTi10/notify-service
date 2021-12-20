@@ -14,6 +14,8 @@ import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.SwaggerDefinition;
+import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,11 +74,11 @@ public class PushServiceController {
     public InnerResponseDto<PushClientResponseDto> pushRequest(
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
-        //log.debug("PushSingleController : {}", pushRequestBodySingleVo);
+        //log.debug("PushSingleController : {}", pushRequestBodySingleVo)
         PushRequestSingleDto dto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
 
         //Reject User
-        if ( ("|" + this.pushRejectRegList).contains("|" + dto.getRegId().trim()) ) {
+        if ( ("|" + this.pushRejectRegList + "|" ).contains("|" + dto.getRegId().trim() + "|" ) ) {
             return InnerResponseDto.of(PushClientResponseDto.builder().code("0000").message("성공").build());
         }
 
@@ -92,11 +94,9 @@ public class PushServiceController {
      */
     @PostMapping(value = "/notify/push/multi")
     @ApiOperation(value="Multi Push Message 등록", notes="Multi Push Message를 등록한다.")
-    public InnerResponseDto<?> multiPushRequest(
+    public InnerResponseDto<PushClientResponseDto> multiPushRequest(
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
-        //PushRequestMultiDto dto = pushRequestBodyMultiVo.convert(pushRequestParamMultiVo);
-        //
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
 
         return InnerResponseDto.of(pushMultiService.requestMultiPush(dto));

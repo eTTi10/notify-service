@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,41 +17,43 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class PushAnnouncementServiceTest {
+class PushMultiServiceTest {
+
 
     @InjectMocks
-    PushAnnouncementService pushAnnouncementService;
+    PushMultiService pushMultiService;
 
     @Mock
-    PushAnnounceDomainService pushAnnounceDomainService;
+    PushMultiDomainService pushMultiDomainService;
 
     @BeforeEach
     void setUp() {
-        pushAnnouncementService = new PushAnnouncementService(pushAnnounceDomainService);
+        pushMultiService = new PushMultiService(pushMultiDomainService);
     }
 
     @Test
-    void requestAnnouncement() {
+    void requestMultiPush() {
 
         PushClientResponseDto clientResponseDto = PushClientResponseDto.builder().build();
-        given(pushAnnouncementService.requestAnnouncement(any())).willReturn(clientResponseDto);
+        given(pushMultiDomainService.requestMultiPush(any())).willReturn(clientResponseDto);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");
         items.add("sound!^ring.caf");
         items.add("cm!^aaaa");
 
-        PushRequestAnnounceDto pushRequestAnnounceDto = PushRequestAnnounceDto.builder()
+
+        PushRequestMultiDto pushRequestMultiDto = PushRequestMultiDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
                 .appId("30011")
+                .users(items)
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(items)
                 .build();
 
-        PushClientResponseDto responseDto = pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto);
+        PushClientResponseDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);
 
         Assertions.assertTrue("200".equals(responseDto.getCode()));
-
     }
 }

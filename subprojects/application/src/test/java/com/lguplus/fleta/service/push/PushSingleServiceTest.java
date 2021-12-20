@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,41 +17,42 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class PushAnnouncementServiceTest {
+class PushSingleServiceTest {
+
 
     @InjectMocks
-    PushAnnouncementService pushAnnouncementService;
+    PushSingleService pushSingleService;
 
     @Mock
-    PushAnnounceDomainService pushAnnounceDomainService;
+    PushSingleDomainService pushSingleDomainService;
 
     @BeforeEach
     void setUp() {
-        pushAnnouncementService = new PushAnnouncementService(pushAnnounceDomainService);
+        pushSingleService = new PushSingleService(pushSingleDomainService);
     }
 
     @Test
-    void requestAnnouncement() {
+    void requestPushSingle() {
 
         PushClientResponseDto clientResponseDto = PushClientResponseDto.builder().build();
-        given(pushAnnouncementService.requestAnnouncement(any())).willReturn(clientResponseDto);
+        given(pushSingleDomainService.requestPushSingle(any())).willReturn(clientResponseDto);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");
         items.add("sound!^ring.caf");
         items.add("cm!^aaaa");
 
-        PushRequestAnnounceDto pushRequestAnnounceDto = PushRequestAnnounceDto.builder()
+        PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
                 .appId("30011")
+                .regId("regId")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(items)
                 .build();
 
-        PushClientResponseDto responseDto = pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto);
+        PushClientResponseDto responseDto = pushSingleService.requestPushSingle(pushRequestSingleDto);
 
         Assertions.assertTrue("200".equals(responseDto.getCode()));
-
     }
 }

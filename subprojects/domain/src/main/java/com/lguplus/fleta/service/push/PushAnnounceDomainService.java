@@ -25,7 +25,7 @@ public class PushAnnounceDomainService {
     private final PushConfig pushConfig;
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
 
-    private AtomicInteger tranactionMsgId = new AtomicInteger(0);
+    private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
     @Value("${push-comm.push.old.lgupush.pushAppId}")
     private String oldLgPushAppId;
@@ -82,7 +82,7 @@ public class PushAnnounceDomainService {
             log.debug("[pushAnnouncement]["+statusCode+"] [FAIL]");
 
             //실패
-            getPushClientResponseDto(statusCode);
+            exceptionHandler(statusCode);
         }
 
         return PushClientResponseDto.builder().build();
@@ -97,7 +97,7 @@ public class PushAnnounceDomainService {
     }
 
 
-    private PushClientResponseDto getPushClientResponseDto(String statusCode) {
+    private void exceptionHandler(String statusCode) {
         switch (statusCode) {
             case "202":
                 throw new AcceptedException();
