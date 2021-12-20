@@ -79,6 +79,12 @@ public class PushSingleDomainService {
      */
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
 
+        String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
+        if (servicePwd == null) {
+            log.error("ServiceId Not Found:" + dto.getServiceId());
+            throw new ServiceIdNotFoundException();
+        }
+
         // 서비스별 초당 처리 건수 오류 처리
         checkThroughput(dto.getServiceId());
 
@@ -89,12 +95,6 @@ public class PushSingleDomainService {
         paramMap.put("service_id", dto.getServiceId());
         paramMap.put("app_id", dto.getAppId());
         paramMap.put("noti_contents", dto.getMsg());
-
-        String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
-        if (servicePwd == null) {
-            log.error("ServiceId Not Found:" + dto.getServiceId());
-            throw new ServiceIdNotFoundException();
-        }
         paramMap.put("service_passwd", servicePwd);
 
         if ("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
@@ -107,7 +107,7 @@ public class PushSingleDomainService {
 
         dto.getItems().forEach(e -> {
             String[] item = e.split("\\!\\^");
-            if (item.length >= 2) {
+            if (item.length == 2) {
                 paramMap.put(item[0], item[1]);
             }
         });
@@ -271,9 +271,7 @@ public class PushSingleDomainService {
 
     private void setPushProgressCnt(String serviceId, int changeVal) {
         synchronized (progressLock.get(serviceId)) {
-            if (changeVal != 0) {
-                pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
-            }
+            pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
         }
     }
 
