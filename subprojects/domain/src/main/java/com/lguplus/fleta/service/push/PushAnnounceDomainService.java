@@ -25,7 +25,7 @@ public class PushAnnounceDomainService {
     private final PushConfig pushConfig;
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
 
-    private AtomicInteger _transactionIDNum = new AtomicInteger(0);
+    private AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
     @Value("${push-comm.push.old.lgupush.pushAppId}")
     private String oldLgPushAppId;
@@ -72,54 +72,60 @@ public class PushAnnounceDomainService {
         PushResponseDto pushResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
 
         //3. Send Result
-        String status_code = pushResponseDto.getStatusCode();
-        String status_msg = pushResponseDto.getStatusMsg();
-        log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+status_code+"]["+status_msg+"]");
+        String statusCode = pushResponseDto.getStatusCode();
+        String statusMsg = pushResponseDto.getStatusMsg();
+        log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]");
 
-        if(status_code.equals("200")){
-            log.debug("[pushAnnouncement]["+status_code+"] [SUCCESS]");
+        if(statusCode.equals("200")){
+            log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
         } else {
-            log.debug("[pushAnnouncement]["+status_code+"] [FAIL]");
+            log.debug("[pushAnnouncement]["+statusCode+"] [FAIL]");
 
             //실패
-            switch (status_code) {
-                case "202":
-                    throw new AcceptedException();
-                case "400":
-                    throw new BadRequestException();
-                case "401":
-                    throw new UnAuthorizedException();
-                case "403":
-                    throw new ForbiddenException();
-                case "404":
-                    throw new NotFoundException();
-                case "410":
-                    throw new NotExistRegistIdException();
-                case "412":
-                    throw new PreConditionFailedException();
-                case "500":
-                    throw new InternalErrorException();
-                case "502":
-                    throw new ExceptionOccursException();
-                case "503":
-                    throw new ServiceUnavailableException();
-                case "5102":
-                    throw new SocketTimeException();
-                case "5103": //FeignException
-                    throw new SocketException();
-                default:
-                    throw new PushEtcException();//("기타 오류"); //9999
-            }
+            getPushClientResponseDto(statusCode);
         }
 
         return PushClientResponseDto.builder().build();
     }
 
     private String getTransactionId() {
-        if(_transactionIDNum.get() >= 9999) {
-            _transactionIDNum.set(0);
+        if(tranactionMsgId.get() >= 9999) {
+            tranactionMsgId.set(0);
+            return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.get());
         }
-        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", _transactionIDNum.incrementAndGet());
+        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.incrementAndGet());
+    }
+
+
+    private PushClientResponseDto getPushClientResponseDto(String statusCode) {
+        switch (statusCode) {
+            case "202":
+                throw new AcceptedException();
+            case "400":
+                throw new BadRequestException();
+            case "401":
+                throw new UnAuthorizedException();
+            case "403":
+                throw new ForbiddenException();
+            case "404":
+                throw new NotFoundException();
+            case "410":
+                throw new NotExistRegistIdException();
+            case "412":
+                throw new PreConditionFailedException();
+            case "500":
+                throw new InternalErrorException();
+            case "502":
+                throw new ExceptionOccursException();
+            case "503":
+                throw new ServiceUnavailableException();
+            case "5102":
+                throw new SocketTimeException();
+            case "5103": //FeignException
+                throw new SocketException();
+            default:
+                throw new PushEtcException();//("기타 오류"); //9999
+        }
     }
 
 }

@@ -3,16 +3,13 @@ package com.lguplus.fleta.data.entity;
 
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.entity.id.LatestId;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 @Entity
 @Table(name = "SMARTUX.PT_UX_LATEST")
 @IdClass(LatestId.class)

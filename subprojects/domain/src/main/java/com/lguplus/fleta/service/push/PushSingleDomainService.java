@@ -49,15 +49,14 @@ public class PushSingleDomainService {
     @Value("${push-comm.retry.exclud.codeList}")
     private String retryExcludeCodeList;
 
-    private final int abnormalRequestTimeMills = 3000;
-
-    private AtomicInteger _transactionIDNum1 = new AtomicInteger(0);
-    private AtomicInteger _transactionIDNum2 = new AtomicInteger(0);
+    private final AtomicInteger tranactionMsgId1 = new AtomicInteger(0);
+    private final AtomicInteger tranactionMsgId2 = new AtomicInteger(0);
 
     private Map<String,Object> requestLock;
     private Map<String,Object> progressLock;
-    private Map<String, Long> pushProgressCnt = new Hashtable<>();
-    //private Map<String, Long> progressTimeMills = new HashMap<>();
+    private final Map<String, Long> pushProgressCnt = new Hashtable<>();
+
+    private static final String DATE_FOMAT = "yyyyMMdd";
 
     @PostConstruct
     public void initialize(){
@@ -67,11 +66,6 @@ public class PushSingleDomainService {
 
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
-
-        /*
-        progressLock.forEach((key, value) -> {
-            progressTimeMills.put(key, 0L);
-        });*/
 
         progressLock.forEach((serviceId, value) -> resetPushProgressCnt(serviceId));
 
@@ -84,31 +78,26 @@ public class PushSingleDomainService {
      * @return 단건푸시등록 결과
      */
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
-        //log.debug("requestPushSingle ::::::::::::::: {}", dto);
-
-        // 비정상 호출 제거
-        //checkPushRequestMills(dto.getServiceId());
 
         // 서비스별 초당 처리 건수 오류 처리
         ImmutablePair<Long, Long> requstInfo = getPushCountInterval(dto.getServiceId());
         long pushCnt = requstInfo.getLeft();
-        long pushWaitTime = requstInfo.getRight();//Mili Seconds
+        //long pushWaitTime = requstInfo.getRight();//Mili Seconds
 
         // 처리량 초과
         if (pushCnt > lPushDelayReqCnt) {
-            log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime);
+            //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime);
 
             // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
             // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
             if (lPushDelayReqCnt * 2 < pushCnt) {
                 resetPushProgressCnt(dto.getServiceId());
             }
-            throw new MaxRequestOverException();
-            /*return PushClientResponseDto.builder()
+           // throw new MaxRequestOverException();
+            return PushClientResponseDto.builder()
                     .code("max-count-over")
                     .message("max-count-over")
                     .build();
-             */
         }
 
         //1. Make Message
@@ -141,7 +130,9 @@ public class PushSingleDomainService {
             }
         });
 
-        PushResponseDto pushResponseDto = null;
+        PushResponseDto pushResponseDto;
+        String statusCode = "";
+        String statusMsg = "";
 
         //2. Send Push
         for (int i = 0; i < iPushCallRetryCnt; i++) {
@@ -155,72 +146,81 @@ public class PushSingleDomainService {
             }
 
             //3. Send Result
-            String status_code = pushResponseDto.getStatusCode();
-            //String status_msg = pushResponseDto.getStatusMsg();
+            statusCode = pushResponseDto.getStatusCode();
+            statusMsg = pushResponseDto.getStatusMsg();
 
-            if (status_code.equals("200")) {
-                log.trace("[requestPushSingle][" + status_code + "] [SUCCESS]");
+            if (statusCode.equals("200")) {
+                log.trace("[requestPushSingle][" + statusCode + "] [SUCCESS]");
             } else {
-                log.trace("[requestPushSingle][" + status_code + "] [FAIL]");
+                log.trace("[requestPushSingle][" + statusCode + "] [FAIL]");
 
-                boolean isRetryExclude = isRetryExcludeCode(status_code);
+                boolean isRetryExclude = isRetryExcludeCode(statusCode);
 
                 if (!isRetryExclude && (i + 1) < iPushCallRetryCnt) {
                     continue;
                 }
 
                 //실패
-                switch (status_code) {
-                    case "202":
-                        throw new AcceptedException();
-                    case "400":
-                        throw new BadRequestException();
-                    case "401":
-                        throw new UnAuthorizedException();
-                    case "403":
-                        throw new ForbiddenException();
-                    case "404":
-                        throw new NotFoundException();
-                    case "410":
-                        throw new NotExistRegistIdException();
-                    case "412":
-                        throw new PreConditionFailedException();
-                    case "500":
-                        throw new InternalErrorException();
-                    case "502":
-                        throw new ExceptionOccursException();
-                    case "503":
-                        throw new ServiceUnavailableException();
-                    case "5102":
-                        throw new SocketTimeException();
-                    case "5103": //FeignException
-                        throw new SocketException();
-                    default:
-                        throw new PushEtcException();//("기타 오류"); //9999
-                }
+                //return getPushClientResponseDto(status_code);
+                return PushClientResponseDto.builder().code(statusCode).message("Error")
+                        .build();
             }
         }
 
-        return PushClientResponseDto.builder().code(pushResponseDto.getStatusCode()).message(pushResponseDto.getStatusMsg())
+        return PushClientResponseDto.builder().code(statusCode).message(statusMsg)
                 .build();
+    }
+
+    static PushClientResponseDto getPushClientResponseDto(String statusCode) {
+        switch (statusCode) {
+            case "202":
+                throw new AcceptedException();
+            case "400":
+                throw new BadRequestException();
+            case "401":
+                throw new UnAuthorizedException();
+            case "403":
+                throw new ForbiddenException();
+            case "404":
+                throw new NotFoundException();
+            case "410":
+                throw new NotExistRegistIdException();
+            case "412":
+                throw new PreConditionFailedException();
+            case "500":
+                throw new InternalErrorException();
+            case "502":
+                throw new ExceptionOccursException();
+            case "503":
+                throw new ServiceUnavailableException();
+            case "5102":
+                throw new SocketTimeException();
+            case "5103": //FeignException
+                throw new SocketException();
+            default:
+                throw new PushEtcException();//("기타 오류"); //9999
+        }
     }
 
     private boolean isLgPushServiceId(String serviceId) {
         return lgPushServceId.equals(serviceId);
     }
 
+
     private String getTransactionId(String serviceId) {
         if(!isLgPushServiceId(serviceId)) {
-            if (_transactionIDNum1.get() >= 9999) {
-                _transactionIDNum1.set(0);
+            if (tranactionMsgId1.get() >= 9999) {
+                tranactionMsgId1.set(0);
+                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.get());
             }
-            return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", _transactionIDNum1.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.incrementAndGet());
         }
         else {
-            if(_transactionIDNum2.get() >= 9999) {
-                _transactionIDNum2.set(0);
+            if(tranactionMsgId2.get() >= 9999) {
+                tranactionMsgId2.set(0);
+                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.get());
             }
-            return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", _transactionIDNum2.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.incrementAndGet());
         }
     }
 
@@ -237,6 +237,7 @@ public class PushSingleDomainService {
             PushStatDto pushStatDto = pushSingleClient.getPushStatus(serviceId, processCount, curTimeMillis);
 
             // 비정상적으로 TimeGap이 크다면
+            int abnormalRequestTimeMills = 3000;
             if(curTimeMillis - pushStatDto.getMeasureStartMillis() > abnormalRequestTimeMills) {
                 pushStatDto = pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
             }
@@ -244,7 +245,6 @@ public class PushSingleDomainService {
             // Get 측정 기준 시간 지나침
             long timeoutgap = pushStatDto.getIntervalTimeGap();
             if(pushStatDto.isIntervalOver()) {
-                //log.debug(":: getPushCountInterval isIntervalOver timeoutgap={}", timeoutgap);
                 pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
                 pushStatDto.setMeasurePushCount(processCount);
                 pushStatDto.setMeasureStartMillis(curTimeMillis);
@@ -257,9 +257,7 @@ public class PushSingleDomainService {
             pushSingleClient.putPushStatus(serviceId, ++resultCnt, pushStatDto.getMeasureStartMillis());
             //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis());
 
-            ImmutablePair<Long, Long> pair = new ImmutablePair<>(resultCnt, timeoutgap);
-
-            return pair;
+            return new ImmutablePair<>(resultCnt, timeoutgap);
         }
 
     }
@@ -289,18 +287,5 @@ public class PushSingleDomainService {
         return true;
         //return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
     }
-/*
-    private void checkPushRequestMills(String serviceId) {
-        synchronized (progressLock.get(serviceId)) {
-            long currTime = System.currentTimeMillis();
-            long lastTime = progressTimeMills.get(serviceId);
-            progressTimeMills.put(serviceId, currTime);
 
-            if (lastTime == 0 || (currTime - lastTime) > abnormalRequestTimeMills) {
-                log.debug("==> set : setPushRequestMills : lastTime:{}, gap:{}", lastTime, (currTime - lastTime));
-                pushSingleClient.putPushStatus(serviceId, 0, currTime);
-            }
-        }
-    }
-*/
 }

@@ -2,9 +2,7 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
@@ -12,8 +10,9 @@ import java.io.Serializable;
 @Getter
 @ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
-@SuperBuilder
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
 public class CallSettingResultMapDto implements Serializable{
     /** result */
     @JsonProperty("result")
