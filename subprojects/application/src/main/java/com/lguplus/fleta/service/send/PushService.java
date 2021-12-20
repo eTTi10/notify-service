@@ -256,22 +256,27 @@ public class PushService {
                             .items(items)
                             .build();
 
-                    PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+                    try {
 
-                    if (pushClientResponseDto.getCode().equals("200")) {
-                        //"성공"
-                        resultPos = true;
+                        PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+
+                        if (pushClientResponseDto.getCode().equals("200")) {
+                            //"성공"
+                            resultPos = true;
+                        }
+
+                        log.debug("extra sendPush Request POS : {} {} {} {}", saId, stbMac, pushClientResponseDto.getCode(), pushClientResponseDto.getMessage());
+                    }
+                    catch (Exception e) {
+                        log.debug("e.getMessage:"+ e.getMessage());
                     }
 
-
-                    log.debug("extra sendPush Request POS : {} {} {} {}", saId, stbMac, pushClientResponseDto.getCode(), pushClientResponseDto.getMessage());
 
                 }
 
 
                 log.debug("sendPushCtn Request : {} {} {} {} {}", saId, stbMac, httpPushResponseDto.getCode(), httpPushResponseDto.getMessage(), httpPushResponseDto.getFailUsers());
 
-                //TODO HTTP와 소켓을 모두 체크해야 함
                 if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
 
                     if ( httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108") ){
