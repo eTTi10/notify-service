@@ -2,6 +2,7 @@ package com.lguplus.fleta.service.push;
 
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class PushMultiDomainService {
      * @param pushRequestMultiDto 단건푸시등록을 위한 DTO
      * @return 단건푸시등록 결과
      */
-    public String requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
+    public PushClientResponseDto requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
         log.debug("pushSingleRequestDto ::::::::::::::: {}", pushRequestMultiDto);
 
         log.debug(pushConfig.getCommPropValue("announce.server.url"));
