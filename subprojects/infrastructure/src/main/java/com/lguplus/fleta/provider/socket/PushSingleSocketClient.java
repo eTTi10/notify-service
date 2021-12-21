@@ -82,10 +82,6 @@ public class PushSingleSocketClient implements PushSingleClient {
     @Value("${push-comm.lgpush.service_id}")
     private String lgPushServiceId;
 
-    @Value("${push-comm.push.call.retryCnt}")
-    private String pushCallRetryCnt;
-    private int iPushCallRetryCnt;
-
     @Value("${push-comm.push.delay.time}")
     private String pushIntervalTime;
     private long measureIntervalMillis;
@@ -94,7 +90,7 @@ public class PushSingleSocketClient implements PushSingleClient {
     private List<GenericObjectPool<PushSocketInfo>> poolList;
 
     private static final int HDTV_PUSH_IDX = 0;
-    private static final int LG_PUSH_IDX = 0;
+    private static final int LG_PUSH_IDX = 1;
 
     /**
      * Push Single 푸시
@@ -108,8 +104,6 @@ public class PushSingleSocketClient implements PushSingleClient {
         PushSocketInfo socketInfo = null;
         boolean bIsLgPush = lgPushServiceId.equals(paramMap.get("service_id"));
 
-        //GenericObjectPool<PushSocketInfo> pool = poolList.stream().filter(p->((PushSocketConnFactory)p.getFactory()).isLgPush() == bIsLgPush)
-        //        .findFirst().get()
         GenericObjectPool<PushSocketInfo> pool = poolList.get(bIsLgPush ? LG_PUSH_IDX : HDTV_PUSH_IDX);
 
         try
@@ -156,8 +150,6 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
                 , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin))));
-
-        iPushCallRetryCnt = Integer.parseInt(pushCallRetryCnt);
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
