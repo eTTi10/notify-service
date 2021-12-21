@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.sql.Array;
 import java.util.*;
 
 @Slf4j
@@ -58,23 +59,24 @@ public class PushService {
         String[]  pushParamList;
 
         Map<String, String> paramMap = new HashMap<String, String>();
-        String msg = "";
-        String payload ="";
-        String payloadItem ="";
+        String payload =""; //msg
+        String payloadItem =""; //APNS전용 추가 item
         String serviceId  ="";
         String appId = "";
-        String result = null;
-        Boolean resultCode = true;
+
+        Boolean resultFlag = true;
+
         String pushParam ="";
-        String failcode = "";
+
+        String failCode = "";
+        String failMessage ="";
         int chk1001 =0;
         int failCount =0;
         int paramSize =0;
-        String failMessage ="";
         boolean SuccessCheckFlag = false;
         boolean check1001Flag = false;
-        String firstFailcode ="";
-        String firstFailmessage ="";
+        String firstFailCode ="";
+        String firstFailMessage ="";
 
         boolean resultFcm = false;
         boolean resultPos = false;
@@ -109,7 +111,7 @@ public class PushService {
         String extraSendYn = StringUtils.defaultIfEmpty(pushInfoMap.get("pos.send"), fcmExtraSend);
 
         SendPushResponseDto sendPushResponseDto;
-        ArrayList<PushServiceResultDto> serviceResultvoList = new ArrayList<>();
+        ArrayList<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         for(int k=0; k<serviceTypeList.length; k++) {
 
@@ -127,44 +129,43 @@ public class PushService {
             chk1001 = 0;
             failCount = 0;
 
-            for(int i=0; i<pushTypeList.length; i++){
+            for(int i=0; i<pushTypeList.length; i++) {
 
                 pushType = pushTypeList[i];
                 resultFcm = false;
                 resultPos = false;
 
                 //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
-                if(pushType.equals("G") || serviceTarget.equals("TV")) {
+                if (pushType.equals("G") || serviceTarget.equals("TV")) {
 
                     serviceId = appInfoMap.get("gcm.serviceid");
                     appId = appInfoMap.get("gcm.appid");
                     payload = pushInfoMap.get("gcm.payload.body");
 
-                    if(serviceTarget.equals("") || serviceTarget.equals("H")){
+                    if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
                         serviceId = appInfoDefaultMap.get("gcm.serviceid");
                         appId = appInfoDefaultMap.get("gcm.appid");
                     }
 
-                    log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId , appId , payload);
+                    log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, appId, payload);
 
-                    for(int index=0; index<paramSize; index++){
+                    for (int index = 0; index < paramSize; index++) {
                         try {
-                            payload = payload.replace("[+"+pushParamList[index]+"]", paramMap.get(pushParamList[index]));
-                        } catch(Exception e){
-                            payload = payload.replace("[+"+pushParamList[index]+"]","");
+                            payload = payload.replace("[+" + pushParamList[index] + "]", paramMap.get(pushParamList[index]));
+                        } catch (Exception e) {
+                            payload = payload.replace("[+" + pushParamList[index] + "]", "");
                         }
                     }
 
-                    if(regType.equals("2")){
-                        String ctn = "0" + regId;
-                        regId = pushDomainService.getRegistrationIDbyCtn(ctn);
-//                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
+                    if (regType.equals("2")) {
+
+                        regId = pushDomainService.getRegistrationIDbyCtn(regId);
                     }
 
 
-                //APNS 일경우
-                } else if(pushType.equals("A")) {
+                    //APNS 일경우
+                } else if (pushType.equals("A")) {
 
                     serviceId = appInfoMap.get("apns.serviceid");
                     appId = appInfoMap.get("apns.appid");
@@ -172,33 +173,33 @@ public class PushService {
                     payloadItem = pushInfoMap.get("apns.payload.item");
 
 
-                    if(serviceTarget.equals("") || serviceTarget.equals("H")){
+                    if (serviceTarget.equals("") || serviceTarget.equals("H")) {
                         serviceId = appInfoDefaultMap.get("apns.serviceid");
                         appId = appInfoDefaultMap.get("apns.appid");
                     }
 
-                    log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId , appId , payload, payloadItem);
+                    log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, appId, payload, payloadItem);
 
-                    for(int index=0; index<paramSize; index++){
+                    for (int index = 0; index < paramSize; index++) {
                         try {
-                            payloadItem = payloadItem.replace("[+"+pushParamList[index]+"]", paramMap.get(pushParamList[index]));
-                        } catch(Exception e){
-                            payloadItem = payloadItem.replace("[+"+pushParamList[index]+"]", "");
+                            payloadItem = payloadItem.replace("[+" + pushParamList[index] + "]", paramMap.get(pushParamList[index]));
+                        } catch (Exception e) {
+                            payloadItem = payloadItem.replace("[+" + pushParamList[index] + "]", "");
                         }
                     }
 
 
-                    if(regType.equals("2")){
-                        String ctn = "0" + regId;
-                        regId = pushDomainService.getRegistrationIDbyCtn(ctn);
+                    if (regType.equals("2")) {
+
+                        regId = pushDomainService.getRegistrationIDbyCtn(regId);
 //                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
                     }
 
                     //APNS일 경우 items의 맨 앞에 payloaditem를 끼워 넣는다.
                     items.add(0, payloadItem);
 
-                // LG 푸시 일 경우
-                } else if(pushType.equalsIgnoreCase("L")){
+                    // LG 푸시 일 경우
+                } else if (pushType.equalsIgnoreCase("L")) {
 
                     serviceId = Optional.of(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
                     appId = Optional.of(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
@@ -213,9 +214,6 @@ public class PushService {
                 //HTTP PUSH 호출
                 payload.replace("\"", "\\\"");
 
-                List<String> users = new ArrayList<>();
-                users.add(regId);
-
                 try {
 
                     HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
@@ -223,7 +221,7 @@ public class PushService {
                             .serviceId(serviceId)
                             .pushType(pushType)
                             .msg(payload)
-                            .users(users)
+                            .users(List.of(regId))
                             .items(items)
                             .build();
 
@@ -233,18 +231,14 @@ public class PushService {
                         //"성공"
                         resultFcm = true;
                     }
-                }
-                catch(NotifyHttpPushRuntimeException ne) {
+                } catch (NotifyHttpPushRuntimeException ne) {
                     log.debug("NotifyHttpPushRuntimeException:{}", ne);
-                }
-                catch(Exception e) {
-                    log.debug("Exception:"+ e);
                 }
 
 
                 //추가 발송 셋팅 (소켓)
                 //푸시의 대상타입이 U+tv이고  send_code에 대한 설정값이 추가발송에 해당하는 경우
-                if(serviceTarget.equals("TV") && extraSendYn.equals("Y") ){
+                if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) {
 
                     regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
 
@@ -256,7 +250,7 @@ public class PushService {
                         PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                                 .appId(extraAppId)
 //                              .serviceId(extraServiceId)
-                                .serviceId("30015")
+                                .serviceId("30015") // TODO
                                 .pushType("L")
                                 .msg(payload)
                                 .regId(regId)
@@ -265,44 +259,39 @@ public class PushService {
 
                         log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
 
-                        PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+                        PushClientResponseDto pushClientResponseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
 
-                        log.debug("pushClientResponseDto:"+ pushClientResponseDto);
+                        log.debug("pushClientResponseDto:" + pushClientResponseDto);
 
                         if (pushClientResponseDto.getCode().equals("200")) {
                             //"성공"
                             resultPos = true;
                         }
 
-                        log.debug("pushClientResponseDto : "+ pushClientResponseDto);
-                    }
-                    catch(NotifyPushRuntimeException ne) {
-                        log.debug("NotifyPushRuntimeException:"+ ne);
-                    }
-                    catch(Exception e) {
-                        log.debug("Exception:"+ e);
+                        log.debug("pushClientResponseDto : " + pushClientResponseDto);
+                    } catch (NotifyPushRuntimeException ne) {
+                        log.debug("NotifyPushRuntimeException:" + ne);
                     }
 
 
                 }
 
-
                 log.debug("sendPushCtn Request : {}", httpPushResponseDto);
 
-//                if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
-//
-//                    if ( httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108") ){
-//                        chk1001++;
-//                    } else {
-//                        resultCode = false;
-//                    }
-//
-//                    // 	failcode = "P"+listOut.item(j).getTextContent();
-//                    failcode = httpPushResponseDto.getCode();
-//                    failCount++;
-//                    failMessage = httpPushResponseDto.getMessage();
-//                }
+                // failCode 기록 로직 시작
+                if (httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
 
+                    if (httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108")) {
+                        chk1001++;
+                    } else {
+                        resultFlag = false;
+                    }
+
+                    //failcode = "P" + httpPushResponseDto.getCode();
+                    failCode = httpPushResponseDto.getCode();
+                    failCount++;
+                    failMessage = httpPushResponseDto.getMessage();
+                }
             } // pushType for end
 
 
@@ -316,8 +305,8 @@ public class PushService {
                 sFlag = "0000";
                 sMessage = "성공";
                 SuccessCheckFlag = true;
-            } else if( !resultCode && pushTypeList.length > 1 ) {
-                sFlag = failcode;
+            } else if( resultFlag == false && pushTypeList.length > 1 ) {
+                sFlag = failCode;
                 sMessage = failMessage;
             }else{
                 if(failCount == 0) {
@@ -329,21 +318,21 @@ public class PushService {
                     sMessage = "Push GW Precondition Failed or Not Exist RegistID";
                     check1001Flag = true;
                 } else {
-                    sFlag = failcode;
+                    sFlag = failCode;
                     sMessage = failMessage;
                 }
             }
 
-            if(firstFailcode.equals("")) {
-                firstFailcode = failcode;
+            if(firstFailCode.equals("")) {
+                firstFailCode = failCode;
             }
 
-            if(firstFailmessage.equals("")) {
-                firstFailmessage = failMessage;
+            if(firstFailMessage.equals("")) {
+                firstFailMessage = failMessage;
             }
 
             PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder().sType(sType).sFlag(sFlag).sMessage(sMessage).build();
-            serviceResultvoList.add(pushServiceResultDto);
+            pushServiceResultDtoArrayList.add(pushServiceResultDto);
 
         }	// serviceType for end
 
@@ -354,30 +343,31 @@ public class PushService {
             return SendPushResponseDto.builder()
                     .flag("0000")
                     .message("성공")
-                    .service(serviceResultvoList)
+                    .service(pushServiceResultDtoArrayList)
                     .build();
-
-        } else if(!SuccessCheckFlag && serviceTypeList.length > 1) {
+        //실패이며 발송건 수가 2이상일 경우
+        } else if(SuccessCheckFlag == false && serviceTypeList.length > 1) {
 
             if(check1001Flag){
 
                 return SendPushResponseDto.builder()
                         .flag("1001")
                         .message("Push GW Precondition Failed or Not Exist RegistID")
-                        .service(serviceResultvoList)
+                        .service(pushServiceResultDtoArrayList)
                         .build();
             }else{
                 return SendPushResponseDto.builder()
-                        .flag(firstFailcode)
-                        .message(firstFailmessage)
-                        .service(serviceResultvoList)
+                        .flag(firstFailCode)
+                        .message(firstFailMessage)
+                        .service(pushServiceResultDtoArrayList)
                         .build();
             }
+        //실패이며 발송건수가 1이하일 경우
         }else {
             return SendPushResponseDto.builder()
-                    .flag(failcode)
+                    .flag(failCode)
                     .message(failMessage)
-                    .service(serviceResultvoList)
+                    .service(pushServiceResultDtoArrayList)
                     .build();
         }
 

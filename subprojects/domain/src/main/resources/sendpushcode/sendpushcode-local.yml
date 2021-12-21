@@ -163,7 +163,7 @@ pushinfo:
       apns.payload.body: '"body":"U+tv에서 연결을 요청했습니다"'
       apns.payload.item: 'cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]'
       param.list: 'address|unumber|req_date|ctn|trans_id'
-      pos.send: 'N'
+      pos.send: 'Y'
     ######U+tv -> 모바일tv VOD 이어보기 정보 알림######
     - sendcode: "P002"
       gcm.payload.body: '"result":{"noti_type":"MFUP", "cont_type":"VOD", "album_id":"[+album_id]", "link_flag":"[+link_flag]", "name":"[+name]", "reqtime":"[+reqtime]", "playtime":"[+playtime]", "intent":"[+intent_url]"}'

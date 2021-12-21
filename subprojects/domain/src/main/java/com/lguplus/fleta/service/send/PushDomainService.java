@@ -41,6 +41,7 @@ public class PushDomainService {
 
         Map<String, String> inputMap = new HashMap<>();
 
+        ctn = "0" + ctn;
         inputMap.put("ctn", ctn);
 
 //        RegIdDto regIdDto = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
