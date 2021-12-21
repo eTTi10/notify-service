@@ -8,6 +8,7 @@ import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpPushDomainService;
@@ -71,7 +72,7 @@ public class PushService {
         int paramSize =0;
         String failMessage ="";
         boolean SuccessCheckFlag = false;
-        boolean check1001falg = false;
+        boolean check1001Flag = false;
         String firstFailcode ="";
         String firstFailmessage ="";
 
@@ -203,13 +204,7 @@ public class PushService {
                     appId = Optional.of(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
 
                     //reg_id를 기입하지 않았다면 DB에서 RegID를 찾아서 처리한다.
-                    if(StringUtils.isEmpty(regId)){
-
-                        regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
-//                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
-
-
-                    }
+                    regId = StringUtils.defaultIfEmpty(regId, pushDomainService.getRegistrationID(sendPushCodeRequestDto));
 
                 }
 
@@ -239,8 +234,11 @@ public class PushService {
                         resultFcm = true;
                     }
                 }
-                catch(NotifyHttpPushRuntimeException e) {
-                    log.debug("exception:" + e);
+                catch(NotifyHttpPushRuntimeException ne) {
+                    log.debug("NotifyHttpPushRuntimeException:{}", ne);
+                }
+                catch(Exception e) {
+                    log.debug("Exception:"+ e);
                 }
 
 
@@ -248,23 +246,24 @@ public class PushService {
                 //푸시의 대상타입이 U+tv이고  send_code에 대한 설정값이 추가발송에 해당하는 경우
                 if(serviceTarget.equals("TV") && extraSendYn.equals("Y") ){
 
-//                    regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
-                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
+                    regId = pushDomainService.getRegistrationID(sendPushCodeRequestDto);
 
                     payloadPos.replace("\"", "\\\"");
 
-                    //소켓 PUSH 호출
-                    PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
-                            .appId(extraAppId)
-//                            .serviceId(extraServiceId)
-                            .serviceId("30015")
-                            .pushType("L")
-                            .msg(payload)
-                            .regId(regId)
-                            .items(items)
-                            .build();
+                    try {
 
-                    log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
+                        //소켓 PUSH 호출
+                        PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
+                                .appId(extraAppId)
+//                              .serviceId(extraServiceId)
+                                .serviceId("30015")
+                                .pushType("L")
+                                .msg(payload)
+                                .regId(regId)
+                                .items(items)
+                                .build();
+
+                        log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
 
                         PushClientResponseDto pushClientResponseDto =  pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
 
@@ -275,7 +274,14 @@ public class PushService {
                             resultPos = true;
                         }
 
-                        log.debug("pushClientResponseDto : {}", pushClientResponseDto);
+                        log.debug("pushClientResponseDto : "+ pushClientResponseDto);
+                    }
+                    catch(NotifyPushRuntimeException ne) {
+                        log.debug("NotifyPushRuntimeException:"+ ne);
+                    }
+                    catch(Exception e) {
+                        log.debug("Exception:"+ e);
+                    }
 
 
                 }
@@ -283,35 +289,30 @@ public class PushService {
 
                 log.debug("sendPushCtn Request : {}", httpPushResponseDto);
 
-                if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
-
-                    if ( httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108") ){
-                        chk1001++;
-                    } else {
-                        resultCode = false;
-                    }
-
-                    // 	failcode = "P"+listOut.item(j).getTextContent();
-                    failcode = httpPushResponseDto.getCode();
-                    failCount++;
-                    failMessage = httpPushResponseDto.getMessage();
-                }
+//                if(httpPushResponseDto.getCode().equals("0000") == false) { // 실패일 경우 처리
+//
+//                    if ( httpPushResponseDto.getCode().equals("1113") || httpPushResponseDto.getCode().equals("1108") ){
+//                        chk1001++;
+//                    } else {
+//                        resultCode = false;
+//                    }
+//
+//                    // 	failcode = "P"+listOut.item(j).getTextContent();
+//                    failcode = httpPushResponseDto.getCode();
+//                    failCount++;
+//                    failMessage = httpPushResponseDto.getMessage();
+//                }
 
             } // pushType for end
 
 
-
-            if(serviceTarget == null || serviceType.equals("")){
-                sType = "H";
-            }else {
-                sType = serviceTarget;
-            }
+            sType = StringUtils.defaultIfEmpty(serviceTarget, "H");
 
             if(chk1001 > 1 && pushTypeList.length > 1) {
                 sFlag = "1001";
                 sMessage = "Push GW Precondition Failed or Not Exist RegistID";
-                check1001falg = true;
-            } else if( failCount < 2 && pushTypeList.length > 1){
+                check1001Flag = true;
+            } else if( failCount < 2 && pushTypeList.length > 1){ //푸시타입이 2개 이상이고 실패건수가 1이하일때
                 sFlag = "0000";
                 sMessage = "성공";
                 SuccessCheckFlag = true;
@@ -326,7 +327,7 @@ public class PushService {
                 }else if (chk1001 > 0){
                     sFlag = "1001";
                     sMessage = "Push GW Precondition Failed or Not Exist RegistID";
-                    check1001falg = true;
+                    check1001Flag = true;
                 } else {
                     sFlag = failcode;
                     sMessage = failMessage;
@@ -358,7 +359,7 @@ public class PushService {
 
         } else if(!SuccessCheckFlag && serviceTypeList.length > 1) {
 
-            if(check1001falg){
+            if(check1001Flag){
 
                 return SendPushResponseDto.builder()
                         .flag("1001")

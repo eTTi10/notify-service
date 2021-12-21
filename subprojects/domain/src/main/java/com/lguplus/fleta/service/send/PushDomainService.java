@@ -1,6 +1,7 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.client.PersonalizationDomainClient;
+import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
@@ -21,6 +22,7 @@ import java.util.Optional;
 public class PushDomainService {
 
     private final PersonalizationDomainClient personalizationDomainClient;
+    private final SubscriberDomainClient subscriberDomainClient;
 
     public String getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
@@ -29,9 +31,10 @@ public class PushDomainService {
         inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
         inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
 
-        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow(DataAlreadyExistsException::new);
+//        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow(DataAlreadyExistsException::new);
+//        return regIdDto.getRegId();
+        return "M00020200205"; // TODO 다른 도메인이 서비스 준비가 되어 실제, Feiin 연결될 경우 삭제
 
-        return regIdDto.getRegId();
     }
 
     public String getRegistrationIDbyCtn(String ctn) {
@@ -40,8 +43,10 @@ public class PushDomainService {
 
         inputMap.put("ctn", ctn);
 
-        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow();
-        return regIdDto.getRegId();
+//        RegIdDto regIdDto = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
+//        return regIdDto.getRegId();
+        return "M00020200205"; // TODO 다른 도메인이 서비스 준비가 되어 실제, Feiin 연결될 경우 삭제
+
     }
 
 }
