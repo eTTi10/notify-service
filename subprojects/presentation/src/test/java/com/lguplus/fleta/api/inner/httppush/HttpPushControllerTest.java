@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
+import com.lguplus.fleta.data.mapper.HttpPushMultiMapper;
 import com.lguplus.fleta.data.mapper.HttpPushSingleMapper;
 import com.lguplus.fleta.service.httppush.HttpPushService;
 import org.junit.jupiter.api.DisplayName;
@@ -47,6 +48,9 @@ class HttpPushControllerTest {
 
     @MockBean
     private HttpPushSingleMapper httpPushSingleMapper;
+
+    @MockBean
+    private HttpPushMultiMapper httpPushMultiMapper;
 
     @MockBean
     private HttpPushService httpPushService;

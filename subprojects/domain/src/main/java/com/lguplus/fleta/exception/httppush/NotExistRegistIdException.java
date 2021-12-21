@@ -1,6 +1,6 @@
 package com.lguplus.fleta.exception.httppush;
 
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
 
 /**
  * Exception for error flag 1113
@@ -8,7 +8,7 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class NotExistRegistIdException extends NotifyPushRuntimeException {
+public class NotExistRegistIdException extends NotifyHttpPushRuntimeException {
 
     /**
      *

@@ -1,19 +1,27 @@
 package com.lguplus.fleta.exception.httppush;
 
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Exception for error flag 1109
+ * Exception for error flag 1112
  *
  * @author Taekuk Song
  * @since 1.0
  */
-public class InternalErrorException extends NotifyHttpPushRuntimeException {
+@Getter
+@Setter
+public class HttpPushCustomException extends NotifyHttpPushRuntimeException {
+
+    private String code;
+
+    private String message;
 
     /**
      *
      */
-    public InternalErrorException() {
+    public HttpPushCustomException() {
 
         super();
     }
@@ -22,7 +30,7 @@ public class InternalErrorException extends NotifyHttpPushRuntimeException {
      *
      * @param message
      */
-    public InternalErrorException(final String message) {
+    public HttpPushCustomException(final String message) {
 
         super(message);
     }
@@ -32,7 +40,7 @@ public class InternalErrorException extends NotifyHttpPushRuntimeException {
      * @param message
      * @param cause
      */
-    public InternalErrorException(final String message, final Throwable cause) {
+    public HttpPushCustomException(final String message, final Throwable cause) {
 
         super(message, cause);
     }
@@ -41,7 +49,7 @@ public class InternalErrorException extends NotifyHttpPushRuntimeException {
      *
      * @param cause
      */
-    public InternalErrorException(final Throwable cause) {
+    public HttpPushCustomException(final Throwable cause) {
 
         super(cause);
     }

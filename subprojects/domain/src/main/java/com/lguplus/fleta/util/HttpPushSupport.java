@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  *  Http Push 관련 유틸 클래스
@@ -93,9 +93,9 @@ public class HttpPushSupport {
      */
     private String getEncryptedServicePassword(String serviceId) {
         //서비스 KEY
-        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가;
+        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가
 
-        String servicePwd = Optional.of(serviceMap.get("service_pwd")).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가;
+        String servicePwd = Optional.of(serviceMap.get("service_pwd")).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가
 
         log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, servicePwd);
 
@@ -141,7 +141,7 @@ public class HttpPushSupport {
 
         // 안드로이드
         if (pushType.equals("G")) {
-            Function<String, String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
+            UnaryOperator<String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
 
             payload = gcmPushOpenApiPayload.apply(msg);
 
