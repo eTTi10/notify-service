@@ -9,7 +9,9 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Builder
 @Entity
 @Table(name = "SMARTUX.PT_UX_LATEST")
 @IdClass(LatestId.class)
@@ -43,10 +45,4 @@ public class LatestEntity implements Serializable{
     @Column(name = "cat_name")
     private String catName;
 
-    public String toPlainText() {
-        return String.join(CommonResponseDto.Separator.COLUMN
-                , getSaId(), getMac(), getCtn()
-                , getRegId(), getCatId(), getCatName()
-                , getRDate(), getCategoryGb());
-    }
 }

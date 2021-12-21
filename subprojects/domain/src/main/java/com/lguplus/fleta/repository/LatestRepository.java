@@ -10,8 +10,8 @@ public interface LatestRepository {
     List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto);
 
     List<LatestCheckEntity> getLatestCheckList(LatestRequestDto latestRequestDto);
-    /*
+
     int deleteLatest(LatestRequestDto latestRequestDto);
-    */
+
     int insertLatest(LatestRequestDto latestRequestDto);
 }
