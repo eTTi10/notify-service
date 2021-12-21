@@ -11,6 +11,8 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  */
 public class NotFoundException extends NotifyHttpPushRuntimeException {
 
+
+
     /**
      *
      */
