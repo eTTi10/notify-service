@@ -1,0 +1,56 @@
+package com.lguplus.fleta.exception.httppush;
+
+import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * Exception for error flag 1112
+ *
+ * @author Taekuk Song
+ * @since 1.0
+ */
+@Getter
+@Setter
+public class HttpPushCustomException extends NotifyHttpPushRuntimeException {
+
+    private String code;
+
+    private String message;
+
+    /**
+     *
+     */
+    public HttpPushCustomException() {
+
+        super();
+    }
+
+    /**
+     *
+     * @param message
+     */
+    public HttpPushCustomException(final String message) {
+
+        super(message);
+    }
+
+    /**
+     *
+     * @param message
+     * @param cause
+     */
+    public HttpPushCustomException(final String message, final Throwable cause) {
+
+        super(message, cause);
+    }
+
+    /**
+     *
+     * @param cause
+     */
+    public HttpPushCustomException(final Throwable cause) {
+
+        super(cause);
+    }
+}
