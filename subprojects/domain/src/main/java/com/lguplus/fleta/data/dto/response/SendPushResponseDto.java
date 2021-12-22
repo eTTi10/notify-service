@@ -4,13 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-@Builder
+@SuperBuilder
 @ToString
 @ApiModel(value = "Code를 이용한 푸시 요청 응답결과 DTO", description = "Code를 이용한 푸시 요청 응답결과 DTO")
 @JsonInclude(JsonInclude.Include.NON_NULL)

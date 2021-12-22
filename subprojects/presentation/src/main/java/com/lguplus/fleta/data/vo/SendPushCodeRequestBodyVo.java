@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @JacksonXmlRootElement(localName = "request")
@@ -17,20 +18,7 @@ public class SendPushCodeRequestBodyVo {
 
     @NotNull(message = "reserve 가 Null 혹은 빈값 입니다.")
     @JacksonXmlProperty(localName = "reserve")
-    private Reserve reserve;
-
-    static class Reserve {
-
-        @JacksonXmlProperty(localName = "address")
-        private String address;
-
-        @JacksonXmlProperty(localName = "unumber")
-        private String unumber;
-
-        @JacksonXmlProperty(localName = "req_date")
-        private String reqDate;
-
-    }
+    private Map<String, String> reserve;
 
     @JacksonXmlElementWrapper(localName = "items")
     @JacksonXmlProperty(localName = "item")
@@ -46,11 +34,10 @@ public class SendPushCodeRequestBodyVo {
                 .sendCode(sendPushCodeRequestVo.getSendCode())
                 .regType(sendPushCodeRequestVo.getRegType())
                 .serviceType(sendPushCodeRequestVo.getServiceType())
-                .address(reserve.address)
-                .unumber(reserve.unumber)
-                .reqDate(reserve.reqDate)
+                .reserve(getReserve())
                 .items(getItems())
                 .build();
     }
+
 }
 

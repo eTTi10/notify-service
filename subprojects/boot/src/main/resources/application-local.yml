@@ -117,3 +117,5 @@ service:
     url: http://channel.fleta.com
   personalization:
     url: http://personalization.fleta.com
+  subscriber:
+    url: http://subscriber.fleta.com
