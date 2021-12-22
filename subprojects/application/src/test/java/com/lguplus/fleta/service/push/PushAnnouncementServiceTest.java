@@ -51,7 +51,7 @@ class PushAnnouncementServiceTest {
 
         PushClientResponseDto responseDto = pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto);
 
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
 
     }
 }

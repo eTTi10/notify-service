@@ -6,8 +6,9 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
+import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -54,9 +52,12 @@ public class PushSingleDomainService {
 
     private Map<String,Object> requestLock;
     private Map<String,Object> progressLock;
-    private final Map<String, Long> pushProgressCnt = new Hashtable<>();
+    private final List<ProcessCounter> pushProgressCnt = new ArrayList<>();
 
     private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String PUSH_COMMAND = "PUSH_NOTI";
+    private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
+    private static final int TRANSACTION_MAX_SEQ_NO = 9999;
 
     @PostConstruct
     public void initialize(){
@@ -90,14 +91,14 @@ public class PushSingleDomainService {
 
         //1. Make Message
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("msg_id", "PUSH_NOTI");
+        paramMap.put("msg_id", PUSH_COMMAND);
         paramMap.put("push_id", getTransactionId(dto.getServiceId()));
         paramMap.put("service_id", dto.getServiceId());
         paramMap.put("app_id", dto.getAppId());
         paramMap.put("noti_contents", dto.getMsg());
         paramMap.put("service_passwd", servicePwd);
 
-        if ("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
             paramMap.put("push_app_id", oldLgPushAppId);
             paramMap.put("noti_type", oldLgPushNotiType);
             paramMap.put("regist_id", dto.getRegId());
@@ -112,39 +113,35 @@ public class PushSingleDomainService {
             }
         });
 
-        PushResponseDto pushResponseDto;
         String statusCode = "";
         String statusMsg = "";
 
         //2. Send Push
-        for (int i = 0; i < iPushCallRetryCnt; i++) {
-
+        int reCnt = 0;
+        while (reCnt < iPushCallRetryCnt) {
             try {
+                PushResponseDto pushResponseDto;
                 setPushProgressCnt(dto.getServiceId(), +1);
                 pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
-            }
-            finally {
+
+                statusCode = pushResponseDto.getStatusCode();
+                statusMsg = pushResponseDto.getStatusMsg();
+            } finally {
                 setPushProgressCnt(dto.getServiceId(), -1);
             }
 
             //3. Send Result
-            statusCode = pushResponseDto.getStatusCode();
-            statusMsg = pushResponseDto.getStatusMsg();
-
             if (statusCode.equals("200")) {
                 log.trace("[requestPushSingle][" + statusCode + "] [SUCCESS]");
-            } else {
-                log.trace("[requestPushSingle][" + statusCode + "] [FAIL]");
+                break;
+            }
 
-                boolean isRetryExclude = isRetryExcludeCode(statusCode);
+            log.debug("[requestPushSingle][" + statusCode + "] [FAIL] retry:{}/{} ", reCnt+1, iPushCallRetryCnt);
 
-                if (!isRetryExclude && (i + 1) < iPushCallRetryCnt) {
-                    continue;
-                }
-
-                //실패
-                exceptionHandler(statusCode);
-                //return PushClientResponseDto.builder().code(statusCode).message("Error").build()
+            // 재시도 예외 리턴 코드인 경우 재시도 안함.
+            // 재시도 횟수에 도달한 경우 바로 반환.
+            if (++reCnt == iPushCallRetryCnt || isRetryExcludeCode(statusCode)) {
+                throw exceptionHandler(statusCode);
             }
         }
 
@@ -171,52 +168,55 @@ public class PushSingleDomainService {
         }
     }
 
-    private void exceptionHandler(String statusCode) {
+    private NotifyPushRuntimeException exceptionHandler(String statusCode) {
         switch (statusCode) {
             case "202":
-                throw new AcceptedException();
+                return new AcceptedException();
             case "400":
-                throw new BadRequestException();
+                return new BadRequestException();
             case "401":
-                throw new UnAuthorizedException();
+                return new UnAuthorizedException();
             case "403":
-                throw new ForbiddenException();
+                return new ForbiddenException();
             case "404":
-                throw new NotFoundException();
+                return new NotFoundException();
             case "410":
-                throw new NotExistRegistIdException();
+                return new NotExistRegistIdException();
             case "412":
-                throw new PreConditionFailedException();
+                return new PreConditionFailedException();
             case "500":
-                throw new InternalErrorException();
+                return new InternalErrorException();
             case "502":
-                throw new ExceptionOccursException();
+                return new ExceptionOccursException();
             case "503":
-                throw new ServiceUnavailableException();
+                return new ServiceUnavailableException();
             case "5102":
-                throw new SocketTimeException();
+                return new SocketTimeException();
             case "5103": //FeignException
-                throw new SocketException();
+                return new SocketException();
             default:
-                throw new PushEtcException();//("기타 오류"); //9999
+                return new PushEtcException();//("기타 오류"); //9999
         }
+    }
+
+    private boolean isRetryExcludeCode(String code) {
+        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
     }
 
     private boolean isLgPushServiceId(String serviceId) {
         return lgPushServceId.equals(serviceId);
     }
 
-
     private String getTransactionId(String serviceId) {
         if(!isLgPushServiceId(serviceId)) {
-            if (tranactionMsgId1.get() >= 9999) {
+            if (tranactionMsgId1.get() >= TRANSACTION_MAX_SEQ_NO) {
                 tranactionMsgId1.set(0);
                 return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.get());
             }
             return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.incrementAndGet());
         }
         else {
-            if(tranactionMsgId2.get() >= 9999) {
+            if(tranactionMsgId2.get() >= TRANSACTION_MAX_SEQ_NO) {
                 tranactionMsgId2.set(0);
                 return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.get());
             }
@@ -265,24 +265,45 @@ public class PushSingleDomainService {
     //Push Count
     private Long getPushProcessCount(String serviceId) {
         synchronized (progressLock.get(serviceId)) {
-            return pushProgressCnt.get(serviceId);
+            Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
+            return processCounter.isPresent() ? processCounter.get().getTransactionCount() : 0;
         }
     }
 
     private void setPushProgressCnt(String serviceId, int changeVal) {
         synchronized (progressLock.get(serviceId)) {
-            pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
+            Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
+            if(processCounter.isPresent()) {
+                processCounter.get().setTransactionCount(processCounter.get().getTransactionCount() + changeVal);
+            }
+            else {
+                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
+            }
         }
     }
 
     private void resetPushProgressCnt(String serviceId) {
         synchronized (progressLock.get(serviceId)) {
-            pushProgressCnt.put(serviceId, 0L);
+           Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
+           if(processCounter.isPresent()) {
+               processCounter.get().setTransactionCount(0L);
+           }
+           else {
+               pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(0L).build());
+           }
         }
     }
 
-    private boolean isRetryExcludeCode(String code) {
-        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
-    }
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    static class ProcessCounter {
+        private String serviceId;
+        private Long transactionCount;
 
+        public void setTransactionCount(Long transactionCount) {
+            this.transactionCount = transactionCount;
+        }
+    }
 }

@@ -13,13 +13,13 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Push 단건 Socket Client
@@ -29,7 +29,6 @@ import java.util.*;
 @Slf4j
 @ToString
 @Component
-@EnableScheduling
 public class PushSingleSocketClient implements PushSingleClient {
 
     //Pool Config
@@ -113,9 +112,6 @@ public class PushSingleSocketClient implements PushSingleClient {
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
-        } catch (NoSuchElementException e) {
-            log.error(e.toString());
-            return PushResponseDto.builder().statusCode("500").statusMsg("Exception Occurs").build();
         } catch (PushBizException e) {
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
@@ -130,7 +126,7 @@ public class PushSingleSocketClient implements PushSingleClient {
     }
 
     @PostConstruct
-    public void initialize() {
+    private void initialize() {
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
                 .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(channelPort))
@@ -155,17 +151,8 @@ public class PushSingleSocketClient implements PushSingleClient {
 
     }
 
-    //@Scheduled(fixedDelay = 1000 * 20)
-    public void socketClientSch() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Date now = new Date();
-        String strDate = sdf.format(now);
-
-        poolList.forEach(p -> log.debug("socketClientSch: Hdtv Time:{} Active{}/Idle{}", strDate, p.getNumActive(), p.getNumIdle()));
-    }
-
     @PreDestroy
-    public void destroy() {
+    private void destroy() {
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close");
         poolList.forEach(GenericObjectPool::close);
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close ...");
@@ -178,6 +165,7 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolConfig.setMaxIdle(maxTotal);  //100
         poolConfig.setMinIdle(minIdle);   //20
         poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
+        poolConfig.setMaxWaitMillis(2000);// 최대 대기 시간
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestOnReturn(true);
         poolConfig.setTestWhileIdle(true);

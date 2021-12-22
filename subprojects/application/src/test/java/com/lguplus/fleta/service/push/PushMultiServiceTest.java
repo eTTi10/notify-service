@@ -54,6 +54,6 @@ class PushMultiServiceTest {
 
         PushClientResponseDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);
 
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 }
