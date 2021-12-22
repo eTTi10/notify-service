@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -27,11 +28,9 @@ public class SendPushCodeRequestDto {
 
     private String serviceType;
 
-    private String address;
-
-    private String unumber;
-
-    private String reqDate;
+    private Map<String, String> reserve;
 
     private List<String> items;
+
+
 }

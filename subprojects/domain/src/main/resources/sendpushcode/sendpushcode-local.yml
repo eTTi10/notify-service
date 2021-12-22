@@ -153,7 +153,7 @@ fcm:
   extra:
     send: Y
     target: '21006'
-    serviceid: '20002'
+    serviceid: '30015'
     appid: smartuxapp
 pushinfo:
   sendcodes:
