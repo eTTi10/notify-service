@@ -1,17 +1,16 @@
 package com.lguplus.fleta.provider.socket;
 
+import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.push.PushBizException;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -19,28 +18,29 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
-
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.BDDMockito.given;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
 class PushSingleSocketClientTest {
 
-    @InjectMocks
-    private PushSingleSocketClient pushSingleSocketClient;
+    private final PushSingleSocketClient pushSingleSocketClient;
 
-    @Mock
-    PushSocketInfo socketInfo;
-
-    @Mock
-    GenericObjectPool<PushSocketInfo> pool;
-
-    //@Mock
-    PushRequestSingleDto pushRequestSingleDto;
+    PushRequestSingleDto pushRequestSingleDto, pushRequestSingleDtoLg;
 
     Map<String, String> paramMap;
+    Map<String, String> paramMapLg;
+
+    List<GenericObjectPool<PushSocketInfo>> poolList;
+
+    final String sendSuccessCode = "412"; //200
+
+    public PushSingleSocketClientTest() {
+        pushSingleSocketClient = new PushSingleSocketClient();
+    }
 
     // Service Password
     private String getSha512Pwd(String servicePwd) {
@@ -89,11 +89,40 @@ class PushSingleSocketClientTest {
             }
         });
 
+        /////////////// LG
+        pushRequestSingleDtoLg = PushRequestSingleDto.builder()
+                .serviceId("00007")
+                .pushType("G")
+                .appId("smartux")
+                .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
+                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(items)
+                .build();
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMax", "10");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMin", "2");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMax", "10");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMin", "2");
+        dto = pushRequestSingleDtoLg;
+
+        paramMapLg = new HashMap<>();
+        paramMapLg.put("msg_id", "PUSH_NOTI");
+        paramMapLg.put("push_id", "202112200101");
+        paramMapLg.put("service_id", dto.getServiceId());
+        paramMapLg.put("app_id", dto.getAppId());
+        paramMapLg.put("noti_contents", dto.getMsg());
+        paramMapLg.put("service_passwd", getSha512Pwd(dto.getAppId()));
+        paramMapLg.put("push_app_id", "smartux0001");
+        paramMapLg.put("noti_type", "POS");
+        paramMapLg.put("regist_id", dto.getRegId());
+
+        dto.getItems().forEach(e -> {
+            String[] item = e.split("\\!\\^");
+            if (item.length == 2) {
+                paramMap.put(item[0], item[1]);
+            }
+        });
+
+        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMax", "2");
+        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMin", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMax", "2");
+        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMin", "1");
 
         ReflectionTestUtils.setField(pushSingleSocketClient, "host", "211.115.75.227");
         ReflectionTestUtils.setField(pushSingleSocketClient, "port", "9600");
@@ -114,52 +143,81 @@ class PushSingleSocketClientTest {
         ReflectionTestUtils.setField(pushSingleSocketClient, "lgPushSocketInitCnt", "5");
 
         ReflectionTestUtils.setField(pushSingleSocketClient, "lgPushServiceId", "00007");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "pushIntervalTime", "1000");
+        ReflectionTestUtils.setField(pushSingleSocketClient, "pushIntervalTime", "1");
 
-        pushSingleSocketClient.initialize();
+        ReflectionTestUtils.setField(pushSingleSocketClient, "measureIntervalMillis", 1000);
+
+        ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "initialize");
     }
 
-    //@Test
-    void requestPushSingle() {
-
-        pushSingleSocketClient.getPushStatus("id", 1, 1000);
-        pushSingleSocketClient.putPushStatus("id", 1, 1000);
-        pushSingleSocketClient.socketClientSch();
-        //pushSingleSocketClient.destroy();
-
-        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
-        log.debug("junit result: " + responseDto.getStatusCode());
-        //Assertions.assertTrue("200".equals(responseDto.getStatusCode()));
-        Assertions.assertTrue("412".equals(responseDto.getStatusCode()));
+    private void clearPool() {
+        //ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
+        ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "destroy");
     }
 
-    @Test
-    void requestPushSingle_exception1() {
-        pushSingleSocketClient.destroy();
-        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
-        log.debug("junit result: " + responseDto.getStatusCode());
-
-        Assertions.assertTrue("500".equals(responseDto.getStatusCode()));
-    }
-
-   // @Test
-    void requestPushSingle_exception2() throws PushBizException {
-        PushBizException ex = new PushBizException("");
-        given( socketInfo.sendPushNotice(anyMap()) ).willThrow(ex);
+    //ok
+    @Test // Push
+    //@Disabled
+    void requestPushSingle_case_01() {
 
         PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
         log.debug("junit result: " + responseDto.getStatusCode());
 
-        Assertions.assertTrue("503".equals(responseDto.getStatusCode()));
+        Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
+
     }
-/*
-    @Test
-    void requestPushSingle_exception3() {
-        Exception  ex = new Exception ("");
-        given( pushSingleSocketClient.requestPushSingle(anyMap()) ).willThrow(ex);
+
+    //ok
+    @Test() // Push Lg
+    //@Disabled
+    void requestPushSingle_case_02() {
+
+        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMapLg);
+        log.debug("junit result: " + responseDto.getStatusCode());
+
+        Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
+    }
+
+    @Test // pool empty Exception
+    void requestPushSingle_case_03()  {
+
+        Long currentTimeMillis = System.currentTimeMillis();
+        Long pushCount = 10L;
+
+        pushSingleSocketClient.putPushStatus("00007", pushCount, currentTimeMillis);
+        PushStatDto pushStatDto = pushSingleSocketClient.getPushStatus("00007", pushCount, currentTimeMillis);
+
+        Assertions.assertEquals(currentTimeMillis, pushStatDto.getMeasureStartMillis());
+        Assertions.assertEquals(pushCount, pushStatDto.getMeasurePushCount());
+
+    }
+
+    @Test // pool empty Exception
+    void requestPushSingle_case_04()  {
+
+        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClient, "poolList");
+
+        for(int i=0; i<2; i++) {
+            try {
+                PushSocketInfo pushSocketInfo = poolListEmpty.get(0).borrowObject();
+                //poolListEmpty.get(0).returnObject(pushSocketInfo);
+                PushSocketInfo pushSocketInfo1 = poolListEmpty.get(1).borrowObject();
+                //poolListEmpty.get(1).returnObject(pushSocketInfo1);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
-        Assertions.assertTrue("500".equals(responseDto.getStatusCode()));
+        log.debug("junit result: " + responseDto.getStatusCode());
+
+        Assertions.assertEquals("500", responseDto.getStatusCode());
+
     }
-    */
+
+    @AfterEach
+    void after() {
+        clearPool();
+    }
+
 }

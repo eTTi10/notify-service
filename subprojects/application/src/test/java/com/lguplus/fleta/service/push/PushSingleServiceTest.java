@@ -53,6 +53,6 @@ class PushSingleServiceTest {
 
         PushClientResponseDto responseDto = pushSingleService.requestPushSingle(pushRequestSingleDto);
 
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 }

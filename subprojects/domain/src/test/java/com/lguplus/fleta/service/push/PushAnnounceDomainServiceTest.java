@@ -63,7 +63,7 @@ class PushAnnounceDomainServiceTest {
         given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
@@ -76,7 +76,7 @@ class PushAnnounceDomainServiceTest {
             PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         });
 
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.ServiceIdNotFoundException");
+        Assertions.assertTrue(thrown instanceof ServiceIdNotFoundException);
     }
 
     @Test
@@ -87,7 +87,7 @@ class PushAnnounceDomainServiceTest {
         given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
