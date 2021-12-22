@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
@@ -10,7 +9,10 @@ import lombok.Getter;
 import lombok.ToString;
 
 import javax.validation.GroupSequence;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter
@@ -54,16 +56,5 @@ public class PushRequestBodySingleVo {
     @JsonProperty("reg_id")
     @ApiModelProperty(position = 6, example = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=", value = "사용자 ID")
     private String regId;
-
-    public PushRequestSingleDto convert() {
-        return PushRequestSingleDto.builder()
-                .appId(getAppId())
-                .serviceId(getServiceId())
-                .pushType(getPushType())
-                .msg(getMsg())
-                .items(getItems())
-                .regId(getRegId())
-                .build();
-    }
 
 }

@@ -28,13 +28,14 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @Override
     public PushSocketInfo create() {
 
-        PushSocketInfo socketInfo = new PushSocketInfo(new Socket());
+        PushSocketInfo socketInfo = new PushSocketInfo();
 
         try {
             socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
             log.trace("=== factory create Socket : {}", socketInfo);
         } catch (PushBizException e) {
             e.printStackTrace();
+            socketInfo.closeSocket();
             log.debug("=== factory create Socket failure: {}", socketInfo);
             return null;
         }
@@ -54,16 +55,12 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         Socket socket = socketInfo.getPushSocket();
 
         if(socket == null || socket.getInetAddress() == null || !socket.isConnected()
-                || !socketInfo.isOpened() ||  socketInfo.getFailCount() > 0
-                || socketInfo.getSocketTime() == -1)
+           || !socketInfo.isOpened() || socketInfo.isFailure())
         {
             return false;
         }
 
-        long lastTime = socketInfo.getSocketTime();
-        long currTime = Instant.now().getEpochSecond();
-
-        return serverInfo.getCloseSecond() > (currTime - lastTime);
+        return serverInfo.getCloseSecond() > (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
 
     }
 
@@ -100,10 +97,6 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         String channelPortNm = (serverInfo.getChannelPort() + "0000").substring(0, 4);
 
         return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
-    }
-
-    public boolean isLgPush() {
-        return this.serverInfo.isLgPush();
     }
 
     @Getter

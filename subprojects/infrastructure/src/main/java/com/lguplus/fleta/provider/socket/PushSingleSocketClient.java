@@ -13,13 +13,13 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Push 단건 Socket Client
@@ -29,7 +29,6 @@ import java.util.*;
 @Slf4j
 @ToString
 @Component
-@EnableScheduling
 public class PushSingleSocketClient implements PushSingleClient {
 
     //Pool Config
@@ -150,15 +149,6 @@ public class PushSingleSocketClient implements PushSingleClient {
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
-    }
-
-    //@Scheduled(fixedDelay = 1000 * 20)
-    private void socketClientSch() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        Date now = new Date();
-        String strDate = sdf.format(now);
-
-        poolList.forEach(p -> log.debug("socketClientSch: Hdtv Time:{} Active{}/Idle{}", strDate, p.getNumActive(), p.getNumIdle()));
     }
 
     @PreDestroy
