@@ -43,7 +43,7 @@ public class PushMultiDomainService {
                 .build();
     }
 
-    private String getTransactionId(String serviceId) {
+    private String getTransactionId() {
         if(tranactionMsgId.get() >= TRANSACTION_MAX_SEQ_NO) {
             tranactionMsgId.set(0);
             return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.get());

@@ -27,6 +27,16 @@ public class PushSocketInfo {
     private static final String RESPONSE_ID_NM = "response";
     private static final String RESPONSE_STATUS_CD = "status_code";
     private static final String RESPONSE_STATUS_MSG = "statusmsg";
+    private static final String SUCCESS = "SC";
+    private static final String FAIL = "FA";
+    private static final int CHANNEL_CONNECTION_REQUEST = 1;
+    private static final int CHANNEL_CONNECTION_REQUEST_ACK = 2;
+    private static final int CHANNEL_RELEASE_REQUEST = 5;
+    private static final int CHANNEL_RELEASE_REQUEST_ACK = 6;
+    private static final int PROCESS_STATE_REQUEST = 13;
+    private static final int PROCESS_STATE_REQUEST_ACK = 14;
+    private static final int COMMAND_REQUEST = 15;
+    private static final int COMMAND_REQUEST_ACK = 16;
 
     private long lastTransactionTime = Instant.now().getEpochSecond();
     private boolean isOpened;
@@ -55,7 +65,7 @@ public class PushSocketInfo {
             log.trace("[OpenSocket]byteTotalLen=" + PUSH_MSG_HEADER_LEN); //64
 
             byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN];
-            System.arraycopy(Ints.toByteArray(1), 0, sendHeader, 0, 4);
+            System.arraycopy(Ints.toByteArray(CHANNEL_CONNECTION_REQUEST), 0, sendHeader, 0, 4);
             System.arraycopy(channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
             System.arraycopy(byteDestinationIP, 0, sendHeader, 32, 16);
             System.arraycopy(Ints.toByteArray(0), 0, sendHeader, 60, 4);
@@ -89,7 +99,7 @@ public class PushSocketInfo {
             short responseState = byteToShort(bResponseState);
             log.trace("[OpenSocket] 서버 응답 response Status Code = " + responseState);
 
-            if ("SC".equals(responseCode)) {
+            if (SUCCESS.equals(responseCode)) {
                 log.trace("[OpenSocket]ChannelConnectionRequest 성공");
                 log.trace("[" + channelID + "][OPEN_E][] - [SUCCESS]");
 
@@ -142,7 +152,7 @@ public class PushSocketInfo {
             log.trace("[setNoti] json = {}, {}", byteDATA.length, jsonStr);
 
             byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteDATA.length];
-            System.arraycopy(Ints.toByteArray(15), 0, sendHeader, 0, 4);                    //Message Id
+            System.arraycopy(Ints.toByteArray(COMMAND_REQUEST), 0, sendHeader, 0, 4);                    //Message Id
             System.arraycopy(pushBody.get(PUSH_ID_NM).getBytes(PUSH_ENCODING), 0, sendHeader, 4, 12);   //Transaction Id
             System.arraycopy(this.channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);             //Channel Id
             System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destIp.getBytes(PUSH_ENCODING).length);//Destination IP
@@ -216,7 +226,7 @@ public class PushSocketInfo {
         try
         {
             switch (pushRcvHeaderVo.getStatus()) {
-                case "SC" :
+                case SUCCESS :
                     log.trace("[setNoti]ChannelConnectionRequest 성공");
                     log.trace("[" + channelID + "][OPEN_E][] - [SUCCESS]");
 
@@ -244,7 +254,7 @@ public class PushSocketInfo {
                     }
 
                     break;
-                case "FA" :
+                case FAIL :
                     log.debug("[setNoti]ChannelConnectionRequest 실패1");
 
                     if (pushRcvHeaderVo.getRecvLength() >= 4) {
@@ -254,14 +264,14 @@ public class PushSocketInfo {
                         log.debug("[setNoti] 서버 응답 response Status Code = " + responseState);
 
                         isFailure = true;
-                        return PushResponseDto.builder().statusCode("FA").statusMsg("" +responseState).build();
+                        return PushResponseDto.builder().statusCode(FAIL).statusMsg("" +responseState).build();
                     }
 
                     break;
 
                 default:
                     isFailure = true;
-                    return PushResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();
+                    return PushResponseDto.builder().statusCode(FAIL).statusMsg("Internal Error").build();
             }
         } catch (IOException e) {
             isFailure = true;
@@ -269,7 +279,7 @@ public class PushSocketInfo {
         }
 
         isFailure = true;
-        return PushResponseDto.builder().statusCode("FA").statusMsg("Internal Error").build();
+        return PushResponseDto.builder().statusCode(FAIL).statusMsg("Internal Error").build();
     }
 
     public void closeSocket() {
