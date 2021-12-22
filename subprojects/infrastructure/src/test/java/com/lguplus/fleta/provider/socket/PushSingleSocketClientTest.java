@@ -3,17 +3,17 @@ package com.lguplus.fleta.provider.socket;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -151,7 +151,7 @@ class PushSingleSocketClientTest {
     }
 
     private void clearPool() {
-        ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
+        //ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
         ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "destroy");
     }
 
