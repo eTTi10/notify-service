@@ -194,7 +194,7 @@ public class PushSocketInfo {
 
     }
 
-    public PushRcvHeaderVo recvPushMessageHeader() throws PushBizException {
+    private PushRcvHeaderVo recvPushMessageHeader() throws PushBizException {
 
         try
         {
@@ -239,7 +239,7 @@ public class PushSocketInfo {
         }
     }
 
-    public PushResponseDto recvPushMessageBody(PushRcvHeaderVo pushRcvHeaderVo) throws PushBizException {
+    private PushResponseDto recvPushMessageBody(PushRcvHeaderVo pushRcvHeaderVo) throws PushBizException {
 
         try
         {
@@ -259,10 +259,11 @@ public class PushSocketInfo {
                         String statusCode = "";
                         String statusMsg = "";
 
-                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM)) {
-                            JsonNode jsonNodeStatus = jsonNodeR.get(RESPONSE_ID_NM);
-                            statusCode = jsonNodeStatus.has(RESPONSE_STATUS_CD) ? jsonNodeStatus.get(RESPONSE_STATUS_CD).asText() : "";
-                            statusMsg = jsonNodeStatus.has(RESPONSE_STATUS_MSG) ? jsonNodeStatus.get(RESPONSE_STATUS_MSG).asText() : "";
+                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has(RESPONSE_STATUS_CD)) {
+                            statusCode = jsonNodeR.get(RESPONSE_ID_NM).get(RESPONSE_STATUS_CD).asText();
+                        }
+                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has(RESPONSE_STATUS_MSG)) {
+                            statusMsg = jsonNodeR.get(RESPONSE_ID_NM).get(RESPONSE_STATUS_MSG).asText();
                         }
 
                         socketTime = Instant.now().getEpochSecond();
