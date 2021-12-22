@@ -1,20 +1,22 @@
 package com.lguplus.fleta.provider.socket.multi;
 
+import lombok.*;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MsgEntityCommon {
 
-    public final static int HEADER_SIZE = 64;
-
-    public final static String SUCCESS = "SC";
-    public final static String FAIL = "FA";
-
-    public final static int CHANNEL_CONNECTION_REQUEST = 1;
-    public final static int CHANNEL_CONNECTION_REQUEST_ACK = 2;
-    public final static int CHANNEL_RELEASE_REQUEST = 5;
-    public final static int CHANNEL_RELEASE_REQUEST_ACK = 6;
-    public final static int PROCESS_STATE_REQUEST = 13;
-    public final static int PROCESS_STATE_REQUEST_ACK = 14;
-    public final static int COMMAND_REQUEST = 15;
-    public final static int COMMAND_REQUEST_ACK = 16;
+    public static final int PUSH_MSG_HEADER_LEN = 64;
+    public static final String SUCCESS = "SC";
+    public static final String FAIL = "FA";
+    public static final int CHANNEL_CONNECTION_REQUEST = 1;
+    public static final int CHANNEL_CONNECTION_REQUEST_ACK = 2;
+    public static final int CHANNEL_RELEASE_REQUEST = 5;
+    public static final int CHANNEL_RELEASE_REQUEST_ACK = 6;
+    public static final int PROCESS_STATE_REQUEST = 13;
+    public static final int PROCESS_STATE_REQUEST_ACK = 14;
+    public static final int COMMAND_REQUEST = 15;
+    public static final int COMMAND_REQUEST_ACK = 16;
+    public static final String PUSH_ENCODING = "euc-kr";
 
     public static boolean isValidMessageType(int type) {
         switch(type) {
