@@ -14,10 +14,10 @@ public class PushRequestSingleDto {
 
     private String appId;
     private String serviceId;
-    private String serviceKey;
     private String pushType;
     private String msg;
     private List<String> items;
+
     private String regId;
 
 }
