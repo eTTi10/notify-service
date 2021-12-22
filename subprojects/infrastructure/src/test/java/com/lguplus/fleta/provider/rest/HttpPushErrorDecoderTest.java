@@ -5,6 +5,8 @@ import feign.Request;
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
+import fleta.util.JunitTestUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -21,9 +23,23 @@ class HttpPushErrorDecoderTest {
     final Map<String, Collection<String>> headers = new LinkedHashMap<>();
     final Request request = Request.create(Request.HttpMethod.POST, "/test", Collections.emptyMap(), null, Util.UTF_8, null);
 
+    @BeforeEach
+    void setUp() {
+        JunitTestUtils.setValue(errorDecoder, "acceptedExceptionMsg", "The request Accepted");
+        JunitTestUtils.setValue(errorDecoder, "badRequestExceptionMsg", "Push GW BadRequest");
+        JunitTestUtils.setValue(errorDecoder, "unAuthorizedExceptionMsg", "Push GW UnAuthorized");
+        JunitTestUtils.setValue(errorDecoder, "forbiddenExceptionMsg", "Push GW Forbidden");
+        JunitTestUtils.setValue(errorDecoder, "notFoundExceptionMsg", "Push GW Not Found");
+        JunitTestUtils.setValue(errorDecoder, "notExistRegistIdExceptionMsg", "Not Exist RegistID");
+        JunitTestUtils.setValue(errorDecoder, "preConditionFailedExceptionMsg", "Push GW Precondition Failed");
+        JunitTestUtils.setValue(errorDecoder, "internalErrorExceptionMsg", "Push GW Internal Error");
+        JunitTestUtils.setValue(errorDecoder, "exceptionOccursExceptionMsg", "Exception Occurs");
+        JunitTestUtils.setValue(errorDecoder, "serviceUnavailableExceptionMsg", "Push GW Service Unavailable");
+    }
+
     @Test
     void testAcceptedException() {
-        Exception exception = assertThrows(AcceptedException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(202)
                     .reason("The request Accepted")
@@ -34,12 +50,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(AcceptedException.class);
+        assertThat(exception.getMessage()).isSameAs("The request Accepted");
     }
 
     @Test
     void testBadRequestException() {
-        Exception exception = assertThrows(BadRequestException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(400)
                     .reason("Push GW BadRequest")
@@ -50,12 +66,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(BadRequestException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW BadRequest");
     }
 
     @Test
     void testUnAuthorizedException() {
-        Exception exception = assertThrows(UnAuthorizedException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(401)
                     .reason("Push GW UnAuthorized")
@@ -66,12 +82,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(UnAuthorizedException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW UnAuthorized");
     }
 
     @Test
     void testForbiddenException() {
-        Exception exception = assertThrows(ForbiddenException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(403)
                     .reason("Push GW Forbidden")
@@ -82,12 +98,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(ForbiddenException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW Forbidden");
     }
 
     @Test
     void testNotFoundException() {
-        Exception exception = assertThrows(NotFoundException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(404)
                     .reason("Push GW Not Found")
@@ -98,12 +114,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(NotFoundException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW Not Found");
     }
 
     @Test
     void testNotExistRegisterIdException() {
-        Exception exception = assertThrows(NotExistRegistIdException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(410)
                     .reason("Not Exist RegistID")
@@ -114,12 +130,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(NotExistRegistIdException.class);
+        assertThat(exception.getMessage()).isSameAs("Not Exist RegistID");
     }
 
     @Test
     void testPreConditionFailedException() {
-        Exception exception = assertThrows(PreConditionFailedException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(412)
                     .reason("Push GW Precondition Failed")
@@ -130,12 +146,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(PreConditionFailedException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW Precondition Failed");
     }
 
     @Test
     void testInternalErrorException() {
-        Exception exception = assertThrows(InternalErrorException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(500)
                     .reason("Push GW Internal Error")
@@ -146,12 +162,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(InternalErrorException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW Internal Error");
     }
 
     @Test
     void testExceptionOccursException() {
-        Exception exception = assertThrows(ExceptionOccursException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(502)
                     .reason("Exception Occurs")
@@ -162,12 +178,12 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(ExceptionOccursException.class);
+        assertThat(exception.getMessage()).isSameAs("Exception Occurs");
     }
 
     @Test
     void testServiceUnavailableException() {
-        Exception exception = assertThrows(ServiceUnavailableException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             Response response = Response.builder()
                     .status(503)
                     .reason("Push GW Service Unavailable")
@@ -178,7 +194,7 @@ class HttpPushErrorDecoderTest {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
 
-        assertThat(exception).isInstanceOf(ServiceUnavailableException.class);
+        assertThat(exception.getMessage()).isSameAs("Push GW Service Unavailable");
     }
 
     @Test
