@@ -11,12 +11,12 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.exception.mmsagent.*;
-import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
+import com.lguplus.fleta.exception.mmsagent.ServerSettingInfoException;
 import com.sun.istack.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
+import com.lguplus.fleta.exception.mmsagent.DatabaseException;
 import java.lang.NumberFormatException;
 import java.util.List;
 import java.util.Map;
@@ -46,13 +46,23 @@ public class MmsAgentDomainService {
         mmsConfig = config.getMms();//1레벨 객체
         settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
 
-        //Start [setting API 호출 캐시등록]
-        CallSettingDto settingItem =  getMmsCallSettingApi(
-                (String)settingConfig.get("rest_sa_id"), //callSettingApi파라메타
-                (String)settingConfig.get("rest_stb_mac"), //ex) MMS:mms SMS:sms
-                sendMmsRequestDto.getMmsCd(), //ex) M011
-                (String)settingConfig.get("rest_svc_type") //ex) MMS:E SMS:I
-        );
+        //setting API 호출관련 파라메타 셋팅
+        CallSettingRequestDto prm = CallSettingRequestDto.builder()
+                .saId((String)settingConfig.get("rest_sa_id"))//ex) MMS:mms SMS:sms
+                .stbMac((String)settingConfig.get("rest_stb_mac"))//ex) MMS:mms SMS:sms
+                .codeId(sendMmsRequestDto.getMmsCd())//ex) M011
+                .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
+                .build();
+
+        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
+        List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+        CallSettingDto settingItem = null;
+
+        if(callSettingApi.getResult().getTotalCount() > 0) {
+            settingItem =  settingApiList.get(0);
+        }else{
+            returnService("1506");//해당 코드에 존재하는 메시지가 없음
+        }
 
         MmsRequestDto mmsDto = MmsRequestDto.builder()
                 .ctn(sendMmsRequestDto.getCtn())
@@ -60,7 +70,6 @@ public class MmsAgentDomainService {
                 .mmsMsg(settingItem.getCodeName())//메세지
                 .mmsRep(sendMmsRequestDto.getCtn())
                 .build();
-
         String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
 
         if(!returnMmsCode.equals("1000")){
@@ -70,39 +79,8 @@ public class MmsAgentDomainService {
         return SuccessResponseDto.builder().build();
     }
 
-    /**
-     * 전송할 MMS메세지 취득
-     * @param saId
-     * @param stbMac
-     * @param codeId
-     * @param svcType
-     * @return
-     */
-    private CallSettingDto getMmsCallSettingApi(String saId, String stbMac, String codeId, String svcType){
-        CallSettingDto settingItem = null;
 
-        //setting API 호출관련 파라메타 셋팅
-        CallSettingRequestDto prm = CallSettingRequestDto.builder()
-            .saId(saId)//ex) MMS:mms SMS:sms
-            .stbMac(stbMac)//ex) MMS:mms SMS:sms
-            .codeId(codeId)//ex) M011
-            .svcType(svcType)//ex) MMS:E SMS:I
-            .build();
-        //setting API 호출하여 캐시에 메세지 등록후 출력
-        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
-
-        //메세지목록 조회결과 취득
-        List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
-
-        if(callSettingApi.getResult().getTotalCount() > 0) {
-            settingItem =  settingApiList.get(0);
-        }else{
-            returnService("1506");//해당 코드에 존재하는 메시지가 없음
-        }
-        return settingItem;
-    }
-
-    private void returnService(@NotNull String errorCode) {
+    public void returnService(@NotNull String errorCode) {
         log.error("{errorCode:"+errorCode+"}");
         switch (errorCode){
             case "0001":

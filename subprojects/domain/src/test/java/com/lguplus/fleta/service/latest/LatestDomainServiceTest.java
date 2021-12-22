@@ -1,4 +1,4 @@
-package com.lguplus.fleta.repository;
+package com.lguplus.fleta.service.latest;
 
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
@@ -10,7 +10,7 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
-import com.lguplus.fleta.service.latest.LatestDomainService;
+import com.lguplus.fleta.repository.LatestRepository;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
