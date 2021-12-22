@@ -95,7 +95,7 @@ class PushAnnounceDomainFeignClientTest{
 
         PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
 
-        Assertions.assertTrue("200".equals(responseDto.getStatusCode()));
+        Assertions.assertEquals("200", responseDto.getStatusCode());
     }
 
     @Test
@@ -103,7 +103,7 @@ class PushAnnounceDomainFeignClientTest{
         FeignException ex = new FeignExceptionEx(("<" + jsonNormal).getBytes(StandardCharsets.UTF_8));
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
         PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
-        Assertions.assertTrue("5103".equals(responseDto.getStatusCode()));
+        Assertions.assertEquals("5103", responseDto.getStatusCode());
     }
 
     @Test
@@ -115,7 +115,7 @@ class PushAnnounceDomainFeignClientTest{
         given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
 
         PushResponseDto  responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
-        Assertions.assertTrue("201".equals(responseDto.getStatusCode()));
+        Assertions.assertEquals("201", responseDto.getStatusCode());
     }
 
     @Test
@@ -127,7 +127,7 @@ class PushAnnounceDomainFeignClientTest{
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
 
         PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
-        Assertions.assertTrue("5102".equals(responseDto.getStatusCode()));
+        Assertions.assertEquals("5102", responseDto.getStatusCode());
     }
 
     static class FeignExceptionEx extends FeignException {

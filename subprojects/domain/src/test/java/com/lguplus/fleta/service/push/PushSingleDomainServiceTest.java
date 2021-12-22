@@ -133,7 +133,7 @@ class PushSingleDomainServiceTest {
         );
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
 
     }
 
@@ -151,7 +151,7 @@ class PushSingleDomainServiceTest {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
         });
 
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.ServiceIdNotFoundException");
+        Assertions.assertTrue(thrown instanceof ServiceIdNotFoundException);
     }
 
     @Test
@@ -182,7 +182,7 @@ class PushSingleDomainServiceTest {
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
@@ -235,7 +235,7 @@ class PushSingleDomainServiceTest {
         );
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
@@ -257,7 +257,7 @@ class PushSingleDomainServiceTest {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         });
 
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.MaxRequestOverException");
+        Assertions.assertTrue(thrown instanceof MaxRequestOverException);
 
     }
 
@@ -280,7 +280,7 @@ class PushSingleDomainServiceTest {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         });
 
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.MaxRequestOverException");
+        Assertions.assertTrue(thrown instanceof MaxRequestOverException);
 
     }
 
@@ -301,7 +301,7 @@ class PushSingleDomainServiceTest {
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     //ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "A|B|C");
@@ -324,7 +324,7 @@ class PushSingleDomainServiceTest {
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200",responseDto.getCode());
     }
 
     @Test
@@ -347,7 +347,7 @@ class PushSingleDomainServiceTest {
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
 
 
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
@@ -360,7 +360,7 @@ class PushSingleDomainServiceTest {
                 .build();
 
         PushClientResponseDto responseDto1 = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
-        Assertions.assertTrue("200".equals(responseDto1.getCode()));
+        Assertions.assertEquals("200", responseDto1.getCode());
     }
 
     @Test
@@ -383,11 +383,11 @@ class PushSingleDomainServiceTest {
         Exception thrown = assertThrows(NotExistRegistIdException.class, () -> {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         });
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.NotExistRegistIdException");
+        Assertions.assertTrue(thrown instanceof NotExistRegistIdException);
 
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("400").build());
         thrown = assertThrows(BadRequestException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.BadRequestException");
+        Assertions.assertTrue(thrown instanceof BadRequestException);
     }
 
 

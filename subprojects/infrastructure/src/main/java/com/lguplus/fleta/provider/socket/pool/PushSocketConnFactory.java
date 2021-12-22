@@ -36,6 +36,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         } catch (PushBizException e) {
             e.printStackTrace();
             log.debug("=== factory create Socket failure: {}", socketInfo);
+            return null;
         }
 
         return socketInfo;
@@ -45,6 +46,11 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     public boolean validateObject(PooledObject<PushSocketInfo> p) {
 
         PushSocketInfo socketInfo = p.getObject();
+
+        if(socketInfo == null) {
+            return false;
+        }
+
         Socket socket = socketInfo.getPushSocket();
 
         if(socket == null || socket.getInetAddress() == null || !socket.isConnected()
