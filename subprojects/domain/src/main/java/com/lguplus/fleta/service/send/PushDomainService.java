@@ -10,6 +10,7 @@ import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -64,6 +65,7 @@ public class PushDomainService {
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
         List items = sendPushCodeRequestDto.getItems();
+
         Map<String, String> paramMap = sendPushCodeRequestDto.getReserve();
         log.debug("sendPushCodeRequestDto.getReserve() : {}", sendPushCodeRequestDto.getReserve());
         log.debug("paramMap : {}", paramMap);
@@ -78,7 +80,7 @@ public class PushDomainService {
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(appInfoDefaultMap);
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = appInfoMap.get("gcm.serviceid");
         String appId = appInfoMap.get("gcm.appid");
@@ -86,7 +88,6 @@ public class PushDomainService {
         String payloadItem = pushInfoMap.get("apns.payload.item");  //APNS전용 추가 item
 
 
-        //TODO appInfoDefaultMap이 appInfoMap에 들어갔는지 확인 후 삭제.
         if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
             serviceId = appInfoDefaultMap.get("gcm.serviceid");
@@ -142,12 +143,17 @@ public class PushDomainService {
         //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(appInfoDefaultMap);
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = appInfoMap.get("apns.serviceid");
         String appId = appInfoMap.get("apns.appid");
         String payload = pushInfoMap.get("apns.payload.body");
         String payloadItem = pushInfoMap.get("apns.payload.item");  //APNS전용 추가 item
+
+        if (serviceTarget.equals("") || serviceTarget.equals("H")) {
+            serviceId = appInfoDefaultMap.get("apns.serviceid");
+            appId = appInfoDefaultMap.get("apns.appid");
+        }
 
         //reserve에 들어갈 내용을
         String paramList = pushInfoMap.get("param.list");;
@@ -155,12 +161,6 @@ public class PushDomainService {
         int paramSize = pushParamList.length;
 
         log.debug("pushinfo.{}.param.list : {}", sendCode, pushParamList);
-
-        //TODO appInfoDefaultMap이 appInfoMap에 들어갔는지 확인 후 삭제.
-        if (serviceTarget.equals("") || serviceTarget.equals("H")) {
-            serviceId = appInfoDefaultMap.get("apns.serviceid");
-            appId = appInfoDefaultMap.get("apns.appid");
-        }
 
         log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, appId, payload, payloadItem);
 
@@ -202,7 +202,7 @@ public class PushDomainService {
         int paramSize =0;
 
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElseThrow();
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = Optional.of(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
         String appId = Optional.of(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
@@ -239,14 +239,13 @@ public class PushDomainService {
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
 
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(appInfoDefaultMap);
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = appInfoMap.get("gcm.serviceid");
         String appId = appInfoMap.get("gcm.appid");
         String payload = pushInfoMap.get("gcm.payload.body");
         String payloadItem = pushInfoMap.get("apns.payload.item");  //APNS전용 추가 item
 
-        //TODO appInfoDefaultMap이 appInfoMap에 들어갔는지 확인 후 삭제.
         if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
             serviceId = appInfoDefaultMap.get("gcm.serviceid");

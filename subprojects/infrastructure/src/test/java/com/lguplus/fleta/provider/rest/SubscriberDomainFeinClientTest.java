@@ -41,8 +41,7 @@ class SubscriberDomainFeinClientTest {
         given(subscriberFeinClient.getRegistrationIDbyCtn(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("sa_id", "500058151453");
-        paramMap.put("stb_mac", "001c.627e.039c");
+        paramMap.put("ctn", "M00020200205");
 
         //when
         RegIdDto responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
