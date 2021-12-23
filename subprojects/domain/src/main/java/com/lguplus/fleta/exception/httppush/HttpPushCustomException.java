@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Exception for error flag 1112
+ *
  *
  * @author Taekuk Song
  * @since 1.0

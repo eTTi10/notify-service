@@ -4,7 +4,7 @@ import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
-import com.lguplus.fleta.exception.httppush.ExclusionNumberException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.util.HttpPushSupport;
 import com.lguplus.fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,6 @@ import static org.mockito.BDDMockito.given;
 class HttpPushDomainServiceTest {
 
     private static final String SUCCESS_CODE = "200";
-    private static final String FAILURE_CODE = "401";
 
     @InjectMocks
     HttpPushDomainService httpPushDomainService;
@@ -39,7 +38,8 @@ class HttpPushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpPushDomainService, "exception", "M20110725000|U01080800201|U01080800202|U01080800203");
+        JunitTestUtils.setValue(httpPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        JunitTestUtils.setValue(httpPushDomainService, "exclusionNumberExceptionMsg", "발송제한번호");
     }
 
     @Test
@@ -76,11 +76,11 @@ class HttpPushDomainServiceTest {
                 .msg("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
                 .build();
 
-        Exception exception = assertThrows(ExclusionNumberException.class, () -> {
+        HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
         });
 
-        assertThat(exception).isInstanceOf(ExclusionNumberException.class);    // ExclusionNumberException 이 발생하였는지 확인
+        assertThat(exception.getMessage()).isSameAs("발송제한번호");    // ExclusionNumberException 이 발생하였는지 확인
     }
 
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +36,7 @@ import java.util.function.UnaryOperator;
 public class HttpPushSupport {
 
     private final HttpServiceProps httpServiceProps;
+
 
     /**
      * transactionId 를 가져온다.
@@ -93,9 +94,14 @@ public class HttpPushSupport {
      */
     private String getEncryptedServicePassword(String serviceId) {
         //서비스 KEY
-        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        Pair<String, String> cdMsgPair = httpServiceProps.getExceptionCodeMessage("ServiceIdNotFoundException");
+        httpPushCustomException.setCode(cdMsgPair.getLeft());
+        httpPushCustomException.setMessage(cdMsgPair.getRight());
 
-        String servicePwd = Optional.of(serviceMap.get("service_pwd")).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가
+        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
+
+        String servicePwd = Optional.ofNullable(serviceMap.get("service_pwd")).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
 
         log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, servicePwd);
 
