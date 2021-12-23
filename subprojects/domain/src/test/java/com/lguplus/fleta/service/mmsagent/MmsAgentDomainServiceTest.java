@@ -16,10 +16,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.lang.NumberFormatException;
 import java.util.ArrayList;
@@ -30,9 +30,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 
-@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @Slf4j
 class MmsAgentDomainServiceTest {
 
@@ -43,7 +44,7 @@ class MmsAgentDomainServiceTest {
     CallSettingDomainClient apiClient;
 
     @Mock
-    MmsAgentDomainClient mmsSoap;
+    private static MmsAgentDomainClient mmsSoap;
 
     private static MmsAgentConfig mmsAgentConfig;
     private static Map<String, Object> mmsConfig;//yml파일/mms
@@ -52,7 +53,7 @@ class MmsAgentDomainServiceTest {
     private static final String saId = "M14070200159";
     private static final String stbMac = "9893.cc1f.e11c";
     private static final String mmsCd = "M011";
-    private static final String ctn = "01025851531";
+    private static final String ctn = "01025851111";
     private static final String replacement = "영희|컴퓨터";
     private static final String svcType = "E";
 
@@ -88,15 +89,48 @@ class MmsAgentDomainServiceTest {
 
         mmsConfig.put("setting", settingConfig);
         mmsAgentConfig.setMms(mmsConfig);
+
         mmsAgentDomainService = new MmsAgentDomainService(apiClient, mmsAgentConfig, mmsSoap);
         log.info(mmsAgentDomainService.toString());
     }
 
-/*
 
     @Test
-    @DisplayName("MMS메세지 NotFoundMsgException case 메세지목록이 0건")
-    void sendMmsCode_callSettingApi_NotFoundMsgException() {
+    @DisplayName("callSettingApi recordset null")
+    void sendMmsCode_callSettingApi_recordset_null() {
+        List<CallSettingDto> rs = new ArrayList<>();
+        CallSettingResultDto result = CallSettingResultDto.builder()
+                .flag("0000")
+                .message("성공")
+                .totalCount(0)
+                .memberGroup("")
+                .recordset(null)
+                .build();
+        CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
+                .result(result)
+                .build();
+        given( apiClient.mmsCallSettingApi(any())).willReturn(callSettingDto);
+
+        SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
+                .saId(saId)
+                .stbMac(stbMac)
+                .mmsCd("M999")
+                .ctn(ctn)
+                .replacement(replacement)
+                .build();
+        MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
+
+        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
+        });
+        assertEquals(thrown instanceof NotFoundMsgException, true);
+
+        log.info("End callSettingApi recordset null");
+    }
+
+    @Test
+    @DisplayName("callSettingApi totalcount0")
+    void sendMmsCode_callSettingApi_totalcount0() {
         List<CallSettingDto> rs = new ArrayList<>();
         CallSettingResultDto result = CallSettingResultDto.builder()
                 .flag("0000")
@@ -113,30 +147,23 @@ class MmsAgentDomainServiceTest {
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
                 .saId(saId)
                 .stbMac(stbMac)
-                .mmsCd(mmsCd)
+                .mmsCd("M999")
                 .ctn(ctn)
                 .replacement(replacement)
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
-        String statusMessage = "1000";
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn(statusMessage);
 
         Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NotFoundMsgException, true);
-        log.info("LatestRepositoryTest.sendMmsCode_callSettingApi_NotFoundMsgException End");
+
+        log.info("End callSettingApi totalcount0");
     }
-*/
-
-
-
-
-
 
     @Test
-    @DisplayName("MMS Success case 성공케이스")
-    void sendMmsCode_callSettingApi_success() {
+    @DisplayName("MMS Success case")
+    void sendMmsCode_success() {
         CallSettingDto dto = CallSettingDto.builder()
                 .codeId("M011")
                 .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
@@ -166,17 +193,36 @@ class MmsAgentDomainServiceTest {
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
         String statusMessage = "1000";
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn(statusMessage);
-
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn(statusMessage);
 
         SuccessResponseDto responseDto = mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
-        Assertions.assertTrue("1000".equals(responseDto.getFlag()));
-        log.info("End MmsAgentDomainServiceTest.sendMmsCode_callSettingApi_success");
+        Assertions.assertTrue("0000".equals(responseDto.getFlag()));
+        log.info("End MMS Success case");
     }
 
     @Test
-    @DisplayName("returnService Exception")
-    void returnService() {
+    @DisplayName("returnMmsCodeError")
+    void returnMmsCodeError() {
+        CallSettingDto dto = CallSettingDto.builder()
+                .codeId("M011")
+                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .build();
+        List<CallSettingDto> rs = new ArrayList<>();
+        rs.add(dto);
+        CallSettingResultDto result = CallSettingResultDto.builder()
+                .flag("0000")
+                .message("성공")
+                .totalCount(rs.size())
+                .memberGroup("")
+                .recordset(rs)
+                .build();
+        CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
+                .result(result)
+                .build();
+        given( apiClient.mmsCallSettingApi(any())).willReturn(callSettingDto);
+
+
+
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
                 .saId(saId)
                 .stbMac(stbMac)
@@ -188,139 +234,139 @@ class MmsAgentDomainServiceTest {
 
 
         Exception thrown;
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("0001");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("0001");
         thrown = assertThrows(NoResultException.class, () -> {
-            mmsAgentDomainService.returnService("0001");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NoResultException, true);
-        log.info("returnService NoResultException 0001 End");
+        log.info("returnMmsCodeError NoResultException 0001 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1500");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1500");
         thrown = assertThrows(SystemErrorException.class, () -> {
-            mmsAgentDomainService.returnService("1500");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof SystemErrorException, true);
-        log.info("returnService SystemErrorException 1500 End");
+        log.info("returnMmsCodeError SystemErrorException 1500 End");
 
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1501");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1501");
         thrown = assertThrows(MsgTypeErrorException.class, () -> {
-            mmsAgentDomainService.returnService("1501");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof MsgTypeErrorException, true);
-        log.info("returnService MsgTypeErrorException 1501 End");
+        log.info("returnMmsCodeError MsgTypeErrorException 1501 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1502");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1502");
         thrown = assertThrows(PhoneNumberErrorException.class, () -> {
-            mmsAgentDomainService.returnService("1502");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof PhoneNumberErrorException, true);
-        log.info("returnService PhoneNumberErrorException 1502 End");
+        log.info("returnMmsCodeError PhoneNumberErrorException 1502 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1502");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1503");
         thrown = assertThrows(SystemBusyException.class, () -> {
-            mmsAgentDomainService.returnService("1503");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof SystemBusyException, true);
-        log.info("returnService SystemBusyException 1503 End");
+        log.info("returnMmsCodeError SystemBusyException 1503 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1502");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1504");
         thrown = assertThrows(NotSendTimeException.class, () -> {
-            mmsAgentDomainService.returnService("1504");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NotSendTimeException, true);
-        log.info("returnService NotSendTimeException 1504 End");
+        log.info("returnMmsCodeError NotSendTimeException 1504 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1502");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1505");
         thrown = assertThrows(BlackListException.class, () -> {
-            mmsAgentDomainService.returnService("1505");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof BlackListException, true);
-        log.info("returnService BlackListException 1505 End");
+        log.info("returnMmsCodeError BlackListException 1505 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("1502");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("1506");
         thrown = assertThrows(NotFoundMsgException.class, () -> {
-            mmsAgentDomainService.returnService("1506");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NotFoundMsgException, true);
-        log.info("returnService NotFoundMsgException 1506 End");
+        log.info("returnMmsCodeError NotFoundMsgException 1506 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("5000");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("5000");
         thrown = assertThrows(ParameterMissingException.class, () -> {
-            mmsAgentDomainService.returnService("5000");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof ParameterMissingException, true);
-        log.info("returnService ParameterMissingException 5000 End");
+        log.info("returnMmsCodeError ParameterMissingException 5000 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("5001");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("5001");
         thrown = assertThrows(NumberFormatException.class, () -> {
-            mmsAgentDomainService.returnService("5001");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NumberFormatException, true);
-        log.info("returnService NumberFormatException 5001 End");
+        log.info("returnMmsCodeError NumberFormatException 5001 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("5101");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("5101");
         thrown = assertThrows(MessageSocketException.class, () -> {
-            mmsAgentDomainService.returnService("5101");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof MessageSocketException, true);
-        log.info("returnService MessageSocketException 5101 End");
+        log.info("returnMmsCodeError MessageSocketException 5101 End");
 
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("5200");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("5200");
         thrown = assertThrows(ServerSettingInfoException.class, () -> {
-            mmsAgentDomainService.returnService("5200");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof ServerSettingInfoException, true);
-        log.info("returnService ServerSettingInfoException 5200 End");
+        log.info("returnMmsCodeError ServerSettingInfoException 5200 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("5400");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("5400");
         thrown = assertThrows(NoHttpsException.class, () -> {
-            mmsAgentDomainService.returnService("5400");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof NoHttpsException, true);
-        log.info("returnService NoHttpsException 5400 End");
+        log.info("returnMmsCodeError NoHttpsException 5400 End");
 
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("8000");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("8000");
         thrown = assertThrows(DuplicateKeyException.class, () -> {
-            mmsAgentDomainService.returnService("8000");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof DuplicateKeyException, true);
-        log.info("returnService DuplicateKeyException 8000 End");
+        log.info("returnMmsCodeError DuplicateKeyException 8000 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("8999");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("8999");
         thrown = assertThrows(DatabaseException.class, () -> {
-            mmsAgentDomainService.returnService("8999");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof DatabaseException, true);
-        log.info("returnService DatabaseException 8999 End");
+        log.info("returnMmsCodeError DatabaseException 8999 End");
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("9998");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("9998");
         thrown = assertThrows(MmsServiceException.class, () -> {
-            mmsAgentDomainService.returnService("9998");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof MmsServiceException, true);
         log.info("returnService MmsServiceException 9998 End");
 
 
-        given( mmsSoap.sendMMS(mmsConfig, mmsRequestDto)).willReturn("9999");
+        given( mmsSoap.sendMMS(anyMap(), any())).willReturn("9999");
         thrown = assertThrows(RuntimeException.class, () -> {
-            mmsAgentDomainService.returnService("9999");
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
         assertEquals(thrown instanceof RuntimeException, true);
         log.info("returnService RuntimeException 9999 End");

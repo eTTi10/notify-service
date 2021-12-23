@@ -70,12 +70,6 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
 
         submitReq.setContent(new BasicContent(con1));
 
-        try {
-            if("Y".equals((String)mms.get("debug_mode"))) {
-                MM7Message.save(submitReq, System.out, new MM7Context());
-            }
-        } catch (IOException e) {}
-
         MMSC mmsc = new BasicMMSC(url, mms);
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
