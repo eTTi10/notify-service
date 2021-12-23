@@ -26,7 +26,7 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf channelBuffer, List<Object> out) throws Exception {
 
-        /**
+        /*
          * Message Header Structure (64Byte)
          * ------------------------------------------------------------------------------
          *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
@@ -108,11 +108,7 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
         return (short) ((src[0] & 0xff) << 8 | src[1] & 0xff);
     }
 
-    private int byteToInt(byte[] src, int... b) {
-        int offset = 0;
-        if(b.length > 0) {
-            offset = b[0];
-        }
+    private int byteToInt(byte[] src, int offset) {
         return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
     }
 

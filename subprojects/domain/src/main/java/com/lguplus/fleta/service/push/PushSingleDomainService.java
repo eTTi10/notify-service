@@ -147,7 +147,7 @@ public class PushSingleDomainService {
         }
 
         dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
+            String[] item = e.split("!\\^");
             if (item.length == 2) {
                 paramMap.put(item[0], item[1]);
             }
@@ -285,7 +285,7 @@ public class PushSingleDomainService {
                 processCounter.get().setTransactionCount(processCounter.get().getTransactionCount() + changeVal);
             }
             else {
-                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
+                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount((long) changeVal).build());
             }
         }
     }

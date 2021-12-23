@@ -62,7 +62,7 @@ public class PushAnnounceDomainService {
         }
 
         dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
+            String[] item = e.split("!\\^");
             if(item.length >= 2){
                 paramMap.put(item[0], item[1]);
             }

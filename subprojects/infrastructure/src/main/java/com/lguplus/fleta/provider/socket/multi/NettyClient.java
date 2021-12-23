@@ -44,10 +44,6 @@ public class NettyClient {
 
 	}
 
-	public Channel getChannel() {
-		return channel;
-	}
-
 	public void initailize(PushMultiSocketClientImpl socketClient, String host, int port) {
 		this.host = host;
 		this.port = port;
@@ -63,7 +59,7 @@ public class NettyClient {
 				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
 				.handler(new ChannelInitializer<SocketChannel>() {
 					@Override
-					public void initChannel(SocketChannel ch) throws Exception {
+					public void initChannel(SocketChannel ch) {
 						ChannelPipeline p = ch.pipeline();
 						p.addLast("clientDecoder", new NettyDecoder());
 						p.addLast("clientEncoder", new NettyEncoder());
@@ -111,7 +107,7 @@ public class NettyClient {
 				return false;
 			}
 		} catch (Exception e) {
-			log.error("[NettyClient] got a exception : {}" + e);
+			log.error("[NettyClient] got a exception : {}", e);
 			return false;
 		}
 
@@ -157,12 +153,12 @@ public class NettyClient {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			response = getAttachment(ATTACHED_DATA_ID);
+			response = getAttachment();
 			readWaited++;
 		}
 
 		// Remove the current attachment
-		setAttachment(ATTACHED_DATA_ID, null);
+		setAttachment(null);
 
 		if(readWaited >= CONN_TIMEOUT) {
 			log.error("[NettyClient][Sync] Read from server failed after " + CONN_TIMEOUT + "ms");
@@ -172,13 +168,13 @@ public class NettyClient {
 		return response;
 	}
 
-	private void setAttachment(String key, Object value) {
-		AttributeKey<Object> attrKey = AttributeKey.valueOf(key);
+	private void setAttachment(Object value) {
+		AttributeKey<Object> attrKey = AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID);
 		this.channel.attr(attrKey).set(value);
 	}
 
-	private Object getAttachment(String key) {
-		AttributeKey<Object> attrKey = AttributeKey.valueOf(key);
+	private Object getAttachment() {
+		AttributeKey<Object> attrKey = AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID);
 		return this.channel.attr(attrKey).get();
 	}
 

@@ -61,7 +61,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
     private String channelID;
-    private ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
 
 
     @PostConstruct
@@ -100,7 +100,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
         else {
             List<String> failUserList = new ArrayList<>();
-            listFailUser.stream().forEach(f -> failUserList.add(f.getRegId()));
+            listFailUser.forEach(f -> failUserList.add(f.getRegId()));
             return PushMultiResponseDto.builder().statusCode("1130")
                     .statusMsg("메시지 전송 실패")
                     .failUsers(failUserList)
@@ -126,12 +126,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
 
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
-        if(!processStateRequest()) {
+        if(checkServerStatus()) {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
             nettyClient.disconnect();
             nettyClient.connect();	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
 
-            if(channelConnectionRequest() && !processStateRequest()) {
+            if(channelConnectionRequest() && checkServerStatus()) {
                 throw new ServiceUnavailableException();
             }
         }
@@ -188,7 +188,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             // Push 메시지 전송 성공
             if ("200".equals(responseMsg.getStatusCode())) {
                 souccesCnt++;
-                log.debug("[MultiPushRequest][Push] - {} : {}", souccesCnt, responseMsg.toString());
+                log.debug("[MultiPushRequest][Push] - {} : {}", souccesCnt, responseMsg);
                 continue;
             }
 
@@ -290,9 +290,9 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     /**
      * 프로세스 상태 확인 메시지 전송
      */
-    private boolean processStateRequest() {
+    private boolean checkServerStatus() {
         if (this.channelID == null) {
-            return false;
+            return true;
         }
 
         PushMessageInfoDto message = PushMessageInfoDto.builder()
@@ -304,11 +304,11 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
         if (response != null && MsgEntityCommon.SUCCESS.equals(response.getResult())) {
             log.debug("[MessageService] ProcessStateRequest Success. Channel ID : " + channelID);
-            return true;
+            return false;
         }
 
         log.info("[MessageService] ProcessStateRequest Fail. Channel ID : " + channelID);
-        return false;
+        return true;
     }
 
     /**

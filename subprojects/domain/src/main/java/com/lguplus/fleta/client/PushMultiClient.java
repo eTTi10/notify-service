@@ -4,8 +4,6 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 
-import java.util.Map;
-
 /**
  * Push Multi Socket client
  *

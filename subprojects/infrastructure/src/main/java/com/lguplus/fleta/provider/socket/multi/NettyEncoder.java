@@ -4,7 +4,6 @@ import com.google.common.primitives.Ints;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,7 @@ public class NettyEncoder extends MessageToMessageEncoder<PushMessageInfoDto> {
     @Override
     protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, List<Object> out) throws Exception {
 
-        /**
+        /*
          * Message Header Structure (64Byte)
          * ------------------------------------------------------------------------------
          *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)

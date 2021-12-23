@@ -38,7 +38,7 @@ public class PushMultiDomainService {
     private static final String REGIST_ID_NM = "[@RegistId]";
     private static final String TRANSACT_ID_NM = "[@RegistId]";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Multi 푸시등록
@@ -60,9 +60,7 @@ public class PushMultiDomainService {
 
         PushMultiResponseDto responseDto = pushMultiClient.requestPushMulti(multiSendDto);
 
-        PushClientResponseMultiDto clientResponseMultiDto = pushMapper.toClientResponseDto(responseDto);
-
-        return clientResponseMultiDto;
+        return pushMapper.toClientResponseDto(responseDto);
     }
 
     private String getMessage(PushRequestMultiDto dto) {
@@ -84,7 +82,7 @@ public class PushMultiDomainService {
         }
 
         dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
+            String[] item = e.split("!\\^");
             if (item.length == 2) {
                 paramMap.put(item[0], item[1]);
             }
