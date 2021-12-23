@@ -1,0 +1,56 @@
+package com.lguplus.fleta.provider.rest;
+
+import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+
+@ExtendWith(SpringExtension.class)
+class PersonalizationDomainFeinClientTest {
+
+    private static final String REG_ID = "M00020200205";
+
+    @Mock
+    PersonalizationFeinClient personalizationFeinClient;
+
+    @InjectMocks
+    PersonalizationDomainFeinClient personalizationDomainFeinClient;
+
+    @Test
+    @DisplayName("정상적으로 regId를 조회하는지 확인")
+    void getRegistrationID() {
+
+        //given
+        RegIdDto regIdDto = RegIdDto.builder()
+                .regId(REG_ID)
+                .build();
+
+        InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
+        given(personalizationFeinClient.getRegistrationID(any())).willReturn(regIdDtoInnerResponseDto);
+
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("sa_id", "500058151453");
+        paramMap.put("stb_mac", "001c.627e.039c");
+
+        //when
+        RegIdDto responseDto = personalizationDomainFeinClient.getRegistrationID(paramMap);
+
+        //then
+        assertThat(responseDto.getRegId()).isEqualTo(REG_ID);
+
+    }
+}

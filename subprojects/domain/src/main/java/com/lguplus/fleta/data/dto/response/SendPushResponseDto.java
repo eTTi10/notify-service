@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -25,5 +26,5 @@ public class SendPushResponseDto implements CommonResponseDto{
     private String message;
 
     @ApiModelProperty(position = 3, value = "서비스별 응답")
-    private ArrayList<PushServiceResultDto> service;
+    private List<PushServiceResultDto> service;
 }

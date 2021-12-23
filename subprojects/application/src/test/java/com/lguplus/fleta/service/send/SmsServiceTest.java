@@ -21,7 +21,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(SpringExtension.class)
 public class SmsServiceTest {
 
-    private static final String SUCCESS_CDE = "0000";
+    private static final String SUCCESS_CODE = "0000";
 
     @InjectMocks
     SmsService smsService;
@@ -58,7 +58,7 @@ public class SmsServiceTest {
         SuccessResponseDto responseDto = smsService.sendSmsCode(request);
 
         // then
-        assertThat(responseDto.getFlag()).isEqualTo(SUCCESS_CDE);
+        assertThat(responseDto.getFlag()).isEqualTo(SUCCESS_CODE);
     }
 
     @Test
