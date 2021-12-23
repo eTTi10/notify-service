@@ -1,5 +1,6 @@
 package com.lguplus.fleta.config;
 
+import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.provider.rest.HttpPushErrorDecoder;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -27,8 +28,8 @@ public class HttpPushFeignConfig {
     private String authorizationAnnounce;
 
     @Bean
-    public ErrorDecoder errorDecoder() {
-        return new HttpPushErrorDecoder();
+    public ErrorDecoder errorDecoder(HttpServiceProps httpServiceProps) {
+        return new HttpPushErrorDecoder(httpServiceProps);
     }
 
     @Bean

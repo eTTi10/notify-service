@@ -33,7 +33,7 @@ public class HttpPushResponseDto {
     /** 응답메시지 */
     @Builder.Default
     @ApiModelProperty(position = 2, value = "응답메시지")
-    private String message = "Success";
+    private String message = "성공";
 
     /** 메시지전송 실패 사용자 */
     @JsonProperty("fail_users")
