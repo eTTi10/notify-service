@@ -5,6 +5,7 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.data.vo.PushRequestBodyAnnounceVo;
 import com.lguplus.fleta.data.vo.PushRequestBodyMultiVo;
@@ -14,8 +15,6 @@ import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.SwaggerDefinition;
-import io.swagger.annotations.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(tags = "Push", description = "Push Message 전송 서비스")
 @Slf4j
@@ -94,12 +95,25 @@ public class PushServiceController {
      */
     @PostMapping(value = "/notify/push/multi")
     @ApiOperation(value="Multi Push Message 등록", notes="Multi Push Message를 등록한다.")
-    public InnerResponseDto<PushClientResponseDto> multiPushRequest(
+    public InnerResponseDto<PushClientResponseMultiDto> multiPushRequest(
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
+
+        //Reject User
+        List<String> validUsers = new ArrayList<>();
+        for(String regId : pushRequestBodyMultiVo.getUsers()) {
+            if (("|" + this.pushRejectRegList + "|").contains("|" + regId + "|")) {
+                log.debug("multiPushRequest reject User: " + regId);
+                continue;
+            }
+            validUsers.add(regId);
+        }
+        pushRequestBodyMultiVo.setUsers(validUsers);
 
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
 
-        return InnerResponseDto.of(pushMultiService.requestMultiPush(dto));
+        PushClientResponseMultiDto responseMultiDto = pushMultiService.requestMultiPush(dto);
+
+        return InnerResponseDto.of(responseMultiDto);
     }
 
 }

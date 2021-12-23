@@ -41,7 +41,7 @@ public class PushSocketInfo {
     private long lastTransactionTime = Instant.now().getEpochSecond();
     private boolean isOpened;
     private boolean isFailure;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destIp) throws PushBizException {
 
