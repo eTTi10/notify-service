@@ -1,6 +1,8 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.exception.httppush.*;
+import com.lguplus.fleta.config.HttpPushConfig;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.properties.HttpServiceProps;
 import feign.Request;
 import feign.Response;
 import feign.Util;
@@ -9,32 +11,54 @@ import fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class HttpPushErrorDecoderTest {
 
-    final ErrorDecoder errorDecoder = new HttpPushErrorDecoder();
+    ErrorDecoder errorDecoder;
+    final HttpPushConfig.HttpPushExceptionCode httpPushExceptionCode = new HttpPushConfig.HttpPushExceptionCode();
+    final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage = new HttpPushConfig.HttpPushExceptionMessage();
     final Map<String, Collection<String>> headers = new LinkedHashMap<>();
     final Request request = Request.create(Request.HttpMethod.POST, "/test", Collections.emptyMap(), null, Util.UTF_8, null);
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(errorDecoder, "acceptedExceptionMsg", "The request Accepted");
-        JunitTestUtils.setValue(errorDecoder, "badRequestExceptionMsg", "Push GW BadRequest");
-        JunitTestUtils.setValue(errorDecoder, "unAuthorizedExceptionMsg", "Push GW UnAuthorized");
-        JunitTestUtils.setValue(errorDecoder, "forbiddenExceptionMsg", "Push GW Forbidden");
-        JunitTestUtils.setValue(errorDecoder, "notFoundExceptionMsg", "Push GW Not Found");
-        JunitTestUtils.setValue(errorDecoder, "notExistRegistIdExceptionMsg", "Not Exist RegistID");
-        JunitTestUtils.setValue(errorDecoder, "preConditionFailedExceptionMsg", "Push GW Precondition Failed");
-        JunitTestUtils.setValue(errorDecoder, "internalErrorExceptionMsg", "Push GW Internal Error");
-        JunitTestUtils.setValue(errorDecoder, "exceptionOccursExceptionMsg", "Exception Occurs");
-        JunitTestUtils.setValue(errorDecoder, "serviceUnavailableExceptionMsg", "Push GW Service Unavailable");
+        Map<String, String> codeMap = new HashMap<>();
+        codeMap.put("ExclusionNumberException", "9998");
+        codeMap.put("ServiceIdNotFoundException", "1115");
+        codeMap.put("AcceptedException", "1112");
+        codeMap.put("BadRequestException", "1104");
+        codeMap.put("UnAuthorizedException", "1105");
+        codeMap.put("ForbiddenException", "1106");
+        codeMap.put("NotFoundException", "1107");
+        codeMap.put("NotExistRegistIdException", "1113");
+        codeMap.put("PreConditionFailedException", "1108");
+        codeMap.put("InternalErrorException", "1109");
+        codeMap.put("ExceptionOccursException", "1114");
+        codeMap.put("ServiceUnavailableException", "1110");
+
+        JunitTestUtils.setValue(httpPushExceptionCode, "httppush", codeMap);
+
+        Map<String, String> messageMap = new HashMap<>();
+        messageMap.put("9998", "발송제한번호");
+        messageMap.put("1115", "서비스ID 확인 불가");
+        messageMap.put("1112", "The request Accepted");
+        messageMap.put("1104", "Push GW BadRequest");
+        messageMap.put("1105", "Push GW UnAuthorized");
+        messageMap.put("1106", "Push GW Forbidden");
+        messageMap.put("1107", "Push GW Not Found");
+        messageMap.put("1113", "Not Exist RegistID");
+        messageMap.put("1108", "Push GW Precondition Failed");
+        messageMap.put("1109", "Push GW Internal Error");
+        messageMap.put("1114", "Exception Occurs");
+        messageMap.put("1110", "Push GW Service Unavailable");
+
+        JunitTestUtils.setValue(httpPushExceptionMessage, "message", messageMap);
+
+        errorDecoder = new HttpPushErrorDecoder(new HttpServiceProps(httpPushExceptionCode, httpPushExceptionMessage));
     }
 
     @Test

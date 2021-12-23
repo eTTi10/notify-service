@@ -31,7 +31,7 @@ public class HttpPushService {
             return httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
         } catch (HttpPushCustomException ex) {
-            log.debug("code :::::::::::::::::::: {}\tmessage ::::::::::::::::::::::: {}", ex.getCode(), ex.getMessage());
+            log.debug("code ::::::::::::::: {}\tmessage :::::::::::::: {}", ex.getCode(), ex.getMessage());
 
             throw ex;
         }*/

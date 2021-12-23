@@ -4,6 +4,7 @@ import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.exception.httppush.ExclusionNumberException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.util.HttpPushSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,13 @@ public class HttpPushDomainService {
     private String maxMultiCount;
 
     @Value("${multi.push.reject.regList}")
-    private String exception;
+    private String rejectReg;
+
+    @Value("${error.flag.com.lguplus.fleta.exception.httppush.ExclusionNumberException}")
+    private String exclusionNumberExceptionCode;
+
+    @Value("${error.message.9998}")
+    private String exclusionNumberExceptionMsg;
 
     @Value("${error.flag.com.lguplus.fleta.exception.push.SendingFailedException}")
     private String sendingFailedExceptionCode;
@@ -54,12 +61,16 @@ public class HttpPushDomainService {
 //        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
 
         // 발송 제외 가번 확인
-        log.debug("exception :::::::::::::::::::: {}", exception);
-        String[] exceptionList = exception.split("\\|");
+        log.debug("rejectReg :::::::::::::::::::: {}", rejectReg);
+        String[] rejectRegList = rejectReg.split("\\|");
         String regId = httpPushSingleRequestDto.getUsers().get(0);
 
-        if (Arrays.asList(exceptionList).contains(regId.strip())) {
-            throw new ExclusionNumberException();   // 9998 발송제한번호
+        if (Arrays.asList(rejectRegList).contains(regId.strip())) {
+            HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+            httpPushCustomException.setCode(exclusionNumberExceptionCode);
+            httpPushCustomException.setMessage(exclusionNumberExceptionMsg);
+
+            throw httpPushCustomException;   // 9998 발송제한번호
         }
 
         String appId = httpPushSingleRequestDto.getAppId();
