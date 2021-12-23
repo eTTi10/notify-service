@@ -2,22 +2,14 @@ package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
-import com.lguplus.fleta.provider.socket.multi.NettyDecoderTobe;
-import com.lguplus.fleta.provider.socket.multi.NettyEncoderTobe;
-import com.lguplus.fleta.provider.socket.multi.NettyHandlerTobe;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.group.DefaultChannelGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
