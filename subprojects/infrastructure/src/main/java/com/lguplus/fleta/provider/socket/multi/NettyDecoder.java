@@ -2,6 +2,7 @@ package com.lguplus.fleta.provider.socket.multi;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -91,7 +92,7 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
             }
         }
 
-        MessageInfo msg = MessageInfo.builder()
+        PushMessageInfoDto msg = PushMessageInfoDto.builder()
                     .messageID(messageID)
                     .transactionID(transactionID)
                     .channelID(channelId)

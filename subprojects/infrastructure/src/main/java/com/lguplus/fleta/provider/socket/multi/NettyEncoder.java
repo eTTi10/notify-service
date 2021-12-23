@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket.multi;
 
 import com.google.common.primitives.Ints;
+import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -17,11 +18,11 @@ import java.util.List;
  */
 @Slf4j
 @NoArgsConstructor
-public class NettyEncoder extends MessageToMessageEncoder<MessageInfo> {
+public class NettyEncoder extends MessageToMessageEncoder<PushMessageInfoDto> {
     // OneToOneEncoder -> MessageToMessageEncoder
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, MessageInfo message, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, List<Object> out) throws Exception {
 
         /**
          * Message Header Structure (64Byte)

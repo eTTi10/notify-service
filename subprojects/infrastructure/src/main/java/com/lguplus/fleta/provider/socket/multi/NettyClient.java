@@ -1,5 +1,7 @@
 package com.lguplus.fleta.provider.socket.multi;
 
+import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
+import com.lguplus.fleta.provider.socket.PushMultiSocketClientImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -46,7 +48,7 @@ public class NettyClient {
 		return channel;
 	}
 
-	public void initailize(String host, int port) {
+	public void initailize(PushMultiSocketClientImpl socketClient, String host, int port) {
 		this.host = host;
 		this.port = port;
 
@@ -65,7 +67,7 @@ public class NettyClient {
 						ChannelPipeline p = ch.pipeline();
 						p.addLast("clientDecoder", new NettyDecoder());
 						p.addLast("clientEncoder", new NettyEncoder());
-						p.addLast("handler", new NettyHandler());
+						p.addLast("handler", new NettyHandler(socketClient));
 					}
 				});
 
@@ -95,7 +97,7 @@ public class NettyClient {
 		return !(channel == null || !channel.isActive() || !channel.isOpen());
 	}
 
-	public boolean write(Object message) {
+	public boolean write(PushMessageInfoDto message) {
 		try {
 			if (null != message && this.channel.isActive()) {
 				ChannelFuture writeFuture = this.channel.write(message);
@@ -116,7 +118,7 @@ public class NettyClient {
 		return true;
 	}
 
-	public Object writeSync(Object message) {
+	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
 
 		if (null == message) {

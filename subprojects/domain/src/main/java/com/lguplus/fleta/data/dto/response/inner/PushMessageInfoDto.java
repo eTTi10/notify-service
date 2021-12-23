@@ -1,4 +1,4 @@
-package com.lguplus.fleta.provider.socket.multi;
+package com.lguplus.fleta.data.dto.response.inner;
 
 import lombok.*;
 
@@ -6,7 +6,8 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class MessageInfo {
+@ToString
+public class PushMessageInfoDto {
     private int messageID;
     private String transactionID; //12 char
     private String channelID;

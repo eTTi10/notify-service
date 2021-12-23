@@ -1,5 +1,7 @@
 package com.lguplus.fleta.provider.socket.multi;
 
+import com.lguplus.fleta.client.PushMultiClient;
+import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -12,12 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 public class NettyHandler extends ChannelInboundHandlerAdapter {
 
+    private PushMultiClient pushMultiClient;
+
+    public NettyHandler(PushMultiClient pushMultiClient) {
+        this.pushMultiClient = pushMultiClient;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-        MessageInfo message;
-        if (msg instanceof MessageInfo) {
-            message = (MessageInfo) msg;
+        PushMessageInfoDto message;
+        if (msg instanceof PushMessageInfoDto) {
+            message = (PushMessageInfoDto) msg;
         } else {
             log.error("[NettyHandler] message is not valid");
             return;
@@ -29,8 +37,7 @@ public class NettyHandler extends ChannelInboundHandlerAdapter {
         }
         else if (message.getMessageID() == MsgEntityCommon.COMMAND_REQUEST_ACK) {
             // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            //TOD
-            // messageService.putMessageInfo(message.getTransactionID(), message)
+            pushMultiClient.receiveAsyncMessage(message);
         }
 
         log.debug("[NettyHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageID() + ", " +
