@@ -1,22 +1,22 @@
 package com.lguplus.fleta.service.push;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
-import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.push.*;
-import com.lguplus.fleta.properties.HttpServiceProps;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
+import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
+import com.lguplus.fleta.data.mapper.PushMapper;
+import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Component
@@ -24,31 +24,73 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PushMultiDomainService {
 
     private final PushConfig pushConfig;
+    private final PushMultiClient pushMultiClient;
+    private final PushMapper pushMapper;
 
-    private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
-    private static final int TRANSACTION_MAX_SEQ_NO = 9999;
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    private String oldLgPushAppId;
+
+    @Value("${push-comm.push.old.lgupush.notiType}")
+    private String oldLgPushNotiType;
+
+    private static final String PUSH_COMMAND = "PUSH_NOTI";
+    private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
+    private static final String REGIST_ID_NM = "[@RegistId]";
+    private static final String TRANSACT_ID_NM = "[@RegistId]";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Multi 푸시등록
      *
-     * @param pushRequestMultiDto Multi 푸시등록을 위한 DTO
+     * @param dto Multi 푸시등록을 위한 DTO
      * @return Multi 푸시등록 결과
      */
-    public PushClientResponseDto requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
-        log.debug("requestMultiPush ::::::::::::::: {}", pushRequestMultiDto);
+    public PushClientResponseMultiDto requestMultiPush(PushRequestMultiDto dto) {
+        log.debug("requestMultiPush ::::::::::::::: {}", dto);
 
+        String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
+        if (servicePwd == null) {
+            log.error("ServiceId Not Found:" + dto.getServiceId());
+            throw new ServiceIdNotFoundException();
+        }
 
-        return PushClientResponseDto.builder().code("").message("")
-                .build();
+        //Make Message
+        PushRequestMultiSendDto multiSendDto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(dto)).users(dto.getUsers()).build();
+
+        PushMultiResponseDto responseDto = pushMultiClient.requestPushMulti(multiSendDto);
+
+        return pushMapper.toClientResponseDto(responseDto);
     }
 
-    private String getTransactionId() {
-        if(tranactionMsgId.get() >= TRANSACTION_MAX_SEQ_NO) {
-            tranactionMsgId.set(0);
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.get());
+    private String getMessage(PushRequestMultiDto dto) {
+
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("msg_id", PUSH_COMMAND);
+        paramMap.put("push_id", TRANSACT_ID_NM);
+        paramMap.put("service_id", dto.getServiceId());
+        paramMap.put("app_id", dto.getAppId());
+        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("service_passwd", pushConfig.getServicePassword(dto.getServiceId()));
+
+        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+            paramMap.put("push_app_id", oldLgPushAppId);
+            paramMap.put("noti_type", oldLgPushNotiType);
+            paramMap.put("regist_id", REGIST_ID_NM);
+        } else {
+            paramMap.put("service_key", REGIST_ID_NM);
         }
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.incrementAndGet());
+
+        dto.getItems().forEach(e -> {
+            String[] item = e.split("!\\^");
+            if (item.length == 2) {
+                paramMap.put(item[0], item[1]);
+            }
+        });
+
+        ObjectNode oNode = objectMapper.createObjectNode();
+        oNode.set("request", objectMapper.valueToTree(paramMap));
+        return oNode.toString();
     }
 
 }

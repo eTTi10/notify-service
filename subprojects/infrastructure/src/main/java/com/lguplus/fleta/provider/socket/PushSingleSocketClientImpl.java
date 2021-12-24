@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 @ToString
 @Component
-public class PushSingleSocketClient implements PushSingleClient {
+public class PushSingleSocketClientImpl implements PushSingleClient {
 
     //Pool Config
     @Value("${push-comm.push.socket.max}")
