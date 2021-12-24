@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
-import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +34,7 @@ class PushMultiServiceTest {
     @Test
     void requestMultiPush() {
 
-        PushClientResponseDto clientResponseDto = PushClientResponseDto.builder().build();
+        PushClientResponseMultiDto clientResponseDto = PushClientResponseMultiDto.builder().build();
         given(pushMultiDomainService.requestMultiPush(any())).willReturn(clientResponseDto);
 
         List<String> items = new ArrayList<>();
@@ -52,7 +52,7 @@ class PushMultiServiceTest {
                 .items(items)
                 .build();
 
-        PushClientResponseDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);
+        PushClientResponseMultiDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);
 
         Assertions.assertEquals("200", responseDto.getCode());
     }

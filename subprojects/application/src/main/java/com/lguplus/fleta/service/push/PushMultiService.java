@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
-import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ public class PushMultiService {
      * @param pushRequestMultiDto Multi 푸시등록을 위한 DTO
      * @return 푸시등록 결과
      */
-    public PushClientResponseDto requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
+    public PushClientResponseMultiDto requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
         return pushMultiDomainService.requestMultiPush(pushRequestMultiDto);
     }
 
