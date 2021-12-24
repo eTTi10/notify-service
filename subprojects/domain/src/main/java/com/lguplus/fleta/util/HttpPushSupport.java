@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,6 +34,7 @@ import java.util.function.UnaryOperator;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Getter
 @Component
 public class HttpPushSupport {
 

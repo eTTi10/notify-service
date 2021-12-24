@@ -52,4 +52,5 @@ public class HttpPushConfig {
             this.message = message;
         }
     }
+
 }
