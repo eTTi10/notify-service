@@ -52,6 +52,7 @@ error:
               InternalErrorException: "1109"
               ExceptionOccursException: "1114"
               ServiceUnavailableException: "1110"
+              SendingFailedException: "1130"
               InvalidSendPushCodeException: "9990"
             push:
               SocketNotFoundException: "1101"

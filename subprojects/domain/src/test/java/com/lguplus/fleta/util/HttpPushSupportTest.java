@@ -50,11 +50,6 @@ class HttpPushSupportTest {
 
     @Test
     void testServiceIdNotFoundExceptionOne() {
-        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-        httpPushCustomException.setCode("1115");
-        httpPushCustomException.setMessage("서비스ID 확인 불가");
-
-//        given(httpServiceProps.findMapByServiceId(anyString())).willThrow(httpPushCustomException);
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
@@ -66,10 +61,6 @@ class HttpPushSupportTest {
 
     @Test
     void testServiceIdNotFoundExceptionTwo() {
-        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-        httpPushCustomException.setCode("1115");
-        httpPushCustomException.setMessage("서비스ID 확인 불가");
-
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
 
         Map<String, String> serviceMap = new HashMap<>();
