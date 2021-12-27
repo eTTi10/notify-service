@@ -36,22 +36,6 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
          *      Channel ID(14)     | Reserved 1(2) |  Reserved 2(12)  |  Data Length(4)
          * ------------------------------------------------------------------------------
          */
-/*
-        PushMessageInfoDto msg = PushMessageInfoDto.builder()
-                .messageID(0)
-                .transactionID("test")
-                .channelID("test")
-                .result("test")
-                .data("test")
-                .statusCode("test")
-                .build();
-        log.debug(":: NettyDecoder : {}", msg);
-        out.add(msg);
-
-        in.release();
-*/
-
-        log.debug(":: NettyDecoder : decode start ~~~");
 
         Channel channel = ctx.channel();
 
@@ -62,7 +46,7 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
 
         in.markReaderIndex();
         if (in.readableBytes() < MsgEntityCommon.PUSH_MSG_HEADER_LEN) {
-            log.debug(":: NettyDecoder : less than PUSH_MSG_HEADER_LEN");
+            log.trace(":: NettyDecoder : less than PUSH_MSG_HEADER_LEN");
             return;
         }
 
@@ -94,14 +78,13 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
         String channelId = new String(byteHeader, 32, 14, MsgEntityCommon.PUSH_ENCODING);
 
         if (messageID == MsgEntityCommon.PROCESS_STATE_REQUEST_ACK) {
-
             result = byteToShort(byteData) == 1 ? MsgEntityCommon.SUCCESS : MsgEntityCommon.FAIL;
-            log.debug(":: NettyDecoder : PROCESS_STATE_REQUEST_ACK {} {}", messageID, result);
+            //log.debug(":: NettyDecoder : PROCESS_STATE_REQUEST_ACK {} {}", messageID, result)
         } else {
             result = new String(byteData,0, 2, MsgEntityCommon.PUSH_ENCODING);
 
             if (messageID == MsgEntityCommon.COMMAND_REQUEST_ACK) {
-                log.debug(":: NettyDecoder : COMMAND_REQUEST_ACK {}", messageID);
+                //log.debug(":: NettyDecoder : COMMAND_REQUEST_ACK {}", messageID)
                 transactionID = new String(byteHeader, 4, 12, MsgEntityCommon.PUSH_ENCODING);
                 data = new String(byteData,2, byteData.length - 2, MsgEntityCommon.PUSH_ENCODING);
 
@@ -123,9 +106,7 @@ public class NettyDecoder extends ByteToMessageDecoder { // FrameDecoder -> Byte
                     .statusCode(statusCode)
                 .build();
 
-        //in.release();
-
-        log.debug(":: NettyDecoder : decode end~ : {}", msg);
+        //log.debug(":: NettyDecoder : decode end~ : {}", msg)
         out.add(msg);
     }
 

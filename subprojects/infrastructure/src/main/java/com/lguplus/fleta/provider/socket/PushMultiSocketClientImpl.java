@@ -30,10 +30,8 @@ import java.util.stream.Collectors;
  * Multi 푸시등록
  */
 @Slf4j
-//@ToString
 @RequiredArgsConstructor
 @Component
-//@EnableScheduling
 public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private final NettyClient nettyClient;
@@ -59,8 +57,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private static final String DATE_FOMAT = "yyyyMMdd";
     private static final int TRANSACTION_MAX_SEQ_NO = 9999;
-    private static final String REGIST_ID_NM = "[@RegistId]";
-    private static final String TRANSACT_ID_NM = "[@RegistId]";
     private static final long SECOND = 1000;
 
     private final AtomicInteger commChannelNum = new AtomicInteger(0);
@@ -68,6 +64,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private String channelID;
     private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
+    private final Object sendLock = new Object();
 
 
     @PostConstruct
@@ -88,42 +85,34 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
      */
     @Override
     public PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto) {
-        /*
-        if (!nettyClient.isValid()) {
-            nettyClient.initailize(this, host, Integer.parseInt(port));
-            channelConnectionRequest();
-        }
-        */
 
-        //checkServerStatus();
+        synchronized (sendLock) {
+            // Push GW 서버 connection이 유효한지 확인
+            checkGateWayServer();
 
-      //  return PushMultiResponseDto.builder().statusCode("200").build();
+            // Push 메시지 전송 via G/W (비동기 호출)
+            List<PushMultiResponseDto> sendList = sendAsyncMessage(dto);
 
+            List<PushMultiResponseDto> listUser = sendList.stream().filter(r -> r.getStatusCode().equals("200")).collect(Collectors.toList());
+            List<PushMultiResponseDto> listFailUser = sendList.stream().filter(r -> r.getStatusCode().equals("")).collect(Collectors.toList());
 
-        // Push GW 서버 connection이 유효한지 확인
-        checkGateWayServer();
+            // Push 메시지 수신 처리
+            List<PushMessageInfoDto> recvMsgList = receiveAsyncMessage(listUser, listFailUser);
 
-        // Push 메시지 전송 via G/W (비동기 호출)
-        List<PushMultiResponseDto> sendList = sendAsyncMessage(dto);
+            analyzeReceivedMessage(dto, recvMsgList, listUser, listFailUser);
 
-        List<PushMultiResponseDto> listUser = sendList.stream().filter(r -> r.getStatusCode().equals("200")).collect(Collectors.toList());
-        List<PushMultiResponseDto> listFailUser = sendList.stream().filter(r -> r.getStatusCode().equals("")).collect(Collectors.toList());
+            log.trace("requestPushMulti send-count: {}", sendList.stream().count());
 
-        // Push 메시지 수신 처리
-        List<PushMessageInfoDto> recvMsgList = receiveAsyncMessage(listUser, listFailUser);
-
-        analyzeReceivedMessage(recvMsgList, listUser, listFailUser);
-
-        if(listFailUser.isEmpty()) {
-            return PushMultiResponseDto.builder().statusCode("200").statusMsg("성공").build();
-        }
-        else {
-            List<String> failUserList = new ArrayList<>();
-            listFailUser.forEach(f -> failUserList.add(f.getRegId()));
-            return PushMultiResponseDto.builder().statusCode("1130")
-                    .statusMsg("메시지 전송 실패")
-                    .failUsers(failUserList)
-                    .build();
+            if (listFailUser.isEmpty()) {
+                return PushMultiResponseDto.builder().statusCode("200").statusMsg("성공").build();
+            } else {
+                List<String> failUserList = new ArrayList<>();
+                listFailUser.forEach(f -> failUserList.add(f.getRegId()));
+                return PushMultiResponseDto.builder().statusCode("1130")
+                        .statusMsg("메시지 전송 실패")
+                        .failUsers(failUserList)
+                        .build();
+            }
         }
 
     }
@@ -133,7 +122,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         receiveMessageMap.putIfAbsent(dto.getTransactionID(), dto);
     }
 
-    private void checkGateWayServer() throws NotifyPushRuntimeException {
+    private synchronized void checkGateWayServer() throws NotifyPushRuntimeException {
         // Push GW 서버 connection이 유효한지 확인
         if (!nettyClient.isValid()) {
             nettyClient.connect();
@@ -146,12 +135,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
 
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
-        if(checkServerStatus()) {
+        if(!checkServerStatus()) {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
             nettyClient.disconnect();
             nettyClient.connect();	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
 
-            if(channelConnectionRequest() && checkServerStatus()) {
+            if(channelConnectionRequest() && !checkServerStatus()) {
                 throw new ServiceUnavailableException();
             }
         }
@@ -161,15 +150,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         int sendCount = 0;
         long sendStartTimeMills = System.currentTimeMillis();
         List<PushMultiResponseDto> sendList = new ArrayList<>();
-
-        //test
-        List<String> testUser = new ArrayList<>();
-
-        for(int i=0; i<100; i++) {
-            testUser.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        }
-
-        dto.setUsers(testUser);
 
         for (String regId : dto.getUsers()) {
             String transactionId = getTransactionId();
@@ -207,7 +187,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         return recvMsgList;
     }
 
-    private void analyzeReceivedMessage(List<PushMessageInfoDto> recvMsgList, List<PushMultiResponseDto> listUser, List<PushMultiResponseDto> listFailUser) throws NotifyPushRuntimeException {
+    private void analyzeReceivedMessage(PushRequestMultiSendDto dto, List<PushMessageInfoDto> recvMsgList, List<PushMultiResponseDto> listUser, List<PushMultiResponseDto> listFailUser) throws NotifyPushRuntimeException {
 
         int souccesCnt = 0;
 
@@ -229,10 +209,10 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
             if("410".equals(responseMsg.getStatusCode()) || "412".equals(responseMsg.getStatusCode())) {
                 // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip함
-                log.debug("[MultiPushRequest][Push] - skip exception:{} - {}", responseMsg.getStatusCode(), responseMsg);
+                log.trace("[MultiPushRequest][Push] - skip exception:{} - {}", responseMsg.getStatusCode(), responseMsg);
             } else {
                 // 메시지 전송 실패 - Retry 대상
-                log.debug("[MultiPushRequest][Push] - skip exception:{} - {}", responseMsg.getStatusCode(), responseMsg);
+                log.debug("[MultiPushRequest][Push] - FA :serviceId:{} Code:{}", dto.getJsonTemplate(), responseMsg.getStatusCode());
 
                 List<PushMultiResponseDto> list = listUser.stream().filter(p -> p.getPushId().equals(transactionId)).collect(Collectors.toList());
                 if(!list.isEmpty())
@@ -334,12 +314,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         PushMessageInfoDto response = (PushMessageInfoDto) nettyClient.writeSync(message);
 
         if (response != null && MsgEntityCommon.SUCCESS.equals(response.getResult())) {
-            log.debug("[MessageService] ProcessStateRequest Success. Channel ID : " + channelID);
-            return false;
+            log.trace("[MessageService] ProcessStateRequest Success. Channel ID : " + channelID);
+            return true;
         }
 
         log.info("[MessageService] ProcessStateRequest Fail. Channel ID : " + channelID);
-        return true;
+        return false;
     }
 
     /**

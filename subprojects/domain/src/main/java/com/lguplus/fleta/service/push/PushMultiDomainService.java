@@ -33,11 +33,6 @@ public class PushMultiDomainService {
     @Value("${push-comm.push.old.lgupush.notiType}")
     private String oldLgPushNotiType;
 
-    private static final String PUSH_COMMAND = "PUSH_NOTI";
-    private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
-    private static final String REGIST_ID_NM = "[@RegistId]";
-    private static final String TRANSACT_ID_NM = "[@RegistId]";
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
@@ -47,7 +42,7 @@ public class PushMultiDomainService {
      * @return Multi 푸시등록 결과
      */
     public PushClientResponseMultiDto requestMultiPush(PushRequestMultiDto dto) {
-        log.debug("requestMultiPush ::::::::::::::: {}", dto);
+        //log.trace("requestMultiPush ::::::::::::::: {}", dto)
 
         String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
         if (servicePwd == null) {
@@ -66,19 +61,19 @@ public class PushMultiDomainService {
     private String getMessage(PushRequestMultiDto dto) {
 
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("msg_id", PUSH_COMMAND);
-        paramMap.put("push_id", TRANSACT_ID_NM);
+        paramMap.put("msg_id", PushMultiClient.PUSH_COMMAND);
+        paramMap.put("push_id", PushMultiClient.TRANSACT_ID_NM);
         paramMap.put("service_id", dto.getServiceId());
         paramMap.put("app_id", dto.getAppId());
         paramMap.put("noti_contents", dto.getMsg());
         paramMap.put("service_passwd", pushConfig.getServicePassword(dto.getServiceId()));
 
-        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+        if (PushMultiClient.LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
             paramMap.put("push_app_id", oldLgPushAppId);
             paramMap.put("noti_type", oldLgPushNotiType);
-            paramMap.put("regist_id", REGIST_ID_NM);
+            paramMap.put("regist_id", PushMultiClient.REGIST_ID_NM);
         } else {
-            paramMap.put("service_key", REGIST_ID_NM);
+            paramMap.put("service_key", PushMultiClient.REGIST_ID_NM);
         }
 
         dto.getItems().forEach(e -> {
