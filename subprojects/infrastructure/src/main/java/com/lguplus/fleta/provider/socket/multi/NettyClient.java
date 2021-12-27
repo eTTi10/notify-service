@@ -2,7 +2,6 @@ package com.lguplus.fleta.provider.socket.multi;
 
 import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
-import com.lguplus.fleta.provider.socket.PushMultiSocketClientImpl;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -29,7 +28,7 @@ public class NettyClient {
 	@Value("${push-comm.push.socket.timeout}")
 	private String timeout;
 
-	private static final int CONN_TIMEOUT = 1000;//1000;
+	private static final int CONN_TIMEOUT = 1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
 
 	EventLoopGroup workerGroup;
@@ -64,7 +63,7 @@ public class NettyClient {
 						ChannelPipeline p = ch.pipeline();
 						p.addLast("clientDecoder", new NettyDecoder());
 						p.addLast("clientEncoder", new NettyEncoder());
-						p.addLast("handler", new NettyHandler(socketClient));//socketClient));
+						p.addLast("handler", new NettyHandler(socketClient));
 					}
 				});
 
@@ -72,14 +71,9 @@ public class NettyClient {
 	}
 
 	public void connect() {
-		try {
-			ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
-			if(future.isSuccess()) {
-				this.channel = future.channel();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+
+		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port));//.sync()
+		channel = future.awaitUninterruptibly().channel();
 
 		log.debug("[NettyClient] The new channel has been connected. [" + channel.id() + "]");
 	}
@@ -103,7 +97,7 @@ public class NettyClient {
 	public boolean write(PushMessageInfoDto message) {
 		try {
 			if (null != message && this.channel.isActive()) {
-				//ChannelFuture writeFuture = this.channel.write(message);
+				//ChannelFuture writeFuture = this.channel.write(message)
 				ChannelFuture writeFuture = this.channel.writeAndFlush(message);
 				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 
@@ -129,7 +123,7 @@ public class NettyClient {
 			return null;
 		}
 
-		//ChannelFuture writeFuture = this.channel.write(message);
+		//ChannelFuture writeFuture = this.channel.write(message)
 		ChannelFuture writeFuture = this.channel.writeAndFlush(message);
 
 		writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
@@ -145,7 +139,7 @@ public class NettyClient {
 					Thread.currentThread().interrupt();
 				}
 
-				//writeFuture = channel.write(message);
+				//writeFuture = channel.write(message)
 				writeFuture = channel.writeAndFlush(message);
 				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 				writeTryTimes++;
@@ -158,15 +152,16 @@ public class NettyClient {
 		}
 
 		long readWaited = 0L;
+		long sleepUnit = 2L;
 
 		while (response == null && readWaited < CONN_TIMEOUT) {
 			try {
-				Thread.sleep(1L);
+				Thread.sleep(sleepUnit);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 			response = getAttachment();
-			readWaited++;
+			readWaited += sleepUnit;
 		}
 
 		// Remove the current attachment
@@ -189,7 +184,7 @@ public class NettyClient {
 
 		if(msg != null) {
 			this.channel.attr(attrKey).set(null);
-			log.debug(":: getAttachment:: {}", ((PushMessageInfoDto)msg));
+			log.trace(":: getAttachment:: {}", ((PushMessageInfoDto)msg));
 		}
 		return msg;
 	}
