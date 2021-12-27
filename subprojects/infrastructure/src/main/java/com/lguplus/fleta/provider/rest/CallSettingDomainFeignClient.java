@@ -21,7 +21,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
      * @return
      */
     @Override
-    @Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
+    //@Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
     public CallSettingResultMapDto mmsCallSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
         parmMap.put("sa_id",parm.getSaId());
