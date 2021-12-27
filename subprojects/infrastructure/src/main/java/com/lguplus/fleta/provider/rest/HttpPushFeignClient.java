@@ -24,8 +24,8 @@ public interface HttpPushFeignClient {
      * @param paramMap 단건 푸시 정보
      * @return 단건 푸시 결과
      */
-//    @PostMapping(value = "/settings/restapi/push/single/servicekey")
-    @PostMapping(value = "/restapi/push/single/servicekey")
+    @PostMapping(value = "/settings/restapi/push/single/servicekey")
+//    @PostMapping(value = "/restapi/push/single/servicekey")
     OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestBody Map<String, Object> paramMap);
 
 }

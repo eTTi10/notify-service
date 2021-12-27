@@ -74,7 +74,7 @@ public class HttpPushController {
 
         log.debug("mapstruct httpPushMultiRequestDto :::::::::::::::::::::::::: {}", httpPushMultiRequestDto);
 
-//        httpPushService.requestHttpPushMulti(httpPushMultiRequestDto);
+        httpPushService.requestHttpPushMulti(httpPushMultiRequestDto);
 
         log.debug("==================멀티푸시등록 END======================");
 
