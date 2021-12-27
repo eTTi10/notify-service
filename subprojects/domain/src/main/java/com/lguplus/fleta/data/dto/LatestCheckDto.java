@@ -4,6 +4,7 @@ import lombok.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 @Builder
 public class LatestCheckDto {
     public static final String DUPL_CODE = "DUPL";
