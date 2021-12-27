@@ -20,6 +20,7 @@ public interface PushMapper {
 
    @Mapping(expression = "java(dto.getStatusCode())", target = "code")
    @Mapping(expression = "java(dto.getStatusMsg())", target = "message")
+   @Mapping(expression = "java(dto.getFailUsers())", target = "failUsers")
    PushClientResponseMultiDto toClientResponseDto(final PushMultiResponseDto dto);
 
 }

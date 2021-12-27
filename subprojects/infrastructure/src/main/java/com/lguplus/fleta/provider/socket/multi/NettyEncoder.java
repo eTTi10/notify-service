@@ -5,7 +5,7 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,11 +17,12 @@ import java.util.List;
  */
 @Slf4j
 @NoArgsConstructor
-public class NettyEncoder extends MessageToMessageEncoder<PushMessageInfoDto> {
+//MessageToMessageEncoder
+public class NettyEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
     // OneToOneEncoder -> MessageToMessageEncoder
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, List<Object> out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
 
         /*
          * Message Header Structure (64Byte)
@@ -36,16 +37,18 @@ public class NettyEncoder extends MessageToMessageEncoder<PushMessageInfoDto> {
 
         byte[] byteTotalData = new byte[MsgEntityCommon.PUSH_MSG_HEADER_LEN + dataInfo.length];
         System.arraycopy(Ints.toByteArray(message.getMessageID()), 0, byteTotalData, 0, 4);                    //Message Id
-        System.arraycopy(message.getTransactionID().getBytes(MsgEntityCommon.PUSH_ENCODING), 0, byteTotalData, 4, 12);   //Transaction Id
-        System.arraycopy(message.getChannelID().getBytes(MsgEntityCommon.PUSH_ENCODING), 0, byteTotalData, 16, 14);             //Channel Id
+        System.arraycopy(message.getTransactionID().getBytes(MsgEntityCommon.PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionID().getBytes(MsgEntityCommon.PUSH_ENCODING).length);//12);   //Transaction Id
+        System.arraycopy(message.getChannelID().getBytes(MsgEntityCommon.PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelID().getBytes(MsgEntityCommon.PUSH_ENCODING).length);//14);             //Channel Id
         System.arraycopy(message.getDestIp().getBytes(MsgEntityCommon.PUSH_ENCODING), 0, byteTotalData, 32, message.getDestIp().getBytes(MsgEntityCommon.PUSH_ENCODING).length);//Destination IP
         System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
         System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
-        log.trace("sendHeader Len =" + byteTotalData.length);
+        log.debug("sendHeader Len =" + byteTotalData.length);
+        if(message.getData().length() > 0) {
+            log.debug("send Json : {}", message.getData());
+        }
 
-        ByteBuf byteBuf = Unpooled.copiedBuffer(byteTotalData);
-        out.add(byteBuf);
+        out.writeBytes(byteTotalData);
     }
 
 }
