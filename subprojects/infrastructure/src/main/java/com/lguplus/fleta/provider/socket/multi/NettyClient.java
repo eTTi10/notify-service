@@ -1,5 +1,6 @@
 package com.lguplus.fleta.provider.socket.multi;
 
+import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.provider.socket.PushMultiSocketClientImpl;
 import io.netty.bootstrap.Bootstrap;
@@ -28,7 +29,7 @@ public class NettyClient {
 	@Value("${push-comm.push.socket.timeout}")
 	private String timeout;
 
-	private static final int CONN_TIMEOUT = 1000;
+	private static final int CONN_TIMEOUT = 1000;//1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
 
 	EventLoopGroup workerGroup;
@@ -44,11 +45,11 @@ public class NettyClient {
 
 	}
 
-	public void initailize(PushMultiSocketClientImpl socketClient, String host, int port) {
+	public void initailize(PushMultiClient socketClient, String host, int port) {
 		this.host = host;
 		this.port = port;
 
-		this.workerGroup =  new NioEventLoopGroup();
+		this.workerGroup =  new NioEventLoopGroup(0);//test 1
 
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 		bootstrap = new Bootstrap()
@@ -56,14 +57,14 @@ public class NettyClient {
 				.channel(NioSocketChannel.class)
 				.option(ChannelOption.TCP_NODELAY, true)
 				.option(ChannelOption.SO_KEEPALIVE, true)
-				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)//Integer.parseInt(timeout))
 				.handler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					public void initChannel(SocketChannel ch) {
 						ChannelPipeline p = ch.pipeline();
 						p.addLast("clientDecoder", new NettyDecoder());
 						p.addLast("clientEncoder", new NettyEncoder());
-						p.addLast("handler", new NettyHandler(socketClient));
+						p.addLast("handler", new NettyHandler(socketClient));//socketClient));
 					}
 				});
 
@@ -71,8 +72,14 @@ public class NettyClient {
 	}
 
 	public void connect() {
-		ChannelFuture connectFuture = bootstrap.connect(new InetSocketAddress(host, port));
-		this.channel = connectFuture.awaitUninterruptibly().channel();
+		try {
+			ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, port)).sync();
+			if(future.isSuccess()) {
+				this.channel = future.channel();
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		log.debug("[NettyClient] The new channel has been connected. [" + channel.id() + "]");
 	}
@@ -96,7 +103,8 @@ public class NettyClient {
 	public boolean write(PushMessageInfoDto message) {
 		try {
 			if (null != message && this.channel.isActive()) {
-				ChannelFuture writeFuture = this.channel.write(message);
+				//ChannelFuture writeFuture = this.channel.write(message);
+				ChannelFuture writeFuture = this.channel.writeAndFlush(message);
 				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 
 				if (!writeFuture.isSuccess()) {
@@ -121,7 +129,9 @@ public class NettyClient {
 			return null;
 		}
 
-		ChannelFuture writeFuture = this.channel.write(message);
+		//ChannelFuture writeFuture = this.channel.write(message);
+		ChannelFuture writeFuture = this.channel.writeAndFlush(message);
+
 		writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 
 		int writeTryTimes = 1;
@@ -134,7 +144,9 @@ public class NettyClient {
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
-				writeFuture = channel.write(message);
+
+				//writeFuture = channel.write(message);
+				writeFuture = channel.writeAndFlush(message);
 				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 				writeTryTimes++;
 			}
@@ -158,7 +170,9 @@ public class NettyClient {
 		}
 
 		// Remove the current attachment
-		setAttachment(null);
+		if(response == null) {
+			this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
+		}
 
 		if(readWaited >= CONN_TIMEOUT) {
 			log.error("[NettyClient][Sync] Read from server failed after " + CONN_TIMEOUT + "ms");
@@ -168,14 +182,16 @@ public class NettyClient {
 		return response;
 	}
 
-	private void setAttachment(Object value) {
-		AttributeKey<Object> attrKey = AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID);
-		this.channel.attr(attrKey).set(value);
-	}
-
 	private Object getAttachment() {
+
 		AttributeKey<Object> attrKey = AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID);
-		return this.channel.attr(attrKey).get();
+		Object msg = this.channel.attr(attrKey).get();
+
+		if(msg != null) {
+			this.channel.attr(attrKey).set(null);
+			log.debug(":: getAttachment:: {}", ((PushMessageInfoDto)msg));
+		}
+		return msg;
 	}
 
 }
