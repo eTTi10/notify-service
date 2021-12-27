@@ -3,11 +3,11 @@ package com.lguplus.fleta.service.httppush;
 import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
-import com.lguplus.fleta.exception.httppush.ExclusionNumberException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.util.HttpPushSupport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -37,17 +37,6 @@ public class HttpPushDomainService {
     @Value("${multi.push.reject.regList}")
     private String rejectReg;
 
-    @Value("${error.flag.com.lguplus.fleta.exception.httppush.ExclusionNumberException}")
-    private String exclusionNumberExceptionCode;
-
-    @Value("${error.message.9998}")
-    private String exclusionNumberExceptionMsg;
-
-    @Value("${error.flag.com.lguplus.fleta.exception.push.SendingFailedException}")
-    private String sendingFailedExceptionCode;
-
-    @Value("${error.message.1130}")
-    private String sendingFailedExceptionMsg;
 
     /**
      * 단건푸시등록
@@ -66,9 +55,11 @@ public class HttpPushDomainService {
         String regId = httpPushSingleRequestDto.getUsers().get(0);
 
         if (Arrays.asList(rejectRegList).contains(regId.strip())) {
+            Pair<String, String> cdMsgMap = httpPushSupport.getHttpServiceProps().getExceptionCodeMessage("ExclusionNumberException");
+
             HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-            httpPushCustomException.setCode(exclusionNumberExceptionCode);
-            httpPushCustomException.setMessage(exclusionNumberExceptionMsg);
+            httpPushCustomException.setCode(cdMsgMap.getLeft());
+            httpPushCustomException.setMessage(cdMsgMap.getRight());
 
             throw httpPushCustomException;   // 9998 발송제한번호
         }
