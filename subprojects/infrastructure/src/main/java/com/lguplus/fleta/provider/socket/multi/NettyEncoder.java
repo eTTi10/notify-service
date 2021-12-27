@@ -3,13 +3,10 @@ package com.lguplus.fleta.provider.socket.multi;
 import com.google.common.primitives.Ints;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 /**
  * Client -> Server
@@ -19,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 //MessageToMessageEncoder
 public class NettyEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
-    // OneToOneEncoder -> MessageToMessageEncoder
 
     @Override
     protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
@@ -43,9 +39,10 @@ public class NettyEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
         System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
         System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
-        log.debug("sendHeader Len =" + byteTotalData.length);
+        //log.debug("sendHeader Len =" + byteTotalData.length)
+
         if(message.getData().length() > 0) {
-            log.debug("send Json : {}", message.getData());
+            //log.debug("send Json : {}", message.getData())
         }
 
         out.writeBytes(byteTotalData);

@@ -11,6 +11,11 @@ import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
  */
 public interface PushMultiClient {
 
+    String PUSH_COMMAND = "PUSH_NOTI";
+    String LG_PUSH_OLD = "LGUPUSH_OLD";
+    String REGIST_ID_NM = "[@RegistId]";
+    String TRANSACT_ID_NM = "[@RegistId]";
+
     /**
      * Push Multi 전송
      *

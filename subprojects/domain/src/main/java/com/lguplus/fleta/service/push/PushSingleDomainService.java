@@ -121,6 +121,8 @@ public class PushSingleDomainService {
             // 재시도 횟수에 도달한 경우 바로 반환.
             if (++reCnt == iPushCallRetryCnt || isRetryExcludeCode(statusCode)) {
                 throw exceptionHandler(statusCode);
+                //테스트 코드
+                // return PushClientResponseDto.builder().code("503").message("Failure").build()
             }
         }
 
