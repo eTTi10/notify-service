@@ -99,12 +99,12 @@ public class NettyClient {
 
 		//Connect
 		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, Integer.parseInt(port)));
-		//channel = future.awaitUninterruptibly().channel();
+		//channel = future.awaitUninterruptibly().channel()
 		try {
 			channel = future.sync().channel();
 		} catch (InterruptedException e) {
-			//e.printStackTrace();
 			log.debug("[NettyClient] The new channel has been not connected.");
+			Thread.currentThread().interrupt();
 			channel = null;
 			return null;
 		}
@@ -135,7 +135,7 @@ public class NettyClient {
 				channel.disconnect();
 				channel.close();
 				channel = null;
-				log.debug("[NettyClient] The current channel has been disconnected. [" + channel.id() + "]");
+				log.debug("[NettyClient] The current channel has been disconnected.");
 			}
 		} catch (Exception ex) {
 			log.error("[NettyClient] connection closing : {}", ex);
@@ -179,15 +179,11 @@ public class NettyClient {
 		ChannelFuture writeFuture = this.channel.writeAndFlush(message);
 
 		try {
-			if(message.getMessageID() == CHANNEL_CONNECTION_REQUEST) {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
-			}
-			else if(message.getMessageID() == PROCESS_STATE_REQUEST) {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
-			}
+			setAttachment(message.getMessageID());
 			writeFuture.sync();
 		} catch (InterruptedException e) {
 			log.error("[NettyClient][Sync] write to server failed ");
+			Thread.currentThread().interrupt();
 			return null;
 		}
 
@@ -200,22 +196,14 @@ public class NettyClient {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-			if(message.getMessageID() == CHANNEL_CONNECTION_REQUEST) {
-				response = getAttachment(NettyClient.ATTACHED_CONN_ID);
-			}
-			else if(message.getMessageID() == PROCESS_STATE_REQUEST) {
-				response = getAttachment(NettyClient.ATTACHED_DATA_ID);
-			}
+
+			response = getAttachment(message.getMessageID());
+
 			readWaited += sleepUnit;
 		}
 
 		if(response == null) {
-			if(message.getMessageID() == CHANNEL_CONNECTION_REQUEST) {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
-			}
-			else if(message.getMessageID() == PROCESS_STATE_REQUEST) {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
-			}
+			setAttachment(message.getMessageID());
 		}
 
 		if(readWaited >= CONN_TIMEOUT) {
@@ -226,15 +214,31 @@ public class NettyClient {
 		return response;
 	}
 
-	private Object getAttachment(String keyId) {
-
-		AttributeKey<Object> attrKey = AttributeKey.valueOf(keyId);
-		Object msg = this.channel.attr(attrKey).get();
-
-		if(msg != null) {
-			this.channel.attr(attrKey).set(null);
-			log.debug(":: getAttachment:: {}", ((PushMessageInfoDto)msg));
+	private void setAttachment(int messageId) {
+		if (messageId == CHANNEL_CONNECTION_REQUEST) {
+			this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
 		}
+		else if(messageId == PROCESS_STATE_REQUEST) {
+			this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
+		}
+	}
+
+	private Object getAttachment(int messageId) {
+		Object msg = null;
+		if (messageId == CHANNEL_CONNECTION_REQUEST) {
+			msg = this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).get();
+		}
+		else {
+			msg = this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).get();
+		}
+		if (msg != null) {
+			if (messageId == CHANNEL_CONNECTION_REQUEST) {
+				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
+			} else {
+				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
+			}
+		}
+
 		return msg;
 	}
 
