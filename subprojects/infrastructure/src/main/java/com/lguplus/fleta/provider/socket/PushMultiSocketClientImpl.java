@@ -6,7 +6,6 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.*;
-import com.lguplus.fleta.provider.socket.multi.MsgEntityCommon;
 import com.lguplus.fleta.provider.socket.multi.NettyClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +57,10 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private static final String DATE_FOMAT = "yyyyMMdd";
     private static final int TRANSACTION_MAX_SEQ_NO = 9999;
     private static final long SECOND = 1000;
+    private static final String SUCCESS = "SC";
+    private static final int CHANNEL_CONNECTION_REQUEST = 1;
+    private static final int PROCESS_STATE_REQUEST = 13;
+    private static final int COMMAND_REQUEST = 15;
 
     private final AtomicInteger commChannelNum = new AtomicInteger(0);
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
@@ -176,7 +179,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             String transactionId =  usr.getPushId();
 
             PushMessageInfoDto responseMsg = getReceivedAsyncMessage(transactionId);
-            if ( responseMsg == null || !MsgEntityCommon.SUCCESS.equals(responseMsg.getResult())) {
+            if ( responseMsg == null || !SUCCESS.equals(responseMsg.getResult())) {
                 listFailUser.add(usr);
                 continue;
             }
@@ -282,7 +285,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         String genChannelID = this.getNextChannelID();
 
         PushMessageInfoDto message = PushMessageInfoDto.builder()
-                .messageID(MsgEntityCommon.CHANNEL_CONNECTION_REQUEST)
+                .messageID(CHANNEL_CONNECTION_REQUEST)
                 .channelID(genChannelID)
                 .destIp(destinationIp)
                 .build();
@@ -306,14 +309,14 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
 
         PushMessageInfoDto message = PushMessageInfoDto.builder()
-                .messageID(MsgEntityCommon.PROCESS_STATE_REQUEST)
+                .messageID(PROCESS_STATE_REQUEST)
                 .channelID(this.channelID)
                 .destIp(destinationIp)
                 .build();
 
         PushMessageInfoDto response = (PushMessageInfoDto) nettyClient.writeSync(message);
 
-        if (response != null && MsgEntityCommon.SUCCESS.equals(response.getResult())) {
+        if (response != null && SUCCESS.equals(response.getResult())) {
             log.trace("[MessageService] ProcessStateRequest Success. Channel ID : " + channelID);
             return true;
         }
@@ -328,7 +331,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private String commandRequest(String transactionId, String jsonMsg) {
 
         PushMessageInfoDto message = PushMessageInfoDto.builder()
-                .messageID(MsgEntityCommon.COMMAND_REQUEST)
+                .messageID(COMMAND_REQUEST)
                 .channelID(this.channelID)
                 .transactionID(transactionId)
                 .destIp(destinationIp)
