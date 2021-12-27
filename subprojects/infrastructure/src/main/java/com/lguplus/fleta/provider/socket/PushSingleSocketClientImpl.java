@@ -139,9 +139,11 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
                 .isLgPush(true).build();
 
         poolList = new ArrayList<>();
+        /*
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVo)
                 , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin))));
+        */
 
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
@@ -161,9 +163,9 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal); //100
-        poolConfig.setMaxIdle(maxTotal);  //100
-        poolConfig.setMinIdle(minIdle);   //20
+        poolConfig.setMaxTotal(1);//maxTotal); //100
+        poolConfig.setMaxIdle(1);//maxTotal);  //100
+        poolConfig.setMinIdle(1);//minIdle);   //20
         poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setMaxWaitMillis(2000);// 최대 대기 시간
         poolConfig.setTestOnBorrow(true);

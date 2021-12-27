@@ -40,12 +40,18 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     @Value("${push-comm.push.server.ip}")
     private String host;
+
     @Value("${push-comm.push.server.port}")
     private String port;
+
     @Value("${server.port}")
     private String channelPort;
+
     @Value("${push-comm.push.socket.channelID}")
     private String defaultChannelHost;
+
+    @Value("${push-comm.push.cp.destination_ip}")
+    private String destinationIp;
 
     @Value("${push-comm.push.multi.socket.tps}")
     private String maxLimitPush; //400/1sec
@@ -70,6 +76,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         maxPushLimitPerSec = Integer.parseInt(maxLimitPush);
 
         nettyClient.initailize(this, host, Integer.parseInt(port));
+        channelConnectionRequest();
+
     }
 
     /**
@@ -80,6 +88,17 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
      */
     @Override
     public PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto) {
+        /*
+        if (!nettyClient.isValid()) {
+            nettyClient.initailize(this, host, Integer.parseInt(port));
+            channelConnectionRequest();
+        }
+        */
+
+        //checkServerStatus();
+
+      //  return PushMultiResponseDto.builder().statusCode("200").build();
+
 
         // Push GW 서버 connection이 유효한지 확인
         checkGateWayServer();
@@ -96,7 +115,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         analyzeReceivedMessage(recvMsgList, listUser, listFailUser);
 
         if(listFailUser.isEmpty()) {
-            return PushMultiResponseDto.builder().statusCode("200").build();
+            return PushMultiResponseDto.builder().statusCode("200").statusMsg("성공").build();
         }
         else {
             List<String> failUserList = new ArrayList<>();
@@ -106,6 +125,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                     .failUsers(failUserList)
                     .build();
         }
+
     }
 
     @Override
@@ -141,6 +161,15 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         int sendCount = 0;
         long sendStartTimeMills = System.currentTimeMillis();
         List<PushMultiResponseDto> sendList = new ArrayList<>();
+
+        //test
+        List<String> testUser = new ArrayList<>();
+
+        for(int i=0; i<100; i++) {
+            testUser.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        }
+
+        dto.setUsers(testUser);
 
         for (String regId : dto.getUsers()) {
             String transactionId = getTransactionId();
@@ -275,6 +304,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         PushMessageInfoDto message = PushMessageInfoDto.builder()
                 .messageID(MsgEntityCommon.CHANNEL_CONNECTION_REQUEST)
                 .channelID(genChannelID)
+                .destIp(destinationIp)
                 .build();
 
         if (nettyClient.write(message)) {
@@ -298,6 +328,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         PushMessageInfoDto message = PushMessageInfoDto.builder()
                 .messageID(MsgEntityCommon.PROCESS_STATE_REQUEST)
                 .channelID(this.channelID)
+                .destIp(destinationIp)
                 .build();
 
         PushMessageInfoDto response = (PushMessageInfoDto) nettyClient.writeSync(message);
@@ -320,6 +351,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 .messageID(MsgEntityCommon.COMMAND_REQUEST)
                 .channelID(this.channelID)
                 .transactionID(transactionId)
+                .destIp(destinationIp)
                 .data(jsonMsg)
                 .build();
 
@@ -348,8 +380,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
         return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
     }
-
-
 
     private String getTransactionId() {
         if(tranactionMsgId.get() >= TRANSACTION_MAX_SEQ_NO) {

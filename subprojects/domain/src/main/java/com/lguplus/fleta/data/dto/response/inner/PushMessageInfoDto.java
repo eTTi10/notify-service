@@ -1,6 +1,7 @@
 package com.lguplus.fleta.data.dto.response.inner;
 
 import lombok.*;
+import org.apache.commons.lang3.StringUtils;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -12,20 +13,16 @@ public class PushMessageInfoDto {
     private String transactionID; //12 char
     private String channelID;
     private String result;
-    private String data;            //Json
     private String statusCode;
-
-    private String transactionDate;
-    private int transactionSeq;
-
     private String destIp;
+    private String data;            //Json
 
     public String getTransactionID() {
-        return "" + transactionID;
+        return !StringUtils.isEmpty(transactionID) ? transactionID : "";
     }
 
     public String getData() {
-        return "" + data;
+        return !StringUtils.isEmpty(data) ? data : "";
     }
 
 }
