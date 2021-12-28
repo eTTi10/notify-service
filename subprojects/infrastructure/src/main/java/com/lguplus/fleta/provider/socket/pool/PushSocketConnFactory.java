@@ -3,6 +3,7 @@ package com.lguplus.fleta.provider.socket.pool;
 import com.lguplus.fleta.exception.push.PushBizException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -11,6 +12,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.Instant;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -20,6 +22,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     private final PushServerInfoVo serverInfo;
 
     private final AtomicInteger commChannelNum = new AtomicInteger(0);
+    private static final int CHANNEL_MAX_SEQ_NO = 10000;
 
     public PushSocketConnFactory(PushServerInfoVo pushServerInfoVo) {
         this.serverInfo = pushServerInfoVo;
@@ -108,7 +111,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         channelHostNm = "S" +  channelHostNm.substring(1);
 
-        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
+        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < CHANNEL_MAX_SEQ_NO) ? x+1 : 0));
     }
 
     @Getter
