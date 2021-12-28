@@ -14,7 +14,7 @@ public interface PushMultiClient {
     String PUSH_COMMAND = "PUSH_NOTI";
     String LG_PUSH_OLD = "LGUPUSH_OLD";
     String REGIST_ID_NM = "[@RegistId]";
-    String TRANSACT_ID_NM = "[@RegistId]";
+    String TRANSACT_ID_NM = "[@TransactionId]";
 
     /**
      * Push Multi 전송

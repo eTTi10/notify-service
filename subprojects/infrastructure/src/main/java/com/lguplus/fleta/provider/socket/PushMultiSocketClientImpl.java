@@ -128,7 +128,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
         for (String regId : dto.getUsers()) {
             String transactionId = getTransactionId();
-            String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId).replace(REGIST_ID_NM, regId);
+            String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
+                    .replace(REGIST_ID_NM, regId);
 
             String sendStatus = commandRequest(transactionId, jsonMsg);
 
