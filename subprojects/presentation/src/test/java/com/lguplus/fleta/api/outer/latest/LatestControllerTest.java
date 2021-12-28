@@ -1,0 +1,148 @@
+package com.lguplus.fleta.api.outer.latest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lguplus.fleta.config.ArgumentResolverConfig;
+import com.lguplus.fleta.config.MessageConverterConfig;
+import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
+import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
+import com.lguplus.fleta.service.latest.LatestService;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@ExtendWith(MockitoExtension.class)
+@WebMvcTest
+@ContextConfiguration(classes = {LatestController.class
+        , ArgumentResolverConfig.class
+        , MessageConverterConfig.class})
+@Slf4j
+class LatestControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private LatestService latestService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private LatestSearchRequestMapper latestSearchRequestMapper;
+
+    @MockBean
+    private LatestPostRequestMapper latestPostRequestMapper;
+
+
+    //####################### Start 알림등록 ######################
+    @Test
+    @DisplayName("LatestControllerTest.insertLatest 정상적으로 데이터를 등록하는지 확인")
+    void insertLatest() throws Exception {
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500023630832");
+        params.add("mac", "001c.6284.30a4");
+        params.add("ctn", "01080808526");
+        params.add("catId", "M0241");
+        params.add("regId", "500023630832");
+        params.add("catName", "신 삼국지 32회");
+        params.add("rDate", "2014-10-27 16:19:38.000");
+        params.add("categoryGb", "");
+
+        MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.insertLatest End");
+    }
+    //####################### End 알림등록 ######################
+
+
+    //####################### Start 알림조회 ######################
+
+
+    @Test
+    @DisplayName("LatestControllerTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
+    void getLatestList() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500058151453");
+        params.add("mac", "001c.627e.039c");
+        params.add("ctn", "01055805424");
+        params.add("catId", "T3021");
+
+        MvcResult mvcResult = mockMvc.perform(get("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.getLatestList End");
+    }
+    //####################### End 알림조회 ######################
+
+
+    //####################### Start 알림삭제 ######################
+    @Test
+    @DisplayName("LatestControllerTest.deleteLatest 정상적으로 데이터를 삭제하는지 확인")
+    void deleteLatest() throws Exception {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("saId", "500058151453");
+        params.add("mac", "001c.627e.039c");
+        params.add("ctn", "01055805424");
+        params.add("catId", "T3021");
+
+        MvcResult mvcResult = mockMvc.perform(delete("/comm/latest")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .queryParams(params)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        assertThat(status).isEqualTo(200);
+        assertThat(responseString).contains("0000");
+
+        log.info("RESULT >> ["+responseString+"]");
+        log.info("LatestControllerTest.deleteLatest End");
+    }
+    //####################### End 알림삭제 ######################
+
+
+
+}

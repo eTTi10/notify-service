@@ -1,7 +1,10 @@
 package com.lguplus.fleta.api.outer.send;
 
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
+import com.lguplus.fleta.data.mapper.SendMmsRequestMapper;
 import com.lguplus.fleta.data.vo.SendMmsVo;
 import com.lguplus.fleta.service.send.MmsService;
 import io.swagger.annotations.Api;
@@ -19,19 +22,11 @@ import javax.validation.Valid;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-/**
- * ################### 개발중 입니다. 잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
- */
 public class MmsController {
-
+    private final SendMmsRequestMapper sendMmsRequestMapper;
     private final MmsService smsService;
 
-    /**
-     * 개발중 입니다. 리뷰 대상이 아닙니다.
-     * @param request
-     * @return
-     * @throws Exception
-     */
+
     @ApiOperation(value="MMS 발송요청", notes="MMS발송을 Agent Server에 요청한다.")
     @ApiImplicitParams(value={
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="sa_id",       value="순번: 1<br>자리수: 12<br>설명:가입번호", example = "M15030600001"),
@@ -40,13 +35,9 @@ public class MmsController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",         value="순번: 4<br>자리수: 20<br>설명: 발송대상 번호", example="01051603997"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="replacement", value="순번: 5<br>자리수: 100<br>설명: 대체문구", example="예) 김철수|냉장고")})
     @PostMapping("/mims/sendMms")
-    public SuccessResponseDto setPayment(@Valid SendMmsVo request) throws Exception {
-
-        log.debug("SmsController.setPayment() - {}:{}", "MMS발송 요청", request);
-
-        SendMmsRequestDto requestDto = request.convert();
-
-        return smsService.sendMms(requestDto);
+    public SuccessResponseDto setPayment(@Valid SendMmsVo vo) throws Exception {
+        SendMmsRequestDto sendMmsRequestDto = sendMmsRequestMapper.toDto(vo);
+        return smsService.sendMms(sendMmsRequestDto);
     }
 
 }

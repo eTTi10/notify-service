@@ -25,9 +25,9 @@ import java.util.Map;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
-class PushSingleSocketClientTest {
+class PushSingleSocketClientImplTest {
 
-    private final PushSingleSocketClient pushSingleSocketClient;
+    private final PushSingleSocketClientImpl pushSingleSocketClientImpl;
 
     PushRequestSingleDto pushRequestSingleDto, pushRequestSingleDtoLg;
 
@@ -38,8 +38,8 @@ class PushSingleSocketClientTest {
 
     final String sendSuccessCode = "412"; //200
 
-    public PushSingleSocketClientTest() {
-        pushSingleSocketClient = new PushSingleSocketClient();
+    public PushSingleSocketClientImplTest() {
+        pushSingleSocketClientImpl = new PushSingleSocketClientImpl();
     }
 
     // Service Password
@@ -119,40 +119,40 @@ class PushSingleSocketClientTest {
             }
         });
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMax", "2");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "socketMin", "1");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMax", "2");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgSocketMin", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMax", "2");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMin", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMax", "2");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMin", "1");
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "host", "211.115.75.227");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "port", "9600");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "timeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "channelPort", "8080");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "defaultChannelHost", "PsAgt");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "closeSecond", "170");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "pushSocketInitCnt", "5");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "host", "211.115.75.227");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "port", "9600");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "timeout", "2000");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "channelPort", "8080");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "defaultChannelHost", "PsAgt");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "destinationIp", "222.231.13.85");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "closeSecond", "170");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushSocketInitCnt", "5");
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgHost", "211.115.75.227");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgPort", "8100");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgTimeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgChannelPort", "8080");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgDefaultChannelHost", "PsAgt");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgDestinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgCloseSecond", "170");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgPushSocketInitCnt", "5");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgHost", "211.115.75.227");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPort", "8100");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgTimeout", "2000");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgChannelPort", "8080");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDefaultChannelHost", "PsAgt");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDestinationIp", "222.231.13.85");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgCloseSecond", "170");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPushSocketInitCnt", "5");
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "lgPushServiceId", "00007");
-        ReflectionTestUtils.setField(pushSingleSocketClient, "pushIntervalTime", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPushServiceId", "00007");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushIntervalTime", "1");
 
-        ReflectionTestUtils.setField(pushSingleSocketClient, "measureIntervalMillis", 1000);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "measureIntervalMillis", 1000);
 
-        ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "initialize");
+        ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "initialize");
     }
 
     private void clearPool() {
         //ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
-        ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "destroy");
+        ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
     }
 
     //ok
@@ -160,7 +160,7 @@ class PushSingleSocketClientTest {
     //@Disabled
     void requestPushSingle_case_01() {
 
-        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
+        PushResponseDto responseDto = pushSingleSocketClientImpl.requestPushSingle(paramMap);
         log.debug("junit result: " + responseDto.getStatusCode());
 
         Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
@@ -172,7 +172,7 @@ class PushSingleSocketClientTest {
     //@Disabled
     void requestPushSingle_case_02() {
 
-        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMapLg);
+        PushResponseDto responseDto = pushSingleSocketClientImpl.requestPushSingle(paramMapLg);
         log.debug("junit result: " + responseDto.getStatusCode());
 
         Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
@@ -184,8 +184,8 @@ class PushSingleSocketClientTest {
         Long currentTimeMillis = System.currentTimeMillis();
         Long pushCount = 10L;
 
-        pushSingleSocketClient.putPushStatus("00007", pushCount, currentTimeMillis);
-        PushStatDto pushStatDto = pushSingleSocketClient.getPushStatus("00007", pushCount, currentTimeMillis);
+        pushSingleSocketClientImpl.putPushStatus("00007", pushCount, currentTimeMillis);
+        PushStatDto pushStatDto = pushSingleSocketClientImpl.getPushStatus("00007", pushCount, currentTimeMillis);
 
         Assertions.assertEquals(currentTimeMillis, pushStatDto.getMeasureStartMillis());
         Assertions.assertEquals(pushCount, pushStatDto.getMeasurePushCount());
@@ -195,7 +195,7 @@ class PushSingleSocketClientTest {
     @Test // pool empty Exception
     void requestPushSingle_case_04()  {
 
-        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClient, "poolList");
+        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "poolList");
 
         for(int i=0; i<2; i++) {
             try {
@@ -208,7 +208,7 @@ class PushSingleSocketClientTest {
             }
         }
 
-        PushResponseDto responseDto = pushSingleSocketClient.requestPushSingle(paramMap);
+        PushResponseDto responseDto = pushSingleSocketClientImpl.requestPushSingle(paramMap);
         log.debug("junit result: " + responseDto.getStatusCode());
 
         Assertions.assertEquals("500", responseDto.getStatusCode());

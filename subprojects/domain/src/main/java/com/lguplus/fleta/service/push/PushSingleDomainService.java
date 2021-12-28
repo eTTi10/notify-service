@@ -90,28 +90,7 @@ public class PushSingleDomainService {
         checkThroughput(dto.getServiceId());
 
         //1. Make Message
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("msg_id", PUSH_COMMAND);
-        paramMap.put("push_id", getTransactionId(dto.getServiceId()));
-        paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
-        paramMap.put("service_passwd", servicePwd);
-
-        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
-            paramMap.put("push_app_id", oldLgPushAppId);
-            paramMap.put("noti_type", oldLgPushNotiType);
-            paramMap.put("regist_id", dto.getRegId());
-        } else {
-            paramMap.put("service_key", dto.getRegId());
-        }
-
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        Map<String, String> paramMap = getMessage(dto, servicePwd);
 
         String statusCode = "";
         String statusMsg = "";
@@ -142,11 +121,42 @@ public class PushSingleDomainService {
             // 재시도 횟수에 도달한 경우 바로 반환.
             if (++reCnt == iPushCallRetryCnt || isRetryExcludeCode(statusCode)) {
                 throw exceptionHandler(statusCode);
+                //테스트 코드
+                // return PushClientResponseDto.builder().code("503").message("Failure").build()
             }
         }
 
         return PushClientResponseDto.builder().code(statusCode).message(statusMsg)
                 .build();
+    }
+
+    private Map<String, String> getMessage(PushRequestSingleDto dto, String servicePwd) {
+
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("msg_id", PUSH_COMMAND);
+        paramMap.put("push_id", getTransactionId(dto.getServiceId()));
+        paramMap.put("service_id", dto.getServiceId());
+        paramMap.put("app_id", dto.getAppId());
+        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("service_passwd", servicePwd);
+
+        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+            paramMap.put("push_app_id", oldLgPushAppId);
+            paramMap.put("noti_type", oldLgPushNotiType);
+            paramMap.put("regist_id", dto.getRegId());
+        } else {
+            paramMap.put("service_key", dto.getRegId());
+        }
+
+        dto.getItems().forEach(e -> {
+            String[] item = e.split("!\\^");
+            if (item.length == 2) {
+                paramMap.put(item[0], item[1]);
+            }
+        });
+
+        return paramMap;
+
     }
 
     private void checkThroughput(String serviceId) {
@@ -277,7 +287,7 @@ public class PushSingleDomainService {
                 processCounter.get().setTransactionCount(processCounter.get().getTransactionCount() + changeVal);
             }
             else {
-                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
+                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount((long) changeVal).build());
             }
         }
     }

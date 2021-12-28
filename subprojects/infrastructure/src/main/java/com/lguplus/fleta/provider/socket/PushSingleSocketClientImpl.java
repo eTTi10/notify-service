@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 @ToString
 @Component
-public class PushSingleSocketClient implements PushSingleClient {
+public class PushSingleSocketClientImpl implements PushSingleClient {
 
     //Pool Config
     @Value("${push-comm.push.socket.max}")
@@ -139,6 +139,7 @@ public class PushSingleSocketClient implements PushSingleClient {
                 .isLgPush(true).build();
 
         poolList = new ArrayList<>();
+
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVo)
                 , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin))));
@@ -169,7 +170,7 @@ public class PushSingleSocketClient implements PushSingleClient {
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestOnReturn(true);
         poolConfig.setTestWhileIdle(true);
-        poolConfig.setLifo(false); //false : FIFO, default: LIFO
+        poolConfig.setLifo(false); //false : FIFO, default: LIFO :: FIFO(소켓이 만들어지거나 사용되어진 시간 기준으로 오래된 자원부터 사용)
         poolConfig.setTimeBetweenEvictionRunsMillis(10 * 1000L);
 
         return poolConfig;

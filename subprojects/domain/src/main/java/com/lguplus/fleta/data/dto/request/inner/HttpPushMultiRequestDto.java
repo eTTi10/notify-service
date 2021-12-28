@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
+@Setter
 @ToString
 public class HttpPushMultiRequestDto {
 

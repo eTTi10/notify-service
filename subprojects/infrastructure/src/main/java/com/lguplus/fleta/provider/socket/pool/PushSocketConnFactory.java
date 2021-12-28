@@ -96,6 +96,8 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         String channelHostNm = (hostname + "00000000").substring(0, 6);
         String channelPortNm = (serverInfo.getChannelPort() + "0000").substring(0, 4);
 
+        channelHostNm = "S" +  channelHostNm.substring(1);
+
         return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
     }
 
