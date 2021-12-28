@@ -74,7 +74,7 @@ public class PushDomainService {
         String[] pushParamList;
         int paramSize =0;
 
-        //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
+        //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
@@ -173,7 +173,6 @@ public class PushDomainService {
         }
 
         regId = (regType.equals("2")) ? getRegistrationIDbyCtn(regId) : regId;
-//                        regId = "M00020200205"; // TODO 실제 Feiin 연결 후 삭제
 
         //APNS일 경우 items의 맨 앞에 payloaditem를 끼워 넣는다.
         items.add(0, payloadItem);
