@@ -60,8 +60,18 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
             return false;
         }
 
-        return serverInfo.getCloseSecond() > (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
+        long connTime = Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime();
 
+        boolean timeover = serverInfo.getCloseSecond() <= (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
+
+        if(timeover && connTime < 300) {
+            log.debug("validateObject timeout: close_secs:{} time:{} info:{}", serverInfo.getCloseSecond()
+                    , (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime())
+                    , socketInfo);
+            socketInfo.isServerInValidStatus();
+        }
+
+        return serverInfo.getCloseSecond() > (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
     }
 
     @Override
