@@ -269,7 +269,7 @@ public class NettyClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
+	private static class MessageEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
 		@Override
 		protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
 
@@ -300,7 +300,7 @@ public class NettyClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageDecoder extends ByteToMessageDecoder {
+	private static class MessageDecoder extends ByteToMessageDecoder {
 
 		private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -420,7 +420,7 @@ public class NettyClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageHandler extends ChannelInboundHandlerAdapter {
+	private static class MessageHandler extends ChannelInboundHandlerAdapter {
 
 		private PushMultiClient pushMultiClient = null;
 
