@@ -25,6 +25,8 @@ public class PushAnnounceDomainService {
     private final PushConfig pushConfig;
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
 
+    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final int TRANSACTION_MAX_SEQ_NO = 10000;
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
     @Value("${push-comm.push.old.lgupush.pushAppId}")
@@ -89,13 +91,8 @@ public class PushAnnounceDomainService {
     }
 
     private String getTransactionId() {
-        if(tranactionMsgId.get() >= 9999) {
-            tranactionMsgId.set(0);
-            return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.get());
-        }
-        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.incrementAndGet());
+        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
     }
-
 
     private void exceptionHandler(String statusCode) {
         switch (statusCode) {
