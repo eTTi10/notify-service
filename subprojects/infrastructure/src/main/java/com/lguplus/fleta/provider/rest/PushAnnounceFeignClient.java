@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * 공지 푸시등록
  */
-@FeignClient(name = "pushannounce", url = "$", configuration = PushFeignConfig.class)
+@FeignClient(name = "pushannounce", url = "$")
 public interface PushAnnounceFeignClient {
      /**
      * Announcement 푸시

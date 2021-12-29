@@ -26,7 +26,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
+public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
 
     private final PushAnnounceFeignClient pushAnnounceFeignClient;
     private final PushConfig pushConfig;
@@ -58,8 +58,8 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
             Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
 
-            //String json = objectMapper.writeValueAsString(stateMap);
-            //log.debug("==json:" + json);
+            //String json = objectMapper.writeValueAsString(stateMap)
+            //log.debug("==json:" + json)
 
             return pushMapper.toResponseDto(stateMap);
         }
@@ -78,10 +78,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
             } catch (JsonProcessingException e) {
                 return PushResponseDto.builder().statusCode("5103").build();
             }
-        } /* catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        } */
+        }
     }
 
     /**
@@ -96,7 +93,7 @@ public class PushAnnounceDomainFeignClient implements PushAnnounceDomainClient {
     // Announcement(별도서버 구성 시)
     private String getServiceServerIp(String serviceId) {
         //test
-        //return "localhost";
+        //return "localhost"
 
         String svcServerIp = pushConfig.getCommPropValue(serviceId + ".announce.server.ip");
         return svcServerIp == null ? this.host : svcServerIp;
