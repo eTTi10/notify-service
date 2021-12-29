@@ -14,6 +14,8 @@ import lombok.Setter;
 @Setter
 public class HttpPushCustomException extends NotifyHttpPushRuntimeException {
 
+    private Integer statusCode;
+
     private String code;
 
     private String message;
