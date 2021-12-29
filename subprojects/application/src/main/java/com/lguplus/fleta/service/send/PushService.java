@@ -108,7 +108,6 @@ public class PushService {
 
                 } else if (pushType.equalsIgnoreCase("L")) {    // LG 푸시 일 경우
 
-                    // TODO HTTP PUSH 쪽에서 L은 사용하지 못하게 validation처리 되어 있다. 확인 후 삭제 처리해야 함
                     httpPushSingleRequestDto = pushDomainService.getPosRequestDto(sendPushCodeRequestDto, serviceTarget);
                 }
 

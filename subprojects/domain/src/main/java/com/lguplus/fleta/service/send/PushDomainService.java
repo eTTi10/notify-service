@@ -10,7 +10,6 @@ import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -67,6 +66,7 @@ public class PushDomainService {
         List items = sendPushCodeRequestDto.getItems();
 
         Map<String, String> paramMap = sendPushCodeRequestDto.getReserve();
+        log.debug("sendPushCodeRequestDto.getSendCode() : {}", sendPushCodeRequestDto.getSendCode());
         log.debug("sendPushCodeRequestDto.getReserve() : {}", sendPushCodeRequestDto.getReserve());
         log.debug("paramMap : {}", paramMap);
 
@@ -77,8 +77,12 @@ public class PushDomainService {
         //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
 
+        log.debug("sendCode : {}", sendCode);
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
+        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+
+        checkInvalidSendPushCode(pushInfoMap);
+
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
@@ -127,6 +131,13 @@ public class PushDomainService {
                 .build();
     }
 
+    public void checkInvalidSendPushCode(Map<String, String> pushInfoMap) {
+
+        if (pushInfoMap.get("gcm.payload.body").equals("")) {
+            throw new InvalidSendPushCodeException("send code 미지원");
+        }
+    }
+
     public HttpPushSingleRequestDto getApnsRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
         String regId = sendPushCodeRequestDto.getRegId();
@@ -139,7 +150,10 @@ public class PushDomainService {
         log.debug("paramMap : {}", paramMap);
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
+        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+
+        checkInvalidSendPushCode(pushInfoMap);
+
         //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
@@ -187,6 +201,12 @@ public class PushDomainService {
                 .build();
     }
 
+    /**
+     * LG 푸시 전문 조립 ( pushagent_op에서는 push_type이 GCM과 APNS만 사용할 수 있지만 ASIS에 있는 로직이라 개발함
+     * @param sendPushCodeRequestDto
+     * @param serviceTarget
+     * @return
+     */
     public HttpPushSingleRequestDto getPosRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
         String regId = sendPushCodeRequestDto.getRegId();
@@ -194,6 +214,7 @@ public class PushDomainService {
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
         List items = sendPushCodeRequestDto.getItems();
+        String bodyLgPush = sendPushCodeRequestDto.getRequestBodyStr();
 
         String paramList;
         String[] pushParamList;
@@ -203,12 +224,11 @@ public class PushDomainService {
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
-        String serviceId = Optional.of(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
-        String appId = Optional.of(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+        String serviceId = Optional.ofNullable(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+        String appId = Optional.ofNullable(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
 
         //reg_id를 기입하지 않았다면 DB에서 RegID를 찾아서 처리한다.
         regId = StringUtils.defaultIfEmpty(regId, getRegistrationID(sendPushCodeRequestDto));
-        String bodyLgPush = ""; // TODO LG PUSH 사용한다면 RequestBody로 받은 String을 받아와야 한다.
         return HttpPushSingleRequestDto.builder()
                 .appId(appId)
                 .serviceId(serviceId)
@@ -233,7 +253,10 @@ public class PushDomainService {
         int paramSize =0;
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
+        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+
+        checkInvalidSendPushCode(pushInfoMap);
+
         //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = sendPushCodeProps.findMapByServiceType("default").orElseThrow();
 

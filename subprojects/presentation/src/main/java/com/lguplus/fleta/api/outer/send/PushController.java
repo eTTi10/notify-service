@@ -1,10 +1,11 @@
 package com.lguplus.fleta.api.outer.send;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.vo.SendPushCodeRequestBodyVo;
 import com.lguplus.fleta.data.vo.SendPushCodeRequestVo;
+import com.lguplus.fleta.exception.ParameterMissingException;
 import com.lguplus.fleta.service.send.PushService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -13,16 +14,18 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
+import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.xml.sax.SAXException;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 @Api(tags = "sendPushCode", description = "Code를 이용한 푸시 발송요청")
 @Slf4j
@@ -31,7 +34,8 @@ import java.io.IOException;
 public class PushController {
 
     private final PushService pushService;
-    private String msg;
+    private final MappingJackson2XmlHttpMessageConverter xmlHttpMessageConverter;
+    private final LocalValidatorFactoryBean validator;
 
     /**
      * MIMS.IPTV058 Code를 통한 푸시발송 요청
@@ -49,11 +53,17 @@ public class PushController {
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="service_type",   value="순번: 5<br>자리수: 5<br>설명: Push 대상 타입<br>ex) U+tv : TV / 모바일tv : H / 프로야구 : B / 아이들나라 : K / 골프 : O / 아이돌Live : C,  ‘|’구분자를 통해 멀티 선택 가능", example="")})
     @PostMapping(value = "/mims/sendPushCode", consumes = MediaType.APPLICATION_XML_VALUE)
     public SendPushResponseDto sendPushCode(
-            @ApiIgnore @Valid SendPushCodeRequestVo sendPushCodeRequestVo,
-            @RequestBody @Valid SendPushCodeRequestBodyVo sendPushCodeRequestBodyVo) {
+        @ApiIgnore @Valid SendPushCodeRequestVo sendPushCodeRequestVo,
+        @RequestBody String requestBodyStr) throws JsonProcessingException, RuntimeException {
 
-        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestBodyVo.convert(sendPushCodeRequestVo);
+        log.debug("body:{}", requestBodyStr);
+
+        SendPushCodeRequestBodyVo sendPushCodeRequestBodyVo = xmlHttpMessageConverter
+                .getObjectMapper().readValue(requestBodyStr, SendPushCodeRequestBodyVo.class);
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestBodyVo.convert(sendPushCodeRequestVo, requestBodyStr);
 
         return pushService.sendPushCode(sendPushCodeRequestDto);
+
     }
 }

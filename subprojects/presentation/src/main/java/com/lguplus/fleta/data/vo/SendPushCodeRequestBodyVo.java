@@ -7,6 +7,8 @@ import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
+
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,6 @@ import java.util.Map;
 public class SendPushCodeRequestBodyVo {
 
 
-    @NotNull(message = "reserve 가 Null 혹은 빈값 입니다.")
     @JacksonXmlProperty(localName = "reserve")
     private Map<String, String> reserve;
 
@@ -24,7 +25,7 @@ public class SendPushCodeRequestBodyVo {
     @JacksonXmlProperty(localName = "item")
     private List<String> items;
 
-    public SendPushCodeRequestDto convert(SendPushCodeRequestVo sendPushCodeRequestVo) {
+    public SendPushCodeRequestDto convert(SendPushCodeRequestVo sendPushCodeRequestVo, String requestBodyStr) {
 
         return SendPushCodeRequestDto.builder()
                 .saId(sendPushCodeRequestVo.getSaId())
@@ -36,6 +37,7 @@ public class SendPushCodeRequestBodyVo {
                 .serviceType(sendPushCodeRequestVo.getServiceType())
                 .reserve(getReserve())
                 .items(getItems())
+                .requestBodyStr(requestBodyStr)
                 .build();
     }
 
