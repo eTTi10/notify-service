@@ -65,7 +65,7 @@ public class PushAnnounceDomainService {
 
         dto.getItems().forEach(e -> {
             String[] item = e.split("!\\^");
-            if(item.length >= 2){
+            if(item.length == 2){
                 paramMap.put(item[0], item[1]);
             }
         });
@@ -75,8 +75,8 @@ public class PushAnnounceDomainService {
 
         //3. Send Result
         String statusCode = pushResponseDto.getStatusCode();
-        String statusMsg = pushResponseDto.getStatusMsg();
-        //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]");
+        //String statusMsg = pushResponseDto.getStatusMsg();
+        //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]")
         log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
 
         return PushClientResponseDto.builder().build();
