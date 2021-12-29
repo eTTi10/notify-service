@@ -31,6 +31,8 @@ public class PushSocketInfo {
     private static final String FAIL = "FA";
     private static final int CHANNEL_CONNECTION_REQUEST = 1;
     private static final int CHANNEL_CONNECTION_REQUEST_ACK = 2;
+    private static final int CHANNEL_PROCESS_STATE_REQUEST = 13;
+    private static final int CHANNEL_PROCESS_STATE_REQUEST_ACK = 14;
     private static final int CHANNEL_RELEASE_REQUEST = 5;
     private static final int CHANNEL_RELEASE_REQUEST_ACK = 6;
     private static final int PROCESS_STATE_REQUEST = 13;
@@ -73,9 +75,7 @@ public class PushSocketInfo {
             outputStream.write(sendHeader);
             outputStream.flush();
 
-            log.trace("======================= Header =========================");
             //Header
-
             byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
             inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
@@ -86,7 +86,6 @@ public class PushSocketInfo {
             int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
             log.trace("[OpenSocket] 서버 응답 response_DataLength = " + responseDataLength);
 
-            log.trace("======================= Body =========================");
             byte[] byteBody = new byte[responseDataLength];
 
             inputStream.read(byteBody, 0, byteBody.length);
@@ -188,8 +187,6 @@ public class PushSocketInfo {
 
         try
         {
-            log.trace("======================= Header =========================");
-
             InputStream inputStream = pushSocket.getInputStream();
 
             //Header
@@ -280,6 +277,55 @@ public class PushSocketInfo {
 
         isFailure = true;
         return PushResponseDto.builder().statusCode(FAIL).statusMsg("Internal Error").build();
+    }
+
+
+    public void isServerInValidStatus() {
+
+        try {
+            InputStream inputStream = pushSocket.getInputStream();
+            OutputStream outputStream = pushSocket.getOutputStream();
+
+            byte[] byteDestinationIP = new byte[16];
+            System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, byteDestinationIP, 0, destIp.getBytes(PUSH_ENCODING).length);
+
+            log.trace("[isServerInValidStatus]byteTotalLen=" + PUSH_MSG_HEADER_LEN); //64
+
+            byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN];
+            System.arraycopy(Ints.toByteArray(CHANNEL_PROCESS_STATE_REQUEST), 0, sendHeader, 0, 4);
+            System.arraycopy(channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
+            System.arraycopy(byteDestinationIP, 0, sendHeader, 32, 16);
+            System.arraycopy(Ints.toByteArray(0), 0, sendHeader, 60, 4);
+
+            outputStream.write(sendHeader);
+            outputStream.flush();
+
+            //Header
+            byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
+            inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+
+            log.trace("[isServerInValidStatus] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
+            log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
+            log.trace("[isServerInValidStatus] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
+
+            int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
+            log.trace("[isServerInValidStatus] 서버 응답 response_DataLength = " + responseDataLength);
+
+            byte[] byteBody = new byte[responseDataLength];
+
+            inputStream.read(byteBody, 0, byteBody.length);
+
+            short commStatus = byteToShort(byteBody);
+            //SUCCESS 1, Fail 0
+            if (commStatus == 1) {
+                log.debug("[" + channelID + "][Health Check] - [SUCCESS]");
+                lastTransactionTime = Instant.now().getEpochSecond();
+            }
+            log.trace("[" + channelID + "][Health Check] - [Failure]");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void closeSocket() {

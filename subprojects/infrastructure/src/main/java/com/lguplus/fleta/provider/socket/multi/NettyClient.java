@@ -53,15 +53,16 @@ public class NettyClient {
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
 	public static final String ATTACHED_CONN_ID = "MessageInfo.conn";
 
-	public static final int PUSH_MSG_HEADER_LEN = 64;
-	public static final String SUCCESS = "SC";
-	public static final String FAIL = "FA";
+	private static final int PUSH_MSG_HEADER_LEN = 64;
+	private static final String SUCCESS = "SC";
+	private static final String FAIL = "FA";
 	private static final int CHANNEL_CONNECTION_REQUEST = 1;
 	private static final int CHANNEL_CONNECTION_REQUEST_ACK = 2;
-	public static final int PROCESS_STATE_REQUEST = 13;
-	public static final int PROCESS_STATE_REQUEST_ACK = 14;
-	public static final int COMMAND_REQUEST_ACK = 16;
-	public static final String PUSH_ENCODING = "euc-kr";
+	private static final int PROCESS_STATE_REQUEST = 13;
+	private static final int PROCESS_STATE_REQUEST_ACK = 14;
+	private static final int COMMAND_REQUEST_ACK = 16;
+	private static final String PUSH_ENCODING = "euc-kr";
+	private static final int CHANNEL_MAX_SEQ_NO = 10000;
 
 	private EventLoopGroup workerGroup;
 	private Bootstrap bootstrap = null;
@@ -264,12 +265,12 @@ public class NettyClient {
 
 		channelHostNm = "M" +  channelHostNm.substring(1);
 
-		return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
+		return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < CHANNEL_MAX_SEQ_NO) ? x+1 : 0));
 	}
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
+	private static class MessageEncoder extends MessageToByteEncoder<PushMessageInfoDto> {
 		@Override
 		protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
 
@@ -300,7 +301,7 @@ public class NettyClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageDecoder extends ByteToMessageDecoder {
+	private static class MessageDecoder extends ByteToMessageDecoder {
 
 		private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -420,7 +421,7 @@ public class NettyClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	static class MessageHandler extends ChannelInboundHandlerAdapter {
+	private static class MessageHandler extends ChannelInboundHandlerAdapter {
 
 		private PushMultiClient pushMultiClient = null;
 

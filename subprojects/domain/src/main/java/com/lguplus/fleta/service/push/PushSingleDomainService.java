@@ -57,7 +57,7 @@ public class PushSingleDomainService {
     private static final String DATE_FOMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_NOTI";
     private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
-    private static final int TRANSACTION_MAX_SEQ_NO = 9999;
+    private static final int TRANSACTION_MAX_SEQ_NO = 10000;
 
     @PostConstruct
     public void initialize(){
@@ -219,18 +219,10 @@ public class PushSingleDomainService {
 
     private String getTransactionId(String serviceId) {
         if(!isLgPushServiceId(serviceId)) {
-            if (tranactionMsgId1.get() >= TRANSACTION_MAX_SEQ_NO) {
-                tranactionMsgId1.set(0);
-                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.get());
-            }
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
         else {
-            if(tranactionMsgId2.get() >= TRANSACTION_MAX_SEQ_NO) {
-                tranactionMsgId2.set(0);
-                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.get());
-            }
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
     }
 

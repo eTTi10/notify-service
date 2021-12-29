@@ -25,6 +25,8 @@ public class PushAnnounceDomainService {
     private final PushConfig pushConfig;
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
 
+    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final int TRANSACTION_MAX_SEQ_NO = 10000;
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
     @Value("${push-comm.push.old.lgupush.pushAppId}")
@@ -63,7 +65,7 @@ public class PushAnnounceDomainService {
 
         dto.getItems().forEach(e -> {
             String[] item = e.split("!\\^");
-            if(item.length >= 2){
+            if(item.length == 2){
                 paramMap.put(item[0], item[1]);
             }
         });
@@ -73,59 +75,15 @@ public class PushAnnounceDomainService {
 
         //3. Send Result
         String statusCode = pushResponseDto.getStatusCode();
-        String statusMsg = pushResponseDto.getStatusMsg();
-        log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]");
-
-        if(statusCode.equals("200")){
-            log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
-        } else {
-            log.debug("[pushAnnouncement]["+statusCode+"] [FAIL]");
-
-            //실패
-            exceptionHandler(statusCode);
-        }
+        //String statusMsg = pushResponseDto.getStatusMsg();
+        //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]")
+        log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
 
         return PushClientResponseDto.builder().build();
     }
 
     private String getTransactionId() {
-        if(tranactionMsgId.get() >= 9999) {
-            tranactionMsgId.set(0);
-            return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.get());
-        }
-        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04d", tranactionMsgId.incrementAndGet());
-    }
-
-
-    private void exceptionHandler(String statusCode) {
-        switch (statusCode) {
-            case "202":
-                throw new AcceptedException();
-            case "400":
-                throw new BadRequestException();
-            case "401":
-                throw new UnAuthorizedException();
-            case "403":
-                throw new ForbiddenException();
-            case "404":
-                throw new NotFoundException();
-            case "410":
-                throw new NotExistRegistIdException();
-            case "412":
-                throw new PreConditionFailedException();
-            case "500":
-                throw new InternalErrorException();
-            case "502":
-                throw new ExceptionOccursException();
-            case "503":
-                throw new ServiceUnavailableException();
-            case "5102":
-                throw new SocketTimeException();
-            case "5103": //FeignException
-                throw new SocketException();
-            default:
-                throw new PushEtcException();//("기타 오류"); //9999
-        }
+        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
     }
 
 }
