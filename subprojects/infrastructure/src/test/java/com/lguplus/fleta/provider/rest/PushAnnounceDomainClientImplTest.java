@@ -26,10 +26,10 @@ import static org.mockito.BDDMockito.given;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class PushAnnounceDomainFeignClientTest{
+class PushAnnounceDomainClientImplTest {
 
     @InjectMocks
-    private PushAnnounceDomainFeignClient pushAnnounceDomainFeignClient;
+    private PushAnnounceDomainClientImpl pushAnnounceDomainClientImpl;
 
     @Mock
     private PushAnnounceFeignClient pushAnnounceFeignClient;
@@ -47,7 +47,7 @@ class PushAnnounceDomainFeignClientTest{
 
     @BeforeEach
     void setUp() {
-        pushAnnounceDomainFeignClient = new PushAnnounceDomainFeignClient(pushAnnounceFeignClient, pushConfig, objectMapper, pushMapper);
+        pushAnnounceDomainClientImpl = new PushAnnounceDomainClientImpl(pushAnnounceFeignClient, pushConfig, objectMapper, pushMapper);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");
@@ -93,7 +93,7 @@ class PushAnnounceDomainFeignClientTest{
         PushResponseDto mockDto = PushResponseDto.builder().statusCode("200").build();
         given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
 
-        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
 
         Assertions.assertEquals("200", responseDto.getStatusCode());
     }
@@ -102,7 +102,7 @@ class PushAnnounceDomainFeignClientTest{
     void requestAnnouncement_ex1()  {
         FeignException ex = new FeignExceptionEx(("<" + jsonNormal).getBytes(StandardCharsets.UTF_8));
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
-        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
         Assertions.assertEquals("5103", responseDto.getStatusCode());
     }
 
@@ -114,7 +114,7 @@ class PushAnnounceDomainFeignClientTest{
         PushResponseDto mockDto = PushResponseDto.builder().statusCode("201").build();
         given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
 
-        PushResponseDto  responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        PushResponseDto  responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
         Assertions.assertEquals("201", responseDto.getStatusCode());
     }
 
@@ -126,7 +126,7 @@ class PushAnnounceDomainFeignClientTest{
         RetryableException ex = new RetryableExceptionEx(request);
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
 
-        PushResponseDto responseDto = pushAnnounceDomainFeignClient.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
         Assertions.assertEquals("5102", responseDto.getStatusCode());
     }
 
