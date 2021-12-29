@@ -130,9 +130,10 @@ feign:
         readTimeout: 1000
       pushannounce: # Push Announce
         connectTimeout: 2000
-        readTimeout: 2000
+        readTimeout: 1
         loggerLevel: full # NONE, BASIC, HEADERS, FULL
         #defaultRequestHeaders:
         #  header1: header1Value
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder
