@@ -197,6 +197,8 @@ pushinfo:
       gcm.serviceid: 30104
       apns.appid: musicshow_apns
       apns.serviceid: 30107
+      pos.appid: smartuxapp
+      pos.serviceid: 30015
     - serviceTarget: TV
       gcm.appid:  smart_uxapp_fcm
       gcm.serviceid: 30128

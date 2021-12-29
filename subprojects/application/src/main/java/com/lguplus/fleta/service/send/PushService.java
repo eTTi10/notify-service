@@ -7,7 +7,6 @@ import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
@@ -52,7 +51,6 @@ public class PushService {
 
         int chk1001 =0;
         int failCount =0;
-        int paramSize =0;
         boolean SuccessCheckFlag = false;
         boolean check1001Flag = false;
         String failCode = "";
@@ -60,7 +58,7 @@ public class PushService {
         String firstFailCode ="";
         String firstFailMessage ="";
 
-        ArrayList<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();  //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();  //서비스타입별 결과 저장용 List
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
@@ -74,7 +72,6 @@ public class PushService {
         if(sendCode.substring(0,1).equals("T")){
             pushType = "G";
         }
-
 
         pushTypeList = pushType.split("\\|");
         serviceTypeList = serviceType.split("\\|");
@@ -111,7 +108,6 @@ public class PushService {
 
                 } else if (pushType.equalsIgnoreCase("L")) {    // LG 푸시 일 경우
 
-                    // TODO HTTP PUSH 쪽에서 L은 사용하지 못하게 validation처리 되어 있다. 확인 후 삭제 처리해야 함
                     httpPushSingleRequestDto = pushDomainService.getPosRequestDto(sendPushCodeRequestDto, serviceTarget);
                 }
 

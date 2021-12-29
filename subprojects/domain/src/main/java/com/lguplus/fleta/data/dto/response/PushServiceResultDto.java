@@ -18,11 +18,11 @@ import lombok.*;
 public class PushServiceResultDto {
 
     @JsonProperty(value = "type")
-    private String sType = "";
+    private String sType;
 
     @JsonProperty(value="s_flag")
-    private String sFlag = "";
+    private String sFlag;
 
     @JsonProperty(value="s_message")
-    private String sMessage = "";
+    private String sMessage;
 }
