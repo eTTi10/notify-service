@@ -24,7 +24,6 @@ class MmsAgentSoapClientTest {
     private static final String ctn = "01025851111";
     private static final String replacement = "영희|컴퓨터";
 
-    @InjectMocks
     private MmsAgentSoapClient mmsAgentSoapClient;
 
     @BeforeEach
