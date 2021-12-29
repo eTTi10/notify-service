@@ -1,14 +1,15 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
+import com.lguplus.fleta.exception.push.*;
 import feign.FeignException;
+import feign.Response;
 import feign.RetryableException;
+import feign.codec.ErrorDecoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,6 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
 
         Map<String, Map<String, String>> sendMap = new HashMap<>();
         sendMap.put("request", paramMap);
-
         try {
             Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
             Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
@@ -65,20 +65,9 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
         }
         catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
-            return PushResponseDto.builder().statusCode("5102").build();
+            throw new SocketTimeException();
         }
-        catch (FeignException ex) {
-            log.debug("ex.contentUTF8() ::::::::::::::::::::::::: {}", ex.contentUTF8());
 
-            try {
-                Map<String,Object> retMap = objectMapper.readValue(ex.contentUTF8(),  new TypeReference<Map<String,Object>>(){});
-                Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
-
-                return pushMapper.toResponseDto(stateMap);
-            } catch (JsonProcessingException e) {
-                return PushResponseDto.builder().statusCode("5103").build();
-            }
-        }
     }
 
     /**
@@ -99,4 +88,68 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
         return svcServerIp == null ? this.host : svcServerIp;
     }
 
+    public static class PushErrorDecoder implements ErrorDecoder {
+
+        @Override
+        public Exception decode(String methodKey, Response response) {
+            FeignException ex = FeignException.errorStatus(methodKey, response);
+
+            if(ex instanceof FeignException.FeignServerException) {
+                //500 : InternalServerError
+                //501 : NotImplemented
+                //502 : BadGateway
+                //503 : ServiceUnavailable
+                //504 : GatewayTimeout
+
+                switch (ex.status()) {
+                    case 500:
+                        return new InternalErrorException(ex);
+                    case 502:
+                        return new ExceptionOccursException(ex);
+                    case 503:
+                        return new ServiceUnavailableException(ex);
+                    default:
+                        break;
+                }
+
+            }
+            else if(ex instanceof FeignException.FeignClientException) {
+                //400 : BadRequest
+                //401 : Unauthorized
+                //403 : Forbidden
+                //404 : NotFound
+                //405 : MethodNotAllowed
+                //406 : NotAcceptable
+                //409 : Conflict
+                //410 : Gone
+                //415 : UnsupportedMediaType
+                //429 : TooManyRequests
+                //422 : UnprocessableEntity
+
+                switch (ex.status()) {
+                    case 400:
+                        return new BadRequestException(ex);
+                    case 401:
+                        return new UnAuthorizedException(ex);
+                    case 403:
+                        return new ForbiddenException(ex);
+                    case 404:
+                        return new NotFoundException(ex);
+                    case 410:
+                        return new NotExistRegistIdException(ex);
+                    case 412:
+                        return new PreConditionFailedException(ex);
+                    default:
+                        break;
+                }
+            }
+            else if(ex instanceof FeignException) {
+                if(202 == ex.status()) {
+                    return new AcceptedException(ex);
+                }
+            }
+
+            return new PushEtcException(ex);
+        }
+    }
 }
