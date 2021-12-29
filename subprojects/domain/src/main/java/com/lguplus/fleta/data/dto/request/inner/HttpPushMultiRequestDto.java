@@ -37,6 +37,6 @@ public class HttpPushMultiRequestDto {
     private List<String> users;
 
     /** 초당 최대 Push 전송 허용 갯수  */
-    @Builder.Default private Integer multiCount = 0;
+    private Integer multiCount;
 
 }

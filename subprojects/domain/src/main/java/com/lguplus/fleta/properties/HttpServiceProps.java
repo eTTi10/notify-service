@@ -27,10 +27,10 @@ public class HttpServiceProps {
     private final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage;
 
     /** 트랜잭션 ID 관리용(단건, 멀티) */
-    public static AtomicInteger singleTransactionIDNum = new AtomicInteger(0);
+    public static AtomicInteger singleTransactionIdNum = new AtomicInteger(0);
 
     /** 트랜잭션 ID 관리용(공지) */
-    public static AtomicInteger announceTransactionIDNum = new AtomicInteger(0);
+    public static AtomicInteger announceTransactionIdNum = new AtomicInteger(0);
 
     /** Push 요청 서버 타입 (단건, 멀티에서 사용) */
     public static final String PUSH_REQUEST_PART = "SP";

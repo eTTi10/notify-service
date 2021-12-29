@@ -7,7 +7,6 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -111,8 +110,6 @@ public class HttpPushSupport {
         // service_pwd : SHA512 암호화
         servicePwd = encryptServicePassword(servicePwd);
 
-//        log.debug("encrypted service_pwd :::::::::::::::::::::: {}", servicePwd);
-
         return servicePwd;
     }
 
@@ -128,22 +125,18 @@ public class HttpPushSupport {
      * @return 푸시(단건, 멀티) Open API 를 호춣할 생성된 파라미터
      */
     public Map<String, Object> makePushParameters(String appId, String serviceId, String pushType, String msg, String regId, List<String> items) {
-//        log.debug("before msg ::::::::::::::::::::::::::::::: {}", msg);
-
         String servicePwd = getEncryptedServicePassword(serviceId);
 
         // 4자리수 넘지 않도록 방어코드
-        if (HttpServiceProps.singleTransactionIDNum.get() >= 9999) {
-            HttpServiceProps.singleTransactionIDNum.set(0);
+        if (HttpServiceProps.singleTransactionIdNum.get() >= 9999) {
+            HttpServiceProps.singleTransactionIdNum.set(0);
         }
 
-//        log.debug("transactionDate :::::::: {}", transactionDate);
-
-        int transactionNum = HttpServiceProps.singleTransactionIDNum.incrementAndGet();
+        int transactionNum = HttpServiceProps.singleTransactionIdNum.incrementAndGet();
 
         String transactionId = getTransactionId(transactionNum);
 
-//        log.debug("transactionId :::::::: {}", transactionId);
+        log.debug("transactionId :::::::: {}", transactionId);
 
         // PAYLOAD
         String payload = "";
@@ -161,8 +154,6 @@ public class HttpPushSupport {
             payload = apnOpenApiPayload.apply(Pair.of(msg, items));
         }
 
-//        log.debug("after msg ::::::::::::::::::::::::::::::: {}", payload);
-
         HttpPushDto httpPushDto = HttpPushDto.builder()
                 .requestPart(HttpServiceProps.PUSH_REQUEST_PART)
                 .requestTime(getRequestTime())
@@ -173,8 +164,6 @@ public class HttpPushSupport {
                 .serviceKey(regId)
                 .payload(payload)
                 .build();
-
-//        log.debug("HttpPushDto ::::::::::::::::::::::::::: {}", httpPushDto);
 
         return makePushMap(httpPushDto, "S", "");
     }

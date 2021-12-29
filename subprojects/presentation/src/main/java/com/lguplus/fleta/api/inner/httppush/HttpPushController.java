@@ -53,12 +53,10 @@ public class HttpPushController {
 
         log.debug("mapstruct httpPushSingleRequestDto :::::::::::::::::::::::::: {}", httpPushSingleRequestDto);
 
-        httpPushService.requestHttpPushSingle(httpPushSingleRequestDto);
-
         log.debug("==================단건푸시등록 END======================");
 
         // 성공
-        return InnerResponseDto.of(HttpPushResponseDto.builder().build());
+        return InnerResponseDto.of(httpPushService.requestHttpPushSingle(httpPushSingleRequestDto));
     }
 
     /**
@@ -67,6 +65,7 @@ public class HttpPushController {
      * @param httpPushMultiRequestVo 멀티푸시등록 위한 VO
      * @return 멀티푸시등록 결과 응답
      */
+    @ApiOperation(value="멀티푸시등록", notes="멀티푸시를 등록한다.")
     @PostMapping(value = "/httppush/multi")
     public InnerResponseDto<HttpPushResponseDto> requestHttpPushMulti(@RequestBody @Valid HttpPushMultiRequestVo httpPushMultiRequestVo) {
         log.debug("==================멀티푸시등록 BEGIN======================");
@@ -74,12 +73,10 @@ public class HttpPushController {
 
         log.debug("mapstruct httpPushMultiRequestDto :::::::::::::::::::::::::: {}", httpPushMultiRequestDto);
 
-        httpPushService.requestHttpPushMulti(httpPushMultiRequestDto);
-
         log.debug("==================멀티푸시등록 END======================");
 
         // 성공
-        return InnerResponseDto.of(HttpPushResponseDto.builder().build());
+        return InnerResponseDto.of(httpPushService.requestHttpPushMulti(httpPushMultiRequestDto));
     }
 
 }

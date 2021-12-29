@@ -123,7 +123,7 @@ class HttpPushSupportTest {
 
     @Test
     void testSingleTransactionIdNum() {
-        JunitTestUtils.setValue(httpServiceProps, "singleTransactionIDNum", new AtomicInteger(10000));
+        JunitTestUtils.setValue(httpServiceProps, "singleTransactionIdNum", new AtomicInteger(10000));
 
         Map<String, String> keyMap = new HashMap<>();
         keyMap.put("service_id", "30015");
