@@ -47,14 +47,6 @@ class PushAnnounceDomainClientImplTest {
     Map<String, String> paramMap;
     String jsonNormal;
 
-    ////////////////////
-    PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
-
-    NotifyPushRuntimeException thrown;
-    final Map<String, Collection<String>> headers = new LinkedHashMap<>();
-    final Request request = Request.create(Request.HttpMethod.POST, "/test", Collections.emptyMap(), null, Util.UTF_8, null);
-
-
     @BeforeEach
     void setUp() {
         pushAnnounceDomainClientImpl = new PushAnnounceDomainClientImpl(pushAnnounceFeignClient, pushConfig, objectMapper, pushMapper);
@@ -157,60 +149,37 @@ class PushAnnounceDomainClientImplTest {
 
     @Test
     void testServerException() {
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(500)); });
-        Assertions.assertTrue(thrown instanceof InternalErrorException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(502)); });
-        Assertions.assertTrue(thrown instanceof ExceptionOccursException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(503)); });
-        Assertions.assertTrue(thrown instanceof ServiceUnavailableException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(504)); });
-        Assertions.assertTrue(thrown instanceof PushEtcException);
-
+        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
+        assertThrows(InternalErrorException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(500)); });
+        assertThrows(ExceptionOccursException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(502)); });
+        assertThrows(ServiceUnavailableException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(503)); });
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(504)); });
     }
 
     @Test
     void testClientException() {
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(400)); });
-        Assertions.assertTrue(thrown instanceof BadRequestException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(401)); });
-        Assertions.assertTrue(thrown instanceof UnAuthorizedException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(403)); });
-        Assertions.assertTrue(thrown instanceof ForbiddenException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(404)); });
-        Assertions.assertTrue(thrown instanceof NotFoundException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(410)); });
-        Assertions.assertTrue(thrown instanceof NotExistRegistIdException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(412)); });
-        Assertions.assertTrue(thrown instanceof PreConditionFailedException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(422)); });
-        Assertions.assertTrue(thrown instanceof PushEtcException);
-
+        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
+        assertThrows(BadRequestException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(400)); });
+        assertThrows(UnAuthorizedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(401)); });
+        assertThrows(ForbiddenException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(403)); });
+        assertThrows(NotFoundException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(404)); });
+        assertThrows(NotExistRegistIdException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(410)); });
+        assertThrows(PreConditionFailedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(412)); });
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(422)); });
     }
-
 
     @Test
     void testFeignException() {
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(202)); });
-        Assertions.assertTrue(thrown instanceof AcceptedException);
-
-        thrown = assertThrows(NotifyPushRuntimeException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(205)); });
-        Assertions.assertTrue(thrown instanceof PushEtcException);
-
+        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
+        assertThrows(AcceptedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(202)); });
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(205)); });
     }
 
     Response getHttpResponse(int status) {
+
+        Map<String, Collection<String>> headers = new LinkedHashMap<>();
+        Request request = Request.create(Request.HttpMethod.POST, "/test", Collections.emptyMap(), null, Util.UTF_8, null);
+
         return Response.builder()
                 .status(status)
                 .reason("-")

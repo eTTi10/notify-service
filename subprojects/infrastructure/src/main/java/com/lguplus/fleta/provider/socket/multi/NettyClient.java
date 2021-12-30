@@ -14,6 +14,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.AttributeKey;
+import io.netty.util.NettyRuntime;
+import io.netty.util.concurrent.DefaultEventExecutor;
+import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,12 +72,21 @@ public class NettyClient {
 	private Bootstrap bootstrap = null;
 	private Channel channel = null;
 	private PushMultiClient pushMultiClient;
+	//private EventExecutorGroup decodeGroup,  encodeGroup, handlerGroup
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
 
 	private void initailize() {
 
-		this.workerGroup =  new NioEventLoopGroup();//test 1
+		int threadCount = Runtime.getRuntime().availableProcessors() * 2;
+
+		this.workerGroup =  new NioEventLoopGroup(threadCount * 2);//test 1
+
+		/*
+		decodeGroup = new NioEventLoopGroup(threadCount)
+		encodeGroup = new NioEventLoopGroup(threadCount)
+		handlerGroup = new NioEventLoopGroup(threadCount)
+		*/
 
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 		bootstrap = new Bootstrap()
@@ -88,6 +101,11 @@ public class NettyClient {
 					p.addLast("decoder", new MessageDecoder());
 					p.addLast("encoder", new MessageEncoder());
 					p.addLast("handler", new MessageHandler(pushMultiClient));
+					/*
+					p.addLast(new NioEventLoopGroup(), "decoder", new MessageDecoder())
+					p.addLast(encodeGroup, "encoder", new MessageEncoder())
+					p.addLast(handlerGroup, "handler", new MessageHandler(pushMultiClient))
+					*/
 				}
 			});
 	}
@@ -150,8 +168,8 @@ public class NettyClient {
 	public boolean write(PushMessageInfoDto message) {
 		try {
 			if (null != message && this.channel.isActive()) {
-				//ChannelFuture writeFuture = this.channel.write(message)
-				ChannelFuture writeFuture = this.channel.writeAndFlush(message);
+				ChannelFuture writeFuture = this.channel.write(message);
+				//ChannelFuture writeFuture = this.channel.writeAndFlush(message)
 				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
 
 				if (!writeFuture.isSuccess()) {
@@ -168,6 +186,14 @@ public class NettyClient {
 
 		return true;
 	}
+
+	public void write0(PushMessageInfoDto message) {
+		this.channel.write(message);
+	}
+	public void flush() {
+		this.channel.flush();
+	}
+
 
 	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
