@@ -1,0 +1,48 @@
+package com.lguplus.fleta.exception.httppush;
+
+import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+
+/**
+ * Exception for error flag 1108
+ *
+ * @author Taekuk Song
+ * @since 1.0
+ */
+public class HttpPushEtcException extends NotifyHttpPushRuntimeException {
+
+    /**
+     *
+     */
+    public HttpPushEtcException() {
+
+        super();
+    }
+
+    /**
+     *
+     * @param message
+     */
+    public HttpPushEtcException(final String message) {
+
+        super(message);
+    }
+
+    /**
+     *
+     * @param message
+     * @param cause
+     */
+    public HttpPushEtcException(final String message, final Throwable cause) {
+
+        super(message, cause);
+    }
+
+    /**
+     *
+     * @param cause
+     */
+    public HttpPushEtcException(final Throwable cause) {
+
+        super(cause);
+    }
+}
