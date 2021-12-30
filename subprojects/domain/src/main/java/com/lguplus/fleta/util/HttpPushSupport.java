@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -65,7 +66,7 @@ public class HttpPushSupport {
             return String.format("%0128x", new BigInteger(1, digest.digest()));
 
         } catch (Exception ex) {
-            throw new RuntimeException("기타 오류");
+            throw new HttpPushEtcException("기타 오류");
         }
     }
 
@@ -187,8 +188,8 @@ public class HttpPushSupport {
         try {
             pushMap.put("PAYLOAD", new ObjectMapper().readValue(httpPushDto.getPayload(), new TypeReference<Object>(){}));
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("기타 오류");
+        } catch (JsonProcessingException ex) {
+            throw new HttpPushEtcException("기타 오류");
         }
 
         // 단건, 멀티

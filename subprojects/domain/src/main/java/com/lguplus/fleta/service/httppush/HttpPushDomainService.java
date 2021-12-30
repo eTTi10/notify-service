@@ -94,7 +94,7 @@ public class HttpPushDomainService {
         log.debug("httpPushMultiRequestDto ::::::::::::::: {}", httpPushMultiRequestDto);
 
         // 초당 최대 Push 전송 허용 갯수
-        Integer maxLimitPush = Integer.parseInt(maxMultiCount);
+        int maxLimitPush = Integer.parseInt(maxMultiCount);
 
         log.debug("before maxMultiCount :::::::::::: {}", maxLimitPush);
 
@@ -160,7 +160,9 @@ public class HttpPushDomainService {
                             Thread.sleep(HttpServiceProps.SECOND - timeMillis);
 
                         } catch (InterruptedException ex) {
-                            throw new RuntimeException("기타 오류");
+                            Thread.currentThread().interrupt();
+
+                            throw new HttpPushEtcException("기타 오류");
                         }
                     }
 
@@ -183,7 +185,9 @@ public class HttpPushDomainService {
                 code = result[1];
 
             } catch (Exception ex) {
-                throw new RuntimeException("기타 오류");
+                Thread.currentThread().interrupt();
+
+                throw new HttpPushEtcException("기타 오류");
             }
 
             log.debug("{} ({}) ::::::::::::::::::: {}", LocalDateTime.now(), Thread.currentThread().getName(), code);

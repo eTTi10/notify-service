@@ -1,8 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -14,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
-@Setter
 @ToString
 public class HttpPushMultiRequestDto {
 
