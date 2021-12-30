@@ -143,7 +143,7 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
                         break;
                 }
             }
-            else if(ex instanceof FeignException) {
+            else {
                 if(202 == ex.status()) {
                     return new AcceptedException(ex);
                 }

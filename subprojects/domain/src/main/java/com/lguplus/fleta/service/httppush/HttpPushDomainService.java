@@ -55,8 +55,6 @@ public class HttpPushDomainService {
     public HttpPushResponseDto requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
         log.debug("httpPushSingleRequestDto ::::::::::::::: {}", httpPushSingleRequestDto);
 
-//        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
-
         // 발송 제외 가번 확인
         log.debug("rejectReg :::::::::::::::::::: {}", rejectReg);
         String[] rejectRegList = rejectReg.split("\\|");
@@ -95,22 +93,17 @@ public class HttpPushDomainService {
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
         log.debug("httpPushMultiRequestDto ::::::::::::::: {}", httpPushMultiRequestDto);
 
-//        httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
-
-        log.debug("before maxMultiCount :::::::::::: {}", maxMultiCount);
-
         // 초당 최대 Push 전송 허용 갯수
         Integer maxLimitPush = Integer.parseInt(maxMultiCount);
 
-        log.debug("after maxMultiCount :::::::::::: {}", maxLimitPush);
+        log.debug("before maxMultiCount :::::::::::: {}", maxLimitPush);
 
-        if (httpPushMultiRequestDto.getMultiCount() > maxLimitPush || httpPushMultiRequestDto.getMultiCount() == 0) {
-            httpPushMultiRequestDto.setMultiCount(maxLimitPush);
+        if (httpPushMultiRequestDto.getMultiCount() != null && httpPushMultiRequestDto.getMultiCount() < maxLimitPush) {
+            maxLimitPush = httpPushMultiRequestDto.getMultiCount();
         }
 
-        maxLimitPush = httpPushMultiRequestDto.getMultiCount();
+        log.debug("after maxMultiCount :::::::::::: {}", maxLimitPush);
 
-//        List<String> successUsers = new ArrayList<>();
         List<String> failUsers = new ArrayList<>();
         List<Future<String>> resultList = new ArrayList<>();
 
@@ -132,8 +125,6 @@ public class HttpPushDomainService {
             List<String> users = httpPushMultiRequestDto.getUsers();
 
             for (String regId : users) {
-//                log.debug("exception :::::::::::::::::::: {}", exception);
-
                 // 사용자별 필수 값 체크 & 발송 제외 가번 확인
                 if (Arrays.asList(rejectRegList).contains(regId.strip())) {
                     continue;
@@ -148,7 +139,11 @@ public class HttpPushDomainService {
                                 return regId + "|" + openApiPushResponseDto.getError().get("CODE");
 
                             } catch (HttpPushCustomException ex) {
-                                return regId + "|" + ex.getCode();
+                                if (ex.getStatusCode() >= 500) {
+                                    return regId + "|" + "900";
+                                }
+
+                                return regId + "|" + ex.getStatusCode();
 
                             } catch (Exception ex) {
                                 return regId + "|" + "900";

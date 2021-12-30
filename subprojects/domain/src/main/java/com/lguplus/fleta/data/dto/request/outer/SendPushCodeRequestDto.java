@@ -11,6 +11,7 @@ import java.util.Map;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
+@Setter
 @ToString
 public class SendPushCodeRequestDto {
 
@@ -32,5 +33,5 @@ public class SendPushCodeRequestDto {
 
     private List<String> items;
 
-
+    private String requestBodyStr;
 }

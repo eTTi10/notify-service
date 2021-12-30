@@ -1,31 +1,21 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
-import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import javax.validation.GroupSequence;
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * 단건푸시등록 요청 VO
  *
  */
 @Getter
-@NoArgsConstructor
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, HttpPushSingleRequestVo.class})
 @ApiModel(value = "단건푸시등록 요청 VO", description = "단건푸시등록 요청 VO")
 public class HttpPushSingleRequestVo {

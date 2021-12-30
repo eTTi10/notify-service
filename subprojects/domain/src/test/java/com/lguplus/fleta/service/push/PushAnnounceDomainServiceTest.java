@@ -90,7 +90,7 @@ class PushAnnounceDomainServiceTest {
         Assertions.assertEquals("200", responseDto.getCode());
     }
 
-    @Test
+   // @Test
     void requestAnnouncement_etc_return() {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
@@ -112,7 +112,7 @@ class PushAnnounceDomainServiceTest {
         assertEquals(count, codeList.size());
     }
 
-    @Test
+   // @Test
     void requestAnnouncement_runtime_exception() {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
