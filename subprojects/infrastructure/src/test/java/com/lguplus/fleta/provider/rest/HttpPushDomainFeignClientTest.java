@@ -25,7 +25,7 @@ class HttpPushDomainFeignClientTest {
     private static final String SUCCESS_CODE = "200";
 
     @InjectMocks
-    HttpPushDomainFeignClient httpPushDomainFeignClient;
+    HttpPushDomainClientImpl httpPushDomainFeignClient;
 
     @Mock
     HttpPushFeignClient httpPushFeignClient;

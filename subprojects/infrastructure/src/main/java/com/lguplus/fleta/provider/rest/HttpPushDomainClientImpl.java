@@ -19,7 +19,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class HttpPushDomainFeignClient implements HttpPushDomainClient {
+public class HttpPushDomainClientImpl implements HttpPushDomainClient {
 
     private final HttpPushFeignClient httpPushFeignClient;
 
