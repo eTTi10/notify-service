@@ -75,7 +75,7 @@ public class PushAnnounceDomainService {
 
         //3. Send Result
         String statusCode = pushResponseDto.getStatusCode();
-        //String statusMsg = pushResponseDto.getStatusMsg();
+        //String statusMsg = pushResponseDto.getStatusMsg()
         //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]")
         log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
 
