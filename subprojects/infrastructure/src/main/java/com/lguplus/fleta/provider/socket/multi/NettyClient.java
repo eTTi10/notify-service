@@ -14,10 +14,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.AttributeKey;
-import io.netty.util.NettyRuntime;
-import io.netty.util.concurrent.DefaultEventExecutor;
-import io.netty.util.concurrent.EventExecutor;
-import io.netty.util.concurrent.EventExecutorGroup;
+import io.netty.util.concurrent.Future;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +25,12 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.lang.Thread.*;
 
 @Slf4j
 @Component
@@ -53,6 +55,9 @@ public class NettyClient {
 	@Value("${push-comm.push.socket.channelID}")
 	private String defaultChannelHost;
 
+	@Value("${push-comm.push.call.retryCnt}")
+	private String pushCallRetryCnt;
+
 	private static final int CONN_TIMEOUT = 1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
 	public static final String ATTACHED_CONN_ID = "MessageInfo.conn";
@@ -72,7 +77,6 @@ public class NettyClient {
 	private Bootstrap bootstrap = null;
 	private Channel channel = null;
 	private PushMultiClient pushMultiClient;
-	//private EventExecutorGroup decodeGroup,  encodeGroup, handlerGroup
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
 
@@ -81,12 +85,6 @@ public class NettyClient {
 		int threadCount = Runtime.getRuntime().availableProcessors() * 2;
 
 		this.workerGroup =  new NioEventLoopGroup(threadCount * 2);//test 1
-
-		/*
-		decodeGroup = new NioEventLoopGroup(threadCount)
-		encodeGroup = new NioEventLoopGroup(threadCount)
-		handlerGroup = new NioEventLoopGroup(threadCount)
-		*/
 
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 		bootstrap = new Bootstrap()
@@ -101,11 +99,6 @@ public class NettyClient {
 					p.addLast("decoder", new MessageDecoder());
 					p.addLast("encoder", new MessageEncoder());
 					p.addLast("handler", new MessageHandler(pushMultiClient));
-					/*
-					p.addLast(new NioEventLoopGroup(), "decoder", new MessageDecoder())
-					p.addLast(encodeGroup, "encoder", new MessageEncoder())
-					p.addLast(handlerGroup, "handler", new MessageHandler(pushMultiClient))
-					*/
 				}
 			});
 	}
@@ -119,18 +112,19 @@ public class NettyClient {
 		//Connect
 		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, Integer.parseInt(port)));
 		//channel = future.awaitUninterruptibly().channel()
-		try {
-			channel = future.sync().channel();
-		} catch (InterruptedException e) {
-			log.debug("[NettyClient] The new channel has been not connected.");
-			Thread.currentThread().interrupt();
+
+		future.awaitUninterruptibly();
+
+		if (future.isSuccess()) {
+			channel = future.channel();
+		}
+		else {
+			log.debug("[NettyClient] The new channel has been not connected. {}", future.cause().getMessage());
 			channel = null;
 			return null;
 		}
 
 		log.debug("[NettyClient] The new channel has been connected. [" + channel.id() + "]");
-
-		log.debug("call channelConnectionRequest");
 
 		String genChannelID = this.getNextChannelID();
 		PushMessageInfoDto response = (PushMessageInfoDto) writeSync(
@@ -188,8 +182,21 @@ public class NettyClient {
 	}
 
 	public void write0(PushMessageInfoDto message) {
-		this.channel.write(message);
+		if (!this.channel.isActive()) {
+			log.error("[NettyClient] write0 isNotActive");
+			return;
+		}
+		ChannelFuture writeFuture = this.channel.write(message);
+
+		writeFuture.addListener(new ChannelFutureListener() {
+			@Override
+			public void operationComplete(ChannelFuture future) throws Exception {
+
+			}
+		});
+		//writeFuture.awaitUninterruptibly(100, TimeUnit.MILLISECONDS);
 	}
+
 	public void flush() {
 		this.channel.flush();
 	}
@@ -202,15 +209,40 @@ public class NettyClient {
 			return null;
 		}
 
-		//ChannelFuture writeFuture = this.channel.write(message)
-		ChannelFuture writeFuture = this.channel.writeAndFlush(message);
+		int retryCount = Integer.parseInt(pushCallRetryCnt);
 
-		try {
-			setAttachment(message.getMessageID());
-			writeFuture.sync();
-		} catch (InterruptedException e) {
+		//Clear
+		setAttachment(message.getMessageID());
+
+		int writeTryTimes = 0;
+		AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
+
+		//Send
+		while(writeTryTimes < retryCount && !isFutureSuccess.get()) {
+			CountDownLatch countDownLatch = new CountDownLatch(1);
+
+			this.channel.writeAndFlush(message).addListener((ChannelFutureListener) future -> {
+				isFutureSuccess.set(future.isSuccess());
+				countDownLatch.countDown();
+			});
+
+			try {
+				boolean awitStatus = countDownLatch.await(2000, TimeUnit.MILLISECONDS);
+				if(!awitStatus) {
+					log.debug("writeSync awitStatus Failure");
+				}
+			} catch (InterruptedException e) {
+				currentThread().interrupt();
+			}
+			writeTryTimes++;
+		}
+
+		if (writeTryTimes >= retryCount) {
+			log.error("[NettyClient][Sync] write to server failed afer retry " + retryCount + "times");
+		}
+
+		if (!isFutureSuccess.get()) {
 			log.error("[NettyClient][Sync] write to server failed ");
-			Thread.currentThread().interrupt();
 			return null;
 		}
 
@@ -219,12 +251,12 @@ public class NettyClient {
 
 		while (response == null && readWaited < CONN_TIMEOUT) {
 			try {
-				Thread.sleep(sleepUnit);
+				sleep(sleepUnit);
 			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+				currentThread().interrupt();
 			}
-
 			response = getAttachment(message.getMessageID());
+			log.trace("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
