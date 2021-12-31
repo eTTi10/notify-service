@@ -54,6 +54,7 @@ error:
               ServiceUnavailableException: "1110"
               SendingFailedException: "1130"
               InvalidSendPushCodeException: "9990"
+              HttpPushEtcException: "9999"
             push:
               SocketNotFoundException: "1101"
               SocketException: "1102"

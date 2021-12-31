@@ -27,15 +27,6 @@ public class HttpPushService {
      * @return 단건푸시등록 결과
      */
     public HttpPushResponseDto requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
-        /*try {
-            return httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-
-        } catch (HttpPushCustomException ex) {
-            log.debug("code ::::::::::::::: {}\tmessage :::::::::::::: {}", ex.getCode(), ex.getMessage());
-
-            throw ex;
-        }*/
-
         return httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
     }
 
