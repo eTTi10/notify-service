@@ -1,16 +1,13 @@
 package com.lguplus.fleta.service.send;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
-import com.lguplus.fleta.service.httppush.HttpPushDomainService;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;

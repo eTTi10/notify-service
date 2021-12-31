@@ -61,7 +61,9 @@ public class PushService {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();  //서비스타입별 결과 저장용 List
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElseThrow(() -> new InvalidSendPushCodeException("send code 미지원"));
+        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+
+        pushDomainService.checkInvalidSendPushCode(pushInfoMap);
 
         /*FCM POS 추가발송 설정값 체크*/
         String extraSendYn = StringUtils.defaultIfEmpty(pushInfoMap.get("pos.send"), fcmExtraSend);
@@ -95,18 +97,17 @@ public class PushService {
 
                 HttpPushSingleRequestDto httpPushSingleRequestDto = null;
                 PushRequestSingleDto pushRequestSingleDto = null;
-                pushType = pushTypeList[i];
 
-                if (pushType.equalsIgnoreCase("G") || serviceTarget.equalsIgnoreCase("TV")) {   //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
+                if (pushTypeList[i].equalsIgnoreCase("G") || serviceTarget.equalsIgnoreCase("TV")) {   //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
 
                     httpPushSingleRequestDto = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, serviceTarget);
 
-                } else if (pushType.equalsIgnoreCase("A")) {  //APNS 일경우
+                } else if (pushTypeList[i].equalsIgnoreCase("A")) {  //APNS 일경우
 
                     httpPushSingleRequestDto = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, serviceTarget);
 
 
-                } else if (pushType.equalsIgnoreCase("L")) {    // LG 푸시 일 경우
+                } else if (pushTypeList[i].equalsIgnoreCase("L")) {    // LG 푸시 일 경우
 
                     httpPushSingleRequestDto = pushDomainService.getPosRequestDto(sendPushCodeRequestDto, serviceTarget);
                 }
@@ -160,7 +161,7 @@ public class PushService {
 
 
             sType = StringUtils.defaultIfEmpty(serviceTarget, "H");
-
+            //서비스별 성공실패 기록 로직
             if(chk1001 > 1 && pushTypeList.length > 1) {
                 sFlag = "1001";
                 sMessage = "Push GW Precondition Failed or Not Exist RegistID";
