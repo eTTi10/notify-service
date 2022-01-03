@@ -9,11 +9,15 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.pool.ChannelHealthChecker;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
 import lombok.NoArgsConstructor;
@@ -85,23 +89,65 @@ public class NettyClient {
 
 		int threadCount = Runtime.getRuntime().availableProcessors() * 2;
 
-		this.workerGroup =  new NioEventLoopGroup(threadCount * 2);//test 1
-
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
-		bootstrap = new Bootstrap()
-			.group(this.workerGroup)
-			.channel(NioSocketChannel.class)
-			.option(ChannelOption.TCP_NODELAY, true)
-			.option(ChannelOption.SO_KEEPALIVE, true)
-			.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
-			.handler(new ChannelInitializer<SocketChannel>() {
-				public void initChannel(SocketChannel ch) {
-					ChannelPipeline p = ch.pipeline();
-					p.addLast("decoder", new MessageDecoder());
-					p.addLast("encoder", new MessageEncoder());
-					p.addLast("handler", new MessageHandler(pushMultiClient));
-				}
-			});
+
+		if(Epoll.isAvailable()) { // Linux Epoll
+			this.workerGroup = new EpollEventLoopGroup(threadCount * 2);
+			bootstrap = new Bootstrap()
+					.group(this.workerGroup)
+					.channel(EpollSocketChannel.class)
+					.option(ChannelOption.TCP_NODELAY, true)
+					.option(ChannelOption.SO_KEEPALIVE, true)
+					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+					.handler(new ChannelInitializer<SocketChannel>() {
+						public void initChannel(SocketChannel ch) {
+							ChannelPipeline p = ch.pipeline();
+							p.addLast("decoder", new MessageDecoder());
+							p.addLast("encoder", new MessageEncoder());
+							p.addLast("handler", new MessageHandler(pushMultiClient));
+						}
+					});
+		}
+		else {
+			this.workerGroup = new NioEventLoopGroup(threadCount * 2);
+
+			bootstrap = new Bootstrap()
+					.group(this.workerGroup)
+					.channel(NioSocketChannel.class)
+					.option(ChannelOption.TCP_NODELAY, true)
+					.option(ChannelOption.SO_KEEPALIVE, true)
+					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+					.handler(new ChannelInitializer<SocketChannel>() {
+						public void initChannel(SocketChannel ch) {
+							ChannelPipeline p = ch.pipeline();
+							p.addLast("decoder", new MessageDecoder());
+							p.addLast("encoder", new MessageEncoder());
+							p.addLast("handler", new MessageHandler(pushMultiClient));
+						}
+					});
+		}
+/* 예제 코드는 다음과 같습니다.
+참고.
+		ChannelPool channelPool = new FixedChannelPool(bootstrap, new AbstractChannelPoolHandler() {
+			@Override
+			public void channelCreated(Channel ch) {
+				log.debug("channel Created!");
+			}
+		}, new ChannelHealth(),FixedChannelPool.AcquireTimeoutAction.FAIL, 2000L, 100, 200);
+
+		SimpleChannelPool
+*/
+	}
+
+	static class ChannelHealth implements ChannelHealthChecker {
+
+		@Override
+		public Future<Boolean> isHealthy(Channel channel) {
+			EventLoop loop = channel.eventLoop();
+			channel.isActive();
+			//channel.metadata().
+			return channel.isActive()? loop.newSucceededFuture(Boolean.TRUE) : loop.newSucceededFuture(Boolean.FALSE);
+		}
 	}
 
 	public String connect(PushMultiClient pushMultiClient) {
@@ -174,7 +220,7 @@ public class NettyClient {
 	}
 
 	public void flush() {
-		log.debug("[NettyClient] flush channel");
+		//log.debug("[NettyClient] flush channel")
 		this.channel.flush();
 	}
 
@@ -504,6 +550,24 @@ public class NettyClient {
 			} catch (Exception ex) {
 				log.error("[MessageHandler] connection closing : {}", ex.toString());
 			}
+		}
+
+		@Override
+		public void channelRegistered(ChannelHandlerContext ctx) {
+			log.debug("channelRegistered!");
+			ctx.fireChannelRegistered();
+		}
+
+		@Override
+		public void channelUnregistered(ChannelHandlerContext ctx) {
+			log.debug("channelUnregistered!");
+			ctx.fireChannelUnregistered();
+		}
+
+		@Override
+		public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+			log.debug("userEventTriggered!");
+			ctx.fireUserEventTriggered(evt);
 		}
 	}
 

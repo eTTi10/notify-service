@@ -52,8 +52,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private String channelID;
     private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, PushMessageInfoDto> sendSuccessMessageMap = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, PushMessageInfoDto> sendFailMessageMap = new ConcurrentHashMap<>();
+    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendSuccessMessageMap = new ConcurrentHashMap<>()
+    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendFailMessageMap = new ConcurrentHashMap<>()
     private final Object sendLock = new Object();
 
     /**
@@ -71,16 +71,17 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         synchronized (sendLock)
         {
             // Push 메시지 전송 via G/W (비동기 호출)
-            List<PushMultiResponseDto> listUser = sendAsyncMessage(dto);
+            final List<PushMultiResponseDto> listUser = sendAsyncMessage(dto);
 
-            // Push 메시지 수신 처리
+            log.debug("requestPushMulti thread:{} reguser-count: {}",  Thread.currentThread().getId(), listUser.size());
+              // Push 메시지 수신 처리
             ImmutablePair<List<PushMessageInfoDto>, List<PushMultiResponseDto>> requstInfo = parserAsyncMessage(listUser);
             List<PushMessageInfoDto> recvMsgList = requstInfo.getLeft();
             List<PushMultiResponseDto> listFailUser = requstInfo.getRight();
 
             analyzeReceivedMessage(dto, recvMsgList, listUser, listFailUser);
 
-            log.trace("requestPushMulti recv-count: {}", (long) recvMsgList.size());
+            log.debug("requestPushMulti thread:{} recv-count: {}",  Thread.currentThread().getId(), recvMsgList.size());
 
             if (listFailUser.isEmpty()) {
                 return PushMultiResponseDto.builder().statusCode("200").statusMsg("성공").build();
@@ -105,10 +106,10 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 receiveMessageMap.put(dto.getTransactionID(), dto);
                 break;
             case SEND_SUCCESS_MSG:
-                sendSuccessMessageMap.put(dto.getTransactionID(), dto);
+                //sendSuccessMessageMap.put(dto.getTransactionID(), dto)
                 break;
             case SEND_FAIL_MSG:
-                sendFailMessageMap.put(dto.getTransactionID(), dto);
+                //sendFailMessageMap.put(dto.getTransactionID(), dto)
                 break;
         }
     }
@@ -151,7 +152,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         for (String regId : dto.getUsers()) {
             String transactionId = getTransactionId();
 
-            final Long sendCount = sendMsgCount.updateAndGet(x ->(x+1 < maxPushLimitPerSec) ? x+1 : 0);
+            final long sendCount = sendMsgCount.updateAndGet(x ->(x+1 < maxPushLimitPerSec) ? x+1 : 0);
 
             String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
                     .replace(REGIST_ID_NM, regId);
@@ -187,7 +188,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             final List<PushMultiResponseDto> list = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null)
                     .collect(Collectors.toList());
 
-            log.trace("parserAsyncMessage0 [{}] = {}/{}", waitTime, listUser.size() - list.size(), listUser.size());
+            log.trace("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, listUser.size() - list.size(), listUser.size());
 
             for (PushMultiResponseDto usr : list) {
                 PushMessageInfoDto responseMsg;
@@ -216,7 +217,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         final Map<String, PushMessageInfoDto> processedMap = recvMsgList.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionID, o -> o));
         List<PushMultiResponseDto> listFailUser = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
 
-        log.debug("parserAsyncMessage time:{} = {}/{}", waitTime, listUser.size() - listFailUser.size(), listUser.size());
+        log.debug("parserAsyncMessage thread:{} time:{} = {}/{}", Thread.currentThread().getId(), waitTime, listUser.size() - listFailUser.size(), listUser.size());
         return new ImmutablePair<>(recvMsgList, listFailUser);
     }
 
