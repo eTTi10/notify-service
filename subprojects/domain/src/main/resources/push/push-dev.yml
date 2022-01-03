@@ -52,7 +52,7 @@ push-comm:
   ####################LGPUSH 개별########################
   lgpush:
     #개별Push중 IPTVPush로 나가야 하는 대상 service_id
-    service_id: '30021' #00007
+    service_id: '00007'
     server:
       ip: 211.115.75.227
       port: '8100'
@@ -82,8 +82,8 @@ push-service:
       service_pwd: lguplushdtvgcm
   key8:
     push:
-      service_id: '30015'
       service_pwd: lguplusuflix
+      service_id: '30015'
   key9:
     push:
       service_id: '30021'
@@ -98,8 +98,8 @@ push-service:
       service_pwd: lguplusuflixapns
   key12:
     push:
-      service_id: '00007'
       service_pwd: smartux
+      service_id: '00007'
       linkage_type: LGUPUSH_OLD
   key13:
     push:
@@ -107,8 +107,8 @@ push-service:
       service_pwd: musicshow_gcm
   key14:
     push:
-      service_id: '30107'
       service_pwd: musicshow_apns
+      service_id: '30107'
   key15:
     push:
       service_id: '30105'
@@ -119,9 +119,9 @@ push-service:
       service_pwd: ugolf_APNS
   key17:
     push:
-      service_id: '30112'
       service_pwd: uvrapp_gcm
+      service_id: '30112'
   key18:
     push:
-      service_id: '30125'
       service_pwd: lguplus_game_live
+      service_id: '30125'
