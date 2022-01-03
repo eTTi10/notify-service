@@ -9,7 +9,7 @@ push-comm:
       encoding: UTF-8
       url: /pushhttp.uplus.co.kr/deviceInfo?service=upush
       port: '9200'
-      ip: 211.115.75.227
+      ip: 106.103.208.88
       protocol: http
 
   ####################GCM/APNS 개별########################
@@ -43,7 +43,7 @@ push-comm:
     call:
       retryCnt: '2'
     server:
-      ip: 211.115.75.227
+      ip: 106.103.255.225
       port: '9600'
   retry:
     exclud:
@@ -52,9 +52,9 @@ push-comm:
   ####################LGPUSH 개별########################
   lgpush:
     #개별Push중 IPTVPush로 나가야 하는 대상 service_id
-    service_id: '30021' #00007
+    service_id: '20002'
     server:
-      ip: 211.115.75.227
+      ip: 106.103.255.225
       port: '8100'
     socket:
       max: '50'
@@ -75,53 +75,65 @@ push-comm:
 #기본(미지정 시) : 연동정의서 1.2.1(service_key)
 #LGUPUSH_OLD : LGUPUSH 초기버전 연동
 ########################
-push-service:
-  key7:
+push-service:push-service:
+  key1:
     push:
-      service_id: '30011'
-      service_pwd: lguplushdtvgcm
-  key8:
+      service_id: '20014'
+      service_pwd: hdtv_GCM01
+  key2:
     push:
-      service_id: '30015'
-      service_pwd: lguplusuflix
-  key9:
+      service_pwd: ucine_GCM1
+      service_id: '20015'
+  key3:
     push:
-      service_id: '30021'
-      service_pwd: lguplushdtvapns
-  key10:
-    push:
-      service_id: '30022'
-      service_pwd: lguplussecondtv
-  key11:
-    push:
-      service_id: '30024'
-      service_pwd: lguplusuflixapns
-  key12:
-    push:
-      service_id: '00007'
-      service_pwd: smartux
+      service_id: '20002'
       linkage_type: LGUPUSH_OLD
+      service_pwd: smartux
+  key4:
+    push:
+      service_id: '20019'
+      service_pwd: 2ndtv_GCM1
+  key5:
+    push:
+      service_pwd: hdtv_APNS1
+      service_id: '30005'
+  key6:
+    push:
+      service_pwd: uflix_APNS
+      service_id: '30006'
   key13:
     push:
-      service_id: '30104'
-      service_pwd: musicshow_gcm
+      service_id: '20056'
+      service_pwd: liveU_GCM1
   key14:
     push:
-      service_id: '30107'
-      service_pwd: musicshow_apns
+      service_pwd: liveU_APNS1
+      service_id: '30034'
   key15:
     push:
-      service_id: '30105'
-      service_pwd: ugolf_GCM
+      service_id: '20057'
+      service_pwd: Ugolf_GCM1
   key16:
     push:
-      service_id: '30106'
-      service_pwd: ugolf_APNS
+      service_id: '30035'
+      service_pwd: Ugolf_APNS1
   key17:
     push:
-      service_id: '30112'
-      service_pwd: uvrapp_gcm
+      service_pwd: uVR_GCM1
+      service_id: '20063'
   key18:
     push:
-      service_id: '30125'
       service_pwd: lguplus_game_live
+      service_id: '30125'
+  key19:
+    push:
+      service_id: '21006'
+      service_pwd: UTVseamless_FCM1
+  key20:
+    push:
+      service_id: '21009'
+      service_pwd: baseball_FCM1
+  key21:
+    push:
+      service_pwd: baseball_APNS1
+      service_id: '30043'
