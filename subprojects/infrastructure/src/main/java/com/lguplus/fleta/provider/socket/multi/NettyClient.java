@@ -3,6 +3,7 @@ package com.lguplus.fleta.provider.socket.multi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
+import com.google.common.util.concurrent.Uninterruptibles;
 import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
@@ -80,7 +81,7 @@ public class NettyClient {
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
 
-	private void initailize() {
+	private void initialize() {
 
 		int threadCount = Runtime.getRuntime().availableProcessors() * 2;
 
@@ -106,16 +107,14 @@ public class NettyClient {
 	public String connect(PushMultiClient pushMultiClient) {
 		if(bootstrap == null) {
 			this.pushMultiClient = pushMultiClient;
-			initailize();
+			initialize();
 		}
 
 		//Connect
 		ChannelFuture future = bootstrap.connect(new InetSocketAddress(host, Integer.parseInt(port)));
-		//channel = future.awaitUninterruptibly().channel()
+		future.awaitUninterruptibly(); // ChannelOption.CONNECT_TIMEOUT_MILLIS 만큼 대기
 
-		future.awaitUninterruptibly();
-
-		if (future.isSuccess()) {
+		if (future.isDone() && future.isSuccess()) {
 			channel = future.channel();
 		}
 		else {
@@ -159,48 +158,25 @@ public class NettyClient {
 		return (channel == null || !channel.isActive() || !channel.isOpen());
 	}
 
-	public boolean write(PushMessageInfoDto message) {
-		try {
-			if (null != message && this.channel.isActive()) {
-				ChannelFuture writeFuture = this.channel.write(message);
-				//ChannelFuture writeFuture = this.channel.writeAndFlush(message)
-				writeFuture.awaitUninterruptibly(CONN_TIMEOUT);
-
-				if (!writeFuture.isSuccess()) {
-					log.error("[NettyClient] write to server failed");
-					return false;
-				}
-			} else {
-				return false;
-			}
-		} catch (Exception e) {
-			log.error("[NettyClient] got a exception : {}", e);
-			return false;
-		}
-
-		return true;
-	}
-
-	public void write0(PushMessageInfoDto message) {
+	public void write(final PushMessageInfoDto message) {
 		if (!this.channel.isActive()) {
 			log.error("[NettyClient] write0 isNotActive");
 			return;
 		}
 		ChannelFuture writeFuture = this.channel.write(message);
 
-		writeFuture.addListener(new ChannelFutureListener() {
-			@Override
-			public void operationComplete(ChannelFuture future) throws Exception {
-
-			}
+		writeFuture.addListener((ChannelFutureListener) future -> {
+			if(future.isSuccess())
+				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_SUCCESS_MSG, message);
+			else
+				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_FAIL_MSG, message);
 		});
-		//writeFuture.awaitUninterruptibly(100, TimeUnit.MILLISECONDS);
 	}
 
 	public void flush() {
+		log.debug("[NettyClient] flush channel");
 		this.channel.flush();
 	}
-
 
 	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
@@ -219,21 +195,12 @@ public class NettyClient {
 
 		//Send
 		while(writeTryTimes < retryCount && !isFutureSuccess.get()) {
-			CountDownLatch countDownLatch = new CountDownLatch(1);
 
-			this.channel.writeAndFlush(message).addListener((ChannelFutureListener) future -> {
-				isFutureSuccess.set(future.isSuccess());
-				countDownLatch.countDown();
-			});
+			ChannelFuture awaitFuture = this.channel.writeAndFlush(message);
+			waitFutureDone(awaitFuture, 2000);
 
-			try {
-				boolean awitStatus = countDownLatch.await(2000, TimeUnit.MILLISECONDS);
-				if(!awitStatus) {
-					log.debug("writeSync awitStatus Failure");
-				}
-			} catch (InterruptedException e) {
-				currentThread().interrupt();
-			}
+			isFutureSuccess.set(awaitFuture.isSuccess());
+
 			writeTryTimes++;
 		}
 
@@ -271,6 +238,12 @@ public class NettyClient {
 		}
 
 		return response;
+	}
+
+	private <T extends Future<?>> void waitFutureDone(final T future, final long timeout) {
+		final CountDownLatch latch = new CountDownLatch(1);
+		future.addListener(f -> latch.countDown());
+		Uninterruptibles.awaitUninterruptibly(latch, timeout, TimeUnit.MILLISECONDS);
 	}
 
 	private void setAttachment(int messageId) {
@@ -511,7 +484,7 @@ public class NettyClient {
 			else if (message.getMessageID() == COMMAND_REQUEST_ACK) {
 				// Push 전송인 경우 response 결과를 임시 Map에 저장함.
 				log.trace(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
-				pushMultiClient.receiveAsyncMessage(message);
+				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 			}
 
 			log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageID() + ", " +

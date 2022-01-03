@@ -44,7 +44,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private static final String SUCCESS = "SC";
     private static final int PROCESS_STATE_REQUEST = 13;
     private static final int COMMAND_REQUEST = 15;
-    private static final int FLUSH_COUNT = 20;
+    private static final int FLUSH_COUNT = 100;
 
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
     private final AtomicLong sendMsgCount = new AtomicLong(0);
@@ -52,6 +52,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private String channelID;
     private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PushMessageInfoDto> sendSuccessMessageMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PushMessageInfoDto> sendFailMessageMap = new ConcurrentHashMap<>();
     private final Object sendLock = new Object();
 
     /**
@@ -95,9 +97,20 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     }
 
     @Override
-    public void receiveAsyncMessage(PushMessageInfoDto dto) {
+    public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
         //log.debug("receiveAsyncMessage : {}, {}", dto.getTransactionID(), dto)
-        receiveMessageMap.putIfAbsent(dto.getTransactionID(), dto);
+        switch (msgType)
+        {
+            case RECIVED_MSG:
+                receiveMessageMap.put(dto.getTransactionID(), dto);
+                break;
+            case SEND_SUCCESS_MSG:
+                sendSuccessMessageMap.put(dto.getTransactionID(), dto);
+                break;
+            case SEND_FAIL_MSG:
+                sendFailMessageMap.put(dto.getTransactionID(), dto);
+                break;
+        }
     }
 
     private synchronized void checkGateWayServer() throws NotifyPushRuntimeException {
@@ -143,7 +156,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
                     .replace(REGIST_ID_NM, regId);
 
-            nettyClient.write0(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
+            nettyClient.write(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
                             .channelID(this.channelID).transactionID(transactionId)
                             .destIp(destinationIp).data(jsonMsg).build());
 
@@ -171,13 +184,19 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         while(true)
         {
             final Map<String, PushMessageInfoDto> processedMap = recvMsgList.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionID, o -> o));
-            final List<PushMultiResponseDto> list = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
+            final List<PushMultiResponseDto> list = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null)
+                    .collect(Collectors.toList());
 
             log.trace("parserAsyncMessage0 [{}] = {}/{}", waitTime, listUser.size() - list.size(), listUser.size());
 
-            for(PushMultiResponseDto usr : list) {
-                PushMessageInfoDto responseMsg = receiveMessageMap.remove(usr.getPushId());
-                if(responseMsg != null) {
+            for (PushMultiResponseDto usr : list) {
+                PushMessageInfoDto responseMsg;
+
+                //responseMsg = sendSuccessMessageMap.remove(usr.getPushId())
+                //responseMsg = sendFailMessageMap.remove(usr.getPushId())
+
+                responseMsg = receiveMessageMap.remove(usr.getPushId());
+                if (responseMsg != null) {
                     recvMsgList.add(responseMsg);
                 }
             }
@@ -251,28 +270,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
 
         return null;
-    }
-
-    private PushMessageInfoDto getReceivedAsyncMessage(String transactionId) {
-
-        PushMessageInfoDto responseMsg;
-
-        responseMsg = receiveMessageMap.remove(transactionId);
-
-        if (responseMsg == null) {	// 현재 메모리에 결과가 없는 경우 주어진 시간 동안 대기한 후 다시 읽음
-            long readWaited = 0L;
-            while (responseMsg == null && readWaited < SECOND * 2) {
-                try {
-                    Thread.sleep(1L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                responseMsg = receiveMessageMap.remove(transactionId);
-                readWaited++;
-            }
-        }
-
-        return responseMsg;
     }
 
     private void waitTPS() {
