@@ -16,6 +16,10 @@ public interface PushMultiClient {
     String REGIST_ID_NM = "[@RegistId]";
     String TRANSACT_ID_NM = "[@TransactionId]";
 
+    enum MsgType {
+        RECIVED_MSG, SEND_SUCCESS_MSG, SEND_FAIL_MSG
+    }
+
     /**
      * Push Multi 전송
      *
@@ -28,6 +32,6 @@ public interface PushMultiClient {
      * Push 비동기 수신시 저장
      * @param dto
      */
-    void receiveAsyncMessage(PushMessageInfoDto dto);
+    void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto);
 
 }
