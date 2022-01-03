@@ -176,7 +176,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             log.trace("parserAsyncMessage0 [{}] = {}/{}", waitTime, listUser.size() - list.size(), listUser.size());
 
             for(PushMultiResponseDto usr : list) {
-                PushMessageInfoDto responseMsg = getReceivedAsyncMessage(usr.getPushId());
+                PushMessageInfoDto responseMsg = receiveMessageMap.remove(usr.getPushId());
                 if(responseMsg != null) {
                     recvMsgList.add(responseMsg);
                 }
@@ -197,6 +197,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         final Map<String, PushMessageInfoDto> processedMap = recvMsgList.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionID, o -> o));
         List<PushMultiResponseDto> listFailUser = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
 
+        log.debug("parserAsyncMessage time:{} = {}/{}", waitTime, listUser.size() - listFailUser.size(), listUser.size());
         return new ImmutablePair<>(recvMsgList, listFailUser);
     }
 
