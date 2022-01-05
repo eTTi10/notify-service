@@ -11,13 +11,10 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.exception.mmsagent.*;
-import com.lguplus.fleta.exception.mmsagent.ServerSettingInfoException;
-import com.sun.istack.NotNull;
+import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.lguplus.fleta.exception.mmsagent.DatabaseException;
-import java.lang.NumberFormatException;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +38,7 @@ public class MmsAgentDomainService {
      * @param sendMmsRequestDto
      * @return
      */
-    public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) {
+    public SuccessResponseDto sendMmsCode(SendMmsRequestDto sendMmsRequestDto) {
         //yml설정파일 객체생성
         mmsConfig = config.getMms();//1레벨 객체
         settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
@@ -64,7 +61,7 @@ public class MmsAgentDomainService {
             throw new BlackListException();//1506:
         }
 
-        if(settingApiList.size() <= 0) {
+        if(settingApiList.isEmpty()) {
             throw new BlackListException();//1506:
         }
         settingItem =  settingApiList.get(0);

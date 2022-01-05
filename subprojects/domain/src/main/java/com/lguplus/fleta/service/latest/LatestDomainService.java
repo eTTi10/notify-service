@@ -37,7 +37,7 @@ public class LatestDomainService {
      */
     public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
         List<LatestEntity> rs = latestRepository.getLatestList(latestRequestDto);
-        List<LatestDto> resultList = new ArrayList<LatestDto>();
+        List<LatestDto> resultList = new ArrayList<>();
         rs.forEach(e->{
             LatestDto item = latestMapper.toDto(e);
             resultList.add(item);
@@ -71,15 +71,12 @@ public class LatestDomainService {
      */
     public int deleteLatest(LatestRequestDto latestRequestDto) {
         int deleteCnt = latestRepository.deleteLatest(latestRequestDto);
-//        try {
+
         if (0 >= deleteCnt) {
             throw new DeleteNotFoundException("삭제대상없음");//1410
         } else {
             return deleteCnt;
         }
-//        } catch (Exception e) {
-//            throw new RuntimeException();
-//        }
     }
 
     /**
@@ -93,12 +90,10 @@ public class LatestDomainService {
 
         try {
             insertCnt = latestRepository.insertLatest(latestRequestDto);
+        }catch(BadSqlGrammarException e){
+            throw new DatabaseException();//8999 DB에러
         }catch(Exception e){
-            if(e instanceof BadSqlGrammarException){
-                throw new DatabaseException();//8999 DB에러
-            }else{
-                throw new RuntimeException();
-            }
+            throw new RuntimeException();
         }
         return insertCnt;
     }

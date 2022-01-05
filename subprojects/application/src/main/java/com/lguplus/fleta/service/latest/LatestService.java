@@ -27,12 +27,10 @@ public class LatestService {
     }
 
     public  int deleteLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.deleteLatest(latestRequestDto);
-        return result;
+        return latestDomainService.deleteLatest(latestRequestDto);
     }
 
     public  int insertLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.insertLatest(latestRequestDto);
-        return result;
+        return latestDomainService.insertLatest(latestRequestDto);
     }
 }
