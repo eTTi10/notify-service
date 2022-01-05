@@ -1,7 +1,6 @@
 package com.lguplus.fleta.provider.socket.pool;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
@@ -20,7 +19,7 @@ import java.util.Map;
 @Getter
 @Slf4j
 public class PushSocketInfo {
-    private Socket pushSocket;                  //Push 소켓
+    private final Socket pushSocket;                  //Push 소켓
     private String channelID;                   //Push Header channelID
     private String destIp;
     private int connPort;
@@ -28,9 +27,6 @@ public class PushSocketInfo {
     private static final String PUSH_ENCODING = "euc-kr";
     private static final int PUSH_MSG_HEADER_LEN = 64;
     private static final String PUSH_ID_NM = "push_id";
-    private static final String RESPONSE_ID_NM = "response";
-    private static final String RESPONSE_STATUS_CD = "status_code";
-    private static final String RESPONSE_STATUS_MSG = "statusmsg";
     private static final String SUCCESS = "SC";
     private static final String FAIL = "FA";
     private static final int CHANNEL_CONNECTION_REQUEST = 1;
@@ -49,6 +45,10 @@ public class PushSocketInfo {
     private boolean isFailure = false;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    public PushSocketInfo() {
+        pushSocket = new Socket();
+    }
+
     public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destIp) throws IOException {
 
         channelID = _channelID;
@@ -62,7 +62,6 @@ public class PushSocketInfo {
 
     public void connectPushServer(final String _host, final int _port, final int _timeout) throws IOException {
 
-        pushSocket = new Socket();
         pushSocket.connect(new InetSocketAddress(_host, _port), _timeout);
         pushSocket.setSoTimeout(_timeout);
     }
@@ -75,9 +74,9 @@ public class PushSocketInfo {
         byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
         this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
-        log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
-        log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
-        log.trace("[OpenSocket] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
+        //log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader))
+        //log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
+        //log.trace("[OpenSocket] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14))
 
         int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
         log.trace("[OpenSocket] 서버 응답 response_DataLength = " + responseDataLength);
@@ -109,8 +108,7 @@ public class PushSocketInfo {
     }
 
     public boolean isInValid() {
-        return (pushSocket == null
-                || !pushSocket.isConnected()
+        return (   !pushSocket.isConnected()
                 || !this.isOpened()
                 || this.isFailure());
     }
@@ -123,11 +121,11 @@ public class PushSocketInfo {
         return Instant.now().getEpochSecond() - this.getLastTransactionTime();
     }
 
-    private void sendHeaderMsg(int requestMsgId) throws IOException {
+    public void sendHeaderMsg(int requestMsgId) throws IOException {
         sendHeaderMsg(requestMsgId, null, null);
     }
 
-    private void sendHeaderMsg(int requestMsgId, String notiMsg, String transactionId) throws IOException {
+    public void sendHeaderMsg(int requestMsgId, String notiMsg, String transactionId) throws IOException {
 
         byte[] byteDATA = new byte[0];
         if(COMMAND_REQUEST == requestMsgId) {
@@ -243,8 +241,8 @@ public class PushSocketInfo {
             this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
             log.trace("[isServerInValidStatus] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
-            log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
-            log.trace("[isServerInValidStatus] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
+            //log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
+            //log.trace("[isServerInValidStatus] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14))
 
             int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
             log.trace("[isServerInValidStatus] 서버 응답 response_DataLength = " + responseDataLength);
@@ -268,33 +266,31 @@ public class PushSocketInfo {
         }
     }
 
-    public void closeSocket() {
-        log.trace("[===>closeSocket] {}", this);
+    public void closeSocket()  {
 
         try {
-            if(pushSocket != null) {
-                pushSocket.close();
-
-                if (!pushSocket.isClosed()) {
-                    pushSocket.getInputStream().close();
-                    pushSocket.getOutputStream().close();
-                    pushSocket.close();
-                }
-            }
-        } catch (IOException e) {
-            log.trace("[closeSocket]" + e.getMessage());
-        } finally {
-            isOpened = false;
+            closeSocketResource();
+        }
+        catch (IOException e) {
+            log.error("closeSocket io-exception : {}", e.getMessage());
         }
 
     }
 
+    public void closeSocketResource() throws IOException {
 
-    private short byteToShort(byte[] src) {
+        try (pushSocket) {
+            this.isOpened = false;
+            log.debug("[===>closeSocket] {}", this);
+        }
+
+    }
+
+    public short byteToShort(byte[] src) {
         return (short) ((src[0] & 0xff) << 8 | src[1] & 0xff);
     }
 
-    private int byteToInt(byte[] src, int... b) {
+    public int byteToInt(byte[] src, int... b) {
         int offset = 0;
         if(b.length > 0) {
             offset = b[0];
@@ -302,7 +298,7 @@ public class PushSocketInfo {
         return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
     }
 
-    private String getEncodeStr(byte[] src, int offset, int length) throws IOException {
+    public String getEncodeStr(byte[] src, int offset, int length) throws IOException {
         byte[] tmpArray = new byte[length];
         System.arraycopy(src, offset, tmpArray, 0, length);
         return new String(tmpArray, PUSH_ENCODING);
