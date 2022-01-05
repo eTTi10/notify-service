@@ -366,10 +366,10 @@ class MmsAgentDomainServiceTest {
 
         given( mmsSoap.sendMMS(anyMap(), any())).willReturn("9999");
         thrown = assertThrows(RuntimeException.class, () -> {
-            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
-        });
-        assertEquals(thrown instanceof RuntimeException, true);
         log.info("returnService RuntimeException 9999 End");
+        mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
+    });
+    assertEquals(thrown instanceof RuntimeException, true);
     }
 
 }
