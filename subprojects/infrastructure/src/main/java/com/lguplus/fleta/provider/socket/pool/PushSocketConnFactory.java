@@ -1,18 +1,14 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.lguplus.fleta.exception.push.PushBizException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
-import java.time.Instant;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
@@ -29,19 +25,19 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     }
 
     @Override
-    public PushSocketInfo create() {
+    public PushSocketInfo create() throws IOException {
 
         PushSocketInfo socketInfo = new PushSocketInfo();
 
-        try {
-            socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
-            log.trace("=== factory create Socket : {}", socketInfo);
-        } catch (PushBizException e) {
-            e.printStackTrace();
+        socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
+
+        if(!socketInfo.isOpened()) {
             socketInfo.closeSocket();
             log.debug("=== factory create Socket failure: {}", socketInfo);
             return null;
         }
+
+        log.debug("=== factory create Socket : {}", socketInfo);
 
         return socketInfo;
     }
@@ -55,26 +51,15 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
             return false;
         }
 
-        Socket socket = socketInfo.getPushSocket();
-
-        if(socket == null || socket.getInetAddress() == null || !socket.isConnected()
-           || !socketInfo.isOpened() || socketInfo.isFailure())
-        {
+        if(socketInfo.isInValid()) {
             return false;
         }
 
-        long connTime = Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime();
-
-        boolean timeover = serverInfo.getCloseSecond() <= (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
-
-        if(timeover && connTime < 300) {
-            log.debug("validateObject timeout: close_secs:{} time:{} info:{}", serverInfo.getCloseSecond()
-                    , (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime())
-                    , socketInfo);
+        if(socketInfo.isTimeoutStatus(serverInfo.getCloseSecond()) && socketInfo.getLastUsedSeconds() < 300) {
             socketInfo.isServerInValidStatus();
         }
 
-        return serverInfo.getCloseSecond() > (Instant.now().getEpochSecond() - socketInfo.getLastTransactionTime());
+        return !socketInfo.isTimeoutStatus(serverInfo.getCloseSecond());
     }
 
     @Override
@@ -89,19 +74,10 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         socketInfo.closeSocket();
     }
 
-    private String getChannelId() {
-        if(commChannelNum.get() >= 9999) {
-            commChannelNum.set(0);
-        }
+    private String getChannelId() throws UnknownHostException {
 
-        String hostname;
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            hostname = serverInfo.getDefaultChannelHost();
-        }
+        InetAddress addr = InetAddress.getLocalHost();
+        String hostname = addr.getHostName();
 
         hostname = hostname.replace("DESKTOP-", "");
         hostname = hostname + hostname;
@@ -111,7 +87,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         channelHostNm = "S" +  channelHostNm.substring(1);
 
-        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < CHANNEL_MAX_SEQ_NO) ? x+1 : 0));
+        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0));
     }
 
     @Getter
