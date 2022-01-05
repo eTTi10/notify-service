@@ -3,7 +3,6 @@ package com.lguplus.fleta.provider.socket;
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.push.PushBizException;
 import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.ToString;
