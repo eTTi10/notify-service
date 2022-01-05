@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.socket.multi;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
 import com.lguplus.fleta.client.PushMultiClient;
@@ -8,18 +8,17 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.Future;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.lang.Thread.*;
+import static java.lang.Thread.currentThread;
+import static java.lang.Thread.sleep;
 
 @Slf4j
 @Component
@@ -74,7 +74,6 @@ public class NettyTcpClient {
 	private static final int PROCESS_STATE_REQUEST_ACK = 14;
 	private static final int COMMAND_REQUEST_ACK = 16;
 	private static final String PUSH_ENCODING = "euc-kr";
-	private static final int CHANNEL_MAX_SEQ_NO = 10000;
 
 	private EventLoopGroup workerGroup;
 	private Bootstrap bootstrap = null;
@@ -424,12 +423,8 @@ public class NettyTcpClient {
 					transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
 					data = new String(byteData,2, byteData.length - 2, PUSH_ENCODING);
 
-					JsonNode jsonNodeR = objectMapper.readTree(data);
-
-					if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has(RESPONSE_STATUS_CD)) {
-						statusCode = jsonNodeR.get(RESPONSE_ID_NM).get(RESPONSE_STATUS_CD).asText();
-					}
-
+					PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, PushRcvStatusMsgWrapperVo.class);
+					statusCode = msgWrapperVo.getResponse().getStatusCode();
 				}
 			}
 
@@ -545,6 +540,33 @@ public class NettyTcpClient {
 			log.debug("userEventTriggered!");
 			ctx.fireUserEventTriggered(evt);
 		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	@ToString
+	static class PushRcvStatusMsgVo {
+		@JsonProperty("msg_id")
+		private String msgId;
+
+		@JsonProperty("push_id")
+		private String pushId;
+
+		@JsonProperty("status_code")
+		private String statusCode;
+
+		@JsonProperty("statusmsg")
+		private String statusMsg;
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
+	@AllArgsConstructor(access = AccessLevel.PRIVATE)
+	@ToString
+	static class PushRcvStatusMsgWrapperVo {
+		@JsonProperty("response")
+		private PushRcvStatusMsgVo response;
 	}
 
 }

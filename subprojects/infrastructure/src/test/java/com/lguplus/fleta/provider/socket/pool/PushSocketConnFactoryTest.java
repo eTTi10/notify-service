@@ -1,30 +1,19 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.google.common.primitives.Ints;
-import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.push.PushBizException;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
-import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.*;
-import java.net.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
