@@ -49,7 +49,7 @@ public class PushRequestBodySingleVo {
     //@Size(max = 1, message = "최대 호출횟수 초과", groups = Groups.C8.class)  // 1120
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> items;
+    private List<String> addItems;
 
     /** 사용자 ID */
     @NotNull(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C6.class)

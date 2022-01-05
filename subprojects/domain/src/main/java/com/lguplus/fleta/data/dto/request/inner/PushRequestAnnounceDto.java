@@ -16,6 +16,10 @@ public class PushRequestAnnounceDto {
     private String serviceId;
     private String pushType;
     private String msg;
-    private List<String> items;
+    private List<PushRequestItemDto> items;
+
+    public void setItems(List<PushRequestItemDto> items) {
+        this.items = items;
+    }
 
 }

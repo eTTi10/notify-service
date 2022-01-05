@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.data.dto.PushStatDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
@@ -57,10 +58,11 @@ class PushSingleSocketClientImplTest {
 
     @BeforeEach
     void setUp() {
-        List<String> items = new ArrayList<>();
-        items.add("badge!^1");
-        items.add("sound!^ring.caf");
-        items.add("cm!^aaaa");
+
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("30011")
@@ -68,7 +70,7 @@ class PushSingleSocketClientImplTest {
                 .appId("lguplushdtvgcm")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
 
         PushRequestSingleDto dto = pushRequestSingleDto;
@@ -82,12 +84,7 @@ class PushSingleSocketClientImplTest {
         paramMap.put("service_passwd", getSha512Pwd(dto.getAppId()));
         paramMap.put("service_key", dto.getRegId());
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         /////////////// LG
         pushRequestSingleDtoLg = PushRequestSingleDto.builder()
@@ -96,7 +93,7 @@ class PushSingleSocketClientImplTest {
                 .appId("smartux")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
 
         dto = pushRequestSingleDtoLg;
@@ -112,12 +109,7 @@ class PushSingleSocketClientImplTest {
         paramMapLg.put("noti_type", "POS");
         paramMapLg.put("regist_id", dto.getRegId());
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMax", "2");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMin", "1");
@@ -152,7 +144,12 @@ class PushSingleSocketClientImplTest {
 
     private void clearPool() {
         //ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
-        ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
+        try {
+            ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
+        }
+        catch (Exception e) {
+
+        }
     }
 
     //ok

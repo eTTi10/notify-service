@@ -45,7 +45,7 @@ public class PushRequestBodyMultiVo {
     /** 추가할 항목 입력(name!^value) */
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> items;
+    private List<String> addItems;
 
     /** 사용자 ID */
     @NotEmpty(message = "필수 BODY DATA 미존재[users]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C8.class)

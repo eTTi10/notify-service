@@ -16,10 +16,14 @@ public class PushRequestMultiDto {
     private String serviceId;
     private String pushType;
     private String msg;
-    private List<String> items;
+    private List<PushRequestItemDto> items;
 
     private String regId;
 
     private List<String> users;
+
+    public void setItems(List<PushRequestItemDto> items) {
+        this.items = items;
+    }
 
 }

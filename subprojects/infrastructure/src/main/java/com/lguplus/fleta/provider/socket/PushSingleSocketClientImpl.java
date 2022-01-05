@@ -113,9 +113,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
-        } catch (IOException e) {
-            log.error(e.toString());
-            return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
+
         } catch (Exception e) {
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("500").statusMsg("Internal Error").build();

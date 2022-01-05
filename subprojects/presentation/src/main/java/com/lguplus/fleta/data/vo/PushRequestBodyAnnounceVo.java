@@ -49,6 +49,6 @@ public class PushRequestBodyAnnounceVo {
     //@Size(max = 1, message = "최대 호출횟수 초과", groups = Groups.C8.class)  // 1120
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> items;
+    private List<String> addItems;
 
 }

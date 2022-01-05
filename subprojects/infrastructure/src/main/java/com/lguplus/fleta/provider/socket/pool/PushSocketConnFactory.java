@@ -27,17 +27,23 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @Override
     public PushSocketInfo create() throws IOException {
 
-        PushSocketInfo socketInfo = new PushSocketInfo();
+        PushSocketInfo socketInfo = createNewSocketInfo();
 
-        socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
-
-        if(!socketInfo.isOpened()) {
+        if(socketInfo.isInValid()) {
             socketInfo.closeSocket();
-            log.debug("=== factory create Socket failure: {}", socketInfo);
+            log.error("=== factory create Socket failure: {}", socketInfo);
             return null;
         }
+        else {
+            log.debug("=== factory create Socket : {}", socketInfo);
+            return socketInfo;
+        }
+    }
 
-        log.debug("=== factory create Socket : {}", socketInfo);
+    public PushSocketInfo createNewSocketInfo() throws IOException {
+
+        PushSocketInfo socketInfo = new PushSocketInfo();
+        socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
 
         return socketInfo;
     }
@@ -46,10 +52,6 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     public boolean validateObject(PooledObject<PushSocketInfo> p) {
 
         PushSocketInfo socketInfo = p.getObject();
-
-        if(socketInfo == null) {
-            return false;
-        }
 
         if(socketInfo.isInValid()) {
             return false;
@@ -74,7 +76,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         socketInfo.closeSocket();
     }
 
-    private String getChannelId() throws UnknownHostException {
+    private String getChannelId() throws IOException {
 
         InetAddress addr = InetAddress.getLocalHost();
         String hostname = addr.getHostName();
@@ -104,6 +106,5 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         private int closeSecond;
         private boolean isLgPush;
     }
-
 
 }

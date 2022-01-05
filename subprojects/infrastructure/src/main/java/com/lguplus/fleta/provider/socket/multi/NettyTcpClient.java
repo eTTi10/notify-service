@@ -27,6 +27,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -75,7 +76,6 @@ public class NettyTcpClient {
 	private static final int COMMAND_REQUEST_ACK = 16;
 	private static final String PUSH_ENCODING = "euc-kr";
 
-	private EventLoopGroup workerGroup;
 	private Bootstrap bootstrap = null;
 	private Channel channel = null;
 	private PushMultiClient pushMultiClient;
@@ -89,9 +89,8 @@ public class NettyTcpClient {
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 
 		if(Epoll.isAvailable()) { // Linux Epoll
-			this.workerGroup = new EpollEventLoopGroup(threadCount * 2);
 			bootstrap = new Bootstrap()
-					.group(this.workerGroup)
+					.group(new EpollEventLoopGroup(threadCount))
 					.channel(EpollSocketChannel.class)
 					.option(ChannelOption.TCP_NODELAY, true)
 					.option(ChannelOption.SO_KEEPALIVE, true)
@@ -106,10 +105,8 @@ public class NettyTcpClient {
 					});
 		}
 		else {
-			this.workerGroup = new NioEventLoopGroup(threadCount * 2);
-
 			bootstrap = new Bootstrap()
-					.group(this.workerGroup)
+					.group(new NioEventLoopGroup(threadCount))
 					.channel(NioSocketChannel.class)
 					.option(ChannelOption.TCP_NODELAY, true)
 					.option(ChannelOption.SO_KEEPALIVE, true)
@@ -171,7 +168,7 @@ public class NettyTcpClient {
 				log.debug("[NettyClient] The current channel has been disconnected.");
 			}
 		} catch (Exception ex) {
-			log.error("[NettyClient] connection closing : {}", ex);
+			log.error("[NettyClient] connection closing : {}", ex.getMessage());
 		}
 	}
 
@@ -356,9 +353,6 @@ public class NettyTcpClient {
 	private static class MessageDecoder extends ByteToMessageDecoder {
 
 		private final ObjectMapper objectMapper = new ObjectMapper();
-
-		private static final String RESPONSE_ID_NM = "response";
-		private static final String RESPONSE_STATUS_CD = "status_code";
 
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {

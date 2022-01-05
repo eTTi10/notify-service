@@ -4,6 +4,7 @@ import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
@@ -261,6 +262,12 @@ class PushDomainServiceTest {
     @Test
     void getExtraPushRequestDto() {
 
+
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
+
         //given
         PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                 .appId("30015")
@@ -268,7 +275,7 @@ class PushDomainServiceTest {
                 .pushType("L")
                 .msg("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
                 .regId("M00020200205")
-                .items(items)
+                .items(addItems)
                 .build();
 
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));

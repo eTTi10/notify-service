@@ -63,12 +63,7 @@ public class PushAnnounceDomainService {
             paramMap.put("noti_type", oldLgPushNotiType);
         }
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("!\\^");
-            if(item.length == 2){
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         //2. Send Announcement Push
         PushResponseDto pushResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);

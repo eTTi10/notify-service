@@ -16,8 +16,12 @@ public class PushRequestSingleDto {
     private String serviceId;
     private String pushType;
     private String msg;
-    private List<String> items;
+    private List<PushRequestItemDto> items;
 
     private String regId;
+
+    public void setItems(List<PushRequestItemDto> items) {
+        this.items = items;
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.push;
 
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +43,10 @@ class PushMultiServiceTest {
         items.add("sound!^ring.caf");
         items.add("cm!^aaaa");
 
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         PushRequestMultiDto pushRequestMultiDto = PushRequestMultiDto.builder()
                 .serviceId("lguplushdtvgcm")
@@ -49,7 +54,7 @@ class PushMultiServiceTest {
                 .appId("30011")
                 .users(items)
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
 
         PushClientResponseMultiDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);

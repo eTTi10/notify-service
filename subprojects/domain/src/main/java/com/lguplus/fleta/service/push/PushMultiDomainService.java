@@ -76,12 +76,7 @@ public class PushMultiDomainService {
             paramMap.put("service_key", PushMultiClient.REGIST_ID_NM);
         }
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         ObjectNode oNode = objectMapper.createObjectNode();
         oNode.set("request", objectMapper.valueToTree(paramMap));

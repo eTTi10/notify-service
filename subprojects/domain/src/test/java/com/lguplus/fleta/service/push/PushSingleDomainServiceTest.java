@@ -3,6 +3,7 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.PushStatDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
@@ -47,11 +48,17 @@ class PushSingleDomainServiceTest {
     PushRequestSingleDto pushRequestSingleDto;
 
     List<String> items;
+    List<PushRequestItemDto> addItems;
 
     @BeforeEach
     void setUp() {
 
         SetupProperties();
+
+        addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushSingleDomainService = new PushSingleDomainService(pushConfig, pushSingleClient);
 
@@ -68,7 +75,7 @@ class PushSingleDomainServiceTest {
                 .appId("lguplushdtvgcm")
                 .regId("-")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
 
         ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", "100");
@@ -139,19 +146,18 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_password_null() {
+
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
-                .serviceId("XXXXX")
+                .serviceId("XXXXX") //unknown service id
                 .pushType("G")
                 .appId("lguplushdtvgcm")
                 .regId("-")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
-        Exception thrown = assertThrows(ServiceIdNotFoundException.class, () -> {
+        assertThrows(ServiceIdNotFoundException.class, () -> {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
         });
-
-        Assertions.assertTrue(thrown instanceof ServiceIdNotFoundException);
     }
 
     @Test
@@ -177,7 +183,7 @@ class PushSingleDomainServiceTest {
                 .appId("lguplushdtvgcm")
                 .regId("-")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
 
@@ -356,7 +362,7 @@ class PushSingleDomainServiceTest {
                 .appId("lguplushdtvgcm")
                 .regId("-")
                 .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .items(addItems)
                 .build();
 
         PushClientResponseDto responseDto1 = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
