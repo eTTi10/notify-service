@@ -3,7 +3,6 @@ package com.lguplus.fleta.provider.socket.multi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Ints;
-import com.google.common.util.concurrent.Uninterruptibles;
 import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
@@ -11,7 +10,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.pool.ChannelHealthChecker;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -40,7 +38,7 @@ import static java.lang.Thread.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NettyClient {
+public class NettyTcpClient {
 
 	@Value("${push-comm.push.server.ip}")
 	private String host;
@@ -125,28 +123,6 @@ public class NettyClient {
 							p.addLast("handler", new MessageHandler(pushMultiClient));
 						}
 					});
-		}
-/* 예제 코드는 다음과 같습니다.
-참고.
-		ChannelPool channelPool = new FixedChannelPool(bootstrap, new AbstractChannelPoolHandler() {
-			@Override
-			public void channelCreated(Channel ch) {
-				log.debug("channel Created!");
-			}
-		}, new ChannelHealth(),FixedChannelPool.AcquireTimeoutAction.FAIL, 2000L, 100, 200);
-
-		SimpleChannelPool
-*/
-	}
-
-	static class ChannelHealth implements ChannelHealthChecker {
-
-		@Override
-		public Future<Boolean> isHealthy(Channel channel) {
-			EventLoop loop = channel.eventLoop();
-			channel.isActive();
-			//channel.metadata().
-			return channel.isActive()? loop.newSucceededFuture(Boolean.TRUE) : loop.newSucceededFuture(Boolean.FALSE);
 		}
 	}
 
@@ -243,7 +219,7 @@ public class NettyClient {
 		while(writeTryTimes < retryCount && !isFutureSuccess.get()) {
 
 			ChannelFuture awaitFuture = this.channel.writeAndFlush(message);
-			waitFutureDone(awaitFuture, 2000);
+			waitFutureDone(awaitFuture);
 
 			isFutureSuccess.set(awaitFuture.isSuccess());
 
@@ -286,45 +262,45 @@ public class NettyClient {
 		return response;
 	}
 
-	private <T extends Future<?>> void waitFutureDone(final T future, final long timeout) {
+	private <T extends Future<?>> void waitFutureDone(final T future) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		future.addListener(f -> latch.countDown());
-		Uninterruptibles.awaitUninterruptibly(latch, timeout, TimeUnit.MILLISECONDS);
+		//Uninterruptibles.awaitUninterruptibly(latch, 1000, TimeUnit.MILLISECONDS)
+
+		try {
+			boolean result = latch.await(2000, TimeUnit.MILLISECONDS);
+			if(!result) {
+				log.error("waitFutureDone awit Failure!");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 
 	private void setAttachment(int messageId) {
 		if (messageId == CHANNEL_CONNECTION_REQUEST) {
-			this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
+			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
 		}
 		else if(messageId == PROCESS_STATE_REQUEST) {
-			this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
+			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
 		}
 	}
 
 	private Object getAttachment(int messageId) {
-		Object msg = null;
+		Object msg;
 		if (messageId == CHANNEL_CONNECTION_REQUEST) {
-			msg = this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).get();
+			msg = this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).get();
+			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
 		}
 		else {
-			msg = this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).get();
-		}
-		if (msg != null) {
-			if (messageId == CHANNEL_CONNECTION_REQUEST) {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(null);
-			} else {
-				this.channel.attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(null);
-			}
+			msg = this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).get();
+			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
 		}
 
 		return msg;
 	}
 
 	private String getNextChannelID() {
-		if(commChannelNum.get() >= 9999) {
-			commChannelNum.set(0);
-		}
-
 		String hostname;
 		try {
 			InetAddress addr = InetAddress.getLocalHost();
@@ -342,7 +318,7 @@ public class NettyClient {
 
 		channelHostNm = "M" +  channelHostNm.substring(1);
 
-		return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < CHANNEL_MAX_SEQ_NO) ? x+1 : 0));
+		return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0));
 	}
 
 	@Slf4j
@@ -520,12 +496,12 @@ public class NettyClient {
 			if (message.getMessageID() == PROCESS_STATE_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
 				log.trace(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
-				ctx.channel().attr(AttributeKey.valueOf(NettyClient.ATTACHED_DATA_ID)).set(message);
+				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(message);
 			}
 			else if (message.getMessageID() == CHANNEL_CONNECTION_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
 				log.trace(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
-				ctx.channel().attr(AttributeKey.valueOf(NettyClient.ATTACHED_CONN_ID)).set(message);
+				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(message);
 			}
 			else if (message.getMessageID() == COMMAND_REQUEST_ACK) {
 				// Push 전송인 경우 response 결과를 임시 Map에 저장함.

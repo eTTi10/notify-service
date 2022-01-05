@@ -6,7 +6,7 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.*;
-import com.lguplus.fleta.provider.socket.multi.NettyClient;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Component
 public class PushMultiSocketClientImpl implements PushMultiClient {
 
-    private final NettyClient nettyClient;
+    private final NettyTcpClient nettyTcpClient;
 
     @Value("${push-comm.push.cp.destination_ip}")
     private String destinationIp;
@@ -116,21 +116,21 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private synchronized void checkGateWayServer() throws NotifyPushRuntimeException {
 
-        if (nettyClient.isInValid() || this.channelID == null) {
-            nettyClient.disconnect();
-            this.channelID = nettyClient.connect(this);
+        if (nettyTcpClient.isInValid() || this.channelID == null) {
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);
         }
 
         // Push GW 서버 connection이 유효한지 확인
-        if (nettyClient.isInValid()) {
+        if (nettyTcpClient.isInValid()) {
             throw new SocketException();
         }
 
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
         if(isServerInValidStatus()) {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
-            nettyClient.disconnect();
-            this.channelID = nettyClient.connect(this);	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
 
             if(isServerInValidStatus()) {
                 throw new ServiceUnavailableException();
@@ -157,14 +157,14 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
                     .replace(REGIST_ID_NM, regId);
 
-            nettyClient.write(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
+            nettyTcpClient.write(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
                             .channelID(this.channelID).transactionID(transactionId)
                             .destIp(destinationIp).data(jsonMsg).build());
 
             sendList.add(PushMultiResponseDto.builder().pushId(transactionId).statusCode("200").regId(regId).build());
 
             if(sendList.size() % FLUSH_COUNT == 0) {
-                nettyClient.flush();
+                nettyTcpClient.flush();
             }
 
             // TPS 설정에 따른 Time delay : 400건/sec
@@ -172,7 +172,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 waitTPS();
             }
         }
-        nettyClient.flush();
+        nettyTcpClient.flush();
 
         return sendList;
     }
@@ -296,7 +296,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             return true;
         }
 
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyClient.writeSync(
+        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
                 PushMessageInfoDto.builder().messageID(PROCESS_STATE_REQUEST)
                         .channelID(this.channelID).destIp(destinationIp)
                         .build());

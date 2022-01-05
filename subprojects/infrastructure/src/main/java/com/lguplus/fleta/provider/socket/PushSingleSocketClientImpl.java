@@ -8,6 +8,7 @@ import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +114,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
-        } catch (PushBizException e) {
+        } catch (IOException e) {
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
         } catch (Exception e) {
@@ -140,13 +142,20 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
 
         poolList = new ArrayList<>();
 
+        AbandonedConfig abandonedConfig = new AbandonedConfig();
+        abandonedConfig.setRemoveAbandonedOnMaintenance(true);
+        abandonedConfig.setRemoveAbandonedOnBorrow(true);
+        abandonedConfig.setRemoveAbandonedTimeout(250);
+
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVo)
-                , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin))));
+                , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin) ), abandonedConfig));
+
+        //AbandonedConfig : Remove 정책
 
         poolList.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
-                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin))));
+                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig));
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
@@ -167,6 +176,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
         poolConfig.setMinIdle(minIdle);   //20
         poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setMaxWaitMillis(2000);// 최대 대기 시간
+        poolConfig.setTestOnCreate(true);
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestOnReturn(true);
         poolConfig.setTestWhileIdle(true);
