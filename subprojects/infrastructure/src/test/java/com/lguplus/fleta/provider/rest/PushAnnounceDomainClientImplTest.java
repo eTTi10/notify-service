@@ -42,14 +42,14 @@ class PushAnnounceDomainClientImplTest {
     @Mock
     private PushMapper pushMapper;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    //private final ObjectMapper objectMapper = new ObjectMapper();
 
     Map<String, String> paramMap;
     String jsonNormal;
 
     @BeforeEach
     void setUp() {
-        pushAnnounceDomainClientImpl = new PushAnnounceDomainClientImpl(pushAnnounceFeignClient, pushConfig, objectMapper, pushMapper);
+        pushAnnounceDomainClientImpl = new PushAnnounceDomainClientImpl(pushAnnounceFeignClient, pushConfig, pushMapper);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");
