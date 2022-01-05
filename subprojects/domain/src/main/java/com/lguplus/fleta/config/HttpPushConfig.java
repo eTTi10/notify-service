@@ -24,14 +24,14 @@ public class HttpPushConfig {
     }
 
     public static class HttpPushExceptionCode {
-        private Map<String, String> httppush = new HashMap<>();
+        private Map<String, String> httpPush = new HashMap<>();
 
-        public Map<String, String> getHttppush() {
-            return httppush;
+        public Map<String, String> getHttpPush() {
+            return httpPush;
         }
 
-        public void setHttppush(Map<String, String> httppush) {
-            this.httppush = httppush;
+        public void setHttpPush(Map<String, String> httpPush) {
+            this.httpPush = httpPush;
         }
     }
 

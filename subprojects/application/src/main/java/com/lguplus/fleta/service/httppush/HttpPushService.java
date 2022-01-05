@@ -19,6 +19,8 @@ public class HttpPushService {
 
     private final HttpPushDomainService httpPushDomainService;
 
+    private final HttpMultiPushDomainService httpMultiPushDomainService;
+
 
     /**
      * 단건푸시등록
@@ -37,7 +39,7 @@ public class HttpPushService {
      * @return 멀티푸시등록 결과
      */
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
-        return httpPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
+        return httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
     }
 
 }
