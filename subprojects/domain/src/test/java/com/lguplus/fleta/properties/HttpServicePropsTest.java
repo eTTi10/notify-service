@@ -34,7 +34,7 @@ class HttpServicePropsTest {
         Map<String, String> codeMap = new HashMap<>();
         codeMap.put("ServiceIdNotFoundException", "1115");
 
-        JunitTestUtils.setValue(httpPushExceptionCode, "httppush", codeMap);
+        JunitTestUtils.setValue(httpPushExceptionCode, "httpPush", codeMap);
 
         HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage = new HttpPushConfig.HttpPushExceptionMessage();
         Map<String, String> messageMap = new HashMap<>();

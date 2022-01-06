@@ -178,6 +178,7 @@ public class HttpPushSupport {
      * @return 생성된 푸시맵
      */
     private Map<String, Object> makePushMap(HttpPushDto httpPushDto, String kind, String pushType) {
+        log.debug(kind, pushType);
         Map<String, Object> pushMap = new HashMap<>();
         pushMap.put("REQUEST_PART", httpPushDto.getRequestPart());
         pushMap.put("REQUEST_TIME", httpPushDto.getRequestTime());

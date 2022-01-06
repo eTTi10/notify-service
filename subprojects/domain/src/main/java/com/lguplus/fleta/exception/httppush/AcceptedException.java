@@ -1,7 +1,8 @@
 package com.lguplus.fleta.exception.httppush;
 
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 1112
@@ -9,7 +10,12 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class AcceptedException extends NotifyHttpPushRuntimeException {
+public class AcceptedException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
+    }
 
     /**
      *
