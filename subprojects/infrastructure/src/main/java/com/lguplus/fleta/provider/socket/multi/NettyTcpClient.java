@@ -27,7 +27,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -123,6 +122,7 @@ public class NettyTcpClient {
 	}
 
 	public String connect(PushMultiClient pushMultiClient) {
+
 		if(bootstrap == null) {
 			this.pushMultiClient = pushMultiClient;
 			initialize();
@@ -199,10 +199,6 @@ public class NettyTcpClient {
 	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
 
-		if (null == message) {
-			return null;
-		}
-
 		int retryCount = Integer.parseInt(pushCallRetryCnt);
 
 		//Clear
@@ -241,7 +237,7 @@ public class NettyTcpClient {
 				currentThread().interrupt();
 			}
 			response = getAttachment(message.getMessageID());
-			log.trace("try getAttachement: {} {}", readWaited, response);
+			log.debug("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
@@ -342,7 +338,7 @@ public class NettyTcpClient {
 			System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
 			System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
-			//log.debug("sendHeader Len =" + byteTotalData.length)
+			log.debug("MessageEncoder {}", message);
 
 			out.writeBytes(byteTotalData);
 		}
@@ -367,6 +363,8 @@ public class NettyTcpClient {
 			 */
 
 			Channel channel = ctx.channel();
+
+			log.debug("MessageDecoder in.readableBytes:{}", in.readableBytes());
 
 			if (!channel.isActive()) {
 				log.debug(":: MessageDecoder : isActive Error");
@@ -400,39 +398,56 @@ public class NettyTcpClient {
 			byte[] byteData = new byte[dataLength];
 			in.readBytes(byteData);
 
-			String transactionID = null;
 			String result;
-			String data = null;
-			String statusCode = null;
 			String channelId = new String(byteHeader, 32, 14, PUSH_ENCODING);
 
-			if (messageID == PROCESS_STATE_REQUEST_ACK) {
-				result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
-				//log.debug(":: MessageDecoder : PROCESS_STATE_REQUEST_ACK {} {}", messageID, result)
-			} else {
-				result = new String(byteData,0, 2, PUSH_ENCODING);
+			switch (messageID) {
+				case CHANNEL_CONNECTION_REQUEST_ACK:
+					log.debug("** decode message: CHANNEL_CONNECTION_REQUEST_ACK {}", CHANNEL_CONNECTION_REQUEST_ACK);
 
-				if (messageID == COMMAND_REQUEST_ACK) {
-					//log.debug(":: MessageDecoder : COMMAND_REQUEST_ACK {}", messageID)
-					transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
-					data = new String(byteData,2, byteData.length - 2, PUSH_ENCODING);
+					result = new String(byteData,0, 2, PUSH_ENCODING);
+					out.add(PushMessageInfoDto.builder()
+							.messageID(messageID)
+							.channelID(channelId)
+							.result(result)
+							.build());
+					break;
+
+				case PROCESS_STATE_REQUEST_ACK:
+					log.debug("** decode message: PROCESS_STATE_REQUEST_ACK {}", PROCESS_STATE_REQUEST_ACK);
+
+					result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
+					out.add(PushMessageInfoDto.builder()
+							.messageID(messageID)
+							.channelID(channelId)
+							.result(result)
+							.build());
+					break;
+
+				case COMMAND_REQUEST_ACK:
+					log.debug("** decode message: COMMAND_REQUEST_ACK {}", COMMAND_REQUEST_ACK);
+
+					result = new String(byteData,0, 2, PUSH_ENCODING);
+					String transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
+					String data = new String(byteData,2, byteData.length - 2, PUSH_ENCODING);
 
 					PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, PushRcvStatusMsgWrapperVo.class);
-					statusCode = msgWrapperVo.getResponse().getStatusCode();
-				}
+					String statusCode = msgWrapperVo.getResponse().getStatusCode();
+					out.add(PushMessageInfoDto.builder()
+							.messageID(messageID)
+							.transactionID(transactionID)
+							.channelID(channelId)
+							.result(result)
+							.data(data)
+							.statusCode(statusCode)
+							.build());
+					break;
+				default:
+					log.error("MessageDecoder unknown message {}", messageID);
+					break;
 			}
 
-			PushMessageInfoDto msg = PushMessageInfoDto.builder()
-					.messageID(messageID)
-					.transactionID(transactionID)
-					.channelID(channelId)
-					.result(result)
-					.data(data)
-					.statusCode(statusCode)
-					.build();
-
-			//log.debug(":: MessageDecoder : decode end~ : {}", msg)
-			out.add(msg);
+			log.debug("** decode end: {}", out.get(out.size()-1));
 		}
 
 		private short byteToShort(byte[] src) {
@@ -444,19 +459,7 @@ public class NettyTcpClient {
 		}
 
 		private boolean isValidMessageType(int type) {
-			switch (type) {
-				case 1:		//CHANNEL_CONNECTION_REQUEST
-				case 2:		//CHANNEL_CONNECTION_REQUEST_ACK
-				case 5:		//CHANNEL_RELEASE_REQUEST
-				case 6:		//CHANNEL_RELEASE_REQUEST_ACK
-				case 13:	//PROCESS_STATE_REQUEST
-				case 14:	//PROCESS_STATE_REQUEST_ACK
-				case 15:	//COMMAND_REQUEST
-				case 16:	//COMMAND_REQUEST_ACK
-					return true;
-				default:
-					return false;
-			}
+			return (type == CHANNEL_CONNECTION_REQUEST_ACK || type == PROCESS_STATE_REQUEST_ACK || type == COMMAND_REQUEST_ACK);
 		}
 
 	}
@@ -474,27 +477,21 @@ public class NettyTcpClient {
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-			PushMessageInfoDto message;
-			if (msg instanceof PushMessageInfoDto) {
-				message = (PushMessageInfoDto) msg;
-			} else {
-				log.error("[MessageHandler] message is not valid");
-				return;
-			}
+			PushMessageInfoDto message = (PushMessageInfoDto) msg;
 
 			if (message.getMessageID() == PROCESS_STATE_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-				log.trace(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
+				log.debug(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(message);
 			}
 			else if (message.getMessageID() == CHANNEL_CONNECTION_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-				log.trace(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
+				log.debug(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(message);
 			}
 			else if (message.getMessageID() == COMMAND_REQUEST_ACK) {
 				// Push 전송인 경우 response 결과를 임시 Map에 저장함.
-				log.trace(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
+				log.debug(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
 				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 			}
 
@@ -527,12 +524,6 @@ public class NettyTcpClient {
 		public void channelUnregistered(ChannelHandlerContext ctx) {
 			log.debug("channelUnregistered!");
 			ctx.fireChannelUnregistered();
-		}
-
-		@Override
-		public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-			log.debug("userEventTriggered!");
-			ctx.fireUserEventTriggered(evt);
 		}
 	}
 
