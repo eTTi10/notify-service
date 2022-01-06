@@ -129,8 +129,6 @@ class PushMultiDomainServiceTest {
         Assertions.assertEquals("200", responseMultiDto.getCode());
     }
 
-
-
     void SetupProperties() {
         StandardEnvironment environment = mock(StandardEnvironment.class);
 

@@ -15,10 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -71,13 +73,10 @@ class PushAnnounceDomainServiceTest {
     void requestAnnouncement_password_null() {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn(null);
-//        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto("200", ""));
 
-        Exception thrown = assertThrows(ServiceIdNotFoundException.class, () -> {
-            PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
+        assertThrows(ServiceIdNotFoundException.class, () -> {
+            pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         });
-
-        Assertions.assertTrue(thrown instanceof ServiceIdNotFoundException);
     }
 
     @Test
@@ -86,6 +85,8 @@ class PushAnnounceDomainServiceTest {
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
         given( pushConfig.getServiceLinkType(anyString()) ).willReturn("LGUPUSH_OLD");
         given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+
+        ReflectionTestUtils.setField(pushAnnounceDomainService, "tranactionMsgId", new AtomicInteger(9999));
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         Assertions.assertEquals("200", responseDto.getCode());
@@ -102,42 +103,10 @@ class PushAnnounceDomainServiceTest {
         for(String code : codeList) {
             given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
 
-            Exception thrown = assertThrows(NotifyPushRuntimeException.class, () -> {
-                PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
+            assertThrows(NotifyPushRuntimeException.class, () -> {
+                pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
             });
-
-            boolean isNotiPush = thrown instanceof NotifyPushRuntimeException;
-            if(isNotiPush)
-                count ++;
         }
-        assertEquals(count, codeList.size());
     }
 
-   // @Test
-    void requestAnnouncement_runtime_exception() {
-        //servicePwd null case
-        given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
-
-        List<String> codeList = Arrays.asList(new String[]{"-"});
-
-        int count = 0;
-        for(String code : codeList) {
-            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
-
-            Exception thrown = assertThrows(RuntimeException.class, () -> {
-                PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-            });
-
-            boolean isNotiPush = thrown instanceof RuntimeException;
-            if(isNotiPush)
-                count ++;
-        }
-        assertEquals(count, codeList.size());
-    }
-
-    /*
-    when(personApiService.getPersonListByFirstChar('c'))
-        .thenReturn(Collections.singletonList(Person.builder().name("corn").citySeq(4L).build()));
-    personService.savePerson('c');
-     */
 }
