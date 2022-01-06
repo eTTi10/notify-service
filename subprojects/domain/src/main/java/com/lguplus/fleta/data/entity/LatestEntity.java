@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.entity;
 
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.entity.id.LatestId;
 import lombok.*;
 

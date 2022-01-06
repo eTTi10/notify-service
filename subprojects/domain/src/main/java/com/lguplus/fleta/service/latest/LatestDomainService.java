@@ -10,6 +10,7 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
+import com.lguplus.fleta.exception.push.LatestException;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,7 +94,7 @@ public class LatestDomainService {
         }catch(BadSqlGrammarException e){
             throw new DatabaseException();//8999 DB에러
         }catch(Exception e){
-            throw new RuntimeException();
+            throw new LatestException();
         }
         return insertCnt;
     }

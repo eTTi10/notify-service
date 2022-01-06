@@ -17,6 +17,7 @@ import java.util.List;
 @Slf4j
 @Repository
 public class LatestJpaJpaRepository implements LatestRepository {
+    private String catIdStr = "catId";
 
     @PersistenceContext
     private EntityManager em;
@@ -28,7 +29,6 @@ public class LatestJpaJpaRepository implements LatestRepository {
      */
     @Override
     public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
-        String catId = latestRequestDto.getCatId();
         String sql = "SELECT SA_ID, MAC, CTN, REG_ID, CAT_ID, CAT_NAME, R_DATE, CATEGORY_GB \n" +
                 "FROM SMARTUX.PT_UX_LATEST \n" +
                 " WHERE  SA_ID = :saId " +
@@ -37,13 +37,12 @@ public class LatestJpaJpaRepository implements LatestRepository {
         sql += " AND CAT_ID = :catId OR :catId = '' ";
         sql += " ORDER BY SA_ID, MAC, CTN";
 
-        List<LatestEntity> rs = (List<LatestEntity>) em.createNativeQuery(sql, LatestEntity.class)
+        return em.createNativeQuery(sql, LatestEntity.class)
                 .setParameter("saId",latestRequestDto.getSaId())
                 .setParameter("mac",latestRequestDto.getMac())
                 .setParameter("ctn",latestRequestDto.getCtn())
-                .setParameter("catId", catId)
+                .setParameter(catIdStr, latestRequestDto.getCatId())
                 .getResultList();
-        return rs;
     }
 
     /**
@@ -59,12 +58,11 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 " AND  MAC = :mac " +
                 " AND  CTN = :ctn ";
 
-        List<LatestCheckEntity> rs = (List<LatestCheckEntity>) em.createNativeQuery(sql, LatestCheckEntity.class)
+        return em.createNativeQuery(sql, LatestCheckEntity.class)
                 .setParameter("saId",latestRequestDto.getSaId())
                 .setParameter("mac",latestRequestDto.getMac())
                 .setParameter("ctn",latestRequestDto.getCtn())
                 .getResultList();
-        return rs;
     }
 
     /**
@@ -76,6 +74,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
     @Modifying
     @Transactional
     public int deleteLatest(LatestRequestDto latestRequestDto) {
+
         String sql = "DELETE FROM SMARTUX.PT_UX_LATEST \n" +
                 "WHERE SA_ID = :saId \n" +
                 " AND MAC = :mac " +
@@ -86,10 +85,9 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 .setParameter("saId",latestRequestDto.getSaId())
                 .setParameter("mac",latestRequestDto.getMac())
                 .setParameter("ctn",latestRequestDto.getCtn())
-                .setParameter("catId",latestRequestDto.getCatId())
+                .setParameter(catIdStr,latestRequestDto.getCatId())
                 ;
-        int execCnt = nativeQuery.executeUpdate();
-        return execCnt;
+        return nativeQuery.executeUpdate();
     }
 
 
@@ -122,8 +120,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 .setParameter("catName",latestRequestDto.getCatName())
                 .setParameter("categoryGb",latestRequestDto.getCategoryGb());
 
-        int execCnt = nativeQuery.executeUpdate();
-        return execCnt;
+        return nativeQuery.executeUpdate();
 
     }
 

@@ -10,6 +10,7 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
+import com.lguplus.fleta.exception.push.LatestException;
 import com.lguplus.fleta.repository.LatestRepository;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -325,7 +326,7 @@ class LatestDomainServiceTest {
             exception = e;
         }
         assertThat(exception).isInstanceOf(DeleteNotFoundException.class);
-        assertThat(exception).isInstanceOf(RuntimeException.class);
+        assertThat(exception).isInstanceOf(LatestException.class);
 
         log.info("LatestServiceTest.deleteLatestDeleteNotFoundException End");
     }

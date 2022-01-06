@@ -5,7 +5,6 @@ import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -28,9 +27,8 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("stb_mac",parm.getStbMac());
         parmMap.put("code_id",parm.getCodeId());
         parmMap.put("svc_type",parm.getSvcType());
-        CallSettingResultMapDto apiMap = mmsApi.callSettingApi(parmMap);
-        return apiMap;
-    };
+        return mmsApi.callSettingApi(parmMap);
+    }
 
     /**
      * Sms메세지 목록
@@ -44,8 +42,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("stb_mac",parm.getStbMac());
         parmMap.put("code_id",parm.getCodeId());
         parmMap.put("svc_type",parm.getSvcType());
-        CallSettingResultMapDto apiMap = smsApi.callSettingApi(parmMap);
-        return apiMap;
-    };
+        return smsApi.callSettingApi(parmMap);
+    }
 
 }

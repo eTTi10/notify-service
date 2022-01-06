@@ -3,6 +3,7 @@ package com.lguplus.fleta.data.vo;
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.validation.Groups;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
@@ -47,16 +48,9 @@ public class LatestPostRequestVo {
     private String catName;
 
     @ParamAlias("category_gb") //카테고리 구분
-    //@Value("I20") <-- 적용이 되지 않았음
-    //@NotBlank(message = "[카테고리 구분]가 입력되지 않았습니다.")
-    private String categoryGb;
-
-    public String getCategoryGb() {
-        if(StringUtils.isEmpty(categoryGb) || categoryGb == null || "null".equals(categoryGb)){
-            return "I20";
-        }
-        return categoryGb;
-    }
+    @NotBlank(message = "[카테고리 구분]가 입력되지 않았습니다.")
+    @Builder.Default
+    private String categoryGb = "I20";//디폴트값이 잘 적용되는지 테스트 해볼것
 
     //LatestRequestDto
     public LatestRequestDto convert() {
