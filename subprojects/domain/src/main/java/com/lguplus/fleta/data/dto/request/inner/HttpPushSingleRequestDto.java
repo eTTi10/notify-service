@@ -1,10 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 

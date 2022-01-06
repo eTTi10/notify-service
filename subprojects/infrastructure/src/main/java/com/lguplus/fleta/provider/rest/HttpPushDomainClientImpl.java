@@ -67,6 +67,7 @@ public class HttpPushDomainClientImpl implements HttpPushDomainClient {
      * @return 기본 URL
      */
     private String getBaseUrl(String kind) {
+        log.debug(kind);
         // 단건, 멀티
         return protocolSingle + "://" + hostSingle + ":" + httpPortSingle;
     }

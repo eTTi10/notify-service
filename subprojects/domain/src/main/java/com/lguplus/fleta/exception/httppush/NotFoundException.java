@@ -1,7 +1,6 @@
 package com.lguplus.fleta.exception.httppush;
 
 import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 
 /**
  * Exception for error flag 1107

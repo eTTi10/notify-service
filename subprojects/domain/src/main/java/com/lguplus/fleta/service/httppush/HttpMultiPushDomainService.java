@@ -8,6 +8,7 @@ import com.lguplus.fleta.exception.httppush.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,8 +37,6 @@ public class HttpMultiPushDomainService {
 
     private final HttpPushSupport httpPushSupport;
 
-    private final Object lock = new Object();
-
     @Value("${multi.push.max.tps}")
     private String maxMultiCount;
 
@@ -54,90 +53,14 @@ public class HttpMultiPushDomainService {
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
         log.debug("httpPushMultiRequestDto ::::::::::::::: {}", httpPushMultiRequestDto);
 
-        // 초당 최대 Push 전송 허용 갯수
-        int maxLimitPush = Integer.parseInt(maxMultiCount);
-
-        log.debug("before maxMultiCount :::::::::::: {}", maxLimitPush);
-
-        if (httpPushMultiRequestDto.getMultiCount() != null && httpPushMultiRequestDto.getMultiCount() < maxLimitPush) {
-            maxLimitPush = httpPushMultiRequestDto.getMultiCount();
-        }
-
-        log.debug("after maxMultiCount :::::::::::: {}", maxLimitPush);
-
-        List<String> failUsers = new ArrayList<>();
-        List<Future<String>> resultList = new ArrayList<>();
-
-        // Push GW 제한 성능 문제로 동시 발송을 허용하지 않음.
-        synchronized (lock) {
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
-
-            int count = 1;
-            long timestamp = System.currentTimeMillis();
-            String[] rejectRegList = rejectReg.split("\\|");
-
-            // Push 메시지 전송
-            String appId = httpPushMultiRequestDto.getAppId();
-            String serviceId = httpPushMultiRequestDto.getServiceId();
-            String pushType = httpPushMultiRequestDto.getPushType();
-            String msg = httpPushMultiRequestDto.getMsg();
-            List<String> items = httpPushMultiRequestDto.getItems();
-
-            List<String> users = httpPushMultiRequestDto.getUsers();
-
-            for (String regId : users) {
-                // 사용자별 필수 값 체크 & 발송 제외 가번 확인
-                if (Arrays.asList(rejectRegList).contains(regId.strip())) {
-                    continue;
-                }
-
-                resultList.add(executor.submit(() -> {
-                            try {
-                                Map<String, Object> paramMap = httpPushSupport.makePushParameters(appId, serviceId, pushType, msg, regId, items);
-
-                                OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushSingle(paramMap);
-
-                                return regId + "|" + openApiPushResponseDto.getError().get("CODE");
-
-                            } catch (HttpPushCustomException ex) {
-                                if (ex.getStatusCode() >= 500) {
-                                    return regId + "|" + "900";
-                                }
-
-                                return regId + "|" + ex.getStatusCode();
-
-                            } catch (Exception ex) {
-                                return regId + "|" + "900";
-                            }
-                        })
-                );
-
-                // TPS 설정에 따른 Time delay
-                if (count % maxLimitPush == 0) {
-                    long timeMillis = System.currentTimeMillis() - timestamp;
-
-                    if (timeMillis < HttpServiceProps.SECOND) {
-                        try {
-                            Thread.sleep(HttpServiceProps.SECOND - timeMillis);
-
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-
-                            throw new HttpPushEtcException("기타 오류");
-                        }
-                    }
-
-                    timestamp = System.currentTimeMillis();
-                }
-                count++;
-            }
-
-            executor.shutdown();
-        }
-
         String[] result;
         String regId = "";
         String code = "";
+
+        // Open API 에 멀티푸시를 요청한다.
+        List<Future<String>> resultList = requestOpenApi(httpPushMultiRequestDto);
+
+        List<String> failUsers = new ArrayList<>();
 
         for (Future<String> future : resultList) {
             try {
@@ -206,6 +129,116 @@ public class HttpMultiPushDomainService {
                 .message(cdMsgMap.getRight())
                 .failUsers(failUsers)
                 .build();
+    }
+
+    /**
+     * 초당 최대 Push 전송 허용 갯수를 가져온다.
+     *
+     * @param multiCount client 에서 넘어온 초당 최대 Push 전송 허용 갯수
+     * @return 구해진 초당 최대 Push 전송 허용 갯수
+     */
+    private int setMaxLimitPush(Integer multiCount) {
+        int maxLimitPush = Integer.parseInt(maxMultiCount);
+
+        log.debug("before maxMultiCount :::::::::::: {}", maxLimitPush);
+
+        if (multiCount != null && multiCount < maxLimitPush) {
+            maxLimitPush = multiCount;
+        }
+
+        log.debug("after maxMultiCount :::::::::::: {}", maxLimitPush);
+
+        return maxLimitPush;
+    }
+
+    /**
+     * Open API 에 멀티푸시를 요청한다.(Push GW 제한 성능 문제로 동시 발송을 허용하지 않음.)
+     *
+     * @param httpPushMultiRequestDto 멀티푸시등록 요청 DTO
+     * @return Open API 에 요청한 멀티푸시 리스트
+     */
+    @Synchronized
+    private List<Future<String>> requestOpenApi(HttpPushMultiRequestDto httpPushMultiRequestDto) {
+        // 초당 최대 Push 전송 허용 갯수
+        int maxLimitPush = setMaxLimitPush(httpPushMultiRequestDto.getMultiCount());
+
+        List<Future<String>> resultList = new ArrayList<>();
+
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+
+        int count = 1;
+        long timestamp = System.currentTimeMillis();
+        String[] rejectRegList = rejectReg.split("\\|");
+
+        // Push 메시지 전송
+        String appId = httpPushMultiRequestDto.getAppId();
+        String serviceId = httpPushMultiRequestDto.getServiceId();
+        String pushType = httpPushMultiRequestDto.getPushType();
+        String msg = httpPushMultiRequestDto.getMsg();
+        List<String> items = httpPushMultiRequestDto.getItems();
+
+        List<String> users = httpPushMultiRequestDto.getUsers();
+
+        for (String regId : users) {
+            // 사용자별 필수 값 체크 & 발송 제외 가번 확인
+            if (Arrays.asList(rejectRegList).contains(regId.strip())) {
+                continue;
+            }
+
+            resultList.add(executor.submit(() -> {
+                        try {
+                            Map<String, Object> paramMap = httpPushSupport.makePushParameters(appId, serviceId, pushType, msg, regId, items);
+
+                            OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushSingle(paramMap);
+
+                            return regId + "|" + openApiPushResponseDto.getError().get("CODE");
+
+                        } catch (HttpPushCustomException ex) {
+                            if (ex.getStatusCode() >= 500) {
+                                return regId + "|" + "900";
+                            }
+
+                            return regId + "|" + ex.getStatusCode();
+
+                        } catch (Exception ex) {
+                            return regId + "|" + "900";
+                        }
+                    })
+            );
+
+            // TPS 설정에 따른 Time delay
+            if (count % maxLimitPush == 0) {
+                timestamp = delayTime(timestamp);
+            }
+            count++;
+        }
+
+        executor.shutdown();
+
+        return resultList;
+    }
+
+    /**
+     * TPS 설정에 따라 Time 을 delay 시킨다.
+     *
+     * @param timestamp 요청 time
+     * @return delay 후의 현재 time
+     */
+    private long delayTime(long timestamp) {
+        long timeMillis = System.currentTimeMillis() - timestamp;
+
+        if (timeMillis < HttpServiceProps.SECOND) {
+            try {
+                Thread.sleep(HttpServiceProps.SECOND - timeMillis);
+
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+
+                throw new HttpPushEtcException("기타 오류");
+            }
+        }
+
+        return System.currentTimeMillis();
     }
 
 }
