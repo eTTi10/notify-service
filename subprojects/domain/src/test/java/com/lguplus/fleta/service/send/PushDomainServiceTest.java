@@ -59,10 +59,10 @@ class PushDomainServiceTest {
 
         //response given
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("musicshow_gcm")
+                .applicationId("musicshow_gcm")
                 .serviceId("30104")
                 .pushType("G")
-                .msg("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
+                .message("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
                 .users(List.of("M00020200205"))
                 .items(List.of("badge!^1", "sound!^ring.caf", "cm!^aaaa"))
                 .build();
@@ -109,7 +109,7 @@ class PushDomainServiceTest {
     @DisplayName("정상적으로 regId를 가져오는 지 확인")
     void getRegistrationID() {
         //given
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
@@ -129,7 +129,7 @@ class PushDomainServiceTest {
     void getRegistrationIDbyCtn() {
 
         //given
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
         String ctn = REG_ID;
 
@@ -147,7 +147,7 @@ class PushDomainServiceTest {
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
 
         //serviceType : C
@@ -200,7 +200,7 @@ class PushDomainServiceTest {
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
 
         HttpPushSingleRequestDto result;
@@ -230,7 +230,7 @@ class PushDomainServiceTest {
 
         //정상
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
 
         HttpPushSingleRequestDto result;
@@ -274,7 +274,7 @@ class PushDomainServiceTest {
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
 
         //serviceType : C

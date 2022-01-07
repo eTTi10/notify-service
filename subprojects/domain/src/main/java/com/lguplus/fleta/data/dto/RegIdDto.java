@@ -14,5 +14,5 @@ import java.io.Serializable;
 @SuperBuilder
 public class RegIdDto implements Serializable {
 
-    private String regId;
+    private String registrationId;
 }

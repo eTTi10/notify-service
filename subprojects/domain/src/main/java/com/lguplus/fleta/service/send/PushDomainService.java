@@ -27,7 +27,7 @@ public class PushDomainService {
     private String extraServiceId;
 
     @Value("${fcm.extra.appid}")
-    private String extraAppId;
+    private String extraApplicationId;
 
     private final PersonalizationDomainClient personalizationDomainClient;
     private final SubscriberDomainClient subscriberDomainClient;
@@ -46,12 +46,12 @@ public class PushDomainService {
         inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
 
         RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow();
-        return regIdDto.getRegId();
+        return regIdDto.getRegistrationId();
 
     }
 
     /**
-     * ctn을 이용해 regId 조회
+     * ctn을 이용해 registrationId 조회
      * @param ctn
      * @return
      */
@@ -63,19 +63,19 @@ public class PushDomainService {
         inputMap.put("ctn", ctn);
 
         RegIdDto regIdDto = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
-        return regIdDto.getRegId();
+        return regIdDto.getRegistrationId();
 
     }
 
     /**
-     * GCM(pushType) or U+tv(serviceType)용 request dto 조립  
+     * GCM(pushType) or U+tv(serviceType)용 request dto 조립
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
      */
     public HttpPushSingleRequestDto getGcmOrTVRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
-        String regId = sendPushCodeRequestDto.getRegId();
+        String registrationId = sendPushCodeRequestDto.getRegId();
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
@@ -86,8 +86,8 @@ public class PushDomainService {
         log.debug("sendPushCodeRequestDto.getReserve() : {}", sendPushCodeRequestDto.getReserve());
         log.debug("paramMap : {}", paramMap);
 
-        String paramList;
-        String[] pushParamList;
+        String params;
+        String[] pushParams;
         int paramSize =0;
 
         //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
@@ -103,7 +103,7 @@ public class PushDomainService {
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = appInfoMap.get("gcm.serviceid");
-        String appId = appInfoMap.get("gcm.appid");
+        String applicationId = appInfoMap.get("gcm.appid");
         String payload = pushInfoMap.get("gcm.payload.body");
         String payloadItem = pushInfoMap.get("apns.payload.item");  //APNS전용 추가 item
 
@@ -111,26 +111,26 @@ public class PushDomainService {
         if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
             serviceId = appInfoDefaultMap.get("gcm.serviceid");
-            appId = appInfoDefaultMap.get("gcm.appid");
+            applicationId = appInfoDefaultMap.get("gcm.appid");
         }
 
-        log.debug("sendPushCtn  : {} {} {}", serviceId, appId, payload);
+        log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
 
         //reserve에 들어갈 내용을
-        paramList = pushInfoMap.get("param.list");;
-        pushParamList = paramList.split("\\|");
-        paramSize = pushParamList.length;
+        params = pushInfoMap.get("param.list");;
+        pushParams = params.split("\\|");
+        paramSize = pushParams.length;
 
 
         for (int index = 0; index < paramSize; index++) {
             try {
-                payload = payload.replace("[+" + pushParamList[index] + "]", paramMap.get(pushParamList[index]));
+                payload = payload.replace("[+" + pushParams[index] + "]", paramMap.get(pushParams[index]));
             } catch (Exception e) {
-                payload = payload.replace("[+" + pushParamList[index] + "]", "");
+                payload = payload.replace("[+" + pushParams[index] + "]", "");
             }
         }
 
-        regId = (regType.equals("2")) ? getRegistrationIDbyCtn(regId) : regId;
+        registrationId = (regType.equals("2")) ? getRegistrationIDbyCtn(registrationId) : registrationId;
 
         if(pushType.equals("A")) {
             //APNS일 경우 items의 맨 앞에 payloaditem를 끼워 넣는다.
@@ -138,11 +138,11 @@ public class PushDomainService {
         }
 
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(applicationId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(payload)
-                .users(List.of(regId))
+                .message(payload)
+                .users(List.of(registrationId))
                 .items(items)
                 .build();
     }
@@ -155,7 +155,7 @@ public class PushDomainService {
      */
     public HttpPushSingleRequestDto getApnsRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
-        String regId = sendPushCodeRequestDto.getRegId();
+        String registrationId = sendPushCodeRequestDto.getRegId();
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
@@ -175,13 +175,13 @@ public class PushDomainService {
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = appInfoMap.get("apns.serviceid");
-        String appId = appInfoMap.get("apns.appid");
+        String applicationId = appInfoMap.get("apns.appid");
         String payload = pushInfoMap.get("apns.payload.body");
         String payloadItem = pushInfoMap.get("apns.payload.item");  //APNS전용 추가 item
 
         if (serviceTarget.equals("") || serviceTarget.equals("H")) {
             serviceId = appInfoDefaultMap.get("apns.serviceid");
-            appId = appInfoDefaultMap.get("apns.appid");
+            applicationId = appInfoDefaultMap.get("apns.appid");
         }
 
         //reserve에 들어갈 내용을
@@ -191,7 +191,7 @@ public class PushDomainService {
 
         log.debug("pushinfo.{}.param.list : {}", sendCode, pushParamList);
 
-        log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, appId, payload, payloadItem);
+        log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, applicationId, payload, payloadItem);
 
         for (int index = 0; index < paramSize; index++) {
             try {
@@ -201,17 +201,17 @@ public class PushDomainService {
             }
         }
 
-        regId = (regType.equals("2")) ? getRegistrationIDbyCtn(regId) : regId;
+        registrationId = (regType.equals("2")) ? getRegistrationIDbyCtn(registrationId) : registrationId;
 
         //APNS일 경우 items의 맨 앞에 payloaditem를 끼워 넣는다.
         items.add(0, payloadItem);
 
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(applicationId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(payload)
-                .users(List.of(regId))
+                .message(payload)
+                .users(List.of(registrationId))
                 .items(items)
                 .build();
     }
@@ -224,7 +224,7 @@ public class PushDomainService {
      */
     public HttpPushSingleRequestDto getPosRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
-        String regId = sendPushCodeRequestDto.getRegId();
+        String registrationId = sendPushCodeRequestDto.getRegId();
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
@@ -240,16 +240,16 @@ public class PushDomainService {
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
         String serviceId = Optional.ofNullable(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
-        String appId = Optional.ofNullable(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+        String applicationId = Optional.ofNullable(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
 
         //reg_id를 기입하지 않았다면 DB에서 RegID를 찾아서 처리한다.
-        regId = StringUtils.defaultIfEmpty(regId, getRegistrationID(sendPushCodeRequestDto));
+        registrationId = StringUtils.defaultIfEmpty(registrationId, getRegistrationID(sendPushCodeRequestDto));
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(applicationId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(bodyLgPush)
-                .users(List.of(regId))
+                .message(bodyLgPush)
+                .users(List.of(registrationId))
                 .items(items)
                 .build();
     }
@@ -262,7 +262,7 @@ public class PushDomainService {
      */
     public PushRequestSingleDto getExtraPushRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
-        String regId = sendPushCodeRequestDto.getRegId();
+        String registrationId = sendPushCodeRequestDto.getRegId();
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String regType = sendPushCodeRequestDto.getRegType();
@@ -315,14 +315,14 @@ public class PushDomainService {
             items.add(0, payloadItem);
         }
 
-        regId = getRegistrationID(sendPushCodeRequestDto);
+        registrationId = getRegistrationID(sendPushCodeRequestDto);
 
         return PushRequestSingleDto.builder()
-                .appId(extraAppId)
+                .appId(extraApplicationId)
                 .serviceId(extraServiceId)
                 .pushType("L")
                 .msg(payload)
-                .regId(regId)
+                .regId(registrationId)
                 .items(items)
                 .build();
     }
