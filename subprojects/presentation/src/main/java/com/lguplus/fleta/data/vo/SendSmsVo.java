@@ -6,11 +6,13 @@ import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.exception.ParameterMissingException;
 import com.lguplus.fleta.validation.Groups;
 import lombok.Getter;
+import lombok.ToString;
 
 import javax.validation.GroupSequence;
 import javax.validation.constraints.NotBlank;
 
 @Getter
+@ToString
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, SendSmsVo.class})
 public class SendSmsVo {
 
@@ -26,13 +28,12 @@ public class SendSmsVo {
     @ParamAlias("msg")
     private String msg;
 
-/*    public SendSmsRequestDto convert(){
+    public SendSmsRequestDto convert(){
 
         return SendSmsRequestDto.builder()
-                .sCtn(getSCtn().replace("-", "").replace(".", ""))
-                .rCtn(getRCtn().replace("-", "").replace(".", ""))
+                .sCtn(getSCtn().replace("-", "").replace(".", ""))                .rCtn(getRCtn().replace("-", "").replace(".", ""))
                 .msg(getMsg())
                 .build();
-    }*/
+    }
 
 }
