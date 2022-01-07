@@ -6,7 +6,7 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.*;
-import com.lguplus.fleta.provider.socket.multi.NettyClient;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 @Component
 public class PushMultiSocketClientImpl implements PushMultiClient {
 
-    private final NettyClient nettyClient;
+    private final NettyTcpClient nettyTcpClient;
 
     @Value("${push-comm.push.cp.destination_ip}")
     private String destinationIp;
@@ -44,7 +44,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private static final String SUCCESS = "SC";
     private static final int PROCESS_STATE_REQUEST = 13;
     private static final int COMMAND_REQUEST = 15;
-    private static final int FLUSH_COUNT = 20;
+    private static final int FLUSH_COUNT = 100;
 
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
     private final AtomicLong sendMsgCount = new AtomicLong(0);
@@ -52,6 +52,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private String channelID;
     private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
+    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendSuccessMessageMap = new ConcurrentHashMap<>()
+    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendFailMessageMap = new ConcurrentHashMap<>()
     private final Object sendLock = new Object();
 
     /**
@@ -69,16 +71,17 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         synchronized (sendLock)
         {
             // Push 메시지 전송 via G/W (비동기 호출)
-            List<PushMultiResponseDto> listUser = sendAsyncMessage(dto);
+            final List<PushMultiResponseDto> listUser = sendAsyncMessage(dto);
 
-            // Push 메시지 수신 처리
+            log.debug("requestPushMulti thread:{} reguser-count: {}",  Thread.currentThread().getId(), listUser.size());
+              // Push 메시지 수신 처리
             ImmutablePair<List<PushMessageInfoDto>, List<PushMultiResponseDto>> requstInfo = parserAsyncMessage(listUser);
             List<PushMessageInfoDto> recvMsgList = requstInfo.getLeft();
             List<PushMultiResponseDto> listFailUser = requstInfo.getRight();
 
             analyzeReceivedMessage(dto, recvMsgList, listUser, listFailUser);
 
-            log.trace("requestPushMulti recv-count: {}", (long) recvMsgList.size());
+            log.debug("requestPushMulti thread:{} recv-count: {}",  Thread.currentThread().getId(), recvMsgList.size());
 
             if (listFailUser.isEmpty()) {
                 return PushMultiResponseDto.builder().statusCode("200").statusMsg("성공").build();
@@ -95,28 +98,39 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     }
 
     @Override
-    public void receiveAsyncMessage(PushMessageInfoDto dto) {
+    public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
         //log.debug("receiveAsyncMessage : {}, {}", dto.getTransactionID(), dto)
-        receiveMessageMap.putIfAbsent(dto.getTransactionID(), dto);
+        switch (msgType)
+        {
+            case RECIVED_MSG:
+                receiveMessageMap.put(dto.getTransactionID(), dto);
+                break;
+            case SEND_SUCCESS_MSG:
+                //sendSuccessMessageMap.put(dto.getTransactionID(), dto)
+                break;
+            case SEND_FAIL_MSG:
+                //sendFailMessageMap.put(dto.getTransactionID(), dto)
+                break;
+        }
     }
 
     private synchronized void checkGateWayServer() throws NotifyPushRuntimeException {
 
-        if (nettyClient.isInValid() || this.channelID == null) {
-            nettyClient.disconnect();
-            this.channelID = nettyClient.connect(this);
+        if (nettyTcpClient.isInValid() || this.channelID == null) {
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);
         }
 
         // Push GW 서버 connection이 유효한지 확인
-        if (nettyClient.isInValid()) {
+        if (nettyTcpClient.isInValid()) {
             throw new SocketException();
         }
 
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
         if(isServerInValidStatus()) {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
-            nettyClient.disconnect();
-            this.channelID = nettyClient.connect(this);	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
 
             if(isServerInValidStatus()) {
                 throw new ServiceUnavailableException();
@@ -138,19 +152,19 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         for (String regId : dto.getUsers()) {
             String transactionId = getTransactionId();
 
-            final Long sendCount = sendMsgCount.updateAndGet(x ->(x+1 < maxPushLimitPerSec) ? x+1 : 0);
+            final long sendCount = sendMsgCount.updateAndGet(x ->(x+1 < maxPushLimitPerSec) ? x+1 : 0);
 
             String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
                     .replace(REGIST_ID_NM, regId);
 
-            nettyClient.write0(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
+            nettyTcpClient.write(PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
                             .channelID(this.channelID).transactionID(transactionId)
                             .destIp(destinationIp).data(jsonMsg).build());
 
             sendList.add(PushMultiResponseDto.builder().pushId(transactionId).statusCode("200").regId(regId).build());
 
             if(sendList.size() % FLUSH_COUNT == 0) {
-                nettyClient.flush();
+                nettyTcpClient.flush();
             }
 
             // TPS 설정에 따른 Time delay : 400건/sec
@@ -158,7 +172,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 waitTPS();
             }
         }
-        nettyClient.flush();
+        nettyTcpClient.flush();
 
         return sendList;
     }
@@ -171,13 +185,19 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         while(true)
         {
             final Map<String, PushMessageInfoDto> processedMap = recvMsgList.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionID, o -> o));
-            final List<PushMultiResponseDto> list = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
+            final List<PushMultiResponseDto> list = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null)
+                    .collect(Collectors.toList());
 
-            log.trace("parserAsyncMessage0 [{}] = {}/{}", waitTime, listUser.size() - list.size(), listUser.size());
+            log.trace("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, listUser.size() - list.size(), listUser.size());
 
-            for(PushMultiResponseDto usr : list) {
-                PushMessageInfoDto responseMsg = receiveMessageMap.remove(usr.getPushId());
-                if(responseMsg != null) {
+            for (PushMultiResponseDto usr : list) {
+                PushMessageInfoDto responseMsg;
+
+                //responseMsg = sendSuccessMessageMap.remove(usr.getPushId())
+                //responseMsg = sendFailMessageMap.remove(usr.getPushId())
+
+                responseMsg = receiveMessageMap.remove(usr.getPushId());
+                if (responseMsg != null) {
                     recvMsgList.add(responseMsg);
                 }
             }
@@ -197,7 +217,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         final Map<String, PushMessageInfoDto> processedMap = recvMsgList.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionID, o -> o));
         List<PushMultiResponseDto> listFailUser = listUser.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
 
-        log.debug("parserAsyncMessage time:{} = {}/{}", waitTime, listUser.size() - listFailUser.size(), listUser.size());
+        log.debug("parserAsyncMessage thread:{} time:{} = {}/{}", Thread.currentThread().getId(), waitTime, listUser.size() - listFailUser.size(), listUser.size());
         return new ImmutablePair<>(recvMsgList, listFailUser);
     }
 
@@ -253,28 +273,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         return null;
     }
 
-    private PushMessageInfoDto getReceivedAsyncMessage(String transactionId) {
-
-        PushMessageInfoDto responseMsg;
-
-        responseMsg = receiveMessageMap.remove(transactionId);
-
-        if (responseMsg == null) {	// 현재 메모리에 결과가 없는 경우 주어진 시간 동안 대기한 후 다시 읽음
-            long readWaited = 0L;
-            while (responseMsg == null && readWaited < SECOND * 2) {
-                try {
-                    Thread.sleep(1L);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                responseMsg = receiveMessageMap.remove(transactionId);
-                readWaited++;
-            }
-        }
-
-        return responseMsg;
-    }
-
     private void waitTPS() {
 
         long timeMillis = System.currentTimeMillis() - lastSendMills.get();
@@ -298,7 +296,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             return true;
         }
 
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyClient.writeSync(
+        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
                 PushMessageInfoDto.builder().messageID(PROCESS_STATE_REQUEST)
                         .channelID(this.channelID).destIp(destinationIp)
                         .build());

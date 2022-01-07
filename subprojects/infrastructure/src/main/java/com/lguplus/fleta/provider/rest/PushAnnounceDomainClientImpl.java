@@ -31,7 +31,7 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
 
     private final PushAnnounceFeignClient pushAnnounceFeignClient;
     private final PushConfig pushConfig;
-    private final ObjectMapper objectMapper;
+    //private final ObjectMapper objectMapper
     private final PushMapper pushMapper;
 
     @Value("${push-comm.announce.server.ip}")

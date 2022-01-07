@@ -120,10 +120,10 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
+        Exception thrown = assertThrows(BlackListException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof NotFoundMsgException, true);
+        assertEquals(thrown instanceof BlackListException, true);
 
         log.info("End callSettingApi recordset null");
     }
@@ -153,10 +153,10 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
+        Exception thrown = assertThrows(BlackListException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof NotFoundMsgException, true);
+        assertEquals(thrown instanceof BlackListException, true);
 
         log.info("End callSettingApi totalcount0");
     }
@@ -366,10 +366,10 @@ class MmsAgentDomainServiceTest {
 
         given( mmsSoap.sendMMS(anyMap(), any())).willReturn("9999");
         thrown = assertThrows(RuntimeException.class, () -> {
-            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
-        });
-        assertEquals(thrown instanceof RuntimeException, true);
         log.info("returnService RuntimeException 9999 End");
+        mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
+    });
+    assertEquals(thrown instanceof RuntimeException, true);
     }
 
 }

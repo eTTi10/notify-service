@@ -1,32 +1,32 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.push.PushBizException;
+import com.lguplus.fleta.exception.push.FailException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.time.Instant;
 import java.util.Map;
 
 @Getter
 @Slf4j
 public class PushSocketInfo {
-    private Socket pushSocket;                  //Push 소켓
+    private final Socket pushSocket;                  //Push 소켓
     private String channelID;                   //Push Header channelID
     private String destIp;
+    private int connPort;
 
     private static final String PUSH_ENCODING = "euc-kr";
     private static final int PUSH_MSG_HEADER_LEN = 64;
     private static final String PUSH_ID_NM = "push_id";
-    private static final String RESPONSE_ID_NM = "response";
-    private static final String RESPONSE_STATUS_CD = "status_code";
-    private static final String RESPONSE_STATUS_MSG = "statusmsg";
     private static final String SUCCESS = "SC";
     private static final String FAIL = "FA";
     private static final int CHANNEL_CONNECTION_REQUEST = 1;
@@ -41,93 +41,122 @@ public class PushSocketInfo {
     private static final int COMMAND_REQUEST_ACK = 16;
 
     private long lastTransactionTime = Instant.now().getEpochSecond();
-    private boolean isOpened;
-    private boolean isFailure;
+    private boolean isOpened = false;
+    private boolean isFailure = false;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destIp) throws PushBizException {
+    public PushSocketInfo() {
+        pushSocket = new Socket();
+    }
+
+    public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destIp) throws IOException {
 
         channelID = _channelID;
         destIp = _destIp;
-        isOpened = false;
-        isFailure = false;
+        connPort = _port;
 
-        try
-        {
-            pushSocket = new Socket();
-            pushSocket.connect(new InetSocketAddress(_host, _port), _timeout);
-            pushSocket.setSoTimeout(_timeout);
+        connectPushServer(_host, _port, _timeout);
 
-            InputStream inputStream = pushSocket.getInputStream();
-            OutputStream outputStream = pushSocket.getOutputStream();
-
-            byte[] byteDestinationIP = new byte[16];
-            System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, byteDestinationIP, 0, destIp.getBytes(PUSH_ENCODING).length);
-
-            log.trace("[OpenSocket]byteTotalLen=" + PUSH_MSG_HEADER_LEN); //64
-
-            byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN];
-            System.arraycopy(Ints.toByteArray(CHANNEL_CONNECTION_REQUEST), 0, sendHeader, 0, 4);
-            System.arraycopy(channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
-            System.arraycopy(byteDestinationIP, 0, sendHeader, 32, 16);
-            System.arraycopy(Ints.toByteArray(0), 0, sendHeader, 60, 4);
-
-            outputStream.write(sendHeader);
-            outputStream.flush();
-
-            //Header
-            byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-            inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
-
-            log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
-            log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
-            log.trace("[OpenSocket] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
-
-            int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
-            log.trace("[OpenSocket] 서버 응답 response_DataLength = " + responseDataLength);
-
-            byte[] byteBody = new byte[responseDataLength];
-
-            inputStream.read(byteBody, 0, byteBody.length);
-
-            String responseCode = getEncodeStr(byteBody, 0, 2);
-            log.trace("[OpenSocket] 서버 응답 response Code = " + responseCode);
-
-            byte[] bResponseState = new byte[2];
-            System.arraycopy(byteBody, 2, bResponseState, 0, bResponseState.length);
-            short responseState = byteToShort(bResponseState);
-            log.trace("[OpenSocket] 서버 응답 response Status Code = " + responseState);
-
-            if (SUCCESS.equals(responseCode)) {
-                log.trace("[OpenSocket]ChannelConnectionRequest 성공");
-                log.trace("[" + channelID + "][OPEN_E][] - [SUCCESS]");
-
-                isOpened = true;
-                lastTransactionTime = Instant.now().getEpochSecond();
-            }
-        } catch (ConnectException e) {
-            log.trace("[setNoti][ConnectException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-100, e.getClass().getName(), e);
-        } catch (java.net.SocketException e) {
-            log.trace("[setNoti][SocketException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-200, e.getClass().getName(), e);
-        } catch (SocketTimeoutException e) {
-            log.trace("[setNoti][SocketTimeoutException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-300, e.getClass().getName(), e);
-        } catch (Exception e) {
-            log.trace("[setNoti][Exception][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-400, e.getClass().getName(), e);
-        }
+        requestPushServer();
     }
 
-    public PushResponseDto sendPushNotice(final Map<String, String> pushBody) throws PushBizException {
+    public void connectPushServer(final String _host, final int _port, final int _timeout) throws IOException {
+
+        pushSocket.connect(new InetSocketAddress(_host, _port), _timeout);
+        pushSocket.setSoTimeout(_timeout);
+    }
+
+    public void requestPushServer() throws IOException {
+
+        sendHeaderMsg(CHANNEL_CONNECTION_REQUEST);
+
+        //Header
+        byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
+        this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+
+        //log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader))
+        //log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
+        //log.trace("[OpenSocket] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14))
+
+        int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
+        log.trace("[OpenSocket] 서버 응답 response_DataLength = " + responseDataLength);
+
+        byte[] byteBody = new byte[responseDataLength];
+
+        pushSocket.getInputStream().read(byteBody, 0, byteBody.length);
+
+        String responseCode = getEncodeStr(byteBody, 0, 2);
+        log.trace("[OpenSocket] 서버 응답 response Code = " + responseCode);
+
+        byte[] bResponseState = new byte[2];
+        System.arraycopy(byteBody, 2, bResponseState, 0, bResponseState.length);
+        short responseState = byteToShort(bResponseState);
+        log.trace("[OpenSocket] 서버 응답 response Status Code = " + responseState);
+
+        if (SUCCESS.equals(responseCode)) {
+            log.trace("[OpenSocket]ChannelConnectionRequest 성공");
+            log.trace("[" + channelID + "][OPEN_E][] - [SUCCESS]");
+
+            isOpened = true;
+            lastTransactionTime = Instant.now().getEpochSecond();
+        }
+        else {
+            isOpened = false;
+            log.error("requestPushServer return code failure channelId:{}", this.channelID);
+        }
+
+    }
+
+    public boolean isInValid() {
+        return (   !pushSocket.isConnected()
+                || !this.isOpened()
+                || this.isFailure());
+    }
+
+    public boolean isTimeoutStatus(long closeSeconds) {
+        return closeSeconds <= getLastUsedSeconds();
+    }
+
+    public long getLastUsedSeconds() {
+        return Instant.now().getEpochSecond() - this.getLastTransactionTime();
+    }
+
+    public void sendHeaderMsg(int requestMsgId) throws IOException {
+        sendHeaderMsg(requestMsgId, null, null);
+    }
+
+    public void sendHeaderMsg(int requestMsgId, String notiMsg, String transactionId) throws IOException {
+
+        byte[] byteDATA = new byte[0];
+        if(COMMAND_REQUEST == requestMsgId) {
+            byteDATA = notiMsg.getBytes(PUSH_ENCODING);
+        }
+
+        byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteDATA.length];
+        System.arraycopy(Ints.toByteArray(requestMsgId), 0, sendHeader, 0, 4);
+        if(COMMAND_REQUEST == requestMsgId) {
+            System.arraycopy(transactionId.getBytes(PUSH_ENCODING), 0, sendHeader, 4, 12);   //Transaction Id
+        }
+        System.arraycopy(this.channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
+        System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destIp.getBytes(PUSH_ENCODING).length);
+        System.arraycopy(Ints.toByteArray(byteDATA.length), 0, sendHeader, 60, 4);
+        if(COMMAND_REQUEST == requestMsgId) {
+            System.arraycopy(byteDATA, 0, sendHeader, 64, byteDATA.length); //Data
+        }
+
+        this.pushSocket.getOutputStream().write(sendHeader);
+        this.pushSocket.getOutputStream().flush();
+
+    }
+
+    public PushResponseDto sendPushNotice(final Map<String, String> pushBody) throws IOException {
 
         //Send G/W
-        sendPushMessage(pushBody);
+        ObjectNode oNode = objectMapper.createObjectNode();
+        oNode.set("request", objectMapper.valueToTree(pushBody));
+        String jsonStr = oNode.toString();
+
+        sendHeaderMsg(COMMAND_REQUEST, jsonStr, pushBody.get(PUSH_ID_NM));
 
         //Recv Header
         PushRcvHeaderVo pushRcvHeaderVo = recvPushMessageHeader();
@@ -137,183 +166,90 @@ public class PushSocketInfo {
 
     }
 
-    private void sendPushMessage(final Map<String, String> pushBody) throws PushBizException {
+    private PushRcvHeaderVo recvPushMessageHeader()  throws IOException {
 
-        try
-        {
-            OutputStream outputStream = pushSocket.getOutputStream();
+        InputStream inputStream = pushSocket.getInputStream();
 
-            ObjectNode oNode = objectMapper.createObjectNode();
-            oNode.set("request", objectMapper.valueToTree(pushBody));
-            String jsonStr = oNode.toString();
+        //Header
+        byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
 
-            byte[] byteDATA = jsonStr.getBytes(PUSH_ENCODING);
-            log.trace("[setNoti] json = {}, {}", byteDATA.length, jsonStr);
+        inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
-            byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteDATA.length];
-            System.arraycopy(Ints.toByteArray(COMMAND_REQUEST), 0, sendHeader, 0, 4);                    //Message Id
-            System.arraycopy(pushBody.get(PUSH_ID_NM).getBytes(PUSH_ENCODING), 0, sendHeader, 4, 12);   //Transaction Id
-            System.arraycopy(this.channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);             //Channel Id
-            System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destIp.getBytes(PUSH_ENCODING).length);//Destination IP
-            System.arraycopy(Ints.toByteArray(byteDATA.length), 0, sendHeader, 60, 4);                 //Data Length
-            System.arraycopy(byteDATA, 0, sendHeader, 64, byteDATA.length);                                   //Data
+        log.trace("[setNoti] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
+        log.trace("[setNoti] 서버 응답 Transaction ID = " + getEncodeStr(byteHeader, 4, 12));
+        log.trace("[setNoti] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
+        log.trace("[setNoti] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
 
-            log.trace("sendHeader Len =" + sendHeader.length);
+        int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
+        log.trace("[setNoti] 서버 응답 responseDataLength = " + responseDataLength);
 
-            outputStream.write(sendHeader);
-            outputStream.flush();
+        log.trace("======================= Body =========================");
+        byte[] byteBody = new byte[responseDataLength];
 
-        } catch (ConnectException e) {
-            log.debug("[setNoti][ConnectException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-100, e.getClass().getName(), e);
-        } catch (java.net.SocketException e) {
-            log.debug("[setNoti][SocketException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-200, e.getClass().getName(), e);
-        } catch (SocketTimeoutException e) {
-            log.debug("[setNoti][SocketTimeoutException][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-300, e.getClass().getName(), e);
-        } catch (Exception e) {
-            log.debug("[setNoti][Exception][" + e.getClass().getName() + "][" + e.getMessage() + "]");
-            isFailure = true;
-            throw new PushBizException(-400, e.getClass().getName(), e);
-        }
+        inputStream.read(byteBody, 0, byteBody.length);
+
+        byte[] bResponseCode = new byte[2];
+        System.arraycopy(byteBody, 0, bResponseCode, 0, bResponseCode.length);
+        String responseCode = new String(bResponseCode, PUSH_ENCODING);
+        log.trace("[setNoti] 서버 응답 response Code = " + responseCode);
+
+        return PushRcvHeaderVo.builder().status(responseCode).recvLength(responseDataLength).recvBuffer(byteBody).build();
 
     }
 
-    private PushRcvHeaderVo recvPushMessageHeader() throws PushBizException {
+    private PushResponseDto recvPushMessageBody(PushRcvHeaderVo pushRcvHeaderVo) throws IOException {
 
-        try
-        {
-            InputStream inputStream = pushSocket.getInputStream();
+        PushResponseDto responseDto = PushResponseDto.builder().responseCode(pushRcvHeaderVo.getStatus()).build();
 
-            //Header
-            byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
+        switch (pushRcvHeaderVo.getStatus()) {
+            case SUCCESS :
+                byte[] bJsonMsg = new byte[pushRcvHeaderVo.getRecvLength() - 2];
+                System.arraycopy(pushRcvHeaderVo.getRecvBuffer(), 2, bJsonMsg, 0, bJsonMsg.length);
+                String retJsonMsg = new String(bJsonMsg, PUSH_ENCODING);
+                retJsonMsg = retJsonMsg.replaceAll("(\r\n|\n)", "");
 
-            inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+                PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(retJsonMsg, PushRcvStatusMsgWrapperVo.class);
 
-            log.trace("[setNoti] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
-            log.trace("[setNoti] 서버 응답 Transaction ID = " + getEncodeStr(byteHeader, 4, 12));
-            log.trace("[setNoti] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
-            log.trace("[setNoti] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
+                //log.debug("msgWrapperVo: {} , {}", msgWrapperVo, msgWrapperVo.getResponse())
+                lastTransactionTime = Instant.now().getEpochSecond();
 
-            int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
-            log.trace("[setNoti] 서버 응답 responseDataLength = " + responseDataLength);
+                responseDto.setStatusCode(msgWrapperVo.getResponse().getStatusCode());
+                responseDto.setStatusMsg(msgWrapperVo.getResponse().getStatusMsg());
+                return responseDto;
 
-            log.trace("======================= Body =========================");
-            byte[] byteBody = new byte[responseDataLength];
+            case FAIL :
+                log.error("[setNoti] 서버 응답 FA ");
+                break;
 
-            inputStream.read(byteBody, 0, byteBody.length);
-
-            byte[] bResponseCode = new byte[2];
-            System.arraycopy(byteBody, 0, bResponseCode, 0, bResponseCode.length);
-            String responseCode = new String(bResponseCode, PUSH_ENCODING);
-            log.trace("[setNoti] 서버 응답 response Code = " + responseCode);
-
-            return PushRcvHeaderVo.builder().status(responseCode).recvLength(responseDataLength).recvBuffer(byteBody).build();
-        } catch (IOException e) {
-            throw new PushBizException(-400, e.getClass().getName(), e);
-        }
-    }
-
-    private PushResponseDto recvPushMessageBody(PushRcvHeaderVo pushRcvHeaderVo) throws PushBizException {
-
-        try
-        {
-            switch (pushRcvHeaderVo.getStatus()) {
-                case SUCCESS :
-                    log.trace("[setNoti]ChannelConnectionRequest 성공");
-                    log.trace("[" + channelID + "][OPEN_E][] - [SUCCESS]");
-
-                    if (pushRcvHeaderVo.getRecvLength() > 2) {
-                        byte[] bJsonMsg = new byte[pushRcvHeaderVo.getRecvLength() - 2];
-                        System.arraycopy(pushRcvHeaderVo.getRecvBuffer(), 2, bJsonMsg, 0, bJsonMsg.length);
-                        String retJsonMsg = new String(bJsonMsg, PUSH_ENCODING);
-                        retJsonMsg = retJsonMsg.replaceAll("(\r\n|\n)", "");
-
-                        JsonNode jsonNodeR = objectMapper.readTree(retJsonMsg);
-
-                        String statusCode = "";
-                        String statusMsg = "";
-
-                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has(RESPONSE_STATUS_CD)) {
-                            statusCode = jsonNodeR.get(RESPONSE_ID_NM).get(RESPONSE_STATUS_CD).asText();
-                        }
-                        if(jsonNodeR != null && jsonNodeR.has(RESPONSE_ID_NM) && jsonNodeR.get(RESPONSE_ID_NM).has(RESPONSE_STATUS_MSG)) {
-                            statusMsg = jsonNodeR.get(RESPONSE_ID_NM).get(RESPONSE_STATUS_MSG).asText();
-                        }
-
-                        lastTransactionTime = Instant.now().getEpochSecond();
-
-                        return PushResponseDto.builder().statusCode(statusCode).statusMsg(statusMsg).build();
-                    }
-
-                    break;
-                case FAIL :
-                    log.debug("[setNoti]ChannelConnectionRequest 실패1");
-
-                    if (pushRcvHeaderVo.getRecvLength() >= 4) {
-                        byte[] bResponseState = new byte[2];
-                        System.arraycopy(pushRcvHeaderVo.getRecvBuffer(), 2, bResponseState, 0, bResponseState.length);
-                        short responseState = byteToShort(bResponseState);
-                        log.debug("[setNoti] 서버 응답 response Status Code = " + responseState);
-
-                        isFailure = true;
-                        return PushResponseDto.builder().statusCode(FAIL).statusMsg("" +responseState).build();
-                    }
-
-                    break;
-
-                default:
-                    isFailure = true;
-                    return PushResponseDto.builder().statusCode(FAIL).statusMsg("Internal Error").build();
-            }
-        } catch (IOException e) {
-            isFailure = true;
-            throw new PushBizException(-400, e.getClass().getName(), e);
+            default:
+                log.error("[setNoti] Unknown 응답 ");
+                break;
         }
 
         isFailure = true;
-        return PushResponseDto.builder().statusCode(FAIL).statusMsg("Internal Error").build();
+        throw new FailException();
     }
-
 
     public void isServerInValidStatus() {
 
-        try {
-            InputStream inputStream = pushSocket.getInputStream();
-            OutputStream outputStream = pushSocket.getOutputStream();
-
-            byte[] byteDestinationIP = new byte[16];
-            System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, byteDestinationIP, 0, destIp.getBytes(PUSH_ENCODING).length);
-
-            log.trace("[isServerInValidStatus]byteTotalLen=" + PUSH_MSG_HEADER_LEN); //64
-
-            byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN];
-            System.arraycopy(Ints.toByteArray(CHANNEL_PROCESS_STATE_REQUEST), 0, sendHeader, 0, 4);
-            System.arraycopy(channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
-            System.arraycopy(byteDestinationIP, 0, sendHeader, 32, 16);
-            System.arraycopy(Ints.toByteArray(0), 0, sendHeader, 60, 4);
-
-            outputStream.write(sendHeader);
-            outputStream.flush();
+        try
+        {
+            sendHeaderMsg(CHANNEL_PROCESS_STATE_REQUEST);
 
             //Header
             byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-            inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+            this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
             log.trace("[isServerInValidStatus] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
-            log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16));
-            log.trace("[isServerInValidStatus] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14));
+            //log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
+            //log.trace("[isServerInValidStatus] 서버 응답 ChannelId = " + getEncodeStr(byteHeader, 32, 14))
 
             int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
             log.trace("[isServerInValidStatus] 서버 응답 response_DataLength = " + responseDataLength);
 
             byte[] byteBody = new byte[responseDataLength];
 
-            inputStream.read(byteBody, 0, byteBody.length);
+            pushSocket.getInputStream().read(byteBody, 0, byteBody.length);
 
             short commStatus = byteToShort(byteBody);
             //SUCCESS 1, Fail 0
@@ -321,40 +257,40 @@ public class PushSocketInfo {
                 log.debug("[" + channelID + "][Health Check] - [SUCCESS]");
                 lastTransactionTime = Instant.now().getEpochSecond();
             }
-            log.trace("[" + channelID + "][Health Check] - [Failure]");
+            else {
+                log.error("[" + channelID + "][Health Check] - [Failure]");
+            }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("isServerInValidStatus error: {}", e.getMessage());
         }
     }
 
-    public void closeSocket() {
-        log.trace("[===>closeSocket] {}", this);
+    public void closeSocket()  {
 
         try {
-            if(pushSocket != null) {
-                pushSocket.close();
-
-                if (!pushSocket.isClosed()) {
-                    pushSocket.getInputStream().close();
-                    pushSocket.getOutputStream().close();
-                    pushSocket.close();
-                }
-            }
-        } catch (IOException e) {
-            log.trace("[closeSocket]" + e.getMessage());
-        } finally {
-            isOpened = false;
+            closeSocketResource();
+        }
+        catch (IOException e) {
+            log.error("closeSocket io-exception : {}", e.getMessage());
         }
 
     }
 
+    public void closeSocketResource() throws IOException {
 
-    private short byteToShort(byte[] src) {
+        try (pushSocket) {
+            this.isOpened = false;
+            log.debug("[===>closeSocket] {}", this);
+        }
+
+    }
+
+    public short byteToShort(byte[] src) {
         return (short) ((src[0] & 0xff) << 8 | src[1] & 0xff);
     }
 
-    private int byteToInt(byte[] src, int... b) {
+    public int byteToInt(byte[] src, int... b) {
         int offset = 0;
         if(b.length > 0) {
             offset = b[0];
@@ -362,19 +298,14 @@ public class PushSocketInfo {
         return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
     }
 
-    private String getEncodeStr(byte[] src, int offset, int length) {
+    public String getEncodeStr(byte[] src, int offset, int length) throws IOException {
         byte[] tmpArray = new byte[length];
         System.arraycopy(src, offset, tmpArray, 0, length);
-        try {
-            return new String(tmpArray, PUSH_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            return "";
-        }
+        return new String(tmpArray, PUSH_ENCODING);
     }
 
     public String toString() {
-        String port = this.pushSocket != null ?  this.pushSocket.getPort() + "" : "";
-        return channelID + ":"  + port + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
+        return channelID + ":"  + connPort + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
     }
 
     @Getter
@@ -385,5 +316,32 @@ public class PushSocketInfo {
         private String status;
         private int recvLength;
         private byte[] recvBuffer;
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @ToString
+    static class PushRcvStatusMsgVo {
+        @JsonProperty("msg_id")
+        private String msgId;
+
+        @JsonProperty("push_id")
+        private String pushId;
+
+        @JsonProperty("status_code")
+        private String statusCode;
+
+        @JsonProperty("statusmsg")
+        private String statusMsg;
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @ToString
+    static class PushRcvStatusMsgWrapperVo {
+        @JsonProperty("response")
+        private PushRcvStatusMsgVo response;
     }
 }

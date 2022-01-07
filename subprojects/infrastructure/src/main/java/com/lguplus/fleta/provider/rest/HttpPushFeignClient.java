@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Http Push FeignClient (Open API 이용)
  *
- * 단건, 멀티, 공지 푸시등록
+ * 단건, 멀티(단건 사용), 공지 푸시등록
  */
 @FeignClient(name = "httppush", url = "${singlepush.server.ip}", configuration = HttpPushFeignConfig.class)
 public interface HttpPushFeignClient {
@@ -24,8 +24,8 @@ public interface HttpPushFeignClient {
      * @param paramMap 단건 푸시 정보
      * @return 단건 푸시 결과
      */
-//    @PostMapping(value = "/settings/restapi/push/single/servicekey")
-    @PostMapping(value = "/restapi/push/single/servicekey")
+    @PostMapping(value = "/settings/restapi/push/single/servicekey")
+//    @PostMapping(value = "/restapi/push/single/servicekey")
     OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestBody Map<String, Object> paramMap);
 
 }

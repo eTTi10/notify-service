@@ -63,6 +63,7 @@ public class HttpPushSupport {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
             digest.reset();
             digest.update(password.getBytes(StandardCharsets.UTF_8));
+
             return String.format("%0128x", new BigInteger(1, digest.digest()));
 
         } catch (Exception ex) {
@@ -117,15 +118,15 @@ public class HttpPushSupport {
     /**
      * 푸시(단건, 멀티) Open API 를 호춣할 파라미터를 만든다.
      *
-     * @param appId 어플리케이션 ID
+     * @param applicationId 어플리케이션 ID
      * @param serviceId 서비스 등록시 부여받은 Unique ID
      * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @param msg 보낼 메시지
+     * @param message 보낼 메시지
      * @param regId 사용자 ID
      * @param items 추가할 항목 입력(name!^value)
      * @return 푸시(단건, 멀티) Open API 를 호춣할 생성된 파라미터
      */
-    public Map<String, Object> makePushParameters(String appId, String serviceId, String pushType, String msg, String regId, List<String> items) {
+    public Map<String, Object> makePushParameters(String applicationId, String serviceId, String pushType, String message, String regId, List<String> items) {
         String servicePwd = getEncryptedServicePassword(serviceId);
 
         // 4자리수 넘지 않도록 방어코드
@@ -146,13 +147,13 @@ public class HttpPushSupport {
         if (pushType.equals("G")) {
             UnaryOperator<String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
 
-            payload = gcmPushOpenApiPayload.apply(msg);
+            payload = gcmPushOpenApiPayload.apply(message);
 
         // 아이폰("A")
         } else {
             Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
-            payload = apnOpenApiPayload.apply(Pair.of(msg, items));
+            payload = apnOpenApiPayload.apply(Pair.of(message, items));
         }
 
         HttpPushDto httpPushDto = HttpPushDto.builder()
@@ -161,7 +162,7 @@ public class HttpPushSupport {
                 .pushId(transactionId)
                 .serviceId(serviceId)
                 .servicePass(servicePwd)
-                .applicationId(appId)
+                .applicationId(applicationId)
                 .serviceKey(regId)
                 .payload(payload)
                 .build();
@@ -178,6 +179,7 @@ public class HttpPushSupport {
      * @return 생성된 푸시맵
      */
     private Map<String, Object> makePushMap(HttpPushDto httpPushDto, String kind, String pushType) {
+        log.debug(kind, pushType);
         Map<String, Object> pushMap = new HashMap<>();
         pushMap.put("REQUEST_PART", httpPushDto.getRequestPart());
         pushMap.put("REQUEST_TIME", httpPushDto.getRequestTime());

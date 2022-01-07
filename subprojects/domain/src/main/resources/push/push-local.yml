@@ -52,7 +52,7 @@ push-comm:
   ####################LGPUSH 개별########################
   lgpush:
     #개별Push중 IPTVPush로 나가야 하는 대상 service_id
-    service_id: '30021' #00007
+    service_id: '00007'
     server:
       ip: 211.115.75.227
       port: '8100'
