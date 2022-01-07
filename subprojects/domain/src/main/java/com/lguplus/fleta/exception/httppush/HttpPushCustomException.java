@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.httppush;
 
-import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,12 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class HttpPushCustomException extends NotifyHttpPushRuntimeException {
+public class HttpPushCustomException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
+    }
 
     private Integer statusCode;
 

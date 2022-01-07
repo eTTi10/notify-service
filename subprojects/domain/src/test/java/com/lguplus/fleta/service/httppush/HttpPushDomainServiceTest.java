@@ -31,7 +31,7 @@ class HttpPushDomainServiceTest {
     private static final String SUCCESS_CODE = "200";
 
     @InjectMocks
-    HttpPushDomainService httpPushDomainService;
+    HttpSinglePushDomainService httpSinglePushDomainService;
 
     @Mock
     HttpPushDomainClient httpPushDomainClient;
@@ -44,7 +44,7 @@ class HttpPushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        JunitTestUtils.setValue(httpSinglePushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
     }
 
     @Test
@@ -64,7 +64,7 @@ class HttpPushDomainServiceTest {
                 .build();
 
         // when
-        HttpPushResponseDto responseDto = httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+        HttpPushResponseDto responseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
         // then
         assertThat(responseDto.getCode()).isEqualTo(SUCCESS_CODE);   // 성공 코드가 맞는지 확인
@@ -87,7 +87,7 @@ class HttpPushDomainServiceTest {
 
         // when
         Exception exception = assertThrows(HttpPushCustomException.class, () -> {
-            httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+            httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
         });
 
         // then

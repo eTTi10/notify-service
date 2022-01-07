@@ -1,7 +1,6 @@
 package com.lguplus.fleta.exception.httppush;
 
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
-import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**

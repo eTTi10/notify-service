@@ -23,7 +23,7 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class HttpPushDomainService {
+public class HttpSinglePushDomainService {
 
     private final HttpPushDomainClient httpPushDomainClient;
 
@@ -44,10 +44,10 @@ public class HttpPushDomainService {
 
         // 발송 제외 가번 확인
         log.debug("rejectReg :::::::::::::::::::: {}", rejectReg);
-        String[] rejectRegList = rejectReg.split("\\|");
+        String[] rejectRegIds = rejectReg.split("\\|");
         String regId = httpPushSingleRequestDto.getUsers().get(0);
 
-        if (Arrays.asList(rejectRegList).contains(regId.strip())) {
+        if (Arrays.asList(rejectRegIds).contains(regId.strip())) {
             Pair<String, String> cdMsgMap = httpPushSupport.getHttpServiceProps().getExceptionCodeMessage("ExclusionNumberException");
 
             HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
@@ -57,13 +57,13 @@ public class HttpPushDomainService {
             throw httpPushCustomException;   // 9998 발송제한번호
         }
 
-        String appId = httpPushSingleRequestDto.getAppId();
+        String applicationId = httpPushSingleRequestDto.getApplicationId();
         String serviceId = httpPushSingleRequestDto.getServiceId();
         String pushType = httpPushSingleRequestDto.getPushType();
-        String msg = httpPushSingleRequestDto.getMsg();
+        String message = httpPushSingleRequestDto.getMessage();
         List<String> items = httpPushSingleRequestDto.getItems();
 
-        Map<String, Object> paramMap = httpPushSupport.makePushParameters(appId, serviceId, pushType, msg, regId, items);
+        Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
 
         httpPushDomainClient.requestHttpPushSingle(paramMap);
 

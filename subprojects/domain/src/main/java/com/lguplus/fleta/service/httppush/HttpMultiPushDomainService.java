@@ -53,20 +53,20 @@ public class HttpMultiPushDomainService {
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
         log.debug("httpPushMultiRequestDto ::::::::::::::: {}", httpPushMultiRequestDto);
 
-        String[] result;
+        String[] results;
         String regId = "";
         String code = "";
 
         // Open API 에 멀티푸시를 요청한다.
-        List<Future<String>> resultList = requestOpenApi(httpPushMultiRequestDto);
+        List<Future<String>> futures = requestOpenApi(httpPushMultiRequestDto);
 
         List<String> failUsers = new ArrayList<>();
 
-        for (Future<String> future : resultList) {
+        for (Future<String> future : futures) {
             try {
-                result = future.get().split("\\|");
-                regId = result[0];
-                code = result[1];
+                results = future.get().split("\\|");
+                regId = results[0];
+                code = results[1];
 
             } catch (Exception ex) {
                 Thread.currentThread().interrupt();
@@ -162,32 +162,32 @@ public class HttpMultiPushDomainService {
         // 초당 최대 Push 전송 허용 갯수
         int maxLimitPush = setMaxLimitPush(httpPushMultiRequestDto.getMultiCount());
 
-        List<Future<String>> resultList = new ArrayList<>();
+        List<Future<String>> futures = new ArrayList<>();
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
         int count = 1;
         long timestamp = System.currentTimeMillis();
-        String[] rejectRegList = rejectReg.split("\\|");
+        String[] rejectRegIds = rejectReg.split("\\|");
 
         // Push 메시지 전송
-        String appId = httpPushMultiRequestDto.getAppId();
+        String applicationId = httpPushMultiRequestDto.getApplicationId();
         String serviceId = httpPushMultiRequestDto.getServiceId();
         String pushType = httpPushMultiRequestDto.getPushType();
-        String msg = httpPushMultiRequestDto.getMsg();
+        String message = httpPushMultiRequestDto.getMessage();
         List<String> items = httpPushMultiRequestDto.getItems();
 
         List<String> users = httpPushMultiRequestDto.getUsers();
 
         for (String regId : users) {
             // 사용자별 필수 값 체크 & 발송 제외 가번 확인
-            if (Arrays.asList(rejectRegList).contains(regId.strip())) {
+            if (Arrays.asList(rejectRegIds).contains(regId.strip())) {
                 continue;
             }
 
-            resultList.add(executor.submit(() -> {
+            futures.add(executor.submit(() -> {
                         try {
-                            Map<String, Object> paramMap = httpPushSupport.makePushParameters(appId, serviceId, pushType, msg, regId, items);
+                            Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
 
                             OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushSingle(paramMap);
 
@@ -215,7 +215,7 @@ public class HttpMultiPushDomainService {
 
         executor.shutdown();
 
-        return resultList;
+        return futures;
     }
 
     /**
