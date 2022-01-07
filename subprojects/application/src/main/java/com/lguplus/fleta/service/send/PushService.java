@@ -47,8 +47,6 @@ public class PushService {
         String serviceTarget;
         Boolean resultFlag = true;
 
-        String pushParam ="";
-
         int chk1001 =0;
         int failCount =0;
         boolean SuccessCheckFlag = false;
@@ -81,8 +79,8 @@ public class PushService {
         for(int k=0; k<serviceTypeList.length; k++) {
 
             String sType = "";
-            String sFlag = "0000";
-            String sMessage = "성공";
+            String sFlag;
+            String sMessage;
             failCode = "";
             failMessage ="";
 
@@ -213,7 +211,7 @@ public class PushService {
                     .build();
         }else {
 
-            if(check1001Flag &&  serviceTypeList.length > 1){
+            if(check1001Flag && serviceTypeList.length > 1){
 
                 return SendPushResponseDto.builder()
                         .flag("1001")

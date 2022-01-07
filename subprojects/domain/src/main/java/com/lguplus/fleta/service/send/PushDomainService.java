@@ -33,6 +33,11 @@ public class PushDomainService {
     private final SubscriberDomainClient subscriberDomainClient;
     private final SendPushCodeProps sendPushCodeProps;
 
+    /**
+     * RegId 조회
+     * @param sendPushCodeRequestDto
+     * @return
+     */
     public String getRegistrationID(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         Map<String, String> inputMap = new HashMap<>();
@@ -45,6 +50,11 @@ public class PushDomainService {
 
     }
 
+    /**
+     * ctn을 이용해 regId 조회
+     * @param ctn
+     * @return
+     */
     public String getRegistrationIDbyCtn(String ctn) {
 
         Map<String, String> inputMap = new HashMap<>();
@@ -57,6 +67,12 @@ public class PushDomainService {
 
     }
 
+    /**
+     * GCM(pushType) or U+tv(serviceType)용 request dto 조립  
+     * @param sendPushCodeRequestDto
+     * @param serviceTarget
+     * @return
+     */
     public HttpPushSingleRequestDto getGcmOrTVRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
         String regId = sendPushCodeRequestDto.getRegId();
@@ -98,7 +114,7 @@ public class PushDomainService {
             appId = appInfoDefaultMap.get("gcm.appid");
         }
 
-        log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, appId, payload);
+        log.debug("sendPushCtn  : {} {} {}", serviceId, appId, payload);
 
         //reserve에 들어갈 내용을
         paramList = pushInfoMap.get("param.list");;
@@ -131,13 +147,12 @@ public class PushDomainService {
                 .build();
     }
 
-    public void checkInvalidSendPushCode(Map<String, String> pushInfoMap) {
-
-        if (pushInfoMap.get("gcm.payload.body").equals("")) {
-            throw new InvalidSendPushCodeException("send code 미지원");
-        }
-    }
-
+    /**
+     * APNS용 request dto 조립
+     * @param sendPushCodeRequestDto
+     * @param serviceTarget
+     * @return
+     */
     public HttpPushSingleRequestDto getApnsRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
         String regId = sendPushCodeRequestDto.getRegId();
@@ -202,7 +217,7 @@ public class PushDomainService {
     }
 
     /**
-     * LG 푸시 전문 조립 ( pushagent_op에서는 push_type이 GCM과 APNS만 사용할 수 있지만 ASIS에 있는 로직이라 개발함
+     * LG푸시용 request dto 조립 ( pushagent_op에서는 push_type이 GCM과 APNS만 사용할 수 있지만 ASIS에 있는 로직이라 개발함
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
@@ -239,6 +254,12 @@ public class PushDomainService {
                 .build();
     }
 
+    /**
+     * 소켓 푸시 전문 조립
+     * @param sendPushCodeRequestDto
+     * @param serviceTarget
+     * @return
+     */
     public PushRequestSingleDto getExtraPushRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget) {
 
         String regId = sendPushCodeRequestDto.getRegId();
@@ -296,8 +317,6 @@ public class PushDomainService {
 
         regId = getRegistrationID(sendPushCodeRequestDto);
 
-        payload.replace("\"", "\\\"");
-
         return PushRequestSingleDto.builder()
                 .appId(extraAppId)
                 .serviceId(extraServiceId)
@@ -307,4 +326,16 @@ public class PushDomainService {
                 .items(items)
                 .build();
     }
+
+    /**
+     * sendCode 체크
+     * @param pushInfoMap
+     */
+    public void checkInvalidSendPushCode(Map<String, String> pushInfoMap) {
+
+        if (pushInfoMap.get("gcm.payload.body").equals("")) {
+            throw new InvalidSendPushCodeException("send code 미지원");
+        }
+    }
+
 }

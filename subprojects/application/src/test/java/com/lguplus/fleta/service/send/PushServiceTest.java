@@ -206,7 +206,7 @@ class PushServiceTest {
     }
 
     @Test
-    @DisplayName("Push Type이 L인 경우")
+    @DisplayName("Push Type이 T인 경우") //else if (pushTypeList[i].equalsIgnoreCase("L")) 까지만 있어 else에 해당하는 조건 추가해야한다.
     void whenPushTypeL() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
@@ -237,7 +237,98 @@ class PushServiceTest {
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
                 .regId("M00020200205")
-                .pushType("A|L")
+                .pushType("T")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        SendPushResponseDto responseDto = pushService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+
+    @Test
+    @DisplayName("TV이며 ExtraSend N인 경우") //if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) 가 아닌 경우 테스트
+    void whenTVAndExtraSendIsN() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage(sMessage)
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message(sMessage)
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .regId("M00020200205")
+                .pushType("A|G")
+                .sendCode("P002")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        SendPushResponseDto responseDto = pushService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+    @Test
+    @DisplayName("TV 아니며 ExtraSend Y인 경우") //if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) 가 아닌 경우 테스트
+    void whenCAndExtraSendIsY() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage(sMessage)
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message(sMessage)
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .regId("M00020200205")
+                .pushType("A|G")
                 .sendCode("P001")
                 .regType("1")
                 .serviceType("C")
