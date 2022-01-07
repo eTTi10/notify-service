@@ -8,7 +8,7 @@ import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
-import com.lguplus.fleta.service.httppush.HttpPushDomainService;
+import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +46,7 @@ class PushServiceTest {
     PushDomainService pushDomainService;
 
     @Mock
-    HttpPushDomainService httpPushDomainService;
+    HttpSinglePushDomainService httpSinglePushDomainService;
 
     @Mock
     PushSingleDomainService pushSingleDomainService;
@@ -58,10 +58,10 @@ class PushServiceTest {
     void setUp() {
 
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("musicshow_gcm")
+                .applicationId("musicshow_gcm")
                 .serviceId("30104")
                 .pushType("G")
-                .msg("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
+                .message("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
                 .users(List.of("M00020200205"))
                 .items(List.of("badge!^1", "sound!^ring.caf", "cm!^aaaa"))
                 .build();
@@ -96,7 +96,7 @@ class PushServiceTest {
     void sendPushCode() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
 
         //서비스타입별 결과 저장용 List
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
@@ -161,7 +161,7 @@ class PushServiceTest {
                 .message("실패")
                 .build();
 
-        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
 
         //서비스타입별 결과 저장용 List
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
@@ -210,7 +210,7 @@ class PushServiceTest {
     void whenPushTypeL() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
 
         //서비스타입별 결과 저장용 List
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
@@ -256,7 +256,7 @@ class PushServiceTest {
     void whenTVAndExtraSendIsN() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
 
         //서비스타입별 결과 저장용 List
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
@@ -301,7 +301,7 @@ class PushServiceTest {
     void whenCAndExtraSendIsY() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(httpPushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
 
         //서비스타입별 결과 저장용 List
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
@@ -349,7 +349,7 @@ class PushServiceTest {
 
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
         httpPushCustomException.setCode("1113");
-        given(httpPushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
         List items = new ArrayList();
 
@@ -380,7 +380,7 @@ class PushServiceTest {
 
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
         httpPushCustomException.setCode("1108");
-        given(httpPushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
         List items = new ArrayList();
 
@@ -412,7 +412,7 @@ class PushServiceTest {
 
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
         httpPushCustomException.setCode("1004");
-        given(httpPushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
         List items = new ArrayList();
 
@@ -443,7 +443,7 @@ class PushServiceTest {
 
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
         httpPushCustomException.setCode("1113");
-        given(httpPushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
         List items = new ArrayList();
 

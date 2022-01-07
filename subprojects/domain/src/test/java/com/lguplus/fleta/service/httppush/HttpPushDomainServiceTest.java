@@ -56,11 +56,11 @@ class HttpPushDomainServiceTest {
         given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .serviceId("30011")
                 .pushType("G")
                 .users(List.of("01099991234"))
-                .msg("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
                 .build();
 
         // when
@@ -78,11 +78,11 @@ class HttpPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("9998", "발송제한번호"));
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .serviceId("30011")
                 .pushType("G")
                 .users(List.of("M20110725000")) // 발송 제외 가번
-                .msg("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
                 .build();
 
         // when

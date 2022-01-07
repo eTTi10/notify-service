@@ -138,10 +138,10 @@ public class PushDomainService {
         }
 
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(appId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(payload)
+                .message(payload)
                 .users(List.of(regId))
                 .items(items)
                 .build();
@@ -207,10 +207,10 @@ public class PushDomainService {
         items.add(0, payloadItem);
 
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(appId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(payload)
+                .message(payload)
                 .users(List.of(regId))
                 .items(items)
                 .build();
@@ -245,10 +245,10 @@ public class PushDomainService {
         //reg_id를 기입하지 않았다면 DB에서 RegID를 찾아서 처리한다.
         regId = StringUtils.defaultIfEmpty(regId, getRegistrationID(sendPushCodeRequestDto));
         return HttpPushSingleRequestDto.builder()
-                .appId(appId)
+                .applicationId(appId)
                 .serviceId(serviceId)
                 .pushType(pushType)
-                .msg(bodyLgPush)
+                .message(bodyLgPush)
                 .users(List.of(regId))
                 .items(items)
                 .build();

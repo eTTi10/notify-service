@@ -59,10 +59,10 @@ class PushDomainServiceTest {
 
         //response given
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("musicshow_gcm")
+                .applicationId("musicshow_gcm")
                 .serviceId("30104")
                 .pushType("G")
-                .msg("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
+                .message("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
                 .users(List.of("M00020200205"))
                 .items(List.of("badge!^1", "sound!^ring.caf", "cm!^aaaa"))
                 .build();

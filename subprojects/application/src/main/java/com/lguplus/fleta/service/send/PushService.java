@@ -9,9 +9,8 @@ import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
-import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
-import com.lguplus.fleta.service.httppush.HttpPushDomainService;
+import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ public class PushService {
     private String fcmExtraSend;
 
     private final PushDomainService pushDomainService;
-    private final HttpPushDomainService httpPushDomainService;
+    private final HttpSinglePushDomainService httpSinglePushDomainService;
     private final PushSingleDomainService pushSingleDomainService;
     private final SendPushCodeProps sendPushCodeProps;
 
@@ -113,7 +112,7 @@ public class PushService {
                 try {
 
                     //HTTP PUSH 호출
-                    httpPushResponseDto = httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+                    httpPushResponseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
                 } catch (HttpPushCustomException ex) {
                     log.debug("code :::::::::::: {}\tmessage :::::::::::::::: {}", ex.getCode(), ex.getMessage());
