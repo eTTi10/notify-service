@@ -1,7 +1,7 @@
 package com.lguplus.fleta.exception.httppush;
 
-import com.lguplus.fleta.exception.NotifyHttpPushRuntimeException;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 1106
@@ -9,7 +9,12 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class ForbiddenException extends NotifyHttpPushRuntimeException {
+public class ForbiddenException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
+    }
 
     /**
      *

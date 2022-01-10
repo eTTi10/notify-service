@@ -40,16 +40,6 @@ public class HttpPushFeignConfig {
             requestTemplate.header(HttpHeaders.CONTENT_TYPE, contentTypeSingle);
             requestTemplate.header(HttpHeaders.CONTENT_ENCODING, encodingSingle);
             requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
-
-            /*if (requestTemplate.url().endsWith("servicekey")) {
-                System.out.println("servicekey autho :::::::::: " + authorizationSingle);
-                requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
-
-            } else if (requestTemplate.url().endsWith("announce")) {
-                System.out.println("announce autho :::::::::: " + authorizationAnnounce);
-                requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationAnnounce);
-
-            }*/
         };
     }
 

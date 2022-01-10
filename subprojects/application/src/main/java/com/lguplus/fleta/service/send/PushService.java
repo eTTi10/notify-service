@@ -9,9 +9,8 @@ import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
-import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
-import com.lguplus.fleta.service.httppush.HttpPushDomainService;
+import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ public class PushService {
     private String fcmExtraSend;
 
     private final PushDomainService pushDomainService;
-    private final HttpPushDomainService httpPushDomainService;
+    private final HttpSinglePushDomainService httpSinglePushDomainService;
     private final PushSingleDomainService pushSingleDomainService;
     private final SendPushCodeProps sendPushCodeProps;
 
@@ -46,8 +45,6 @@ public class PushService {
         String[]  serviceTypeList;
         String serviceTarget;
         Boolean resultFlag = true;
-
-        String pushParam ="";
 
         int chk1001 =0;
         int failCount =0;
@@ -81,8 +78,8 @@ public class PushService {
         for(int k=0; k<serviceTypeList.length; k++) {
 
             String sType = "";
-            String sFlag = "0000";
-            String sMessage = "성공";
+            String sFlag;
+            String sMessage;
             failCode = "";
             failMessage ="";
 
@@ -115,7 +112,7 @@ public class PushService {
                 try {
 
                     //HTTP PUSH 호출
-                    httpPushResponseDto = httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+                    httpPushResponseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
                 } catch (HttpPushCustomException ex) {
                     log.debug("code :::::::::::: {}\tmessage :::::::::::::::: {}", ex.getCode(), ex.getMessage());
@@ -213,7 +210,7 @@ public class PushService {
                     .build();
         }else {
 
-            if(check1001Flag &&  serviceTypeList.length > 1){
+            if(check1001Flag && serviceTypeList.length > 1){
 
                 return SendPushResponseDto.builder()
                         .flag("1001")

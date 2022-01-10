@@ -25,7 +25,7 @@ public class HttpPushSingleRequestVo {
     @Size(max = 256, message = "파라미터 app_id는 값이 256 이하이어야 함", groups = Groups.C2.class)
     @JsonProperty("app_id")
     @ApiModelProperty(position = 1, example = "lguplushdtvgcm", value = "어플리케이션 ID")
-    private String appId;
+    private String applicationId;
 
     /** 서비스 등록시 부여받은 Unique ID */
     @NotBlank(message = "service_id 파라미터값이 전달이 안됨", groups = Groups.C3.class)
@@ -48,8 +48,9 @@ public class HttpPushSingleRequestVo {
 
     /** 보낼 메시지 */
     @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
+    @JsonProperty("msg")
     @ApiModelProperty(position = 5, example = "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", value = "보낼 메시지")
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     @ApiModelProperty(position = 6, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")

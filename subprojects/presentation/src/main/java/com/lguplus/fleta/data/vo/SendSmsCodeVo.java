@@ -31,26 +31,14 @@ public class SendSmsCodeVo {
     @ParamAlias("stb_mac")
     private String stbMac;
 
-    @NotBlank(message = "sms_cd 파라미터값이 전달이 안됨.", groups = Groups.C6.class)
+    @NotBlank(message = "필수 요청 정보 누락(sms_cd 가 Null 혹은 빈값 입니다.).", groups = Groups.C6.class)
     @ParamAlias("sms_cd")
     private String smsCd;
 
-    @NotBlank(message = "ctn 파라미터값이 전달이 안됨", groups = Groups.C7.class)
+    @NotBlank(message = "필수 요청 정보 누락(ctn 가 Null 혹은 빈값 입니다.)", groups = Groups.C7.class)
     @ParamAlias("ctn")
     private String ctn;
 
     @ParamAlias("replacement")
     private String replacement;
-
-/*    public SendSmsCodeRequestDto convert(){
-
-        return SendSmsCodeRequestDto.builder()
-                .saId(getSaId())
-                .stbMac(getStbMac())
-                .smsCd(getSmsCd())
-                .ctn(getCtn())
-                .replacement(getReplacement())
-                .build();
-    }*/
-
 }

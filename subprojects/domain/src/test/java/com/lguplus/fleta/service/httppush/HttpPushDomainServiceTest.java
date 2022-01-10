@@ -31,7 +31,7 @@ class HttpPushDomainServiceTest {
     private static final String SUCCESS_CODE = "200";
 
     @InjectMocks
-    HttpPushDomainService httpPushDomainService;
+    HttpSinglePushDomainService httpSinglePushDomainService;
 
     @Mock
     HttpPushDomainClient httpPushDomainClient;
@@ -44,7 +44,7 @@ class HttpPushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        JunitTestUtils.setValue(httpSinglePushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
     }
 
     @Test
@@ -56,15 +56,15 @@ class HttpPushDomainServiceTest {
         given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .serviceId("30011")
                 .pushType("G")
                 .users(List.of("01099991234"))
-                .msg("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
                 .build();
 
         // when
-        HttpPushResponseDto responseDto = httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+        HttpPushResponseDto responseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
 
         // then
         assertThat(responseDto.getCode()).isEqualTo(SUCCESS_CODE);   // 성공 코드가 맞는지 확인
@@ -78,16 +78,16 @@ class HttpPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("9998", "발송제한번호"));
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .serviceId("30011")
                 .pushType("G")
                 .users(List.of("M20110725000")) // 발송 제외 가번
-                .msg("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
                 .build();
 
         // when
         Exception exception = assertThrows(HttpPushCustomException.class, () -> {
-            httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+            httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
         });
 
         // then
