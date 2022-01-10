@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 public class PushMultiResponseDto {
 
-    private String msgId;
+    private String messageId;
     private String pushId;
     private String statusCode;
     private String statusMsg;

@@ -60,7 +60,7 @@ public class PushServiceController {
 
         log.debug("PushAnnounceController : {}", pushRequestBodyAnnounceVo);
 
-        PushRequestAnnounceDto dto = pushRequestMapper.toDtoAnnounce(pushRequestBodyAnnounceVo);
+        PushRequestAnnounceDto pushRequestAnnounceDto = pushRequestMapper.toDtoAnnounce(pushRequestBodyAnnounceVo);
 
         //추가 Items
         List<PushRequestItemDto> items = new ArrayList<>();
@@ -73,9 +73,9 @@ public class PushServiceController {
                 log.error("pushRequestAnnouncement items error");
             }
         });
-        dto.setItems(items);
+        pushRequestAnnounceDto.setItems(items);
 
-        return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(dto));
+        return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto));
     }
 
     /**
@@ -90,10 +90,10 @@ public class PushServiceController {
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
         //log.debug("PushSingleController : {}", pushRequestBodySingleVo)
-        PushRequestSingleDto dto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
+        PushRequestSingleDto pushRequestSingleDto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
 
         //Reject User
-        if ( ("|" + this.pushRejectRegList + "|" ).contains("|" + dto.getRegId().trim() + "|" ) ) {
+        if ( ("|" + this.pushRejectRegList + "|" ).contains("|" + pushRequestSingleDto.getRegId().trim() + "|" ) ) {
             return InnerResponseDto.of(PushClientResponseDto.builder().code("0000").message("성공").build());
         }
 
@@ -108,9 +108,9 @@ public class PushServiceController {
                 log.error("pushRequest items error");
             }
         });
-        dto.setItems(items);
+        pushRequestSingleDto.setItems(items);
 
-        return InnerResponseDto.of(pushSingleService.requestPushSingle(dto));
+        return InnerResponseDto.of(pushSingleService.requestPushSingle(pushRequestSingleDto));
     }
 
 
@@ -125,7 +125,7 @@ public class PushServiceController {
     public InnerResponseDto<PushClientResponseMultiDto> multiPushRequest(
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
-        //Reject User
+        //Reject User Filtering
         List<String> validUsers = new ArrayList<>();
         for(String regId : pushRequestBodyMultiVo.getUsers()) {
             if (("|" + this.pushRejectRegList + "|").contains("|" + regId + "|")) {

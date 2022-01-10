@@ -318,10 +318,10 @@ public class PushDomainService {
         regId = getRegistrationID(sendPushCodeRequestDto);
 
         return PushRequestSingleDto.builder()
-                .appId(extraAppId)
+                .applicationId(extraAppId)
                 .serviceId(extraServiceId)
                 .pushType("L")
-                .msg(payload)
+                .message(payload)
                 .regId(regId)
                 .items(items)
                 .build();

@@ -45,8 +45,8 @@ class PushAnnouncementServiceTest {
         PushRequestAnnounceDto pushRequestAnnounceDto = PushRequestAnnounceDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
-                .appId("30011")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .applicationId("30011")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 

@@ -6,7 +6,7 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +53,8 @@ class PushAnnounceDomainServiceTest {
         pushRequestAnnounceDto = PushRequestAnnounceDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
-                .appId("30011")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .applicationId("30011")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
     }
@@ -103,7 +103,7 @@ class PushAnnounceDomainServiceTest {
         for(String code : codeList) {
             given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
 
-            assertThrows(NotifyPushRuntimeException.class, () -> {
+            assertThrows(NotifyRuntimeException.class, () -> {
                 pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
             });
         }

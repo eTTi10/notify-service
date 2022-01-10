@@ -6,7 +6,7 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -99,9 +99,8 @@ public class PushSingleDomainService {
         int reCnt = 0;
         while (reCnt < iPushCallRetryCnt) {
             try {
-                PushResponseDto pushResponseDto;
                 setPushProgressCnt(dto.getServiceId(), +1);
-                pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
+                PushResponseDto pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
 
                 statusCode = pushResponseDto.getStatusCode();
                 statusMsg = pushResponseDto.getStatusMsg();
@@ -136,8 +135,8 @@ public class PushSingleDomainService {
         paramMap.put("msg_id", PUSH_COMMAND);
         paramMap.put("push_id", getTransactionId(dto.getServiceId()));
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
         paramMap.put("service_passwd", servicePwd);
 
         if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
@@ -173,7 +172,7 @@ public class PushSingleDomainService {
         }
     }
 
-    private NotifyPushRuntimeException exceptionHandler(String statusCode) {
+    private NotifyRuntimeException exceptionHandler(String statusCode) {
         switch (statusCode) {
             case "202":
                 return new AcceptedException();

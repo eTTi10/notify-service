@@ -7,7 +7,7 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.BadRequestException;
 import com.lguplus.fleta.exception.push.MaxRequestOverException;
 import com.lguplus.fleta.exception.push.NotExistRegistIdException;
@@ -72,9 +72,9 @@ class PushSingleDomainServiceTest {
         pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 
@@ -150,9 +150,9 @@ class PushSingleDomainServiceTest {
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
                 .serviceId("XXXXX") //unknown service id
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
         assertThrows(ServiceIdNotFoundException.class, () -> {
@@ -180,9 +180,9 @@ class PushSingleDomainServiceTest {
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
@@ -213,11 +213,11 @@ class PushSingleDomainServiceTest {
         for(String code : codeList) {
             given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
 
-            Exception thrown = assertThrows(NotifyPushRuntimeException.class, () -> {
+            Exception thrown = assertThrows(NotifyRuntimeException.class, () -> {
                 pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
             });
 
-            boolean isNotiPush = thrown instanceof NotifyPushRuntimeException;
+            boolean isNotiPush = thrown instanceof NotifyRuntimeException;
             if(isNotiPush)
                 count ++;
         }
@@ -359,9 +359,9 @@ class PushSingleDomainServiceTest {
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 

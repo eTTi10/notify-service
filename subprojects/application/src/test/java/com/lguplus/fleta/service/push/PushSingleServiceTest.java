@@ -46,9 +46,9 @@ class PushSingleServiceTest {
         PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
-                .appId("30011")
+                .applicationId("30011")
                 .regId("regId")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 

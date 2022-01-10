@@ -12,7 +12,7 @@ import java.util.Map;
 @Mapper(config = ObjectMapperConfig.class)
 public interface PushMapper {
 
-   @Mapping(expression = "java(map.get(\"msg_id\"))", target = "msgId")
+   @Mapping(expression = "java(map.get(\"msg_id\"))", target = "messageId")
    @Mapping(expression = "java(map.get(\"push_id\"))", target = "pushId")
    @Mapping(expression = "java(map.get(\"status_code\"))", target = "statusCode")
    @Mapping(expression = "java(map.get(\"status_msg\"))", target = "statusMsg")
@@ -20,7 +20,6 @@ public interface PushMapper {
 
    @Mapping(expression = "java(dto.getStatusCode())", target = "code")
    @Mapping(expression = "java(dto.getStatusMsg())", target = "message")
-   @Mapping(expression = "java(dto.getFailUsers())", target = "failUsers")
    PushClientResponseMultiDto toClientResponseDto(final PushMultiResponseDto dto);
 
 }

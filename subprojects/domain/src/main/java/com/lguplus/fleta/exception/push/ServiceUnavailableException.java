@@ -1,6 +1,6 @@
 package com.lguplus.fleta.exception.push;
 
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
@@ -9,7 +9,12 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class ServiceUnavailableException extends NotifyPushRuntimeException {
+public class ServiceUnavailableException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
+    }
 
     /**
      *

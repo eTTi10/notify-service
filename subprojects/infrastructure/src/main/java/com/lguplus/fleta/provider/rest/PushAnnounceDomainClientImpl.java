@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;

@@ -64,8 +64,8 @@ public class PushMultiDomainService {
         paramMap.put("msg_id", PushMultiClient.PUSH_COMMAND);
         paramMap.put("push_id", PushMultiClient.TRANSACT_ID_NM);
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
         paramMap.put("service_passwd", pushConfig.getServicePassword(dto.getServiceId()));
 
         if (PushMultiClient.LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {

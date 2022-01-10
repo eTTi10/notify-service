@@ -24,8 +24,8 @@ public class SendSmsVo {
     @ParamAlias("r_ctn")
     private String rCtn;
 
-    @NotBlank(message = "msg 파라미터값이 전달이 안됨.", groups = Groups.C3.class)
-    @ParamAlias("msg")
+    @NotBlank(message = "message 파라미터값이 전달이 안됨.", groups = Groups.C3.class)
+    @ParamAlias("message")
     private String msg;
 
     public SendSmsRequestDto convert(){

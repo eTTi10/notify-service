@@ -26,6 +26,7 @@ public class PushAnnounceDomainService {
     private final PushAnnounceDomainClient pushAnnounceDomainClient;
 
     private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String PUSH_COMMAND = "PUSH_ANNOUNCEMENT";
     private static final int TRANSACTION_MAX_SEQ_NO = 10000;
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
 
@@ -46,11 +47,11 @@ public class PushAnnounceDomainService {
 
         //1. Make Message
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("msg_id", "PUSH_ANNOUNCEMENT");
+        paramMap.put("msg_id", PUSH_COMMAND);
         paramMap.put("push_id", getTransactionId());
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
 
         String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
         if (servicePwd == null) {
@@ -71,7 +72,7 @@ public class PushAnnounceDomainService {
         //3. Send Result
         String statusCode = pushResponseDto.getStatusCode();
         //String statusMsg = pushResponseDto.getStatusMsg()
-        //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getAppId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]")
+        //log.info("[pushAnnouncement][reqAnnouncement] - ["+dto.getApplicationId()+"]["+dto.getServiceId()+"]["+statusCode+"]["+statusMsg+"]")
         log.debug("[pushAnnouncement]["+statusCode+"] [SUCCESS]");
 
         return PushClientResponseDto.builder().build();

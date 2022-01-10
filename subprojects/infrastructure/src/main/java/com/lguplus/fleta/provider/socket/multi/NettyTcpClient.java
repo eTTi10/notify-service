@@ -53,13 +53,13 @@ public class NettyTcpClient {
 	private String destinationIp;
 
 	@Value("${server.port}")
-	private String channelPort;
+	private String wasPort;
 
 	@Value("${push-comm.push.socket.channelID}")
-	private String defaultChannelHost;
+	private String defaultSocketChannelId;
 
 	@Value("${push-comm.push.call.retryCnt}")
-	private String pushCallRetryCnt;
+	private String callRetryCount;
 
 	private static final int CONN_TIMEOUT = 1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
@@ -145,8 +145,8 @@ public class NettyTcpClient {
 
 		String genChannelID = this.getNextChannelID();
 		PushMessageInfoDto response = (PushMessageInfoDto) writeSync(
-				PushMessageInfoDto.builder().messageID(CHANNEL_CONNECTION_REQUEST)
-						.channelID(genChannelID).destIp(destinationIp)
+				PushMessageInfoDto.builder().messageId(CHANNEL_CONNECTION_REQUEST)
+						.channelId(genChannelID).destinationIp(destinationIp)
 						.build());
 
 		if (response != null && SUCCESS.equals(response.getResult())) {
@@ -176,18 +176,18 @@ public class NettyTcpClient {
 		return (channel == null || !channel.isActive() || !channel.isOpen());
 	}
 
-	public void write(final PushMessageInfoDto message) {
+	public void write(final PushMessageInfoDto pushMessageInfoDto) {
 		if (!this.channel.isActive()) {
 			log.error("[NettyClient] write0 isNotActive");
 			return;
 		}
-		ChannelFuture writeFuture = this.channel.write(message);
+		ChannelFuture writeFuture = this.channel.write(pushMessageInfoDto);
 
 		writeFuture.addListener((ChannelFutureListener) future -> {
 			if(future.isSuccess())
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_SUCCESS_MSG, message);
+				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_SUCCESS_MSG, pushMessageInfoDto);
 			else
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_FAIL_MSG, message);
+				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_FAIL_MSG, pushMessageInfoDto);
 		});
 	}
 
@@ -199,10 +199,10 @@ public class NettyTcpClient {
 	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
 
-		int retryCount = Integer.parseInt(pushCallRetryCnt);
+		int retryCount = Integer.parseInt(callRetryCount);
 
 		//Clear
-		setAttachment(message.getMessageID());
+		setAttachment(message.getMessageId());
 
 		int writeTryTimes = 0;
 		AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
@@ -236,14 +236,14 @@ public class NettyTcpClient {
 			} catch (InterruptedException e) {
 				currentThread().interrupt();
 			}
-			response = getAttachment(message.getMessageID());
+			response = getAttachment(message.getMessageId());
 			log.debug("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
 
 		if(response == null) {
-			setAttachment(message.getMessageID());
+			setAttachment(message.getMessageId());
 		}
 
 		if(readWaited >= CONN_TIMEOUT) {
@@ -293,20 +293,20 @@ public class NettyTcpClient {
 	}
 
 	private String getNextChannelID() {
-		String hostname;
+		String hostName;
 		try {
 			InetAddress addr = InetAddress.getLocalHost();
-			hostname = addr.getHostName();
+			hostName = addr.getHostName();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
-			hostname = defaultChannelHost;
+			hostName = defaultSocketChannelId;
 		}
 
-		hostname = hostname.replace("DESKTOP-", "");
-		hostname = hostname + hostname;
+		hostName = hostName.replace("DESKTOP-", "");
+		hostName = hostName + hostName;
 
-		String channelHostNm = (hostname + "00000000").substring(0, 6);
-		String channelPortNm = (channelPort + "0000").substring(0, 4);
+		String channelHostNm = (hostName + "00000000").substring(0, 6);
+		String channelPortNm = (wasPort + "0000").substring(0, 4);
 
 		channelHostNm = "M" +  channelHostNm.substring(1);
 
@@ -331,10 +331,10 @@ public class NettyTcpClient {
 			byte[] dataInfo = message.getData().getBytes(PUSH_ENCODING);
 
 			byte[] byteTotalData = new byte[PUSH_MSG_HEADER_LEN + dataInfo.length];
-			System.arraycopy(Ints.toByteArray(message.getMessageID()), 0, byteTotalData, 0, 4);                    //Message Id
-			System.arraycopy(message.getTransactionID().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionID().getBytes(PUSH_ENCODING).length);//12);   //Transaction Id
-			System.arraycopy(message.getChannelID().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelID().getBytes(PUSH_ENCODING).length);//14);             //Channel Id
-			System.arraycopy(message.getDestIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestIp().getBytes(PUSH_ENCODING).length);//Destination IP
+			System.arraycopy(Ints.toByteArray(message.getMessageId()), 0, byteTotalData, 0, 4);                    //Message Id
+			System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);//12);   //Transaction Id
+			System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelId().getBytes(PUSH_ENCODING).length);//14);             //Channel Id
+			System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestinationIp().getBytes(PUSH_ENCODING).length);//Destination IP
 			System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
 			System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
@@ -407,8 +407,8 @@ public class NettyTcpClient {
 
 					result = new String(byteData,0, 2, PUSH_ENCODING);
 					out.add(PushMessageInfoDto.builder()
-							.messageID(messageID)
-							.channelID(channelId)
+							.messageId(messageID)
+							.channelId(channelId)
 							.result(result)
 							.build());
 					break;
@@ -418,8 +418,8 @@ public class NettyTcpClient {
 
 					result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
 					out.add(PushMessageInfoDto.builder()
-							.messageID(messageID)
-							.channelID(channelId)
+							.messageId(messageID)
+							.channelId(channelId)
 							.result(result)
 							.build());
 					break;
@@ -434,9 +434,9 @@ public class NettyTcpClient {
 					PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, PushRcvStatusMsgWrapperVo.class);
 					String statusCode = msgWrapperVo.getResponse().getStatusCode();
 					out.add(PushMessageInfoDto.builder()
-							.messageID(messageID)
-							.transactionID(transactionID)
-							.channelID(channelId)
+							.messageId(messageID)
+							.transactionId(transactionID)
+							.channelId(channelId)
 							.result(result)
 							.data(data)
 							.statusCode(statusCode)
@@ -479,24 +479,24 @@ public class NettyTcpClient {
 
 			PushMessageInfoDto message = (PushMessageInfoDto) msg;
 
-			if (message.getMessageID() == PROCESS_STATE_REQUEST_ACK) {
+			if (message.getMessageId() == PROCESS_STATE_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
 				log.debug(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(message);
 			}
-			else if (message.getMessageID() == CHANNEL_CONNECTION_REQUEST_ACK) {
+			else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
 				log.debug(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(message);
 			}
-			else if (message.getMessageID() == COMMAND_REQUEST_ACK) {
+			else if (message.getMessageId() == COMMAND_REQUEST_ACK) {
 				// Push 전송인 경우 response 결과를 임시 Map에 저장함.
 				log.debug(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
 				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 			}
 
-			log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageID() + ", " +
-					message.getTransactionID() + ", " + message.getResult());
+			log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
+					message.getTransactionId() + ", " + message.getResult());
 		}
 
 		@Override

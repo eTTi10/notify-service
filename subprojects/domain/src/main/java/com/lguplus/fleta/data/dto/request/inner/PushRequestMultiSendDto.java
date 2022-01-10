@@ -13,7 +13,6 @@ import java.util.List;
 public class PushRequestMultiSendDto {
 
     private String jsonTemplate;
-
     private List<String> users;
 
 }

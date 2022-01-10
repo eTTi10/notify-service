@@ -67,9 +67,9 @@ class PushSingleSocketClientImplTest {
         pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 
@@ -79,9 +79,9 @@ class PushSingleSocketClientImplTest {
         paramMap.put("msg_id", "PUSH_NOTI");
         paramMap.put("push_id", "202112200001");
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
-        paramMap.put("service_passwd", getSha512Pwd(dto.getAppId()));
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
+        paramMap.put("service_passwd", getSha512Pwd(dto.getApplicationId()));
         paramMap.put("service_key", dto.getRegId());
 
         dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
@@ -90,9 +90,9 @@ class PushSingleSocketClientImplTest {
         pushRequestSingleDtoLg = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("smartux")
+                .applicationId("smartux")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 
@@ -102,9 +102,9 @@ class PushSingleSocketClientImplTest {
         paramMapLg.put("msg_id", "PUSH_NOTI");
         paramMapLg.put("push_id", "202112200101");
         paramMapLg.put("service_id", dto.getServiceId());
-        paramMapLg.put("app_id", dto.getAppId());
-        paramMapLg.put("noti_contents", dto.getMsg());
-        paramMapLg.put("service_passwd", getSha512Pwd(dto.getAppId()));
+        paramMapLg.put("app_id", dto.getApplicationId());
+        paramMapLg.put("noti_contents", dto.getMessage());
+        paramMapLg.put("service_passwd", getSha512Pwd(dto.getApplicationId()));
         paramMapLg.put("push_app_id", "smartux0001");
         paramMapLg.put("noti_type", "POS");
         paramMapLg.put("regist_id", dto.getRegId());

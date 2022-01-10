@@ -12,10 +12,10 @@ import java.util.List;
 @Builder
 public class PushRequestAnnounceDto {
 
-    private String appId;
+    private String applicationId;
     private String serviceId;
     private String pushType;
-    private String msg;
+    private String message;
     private List<PushRequestItemDto> items;
 
     public void setItems(List<PushRequestItemDto> items) {

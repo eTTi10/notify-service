@@ -6,7 +6,6 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -70,9 +69,9 @@ class PushMultiDomainServiceTest {
         pushRequestMultiDto = PushRequestMultiDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .users(items)
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 
@@ -86,9 +85,9 @@ class PushMultiDomainServiceTest {
         PushRequestMultiDto testDto = PushRequestMultiDto.builder()
                 .serviceId("XXXXX") //unknown service id
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .users(items)
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
 
@@ -114,9 +113,9 @@ class PushMultiDomainServiceTest {
         PushRequestMultiDto testDto = PushRequestMultiDto.builder()
                 .serviceId("00007") //Lg Push
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .users(items)
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
         given( pushMultiClient.requestPushMulti(any()) ).willReturn(PushMultiResponseDto.builder().statusCode("200").build());

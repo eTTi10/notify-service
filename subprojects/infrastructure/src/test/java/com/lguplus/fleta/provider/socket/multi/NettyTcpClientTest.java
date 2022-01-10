@@ -65,9 +65,9 @@ class NettyTcpClientTest implements PushMultiClient {
         pushRequestMultiDto = PushRequestMultiDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .users(users)
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
     }
@@ -78,8 +78,8 @@ class NettyTcpClientTest implements PushMultiClient {
         paramMap.put("msg_id", PushMultiClient.PUSH_COMMAND);
         paramMap.put("push_id", PushMultiClient.TRANSACT_ID_NM);
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
         paramMap.put("service_passwd", getSha512Pwd(dto.getServiceId()));
 
         if (PushMultiClient.LG_PUSH_OLD.equals("00007")) {
@@ -148,9 +148,9 @@ class NettyTcpClientTest implements PushMultiClient {
 
         receivedLatch = new CountDownLatch(1);
 
-        PushMessageInfoDto sendDto = PushMessageInfoDto.builder().messageID(COMMAND_REQUEST)
-                .channelID(this.channelID).transactionID(transactionId)
-                .destIp("222.231.13.85").data(jsonMsg).build();
+        PushMessageInfoDto sendDto = PushMessageInfoDto.builder().messageId(COMMAND_REQUEST)
+                .channelId(this.channelID).transactionId(transactionId)
+                .destinationIp("222.231.13.85").data(jsonMsg).build();
 
         log.debug("nettyTcpClient.isInValid {} {} {}", nettyTcpClient.isInValid(), this.channelID, sendDto);
         Assertions.assertFalse(nettyTcpClient.isInValid());
@@ -160,7 +160,7 @@ class NettyTcpClientTest implements PushMultiClient {
         receivedLatch.await(2000, TimeUnit.MILLISECONDS);
 
         Assertions.assertEquals(MsgType.SEND_SUCCESS_MSG, receivedMsgType);
-        Assertions.assertEquals(transactionId, receivedMessage.getTransactionID());
+        Assertions.assertEquals(transactionId, receivedMessage.getTransactionId());
 
         Thread.sleep(2000);
         nettyTcpClient.disconnect();
@@ -177,10 +177,10 @@ class NettyTcpClientTest implements PushMultiClient {
                 .replace(REGIST_ID_NM, pushRequestMultiDto.getUsers().get(0));
 
         PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
-                PushMessageInfoDto.builder().messageID(PROCESS_STATE_REQUEST)
-                        .channelID(this.channelID).destIp("222.231.13.85").build());
+                PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST)
+                        .channelId(this.channelID).destinationIp("222.231.13.85").build());
 
-        int processSatusId = response.getMessageID();
+        int processSatusId = response.getMessageId();
         Assertions.assertEquals(14, processSatusId);
 
         Thread.sleep(2000);

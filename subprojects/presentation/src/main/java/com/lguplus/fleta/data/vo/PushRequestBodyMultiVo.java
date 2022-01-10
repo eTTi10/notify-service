@@ -23,7 +23,7 @@ public class PushRequestBodyMultiVo {
     @Size(max = 256, message = "파라미터 app_id는 값이 256 이하이어야 함", groups = Groups.C2.class)
     @JsonProperty("app_id")
     @ApiModelProperty(position = 1, example = "lguplushdtvgcm", value = "어플리케이션 ID")
-    private String appId;
+    private String applicationId;
 
     @NotBlank(message = "service_id 파라미터값이 전달이 안됨", groups = Groups.C3.class)
     @JsonProperty("service_id")
@@ -37,10 +37,10 @@ public class PushRequestBodyMultiVo {
     private String pushType;
 
     /** 보낼 메시지 */
-    @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
+    @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
     @JsonProperty("msg")
     @ApiModelProperty(position = 4, example = "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"", value = "보낼 메시지")
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     @JsonProperty("items")

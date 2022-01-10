@@ -270,10 +270,10 @@ class PushDomainServiceTest {
 
         //given
         PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
-                .appId("30015")
+                .applicationId("30015")
                 .serviceId("smartuxapp")
                 .pushType("L")
-                .msg("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
+                .message("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
                 .regId("M00020200205")
                 .items(addItems)
                 .build();

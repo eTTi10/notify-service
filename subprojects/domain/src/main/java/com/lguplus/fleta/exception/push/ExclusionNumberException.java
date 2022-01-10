@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.push;
 
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 9998.
@@ -8,7 +9,12 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Minwoo Lee
  * @since 1.0
  */
-public class ExclusionNumberException extends NotifyPushRuntimeException {
+public class ExclusionNumberException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
+    }
 
     /**
      *
