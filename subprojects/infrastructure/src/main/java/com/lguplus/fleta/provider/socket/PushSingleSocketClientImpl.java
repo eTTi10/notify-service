@@ -49,7 +49,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     @Value("${push-comm.push.socket.timeout}")
     private String timeout;
     @Value("${server.port}")
-    private String channelPort;
+    private String wasPort;
     @Value("${push-comm.push.socket.channelID}")
     private String defaultChannelHost;
     @Value("${push-comm.push.cp.destination_ip}")
@@ -66,8 +66,6 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private String lgPort;
     @Value("${push-comm.lgpush.socket.timeout}")
     private String lgTimeout;
-    @Value("${server.port}")
-    private String lgChannelPort;
     @Value("${push-comm.lgpush.socket.channelID}")
     private String lgDefaultChannelHost;
     @Value("${push-comm.lgpush.cp.destination_ip}")
@@ -127,12 +125,12 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private void initialize() {
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(channelPort))
+                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(wasPort))
                 .defaultChannelHost(defaultChannelHost).closeSecond(Integer.parseInt(closeSecond)).destinationIp(destinationIp)
                 .isLgPush(false).build();
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVoLg = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(lgChannelPort))
+                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(wasPort))
                 .defaultChannelHost(lgDefaultChannelHost).closeSecond(Integer.parseInt(lgCloseSecond)).destinationIp(lgDestinationIp)
                 .isLgPush(true).build();
 

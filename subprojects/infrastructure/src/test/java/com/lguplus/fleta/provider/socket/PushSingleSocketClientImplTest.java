@@ -119,7 +119,7 @@ class PushSingleSocketClientImplTest {
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "host", "211.115.75.227");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "port", "9600");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "timeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "channelPort", "8080");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "wasPort", "8080");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "defaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "destinationIp", "222.231.13.85");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "closeSecond", "170");
@@ -128,7 +128,6 @@ class PushSingleSocketClientImplTest {
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgHost", "211.115.75.227");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPort", "8100");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgTimeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgChannelPort", "8080");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDefaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDestinationIp", "222.231.13.85");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgCloseSecond", "170");
@@ -192,7 +191,7 @@ class PushSingleSocketClientImplTest {
     @Test // pool empty Exception
     void requestPushSingle_case_04()  {
 
-        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "poolList");
+        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
 
         for(int i=0; i<2; i++) {
             try {

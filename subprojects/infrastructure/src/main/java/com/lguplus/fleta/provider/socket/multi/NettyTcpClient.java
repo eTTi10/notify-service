@@ -8,9 +8,6 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -87,38 +84,20 @@ public class NettyTcpClient {
 
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 
-		if(Epoll.isAvailable()) { // Linux Epoll
-			bootstrap = new Bootstrap()
-					.group(new EpollEventLoopGroup(threadCount))
-					.channel(EpollSocketChannel.class)
-					.option(ChannelOption.TCP_NODELAY, true)
-					.option(ChannelOption.SO_KEEPALIVE, true)
-					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
-					.handler(new ChannelInitializer<SocketChannel>() {
-						public void initChannel(SocketChannel ch) {
-							ChannelPipeline p = ch.pipeline();
-							p.addLast("decoder", new MessageDecoder());
-							p.addLast("encoder", new MessageEncoder());
-							p.addLast("handler", new MessageHandler(pushMultiClient));
-						}
-					});
-		}
-		else {
-			bootstrap = new Bootstrap()
-					.group(new NioEventLoopGroup(threadCount))
-					.channel(NioSocketChannel.class)
-					.option(ChannelOption.TCP_NODELAY, true)
-					.option(ChannelOption.SO_KEEPALIVE, true)
-					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
-					.handler(new ChannelInitializer<SocketChannel>() {
-						public void initChannel(SocketChannel ch) {
-							ChannelPipeline p = ch.pipeline();
-							p.addLast("decoder", new MessageDecoder());
-							p.addLast("encoder", new MessageEncoder());
-							p.addLast("handler", new MessageHandler(pushMultiClient));
-						}
-					});
-		}
+		bootstrap = new Bootstrap()
+				.group(new NioEventLoopGroup(threadCount))
+				.channel(NioSocketChannel.class)
+				.option(ChannelOption.TCP_NODELAY, true)
+				.option(ChannelOption.SO_KEEPALIVE, true)
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+				.handler(new ChannelInitializer<SocketChannel>() {
+					public void initChannel(SocketChannel ch) {
+						ChannelPipeline p = ch.pipeline();
+						p.addLast("decoder", new MessageDecoder());
+						p.addLast("encoder", new MessageEncoder());
+						p.addLast("handler", new MessageHandler(pushMultiClient));
+					}
+				});
 	}
 
 	public String connect(PushMultiClient pushMultiClient) {
@@ -173,11 +152,12 @@ public class NettyTcpClient {
 	}
 
 	public boolean isInValid() {
-		return (channel == null || !channel.isActive() || !channel.isOpen());
+		//isActive : isOpen() && isConnected()
+		return (channel == null || !channel.isActive());
 	}
 
 	public void write(final PushMessageInfoDto pushMessageInfoDto) {
-		if (!this.channel.isActive()) {
+		if (isInValid()) {
 			log.error("[NettyClient] write0 isNotActive");
 			return;
 		}
@@ -276,6 +256,9 @@ public class NettyTcpClient {
 		else if(messageId == PROCESS_STATE_REQUEST) {
 			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
 		}
+		else {
+			log.error("unknown messagId {}", messageId);
+		}
 	}
 
 	private Object getAttachment(int messageId) {
@@ -346,7 +329,7 @@ public class NettyTcpClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	private static class MessageDecoder extends ByteToMessageDecoder {
+	public static class MessageDecoder extends ByteToMessageDecoder {
 
 		private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -383,11 +366,6 @@ public class NettyTcpClient {
 
 			int messageID = byteToInt(byteHeader, 0);
 			int dataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
-
-			if (!isValidMessageType(messageID)) {
-				in.resetReaderIndex();
-				return;
-			}
 
 			if (in.readableBytes() < dataLength) {
 				in.resetReaderIndex();
@@ -447,7 +425,7 @@ public class NettyTcpClient {
 					break;
 			}
 
-			log.debug("** decode end: {}", out.get(out.size()-1));
+			log.debug("** decode end: {}", out.size());
 		}
 
 		private short byteToShort(byte[] src) {
@@ -458,15 +436,11 @@ public class NettyTcpClient {
 			return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
 		}
 
-		private boolean isValidMessageType(int type) {
-			return (type == CHANNEL_CONNECTION_REQUEST_ACK || type == PROCESS_STATE_REQUEST_ACK || type == COMMAND_REQUEST_ACK);
-		}
-
 	}
 
 	@Slf4j
 	@NoArgsConstructor
-	private static class MessageHandler extends ChannelInboundHandlerAdapter {
+	public static class MessageHandler extends ChannelInboundHandlerAdapter {
 
 		private PushMultiClient pushMultiClient = null;
 
@@ -494,9 +468,12 @@ public class NettyTcpClient {
 				log.debug(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
 				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 			}
+			else {
+				log.error("unknown channelRead ! {}", message.getMessageId());
+			}
 
-			log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
-					message.getTransactionId() + ", " + message.getResult());
+			//log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
+			//		message.getTransactionId() + ", " + message.getResult())
 		}
 
 		@Override
@@ -504,13 +481,9 @@ public class NettyTcpClient {
 
 			log.error("[MessageHandler] id : " + ctx.channel().id() + ", exceptionCaught : " + e.toString());
 
-			try {
-				if (ctx.channel().isActive()) { // isConnected -> isActive
-					ctx.channel().disconnect();
-					ctx.channel().close();
-				}
-			} catch (Exception ex) {
-				log.error("[MessageHandler] connection closing : {}", ex.toString());
+			if (ctx.channel().isActive()) { // isConnected -> isActive
+				ctx.channel().disconnect();
+				ctx.channel().close();
 			}
 		}
 

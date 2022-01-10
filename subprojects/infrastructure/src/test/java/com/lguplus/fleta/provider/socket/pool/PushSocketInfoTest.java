@@ -39,10 +39,10 @@ class PushSocketInfoTest {
         String channelId = "01234567890001";//14char
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         pushSocketInfo.openSocket(testIp, testPort, testTimeout, channelId+"0", testDestIp);
-        Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "pushSocket");
+        Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "socket");
         assertTrue(!pushSocketInfo.isInValid());
 
-        JunitTestUtils.setValue(pushSocketInfo, "pushSocket", normalSocket);
+        JunitTestUtils.setValue(pushSocketInfo, "socket", normalSocket);
 
         JunitTestUtils.setValue(pushSocketInfo, "isOpened", false);
         assertTrue(pushSocketInfo.isInValid());
@@ -62,7 +62,7 @@ class PushSocketInfoTest {
         Socket socket = new Socket();
         assertTrue(!socket.isConnected());
 
-        JunitTestUtils.setValue(pushSocketInfo, "pushSocket", socket);
+        JunitTestUtils.setValue(pushSocketInfo, "socket", socket);
         assertTrue(pushSocketInfo.isInValid());
         socket.close();
     }
