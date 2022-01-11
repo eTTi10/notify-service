@@ -1,8 +1,6 @@
 package com.lguplus.fleta.data.dto.request.outer;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +17,7 @@ public class SendPushCodeRequestDto {
 
     private String stbMac;
 
-    private String regId;
+    private String registrationId;
 
     private String pushType;
 
@@ -34,4 +32,13 @@ public class SendPushCodeRequestDto {
     private List<String> items;
 
     private String requestBodyStr;
+
+    public String getPushType() {
+
+        if(sendCode.substring(0,1).equals("T")){
+            pushType = "G";
+        }
+
+        return pushType;
+    }
 }

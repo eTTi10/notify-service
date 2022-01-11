@@ -75,7 +75,7 @@ class PushDomainServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G")
                 .sendCode("P001")
                 .regType("1")

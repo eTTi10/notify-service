@@ -122,7 +122,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G|A|L")
                 .sendCode("P001")
                 .regType("1")
@@ -187,7 +187,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G|A|L")
                 .sendCode("P001")
                 .regType("1")
@@ -236,7 +236,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("T")
                 .sendCode("P001")
                 .regType("1")
@@ -282,7 +282,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("A|G")
                 .sendCode("P002")
                 .regType("1")
@@ -327,7 +327,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("A|G")
                 .sendCode("P001")
                 .regType("1")
@@ -360,7 +360,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G|A")
                 .sendCode("P001")
                 .regType("1")
@@ -391,7 +391,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G|A")
                 .sendCode("P001")
                 .regType("1")
@@ -423,7 +423,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G|A")
                 .sendCode("P001")
                 .regType("1")
@@ -454,7 +454,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G")
                 .sendCode("P001")
                 .regType("1")
@@ -482,7 +482,7 @@ class PushServiceTest {
         Map<String, String> reserveMap = Map.of("address","111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .regId("M00020200205")
+                .registrationId("M00020200205")
                 .pushType("G")
                 .sendCode("P001")
                 .regType("1")
