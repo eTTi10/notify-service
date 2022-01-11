@@ -4,14 +4,13 @@ import com.lguplus.fleta.data.type.CarrierType;
 import com.lguplus.fleta.data.type.DeviceInfo;
 import com.lguplus.fleta.data.type.NetworkInfo;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
 @ToString
-public class UXSimpleJoinSmsRequestDto {
+public class UxSimpleJoinSmsRequestDto {
 
     /** 가입자 번호 */
     private String saId;
