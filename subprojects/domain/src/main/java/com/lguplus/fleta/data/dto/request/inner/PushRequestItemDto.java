@@ -10,9 +10,9 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
-public class PushRequestMultiSendDto {
+public class PushRequestItemDto {
 
-    private String jsonTemplate;
-    private List<String> users;
+    private String itemKey;
+    private String itemValue;
 
 }

@@ -39,10 +39,10 @@ class PushSocketInfoTest {
         String channelId = "01234567890001";//14char
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         pushSocketInfo.openSocket(testIp, testPort, testTimeout, channelId+"0", testDestIp);
-        Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "pushSocket");
+        Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "socket");
         assertTrue(!pushSocketInfo.isInValid());
 
-        JunitTestUtils.setValue(pushSocketInfo, "pushSocket", normalSocket);
+        JunitTestUtils.setValue(pushSocketInfo, "socket", normalSocket);
 
         JunitTestUtils.setValue(pushSocketInfo, "isOpened", false);
         assertTrue(pushSocketInfo.isInValid());
@@ -62,7 +62,7 @@ class PushSocketInfoTest {
         Socket socket = new Socket();
         assertTrue(!socket.isConnected());
 
-        JunitTestUtils.setValue(pushSocketInfo, "pushSocket", socket);
+        JunitTestUtils.setValue(pushSocketInfo, "socket", socket);
         assertTrue(pushSocketInfo.isInValid());
         socket.close();
     }
@@ -94,15 +94,13 @@ class PushSocketInfoTest {
         Assertions.assertEquals("200", responseDto.getStatusCode());
         Assertions.assertEquals("SC", responseDto.getResponseCode());
 
-        testVo = PushSocketInfo.PushRcvHeaderVo.builder().status("FA").recvLength(byteBody.length).recvBuffer(byteBody).build();
-
+        final PushSocketInfo.PushRcvHeaderVo testVo2 = PushSocketInfo.PushRcvHeaderVo.builder().status("FA").recvLength(byteBody.length).recvBuffer(byteBody).build();
         assertThrows(FailException.class, () -> {
-            PushSocketInfo.PushRcvHeaderVo testVo1 = PushSocketInfo.PushRcvHeaderVo.builder().status("FA").recvLength(byteBody.length).recvBuffer(byteBody).build();
-            ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo1);
+          ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo2);
         });
 
+        final PushSocketInfo.PushRcvHeaderVo testVo1 = PushSocketInfo.PushRcvHeaderVo.builder().status("--").recvLength(byteBody.length).recvBuffer(byteBody).build();
         assertThrows(FailException.class, () -> {
-            PushSocketInfo.PushRcvHeaderVo testVo1 = PushSocketInfo.PushRcvHeaderVo.builder().status("--").recvLength(byteBody.length).recvBuffer(byteBody).build();
             ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo1);
         });
 
@@ -115,8 +113,8 @@ class PushSocketInfoTest {
         responseJson1 = responseJson1.replaceAll("(\r\n|\n)", "");
         byte[] byteBody1 = responseJson1.getBytes(PUSH_ENCODING);
 
-        PushSocketInfo.PushRcvHeaderVo testVo1 = PushSocketInfo.PushRcvHeaderVo.builder().status("SC").recvLength(byteBody1.length).recvBuffer(byteBody1).build();
-        PushResponseDto responseDto1 = ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo1);
+        final PushSocketInfo.PushRcvHeaderVo testVo3 = PushSocketInfo.PushRcvHeaderVo.builder().status("SC").recvLength(byteBody1.length).recvBuffer(byteBody1).build();
+        PushResponseDto responseDto1 = ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo3);
         Assertions.assertEquals(null, responseDto1.getStatusCode());
         Assertions.assertEquals(null, responseDto1.getStatusMsg());
 

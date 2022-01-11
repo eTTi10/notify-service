@@ -38,7 +38,7 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         submitReq.setNamespace((String)mms.get("namespace"));
         submitReq.setMm7Version((String)mms.get("version"));
 
-        // transactionID
+        // transactionId
         String reqDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date(System.currentTimeMillis()));
         int ranNum = (int)(Math.random() * (9999999 - 1000000 + 1)) + 1000000;//7자리 난수발생
         String transactionID = ranNum+"_"+reqDate;

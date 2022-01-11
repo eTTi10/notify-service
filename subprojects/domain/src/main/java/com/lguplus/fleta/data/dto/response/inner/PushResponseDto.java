@@ -14,7 +14,7 @@ import lombok.*;
 @ToString
 public class PushResponseDto {
 
-    private String msgId;
+    private String messageId;
     private String pushId;
     private String statusCode;
     private String statusMsg;

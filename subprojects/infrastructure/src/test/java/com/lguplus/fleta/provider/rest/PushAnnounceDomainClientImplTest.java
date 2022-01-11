@@ -1,10 +1,8 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.push.*;
 import feign.*;
 import lombok.extern.slf4j.Slf4j;
