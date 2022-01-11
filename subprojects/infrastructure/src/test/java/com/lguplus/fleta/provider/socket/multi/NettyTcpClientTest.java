@@ -18,33 +18,32 @@ import io.netty.channel.*;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
+
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class NettyTcpClientTest implements PushMultiClient {
-
-    //NettyTcpClient nettyTcpClient = new NettyTcpClient();
-    //String channelID;
 
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
@@ -122,6 +121,38 @@ class NettyTcpClientTest implements PushMultiClient {
         }
     }
 
+    private NettyTcpClient getNettyClient() {
+        NettyTcpClient nettyTcpClient = new NettyTcpClient();
+
+        ReflectionTestUtils.setField(nettyTcpClient, "host", "211.115.75.227");
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "9600");
+        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
+        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
+        ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
+        ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
+        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
+
+        ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
+
+        return nettyTcpClient;
+    }
+
+    private NettyTcpClient getNettyClientInvalid() {
+        NettyTcpClient nettyTcpClient = new NettyTcpClient();
+
+        ReflectionTestUtils.setField(nettyTcpClient, "host", "211.115.75.227");
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "9876");
+        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
+        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
+        ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
+        ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
+        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
+
+        ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
+
+        return nettyTcpClient;
+    }
+
     @Override
     public PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto) {
         return null;
@@ -149,20 +180,9 @@ class NettyTcpClientTest implements PushMultiClient {
 
     @Test
     void test_requestPushMulti() throws InterruptedException {
-        //nettyTcpClient = new NettyTcpClient();
-        NettyTcpClient nettyTcpClient = new NettyTcpClient();
-
-        ReflectionTestUtils.setField(nettyTcpClient, "host", "211.115.75.227");
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "9600");
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
-        ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
-        ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
-
-        ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
-
+        NettyTcpClient nettyTcpClient = getNettyClient();
         String channelID = nettyTcpClient.connect(this);
+
         String transactionId = getTransactionId();
         int COMMAND_REQUEST = 15;
 
@@ -187,25 +207,16 @@ class NettyTcpClientTest implements PushMultiClient {
         Assertions.assertEquals(MsgType.SEND_SUCCESS_MSG, receivedMsgType);
         Assertions.assertEquals(transactionId, receivedMessage.getTransactionId());
 
-        Thread.sleep(3000);
+        //Thread.sleep(3000);
         nettyTcpClient.disconnect();
     }
 
     @Test
     void test_requestPushMulti2() throws InterruptedException {
-        NettyTcpClient nettyTcpClient = new NettyTcpClient();
-
-        ReflectionTestUtils.setField(nettyTcpClient, "host", "211.115.75.227");
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "9600");
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
-        ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
-        ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
-
-        ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
-
+        NettyTcpClient nettyTcpClient = getNettyClient();
         String channelID = nettyTcpClient.connect(this);
+
+        nettyTcpClient.setAttachment(-1);
 
         String transactionId = getTransactionId();
         int PROCESS_STATE_REQUEST = 13;
@@ -222,7 +233,7 @@ class NettyTcpClientTest implements PushMultiClient {
         int processSatusId = response.getMessageId();
         Assertions.assertEquals(14, processSatusId);
 
-        Thread.sleep(3000);
+        //Thread.sleep(3000);
         nettyTcpClient.disconnect();
 
     }
@@ -404,6 +415,298 @@ class NettyTcpClientTest implements PushMultiClient {
 
         return byteTotalData;
     }
+
+    @Test
+    void test_clientInvalid() throws IOException {
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try {
+
+            String channelID = nettyTcpClient.connect(this);
+
+            NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
+            doThrow(new IOException("")).when(spyNettyTcpClient).getHostName();
+
+            String channelId = spyNettyTcpClient.getNextChannelID();
+            Assertions.assertFalse(nettyTcpClient.isInValid());
+
+            doReturn(null).when(spyNettyTcpClient).getChannel();
+            boolean isInvalid = spyNettyTcpClient.isInValid();
+            Assertions.assertTrue(isInvalid);
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            ChannelTest channelTest = new ChannelTest("test", true, true);
+            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            isInvalid = spyNettyTcpClient.isInValid();
+            Assertions.assertFalse(isInvalid);
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            channelTest = new ChannelTest("test", true, false);
+            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            isInvalid = spyNettyTcpClient.isInValid();
+            Assertions.assertTrue(isInvalid);
+
+            //disconnect
+            spyNettyTcpClient = spy(nettyTcpClient);
+            doReturn(null).when(spyNettyTcpClient).getChannel();
+            spyNettyTcpClient.disconnect();
+            //Assertions.assertTrue(spyNettyTcpClient.isInValid());
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getChannel();
+            spyNettyTcpClient.disconnect();
+            //Assertions.assertTrue(spyNettyTcpClient.isInValid());
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            ChannelTest channelTest1 = new ChannelTest("test", true, true);
+            doReturn(channelTest1).when(spyNettyTcpClient).getChannel();
+            spyNettyTcpClient.disconnect();
+            Assertions.assertTrue(spyNettyTcpClient.isInValid());
+        }
+        finally {
+            nettyTcpClient.disconnect();
+        }
+
+    }
+
+
+    @Test
+    void test_write() throws IOException, InterruptedException {
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try {
+
+            String channelID = nettyTcpClient.connect(this);
+            nettyTcpClient.disconnect();
+            channelID = nettyTcpClient.connect(this);
+
+            NettyTcpClient spyNettyTcpClient;
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getChannel();
+
+            int COMMAND_REQUEST = 15;
+            String data = "{\"request\":{\"service_key\":\"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=\",\"badge\":\"1\",\"push_id\":\"202201100001\",\"service_id\":\"30011\",\"sound\":\"ring.caf\",\"service_passwd\":\"5643a19ce9fa3ddf470b33afdfe57a976e9e99af082d1a366d69185299425e45ca8fb3c18539751432e207b99d52d3f8f13956513a1126792072c3d18e8cea3a\",\"cm\":\"aaaa\",\"noti_contents\":\"\\\"PushCtrl\\\":\\\"ON\\\",\\\"MESSGAGE\\\": \\\"NONE\\\"\",\"msg_id\":\"PUSH_NOTI\",\"app_id\":\"lguplushdtvgcm\"}}";
+            spyNettyTcpClient.write(PushMessageInfoDto.builder().messageId(COMMAND_REQUEST)
+                    .channelId(channelID).destinationIp("222.231.13.85").data(data).build()
+            );
+            Assertions.assertTrue(spyNettyTcpClient.isInValid());
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            ChannelTest channelTest = new ChannelTest("test", true, true);
+            channelTest.setIsSuccess(true);
+            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            spyNettyTcpClient.write(PushMessageInfoDto.builder().messageId(COMMAND_REQUEST)
+                    .channelId(channelID).destinationIp("222.231.13.85").data(data).build()
+            );
+/*
+            channelTest = new ChannelTest("test", true, true);
+            channelTest.setIsSuccess(false);
+            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            spyNettyTcpClient.write(PushMessageInfoDto.builder().messageId(COMMAND_REQUEST)
+                    .channelId(channelID).destinationIp("222.231.13.85").data(data).build()
+            );
+
+            Assertions.assertFalse(spyNettyTcpClient.isInValid());
+*/
+            //waitFutureDone
+            /*
+            spyNettyTcpClient = spy(nettyTcpClient);
+            doReturn(false).when(spyNettyTcpClient).waitLatch(new CountDownLatch(0));
+            int PROCESS_STATE_REQUEST = 13;
+            PushMessageInfoDto response = (PushMessageInfoDto) spyNettyTcpClient.writeSync(
+                    PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST)
+                            .channelId(channelID).destinationIp("222.231.13.85").build());
+            */
+
+        }
+        finally {
+            nettyTcpClient.disconnect();
+        }
+
+    }
+
+
+    @Test
+    void test_connect_timeout() {
+        NettyTcpClient nettyTcpClient = getNettyClientInvalid();
+
+        try {
+
+            String channelID = nettyTcpClient.connect(this);
+            Assertions.assertTrue(nettyTcpClient.isInValid());
+/*
+            //normal port
+            ReflectionTestUtils.setField(nettyTcpClient, "port", "9600");
+            //unknown destination ip
+            ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.11.11");
+
+            nettyTcpClient.connect(this);
+            Assertions.assertTrue(nettyTcpClient.isInValid());
+*/
+        }
+        finally {
+            nettyTcpClient.disconnect();
+        }
+
+    }
+
+    public static class ChannelFutureTest implements  ChannelFuture {
+
+        boolean isSuccess = false;
+        Channel channel;
+
+        public ChannelFutureTest(Channel channel, boolean isSuccess) {
+            this.channel = channel;
+            this.isSuccess = isSuccess;
+        }
+
+        @Override
+        public Channel channel() {
+            return channel;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return isSuccess;
+        }
+
+        @Override
+        public boolean isCancellable() {
+            return false;
+        }
+
+        @Override
+        public Throwable cause() {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture addListener(GenericFutureListener<? extends Future<? super Void>> listener) {
+/*
+            Callable<String> calls = () -> {
+                //Thread.sleep(1000);
+                log.debug("call future!");
+                ChannelFutureTest.notifyListener0(this, listener);
+                log.debug("call future end!");
+                return null;
+            };
+
+            final Future<String> future = (Future<String>) Executors.newSingleThreadExecutor().submit(calls);
+*/
+            //ChannelFutureTest that = this;
+            Thread thread = new Thread(() -> {
+                log.debug("call future!");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                ChannelFutureTest.notifyListener0(this, listener);
+            });
+            thread.start();
+            return this;
+        }
+
+        static void notifyListener0(Future future, GenericFutureListener l) {
+            try {
+                l.operationComplete(future);
+            } catch (Throwable t) {
+            }
+        }
+
+        @Override
+        public ChannelFuture addListeners(GenericFutureListener<? extends Future<? super Void>>... listeners) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture removeListener(GenericFutureListener<? extends Future<? super Void>> listener) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture removeListeners(GenericFutureListener<? extends Future<? super Void>>... listeners) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture sync() throws InterruptedException {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture syncUninterruptibly() {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture await() throws InterruptedException {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture awaitUninterruptibly() {
+            return null;
+        }
+
+        @Override
+        public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean await(long timeoutMillis) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean awaitUninterruptibly(long timeout, TimeUnit unit) {
+            return false;
+        }
+
+        @Override
+        public boolean awaitUninterruptibly(long timeoutMillis) {
+            return false;
+        }
+
+        @Override
+        public Void getNow() {
+            return null;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public Void get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        public Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return null;
+        }
+
+        @Override
+        public boolean isVoid() {
+            return false;
+        }
+    }
+
+
 
     public static class ChannelHandlerContextTest implements ChannelHandlerContext {
 
@@ -624,11 +927,16 @@ class NettyTcpClientTest implements PushMultiClient {
         String id;
         boolean isOpen;
         boolean isActive;
+        boolean isSuccess;
 
         public ChannelTest(String id, boolean opened, boolean actived) {
             this.id = id;
             this.isActive = actived;
             this.isOpen = opened;
+        }
+
+        public void setIsSuccess(boolean isSuccess) {
+            this.isSuccess = isSuccess;
         }
 
         @Override
@@ -663,7 +971,15 @@ class NettyTcpClientTest implements PushMultiClient {
 
         @Override
         public ChannelFuture close() {
+            isActive = false;
+            isOpen = false;
             return null;
+        }
+
+        @Override
+        public ChannelFuture write(Object msg) {
+
+            return new ChannelFutureTest(this, isSuccess);//isSuccess);
         }
 
         @Override
@@ -796,11 +1112,6 @@ class NettyTcpClientTest implements PushMultiClient {
         }
 
         @Override
-        public ChannelFuture write(Object msg) {
-            return null;
-        }
-
-        @Override
         public ChannelFuture write(Object msg, ChannelPromise promise) {
             return null;
         }
@@ -860,8 +1171,6 @@ class NettyTcpClientTest implements PushMultiClient {
             return 0;
         }
     }
-
-
     @AfterEach
     void tearDown() {
 
