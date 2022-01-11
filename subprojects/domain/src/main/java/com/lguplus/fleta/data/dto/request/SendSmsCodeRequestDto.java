@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
+@ToString
 public class SendSmsCodeRequestDto {
 
     private String saId;

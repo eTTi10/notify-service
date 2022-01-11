@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Http Push Domain FeignClient (Open API 이용)
  *
- * 단건, 멀티, 공지 푸시등록
+ * 단건, 멀티(단건 사용), 공지 푸시등록
  */
 @Slf4j
 @Component
@@ -67,6 +67,7 @@ public class HttpPushDomainClientImpl implements HttpPushDomainClient {
      * @return 기본 URL
      */
     private String getBaseUrl(String kind) {
+        log.debug(kind);
         // 단건, 멀티
         return protocolSingle + "://" + hostSingle + ":" + httpPortSingle;
     }
