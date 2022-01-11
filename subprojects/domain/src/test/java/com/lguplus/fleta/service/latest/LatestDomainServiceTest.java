@@ -7,6 +7,7 @@ import com.lguplus.fleta.data.entity.LatestCheckEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
+import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
@@ -132,8 +133,8 @@ class LatestDomainServiceTest {
                 .catName("놀라운 대회 스타킹")
                 .categoryGb(CATEGORY_GB)
                 .build();
-        given(latestRepository.insertLatest(any())).willThrow(new RuntimeException());
-        Exception thrown = assertThrows(RuntimeException.class, () -> {
+        given(latestRepository.insertLatest(any())).willThrow(new ExtRuntimeException());
+        Exception thrown = assertThrows(ExtRuntimeException.class, () -> {
             latestDomainService.insertLatest(latestRequestDto);
         });
         assertEquals(thrown instanceof RuntimeException, true);
