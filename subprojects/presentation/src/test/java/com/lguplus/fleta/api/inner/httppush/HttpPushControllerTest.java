@@ -37,7 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         , MessageConverterConfig.class})
 class HttpPushControllerTest {
 
-    private static final String URL_TEMPLATE = "/notify/httppush/single";
+    private static final String URL_TEMPLATE_SINGLE = "/notify/httppush/single";
+    private static final String URL_TEMPLATE_MULTI = "/notify/httppush/multi";
     private static final String SUCCESS_CODE = "200";
 
     @Autowired
@@ -73,7 +74,36 @@ class HttpPushControllerTest {
         String content = objectMapper.writeValueAsString(paramMap);
 
         // when
-        MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE).content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+        MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE_SINGLE).content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print())
+                .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+
+        // then
+        assertThat(response).contains(SUCCESS_CODE);    // 성공 코드가 있는지 확인
+    }
+
+    @Test
+    @DisplayName("정상적으로 멀티푸시가 성공하는지 확인")
+    void whenRequestMultiPush_thenReturnSuccess() throws Exception {
+        // given
+        HttpPushResponseDto httpPushResponseDto = HttpPushResponseDto.builder().build();
+
+        given(httpPushService.requestHttpPushMulti(any())).willReturn(httpPushResponseDto);
+
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("app_id", "lguplushdtvgcm");
+        paramMap.put("service_id", "30011");
+        paramMap.put("push_type", "G");
+        paramMap.put("users", List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="));
+        paramMap.put("msg", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"");
+
+        String content = objectMapper.writeValueAsString(paramMap);
+
+        // when
+        MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE_MULTI).content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();

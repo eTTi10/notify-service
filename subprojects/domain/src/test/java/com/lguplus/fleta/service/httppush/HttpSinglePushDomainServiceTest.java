@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class HttpPushDomainServiceTest {
+class HttpSinglePushDomainServiceTest {
 
     private static final String SUCCESS_CODE = "200";
 
