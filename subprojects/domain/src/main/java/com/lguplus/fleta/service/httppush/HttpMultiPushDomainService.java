@@ -53,68 +53,11 @@ public class HttpMultiPushDomainService {
     public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
         log.debug("httpPushMultiRequestDto ::::::::::::::: {}", httpPushMultiRequestDto);
 
-        String[] results;
-        String regId = "";
-        String code = "";
-
         // Open API 에 멀티푸시를 요청한다.
         List<Future<String>> futures = requestOpenApi(httpPushMultiRequestDto);
 
-        List<String> failUsers = new ArrayList<>();
-
-        for (Future<String> future : futures) {
-            try {
-                results = future.get().split("\\|");
-                regId = results[0];
-                code = results[1];
-
-            } catch (Exception ex) {
-                Thread.currentThread().interrupt();
-
-                throw new HttpPushEtcException("기타 오류");
-            }
-
-            log.debug("{} ({}) ::::::::::::::::::: {}", LocalDateTime.now(), Thread.currentThread().getName(), code);
-
-            // Push 메시지 전송 실패
-            if (!code.equals("200")) {
-                log.debug("Push 메시지 전송 실패 code ::::::::::::::::::: {}", code);
-
-                switch (code) {
-                    case "202":
-                        // code "1112", message "The request Accepted"
-                        throw new AcceptedException();
-
-                    case "400":
-                        // code "1104", message "Push GW BadRequest"
-                        throw new BadRequestException();
-
-                    case "401":
-                        // code "1105", message "Push GW UnAuthorized"
-                        throw new UnAuthorizedException();
-
-                    case "403":
-                        // code "1106", message "Push GW Forbidden"
-                        throw new ForbiddenException();
-
-                    case "404":
-                        // code "1107", message "Push GW Not Found"
-                        throw new NotFoundException();
-
-                        // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함
-                    case "410":
-                    case "412":
-                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함");
-                        break;
-
-                    // 메시지 전송 실패 - Retry 대상
-                    default:
-                        log.debug("메시지 전송 실패 - Retry 대상");
-                        failUsers.add(regId);
-                        break;
-                }
-            }
-        }
+        // 멀티푸시를 요청한 Open API 의 응답을 가져온다.
+        List<String> failUsers = responseOpenApi(futures);
 
         // 성공
         if (failUsers.isEmpty()) {
@@ -216,6 +159,75 @@ public class HttpMultiPushDomainService {
         executor.shutdown();
 
         return futures;
+    }
+
+    /**
+     * Open API 의 응답을 가져온다.
+     *
+     * @param futures 응답값을 저장한 Future 목록
+     * @return 메시지 전송 실패 유저 목록
+     */
+    private List<String> responseOpenApi(List<Future<String>> futures) {
+        String[] results;
+        String regId = "";
+        String code = "";
+        List<String> failUsers = new ArrayList<>();
+
+        for (Future<String> future : futures) {
+            try {
+                results = future.get().split("\\|");
+                regId = results[0];
+                code = results[1];
+
+            } catch (Exception ex) {
+                Thread.currentThread().interrupt();
+
+                throw new HttpPushEtcException("기타 오류");
+            }
+
+            log.debug("{} ({}) ::::::::::::::::::: {}", LocalDateTime.now(), Thread.currentThread().getName(), code);
+
+            // Push 메시지 전송 실패
+            if (!code.equals("200")) {
+                log.debug("Push 메시지 전송 실패 code ::::::::::::::::::: {}", code);
+
+                switch (code) {
+                    case "202":
+                        // code "1112", message "The request Accepted"
+                        throw new AcceptedException();
+
+                    case "400":
+                        // code "1104", message "Push GW BadRequest"
+                        throw new BadRequestException();
+
+                    case "401":
+                        // code "1105", message "Push GW UnAuthorized"
+                        throw new UnAuthorizedException();
+
+                    case "403":
+                        // code "1106", message "Push GW Forbidden"
+                        throw new ForbiddenException();
+
+                    case "404":
+                        // code "1107", message "Push GW Not Found"
+                        throw new NotFoundException();
+
+                        // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함
+                    case "410":
+                    case "412":
+                        log.debug("유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip 함");
+                        break;
+
+                    // 메시지 전송 실패 - Retry 대상
+                    default:
+                        log.debug("메시지 전송 실패 - Retry 대상");
+                        failUsers.add(regId);
+                        break;
+                }
+            }
+        }
+
+        return failUsers;
     }
 
     /**
