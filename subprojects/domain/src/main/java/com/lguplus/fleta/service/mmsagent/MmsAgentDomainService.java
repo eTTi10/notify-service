@@ -10,12 +10,12 @@ import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
-import com.lguplus.fleta.exception.mmsagent.*;
 import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
-import com.lguplus.fleta.exception.push.MmsException;
+import com.lguplus.fleta.exception.mmsagent.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +111,7 @@ public class MmsAgentDomainService {
                 case "9998":
                     throw new MmsServiceException();//MM7 Service Error
                 default :
-                    throw new MmsException();//기타에러
+                    throw new MmsRuntimeException();
             }
         }
 

@@ -48,9 +48,13 @@ public class LatestPostRequestVo {
     private String catName;
 
     @ParamAlias("category_gb") //카테고리 구분
-    @NotBlank(message = "[카테고리 구분]가 입력되지 않았습니다.")
-    @Builder.Default
-    private String categoryGb = "I20";//디폴트값이 잘 적용되는지 테스트 해볼것
+    private String categoryGb;
+    public String getCategoryGb() {
+        if(StringUtils.isEmpty(categoryGb)){
+            return "I20";
+        }
+        return categoryGb;
+    }
 
     //LatestRequestDto
     public LatestRequestDto convert() {

@@ -33,6 +33,7 @@ error:
             ParameterContainsWhitespaceException: "5013"
             ParameterContainsNonAlphanumericException: "5014"
             ParameterLengthTooShortException: "5017"
+            ExtRuntimeException: "9999"
             openapi:
               AccessKeyNotPermittedException: "1300"
               CpIdNotPermittedException: "1301"

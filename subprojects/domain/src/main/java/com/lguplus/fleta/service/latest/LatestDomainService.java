@@ -10,7 +10,6 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
-import com.lguplus.fleta.exception.push.LatestException;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,6 @@ public class LatestDomainService {
 
         if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             throw new DuplicateKeyException("기존 데이터 존재");//1201;//중복
-
         }else if(maxCnt < checkList.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과
         }
@@ -94,7 +92,7 @@ public class LatestDomainService {
         }catch(BadSqlGrammarException e){
             throw new DatabaseException();//8999 DB에러
         }catch(Exception e){
-            throw new LatestException();
+            throw new RuntimeException();
         }
         return insertCnt;
     }

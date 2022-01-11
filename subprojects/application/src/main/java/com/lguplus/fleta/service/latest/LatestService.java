@@ -13,7 +13,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true) <== 리뷰에서 어노테이션 추가요청을 받았지만 insertLatest인서트가 되지 않아서 일단 주석처리함
 public class LatestService {
 
     private final LatestDomainService latestDomainService;
