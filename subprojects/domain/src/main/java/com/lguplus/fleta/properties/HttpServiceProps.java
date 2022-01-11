@@ -65,7 +65,7 @@ public class HttpServiceProps {
      * @return exceptionClassName 에 해당하는 code, message
      */
     public Pair<String, String> getExceptionCodeMessage(String exceptionClassName) {
-        String exceptionCode = httpPushExceptionCode.getHttppush().get(exceptionClassName);
+        String exceptionCode = httpPushExceptionCode.getHttpPush().get(exceptionClassName);
 
         return Pair.of(exceptionCode, httpPushExceptionMessage.getMessage().get(exceptionCode));
     }

@@ -1,10 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -20,7 +16,7 @@ import java.util.List;
 public class HttpPushSingleRequestDto {
 
     /** 어플리케이션 ID */
-    private String appId;
+    private String applicationId;
 
     /** 서비스 등록시 부여받은 Unique ID */
     private String serviceId;
@@ -29,7 +25,7 @@ public class HttpPushSingleRequestDto {
     @Builder.Default private String pushType = "G";
 
     /** 보낼 메시지 */
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     private List<String> items;
