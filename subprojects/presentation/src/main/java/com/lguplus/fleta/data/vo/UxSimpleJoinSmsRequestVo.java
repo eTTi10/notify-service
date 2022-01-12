@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.outer.UxSimpleJoinSmsRequestDto;
 import com.lguplus.fleta.data.type.CarrierType;
 import com.lguplus.fleta.data.type.DeviceInfo;
 import com.lguplus.fleta.data.type.NetworkInfo;
@@ -68,13 +67,5 @@ public class UxSimpleJoinSmsRequestVo {
     /** 통합 통계용 통신사 구분 */
     @ParamAlias("carrier_type")
     private CarrierType carrierType;
-
-    public UxSimpleJoinSmsRequestDto convert() {
-        return UxSimpleJoinSmsRequestDto.builder()
-                .saId(getSaId())
-                .stbMac(getStbMac())
-                .ctn(getCtn())
-                .build();
-    }
 
 }
