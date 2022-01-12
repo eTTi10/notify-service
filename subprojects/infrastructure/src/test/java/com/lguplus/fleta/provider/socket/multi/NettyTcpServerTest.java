@@ -10,6 +10,8 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
+import com.lguplus.fleta.exception.push.*;
+import com.lguplus.fleta.provider.socket.PushMultiSocketClientImpl;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -20,7 +22,6 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -28,19 +29,30 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 public class NettyTcpServerTest {
     static NettyTcpServer server;
     static Thread thread;
     static int testCnt = 9997;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9666;
-    AtomicInteger tranactionMsgId = new AtomicInteger(0);
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
     List<String> users = new ArrayList<>();
+    static String responseCode = "200";
+    static int responseCount = 0;
+    static String responseTestMode = "normal";
+
+    PushMultiSocketClientImpl pushMultiSocketClient;
+    NettyTcpClient nettyTcpClient;
 
     @BeforeAll
     static void setUpAll() {
@@ -60,12 +72,16 @@ public class NettyTcpServerTest {
     @BeforeEach
     void setUp() {
         //boolean check = nettyTcpClient.isInValid();
+        nettyTcpClient = getNettyClient();
+        pushMultiSocketClient = new PushMultiSocketClientImpl(nettyTcpClient);
+        ReflectionTestUtils.setField(pushMultiSocketClient, "destinationIp", "222.231.13.85");
+        ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", "5");
+        ReflectionTestUtils.setField(pushMultiSocketClient, "FLUSH_COUNT", 2);
+        ReflectionTestUtils.setField(pushMultiSocketClient, "tranactionMsgId", new AtomicInteger((int)(Math.pow(16, 4)) -3));
 
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        for(int i=0; i<10; i++) {
+            users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        }
 
         addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
         addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
@@ -79,38 +95,10 @@ public class NettyTcpServerTest {
                 .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
-    }
 
-    @Test
-    void testServer01 () {
-
-        //Connect
-        NettyTcpClient nettyTcpClient = getNettyClient();
-        String channelID = nettyTcpClient.connect(new Test02Client());
-        Assertions.assertFalse(nettyTcpClient.isInValid());
-
-        String transactionId = getTransactionId();
-        int PROCESS_STATE_REQUEST = 13;
-        String REGIST_ID_NM = "[@RegistId]";
-        String TRANSACT_ID_NM = "[@TransactionId]";
-
-        //Make Message
-        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
-        String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId)
-                .replace(REGIST_ID_NM, pushRequestMultiDto.getUsers().get(0));
-
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
-                            PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST)
-                                .channelId(channelID).destinationIp("222.231.13.85").build());
-        Assertions.assertEquals(14, response.getMessageId());
-
-
-        //nettyTcpClient.disconnect();
-
-    }
-    private String getTransactionId() {
-        String DATE_FOMAT = "yyyyMMdd";
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0) & 0xFFFF);
+        NettyTcpServerTest.responseCode = "200";
+        NettyTcpServerTest.responseCount = 0;
+        NettyTcpServerTest.responseTestMode = "normal";
     }
 
     private NettyTcpClient getNettyClient() {
@@ -156,6 +144,95 @@ public class NettyTcpServerTest {
         return oNode.toString();
     }
 
+    @Test
+    //normal case
+    void testServer01 () {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+    }
+
+    @Test
+    //timeMillis >= SECOND
+    void testServer02 () {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
+
+        ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis()-5000));
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+    }
+
+    @Test //exception check
+    void testServer03 () {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto))
+                .users(pushRequestMultiDto.getUsers().stream().limit(1).collect(toList())).build();
+
+        int [] errCode = new int[] {202, 400, 401, 403, 404};
+        Class [] exlist = new Class[] {
+                  AcceptedException.class
+                , BadRequestException.class
+                , UnAuthorizedException.class
+                , ForbiddenException.class
+                , NotFoundException.class   };
+
+        this.getClass();
+
+        for (int i =0; i<errCode.length; i++) {
+            NettyTcpServerTest.responseCode = "" + errCode[i];
+
+            assertThrows(exlist[i], () -> {
+                pushMultiSocketClient.requestPushMulti(dto);
+            });
+        }
+
+    }
+
+    @Test //exception check : 410, 412, other
+    void testServer04 () {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto))
+                .users(pushRequestMultiDto.getUsers().stream().limit(2).collect(toList())).build();
+
+        int[] arr = {10, 20, 30, 40, 50};
+        Arrays.copyOfRange(arr, 0, 2);          // returns {10, 20}
+
+        NettyTcpServerTest.responseCode = "410";
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+        NettyTcpServerTest.responseCode = "412";
+        responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+        NettyTcpServerTest.responseCode = "499";
+        responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("1130", responseMultiDto.getStatusCode());
+
+        //NettyTcpServerTest.responseTestMode
+    }
+
+    @Test // test mode abnormal
+    void testServer05 () {
+
+        NettyTcpServerTest.responseTestMode = "abnormal";
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
+
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        log.debug("testServer05: {}", responseMultiDto);
+        Assertions.assertEquals("1130", responseMultiDto.getStatusCode());
+    }
+
 }
 
 @Slf4j
@@ -189,21 +266,6 @@ class NettyTcpServer {
     }
 }
 
-class Test02Client implements PushMultiClient {
-
-    public PushMessageInfoDto pushMessageInfoDto;
-
-    @Override
-    public PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto) {
-        return null;
-    }
-
-    @Override
-    public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
-        pushMessageInfoDto = dto;
-    }
-}
-
 class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
@@ -214,7 +276,6 @@ class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
         pipeline.addLast("handler", new MessageHandlerTest());
     }
 }
-
 
 @Slf4j
 @NoArgsConstructor
@@ -397,13 +458,16 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
     final int CHANNEL_CONNECTION_REQUEST = 1;
     final int PROCESS_STATE_REQUEST = 13;
     final int COMMAND_REQUEST = 15;
+    final int SLEEP_MILLS = 10;
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) {
+    public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) throws InterruptedException {
 
         if (message.getMessageId() == PROCESS_STATE_REQUEST) {
             // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
             log.debug(":: MessageHandlerTest channelRead : PROCESS_STATE_REQUEST");
+
+            Thread.sleep(SLEEP_MILLS);
 
             ctx.writeAndFlush(PushMessageInfoDto.builder()
                             .messageId(PROCESS_STATE_REQUEST+1)
@@ -413,11 +477,12 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
                             .data("@Short!^1") //Success
                             .build()
             );
-           // ctx.channel().flush();
         }
         else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST) {
             // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
             log.debug(":: MessageHandlerTest channelRead : CHANNEL_CONNECTION_REQUEST");
+
+            Thread.sleep(SLEEP_MILLS);
 
             ctx.writeAndFlush(PushMessageInfoDto.builder()
                     .messageId(CHANNEL_CONNECTION_REQUEST+1)
@@ -427,11 +492,12 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
                     .data("SC")
                     .build()
             );
-            //ctx.channel().flush();
         }
-        else if (message.getMessageId() == COMMAND_REQUEST) {
+        else if ("normal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
             // Push 전송인 경우 response 결과를 임시 Map에 저장함.
             log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST {}", message);
+
+            Thread.sleep(SLEEP_MILLS);
 
             String data = "SC{\n" +
                     "\"response\" : {\n" +
@@ -442,8 +508,10 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
                     "}";
             //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 
+            NettyTcpServerTest.responseCount++;
+
             String sendData = data.replace("@TransactionId", message.getTransactionId())
-                            .replace("@StatusCode", "200");
+                            .replace("@StatusCode", NettyTcpServerTest.responseCode);
             ctx.writeAndFlush(PushMessageInfoDto.builder()
                     .messageId(COMMAND_REQUEST+1)
                     .channelId(message.getChannelId())
@@ -452,7 +520,64 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
                     .data(sendData)
                     .build()
             );
-           // ctx.channel().flush();
+        }
+        else if ("abnormal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
+            // Push 전송인 경우 response 결과를 임시 Map에 저장함.
+            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST {}", message);
+
+            Thread.sleep(SLEEP_MILLS);
+
+            String data = "SC{\n" +
+                    "\"response\" : {\n" +
+                    "\"msg_id\" : \"PUSH_NOTI\",\n" +
+                    "\"push_id\" : \"@TransactionId\",\n" +
+                    "\"status_code\" : \"@StatusCode\"\n" +
+                    "}\n" +
+                    "}";
+            String sendData = data.replace("@TransactionId", message.getTransactionId())
+                    .replace("@StatusCode", NettyTcpServerTest.responseCode);
+            //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
+
+            NettyTcpServerTest.responseCount++;
+
+            int modeValue = 4;
+
+            //normal
+            if(NettyTcpServerTest.responseCount%modeValue == 1) {
+                ctx.writeAndFlush(PushMessageInfoDto.builder()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
+                );
+            }
+            else if(NettyTcpServerTest.responseCount%modeValue == 2) {
+                // not response
+            }
+            else if(NettyTcpServerTest.responseCount%modeValue == 3) {
+                // delay time
+                Thread.sleep(500);
+                ctx.writeAndFlush(PushMessageInfoDto.builder()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
+                );
+            }
+            else { //normal
+                ctx.writeAndFlush(PushMessageInfoDto.builder()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
+                );
+            }
         }
 
         //log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +

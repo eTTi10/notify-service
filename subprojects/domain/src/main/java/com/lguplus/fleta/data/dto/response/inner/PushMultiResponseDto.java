@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
+@ToString
 public class PushMultiResponseDto {
 
     private String messageId;
