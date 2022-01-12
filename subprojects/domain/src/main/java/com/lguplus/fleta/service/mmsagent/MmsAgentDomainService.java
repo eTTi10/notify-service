@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-
+//커밋3
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -51,8 +51,6 @@ public class MmsAgentDomainService {
                 .codeId(sendMmsRequestDto.getMmsCd())//ex) M011
                 .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
                 .build();
-
-
 
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
         List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
