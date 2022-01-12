@@ -247,10 +247,10 @@ class NettyTcpClientTest implements PushMultiClient {
         int COMMAND_REQUEST_ACK = 16;
         int UNKNOWN = 200;
 
-        messageHandler.channelRead(null, PushMessageInfoDto.builder().messageId(COMMAND_REQUEST_ACK).result("SC").build());
+        messageHandler.channelRead0(null, PushMessageInfoDto.builder().messageId(COMMAND_REQUEST_ACK).result("SC").build());
         Assertions.assertEquals(COMMAND_REQUEST_ACK, test01.pushMessageInfoDto.getMessageId());
 
-        messageHandler.channelRead(null, PushMessageInfoDto.builder().messageId(UNKNOWN).result("SC").build());
+        messageHandler.channelRead0(null, PushMessageInfoDto.builder().messageId(UNKNOWN).result("SC").build());
         //Assertions.assertEquals(COMMAND_REQUEST_ACK, test01.pushMessageInfoDto.getMessageId());
 
         //exceptionCaught isActive
