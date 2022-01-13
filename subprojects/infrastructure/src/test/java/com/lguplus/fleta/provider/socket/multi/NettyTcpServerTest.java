@@ -27,6 +27,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,6 +52,7 @@ public class NettyTcpServerTest {
     static String responseCode = "200";
     static int responseCount = 0;
     static String responseTestMode = "normal";
+    static String responseProcessFlag = "1";
 
     PushMultiSocketClientImpl pushMultiSocketClient;
     NettyTcpClient nettyTcpClient;
@@ -183,8 +186,6 @@ public class NettyTcpServerTest {
                 , ForbiddenException.class
                 , NotFoundException.class   };
 
-        this.getClass();
-
         for (int i =0; i<errCode.length; i++) {
             NettyTcpServerTest.responseCode = "" + errCode[i];
 
@@ -201,9 +202,6 @@ public class NettyTcpServerTest {
         //Make Message
         PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto))
                 .users(pushRequestMultiDto.getUsers().stream().limit(2).collect(toList())).build();
-
-        int[] arr = {10, 20, 30, 40, 50};
-        Arrays.copyOfRange(arr, 0, 2);          // returns {10, 20}
 
         NettyTcpServerTest.responseCode = "410";
         PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
@@ -231,6 +229,39 @@ public class NettyTcpServerTest {
         PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
         log.debug("testServer05: {}", responseMultiDto);
         Assertions.assertEquals("1130", responseMultiDto.getStatusCode());
+    }
+
+    @Test // isServerInValidStatus
+    void testServer06_isServerInValidStatus () throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        //Connect
+        Method methodCheck = pushMultiSocketClient.getClass().getDeclaredMethod("checkGateWayServer");
+        methodCheck.setAccessible(true);
+        methodCheck.invoke(pushMultiSocketClient);
+
+        //Server Status
+        Method method = pushMultiSocketClient.getClass().getDeclaredMethod("isServerInValidStatus");
+
+        NettyTcpServerTest.responseProcessFlag = "1";
+        method.setAccessible(true);
+        boolean status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertFalse(status);
+
+        NettyTcpServerTest.responseProcessFlag = "0";
+        status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertTrue(status);
+
+        NettyTcpServerTest.responseProcessFlag = ""; // not return
+        status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertTrue(status);
+
+        NettyTcpServerTest.responseProcessFlag = "1";
+    }
+
+    @Test
+    void testServer07_checkGateWayServer () {
+
+        Assertions.assertTrue(true);
     }
 
 }
@@ -469,14 +500,16 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
 
             Thread.sleep(SLEEP_MILLS);
 
-            ctx.writeAndFlush(PushMessageInfoDto.builder()
-                            .messageId(PROCESS_STATE_REQUEST+1)
-                            .channelId(message.getChannelId())
-                            .transactionId(message.getTransactionId())
-                            .destinationIp(message.getDestinationIp())
-                            .data("@Short!^1") //Success
-                            .build()
-            );
+            if(NettyTcpServerTest.responseProcessFlag.length() > 0 ) {
+                ctx.writeAndFlush(PushMessageInfoDto.builder()
+                        .messageId(PROCESS_STATE_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data("@Short!^" + NettyTcpServerTest.responseProcessFlag) //Success 1 , Fail  0
+                        .build()
+                );
+            }
         }
         else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST) {
             // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
@@ -495,7 +528,7 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
         }
         else if ("normal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
             // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST {}", message);
+            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST normal {}", message);
 
             Thread.sleep(SLEEP_MILLS);
 
@@ -506,24 +539,22 @@ class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto>
                     "\"status_code\" : \"@StatusCode\"\n" +
                     "}\n" +
                     "}";
-            //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
-
-            NettyTcpServerTest.responseCount++;
 
             String sendData = data.replace("@TransactionId", message.getTransactionId())
                             .replace("@StatusCode", NettyTcpServerTest.responseCode);
-            ctx.writeAndFlush(PushMessageInfoDto.builder()
+            PushMessageInfoDto dto =  PushMessageInfoDto.builder()
                     .messageId(COMMAND_REQUEST+1)
                     .channelId(message.getChannelId())
                     .transactionId(message.getTransactionId())
                     .destinationIp(message.getDestinationIp())
                     .data(sendData)
-                    .build()
-            );
+                    .build();
+            log.debug(":: MessageHandlerTest channelWrite : COMMAND_REQUEST_ACK {}", dto);
+            ctx.writeAndFlush(dto);
         }
         else if ("abnormal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
             // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST {}", message);
+            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST abnormal {}", message);
 
             Thread.sleep(SLEEP_MILLS);
 

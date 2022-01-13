@@ -162,15 +162,7 @@ public class NettyTcpClient {
 			log.error("[NettyClient] write0 isNotActive");
 			return;
 		}
-		ChannelFuture writeFuture = getChannel().write(pushMessageInfoDto);
-
-		writeFuture.addListener((ChannelFutureListener) future -> {
-			log.debug("future: isSuccess {}", future.isSuccess());
-			if(future.isSuccess())
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_SUCCESS_MSG, pushMessageInfoDto);
-			else
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_FAIL_MSG, pushMessageInfoDto);
-		});
+		getChannel().write(pushMessageInfoDto);
 	}
 
 	public void flush() {

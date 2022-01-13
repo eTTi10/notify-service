@@ -54,6 +54,11 @@ public class PushRequestBodyMultiVo {
     @ApiModelProperty(position = 6, example = "[MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=]", value = "사용자 ID")
     private List<String> users;
 
+    /** 재전송 시도 횟수  */
+    @JsonProperty("retry")
+    @ApiModelProperty(position = 7, example = "100", value = "실패시 재전송 시도 횟수")
+    private Integer retryCount;
+
     public void setUsers(List<String> users) {
         this.users = users;
     }

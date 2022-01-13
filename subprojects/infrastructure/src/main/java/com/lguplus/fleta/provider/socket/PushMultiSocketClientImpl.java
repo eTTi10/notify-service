@@ -55,8 +55,6 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private String channelID;
     private final ConcurrentHashMap<String, PushMessageInfoDto> receiveMessageMap = new ConcurrentHashMap<>();
-    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendSuccessMessageMap = new ConcurrentHashMap<>()
-    //private final ConcurrentHashMap<String, PushMessageInfoDto> sendFailMessageMap = new ConcurrentHashMap<>()
     private final Object sendLock = new Object();
 
     /**
@@ -107,15 +105,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private synchronized void checkGateWayServer() throws NotifyRuntimeException {
 
-        if (nettyTcpClient.isInValid() || this.channelID == null) {
-            nettyTcpClient.disconnect();
-            this.channelID = nettyTcpClient.connect(this);
-        }
-
-        // Push GW 서버 connection이 유효한지 확인
-        if (nettyTcpClient.isInValid()) {
-            throw new SocketException();
-        }
+        checkClientInvalid();
 
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
         if(isServerInValidStatus()) {
@@ -126,6 +116,18 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             if(isServerInValidStatus()) {
                 throw new ServiceUnavailableException();
             }
+        }
+    }
+
+    private void checkClientInvalid() {
+        if (nettyTcpClient.isInValid() || this.channelID == null) {
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);
+        }
+
+        // Push GW 서버 connection이 유효한지 확인
+        if (nettyTcpClient.isInValid()) {
+            throw new SocketException();
         }
     }
 
@@ -179,17 +181,18 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             final List<PushMultiResponseDto> notReceivedMessages = sendUsers.stream().filter(e -> processedMap.get(e.getPushId()) == null)
                     .collect(Collectors.toList());
 
-            log.trace("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, sendUsers.size() - notReceivedMessages.size(), sendUsers.size());
+            log.debug("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, sendUsers.size() - notReceivedMessages.size(), sendUsers.size());
 
             for (PushMultiResponseDto usr : notReceivedMessages) {
-                PushMessageInfoDto responseMsg;
-
-                //responseMsg = sendSuccessMessageMap.remove(usr.getPushId())
-                //responseMsg = sendFailMessageMap.remove(usr.getPushId())
-
-                responseMsg = receiveMessageMap.remove(usr.getPushId());
+                PushMessageInfoDto responseMsg = receiveMessageMap.remove(usr.getPushId());
                 if (responseMsg != null) {
+                    log.debug("parserAsyncMessage1 msg: {}", responseMsg);
                     receivedMessages.add(responseMsg);
+
+                    //exception check
+                    if(!"200".equals(responseMsg.getStatusCode())) {
+                        exceptionHandler(responseMsg);
+                    }
                 }
             }
 
@@ -225,44 +228,34 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 log.trace("[MultiPushRequest][Push] - {} : {}", souccesCnt, messageInfoDto);
             }
             else {
-                //exception check
-                NotifyRuntimeException ex = exceptionHandler(messageInfoDto);
-                if (ex != null) {
-                    throw ex;
-                }
-                else {
-                    if ("410".equals(messageInfoDto.getStatusCode()) || "412".equals(messageInfoDto.getStatusCode())) {
-                        // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip
-                        log.trace("[MultiPushRequest][Push] - skip exception:{} - {}", messageInfoDto.getStatusCode(), messageInfoDto);
-                    } else {
-                        // 메시지 전송 실패 - Retry 대상
-                        log.trace("[MultiPushRequest][Push] - FA :serviceId:{} Code:{}", multiSendDto.getJsonTemplate(), messageInfoDto.getStatusCode());
+                if ("410".equals(messageInfoDto.getStatusCode()) || "412".equals(messageInfoDto.getStatusCode())) {
+                    // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip
+                    log.debug("[MultiPushRequest][Push] - skip exception:{} - {}", messageInfoDto.getStatusCode(), messageInfoDto);
+                } else {
+                    // 메시지 전송 실패 - Retry 대상
+                    log.debug("[MultiPushRequest][Push] - FA :serviceId:{} Code:{}", multiSendDto.getJsonTemplate(), messageInfoDto.getStatusCode());
 
-                        List<PushMultiResponseDto> list = sendUsers.stream().filter(p -> p.getPushId().equals(transactionId)).collect(Collectors.toList());
-                        //if (!list.isEmpty())
-                        lastNotReceivedMessages.add(list.get(0));
-                    }
+                    List<PushMultiResponseDto> list = sendUsers.stream().filter(p -> p.getPushId().equals(transactionId)).collect(Collectors.toList());
+                    lastNotReceivedMessages.add(list.get(0));
                 }
             }
         }
 
     }
 
-    private NotifyRuntimeException exceptionHandler(PushMessageInfoDto messageInfoDto) {
+    private void exceptionHandler(PushMessageInfoDto messageInfoDto) {
 
         if("202".equals(messageInfoDto.getStatusCode())){
-            return new AcceptedException();
+            throw new AcceptedException();
         } else if("400".equals(messageInfoDto.getStatusCode())) {
-            return new BadRequestException();
+            throw new BadRequestException();
         } else if("401".equals(messageInfoDto.getStatusCode())) {
-            return new UnAuthorizedException();
+            throw new UnAuthorizedException();
         } else if("403".equals(messageInfoDto.getStatusCode())) {
-            return new ForbiddenException();
+            throw new ForbiddenException();
         } else if("404".equals(messageInfoDto.getStatusCode())) {
-            return new NotFoundException();
+            throw new NotFoundException();
         }
-
-        return null;
     }
 
     private void waitTPS() {
@@ -284,26 +277,23 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
      * 프로세스 상태 확인 메시지 전송
      */
     private boolean isServerInValidStatus() {
-        if (this.channelID == null) {
-            return true;
-        }
 
         PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
                 PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST)
                         .channelId(this.channelID).destinationIp(destinationIp)
                         .build());
 
-        if (response != null && SUCCESS.equals(response.getResult())) {
+        if (response != null) {
             log.trace("[PushMultiClient] ProcessStateRequest Success. Channel ID : " + channelID);
-            return false;
+            return !SUCCESS.equals(response.getResult());
         }
-
-        log.info("[PushMultiClient] ProcessStateRequest Fail. Channel ID : " + channelID);
-        return true;
+        else {
+            log.info("[PushMultiClient] ProcessStateRequest Fail. Channel ID : " + channelID);
+            return true;
+        }
     }
 
     private String getTransactionId() {
-        //return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0))
         return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
     }
 
