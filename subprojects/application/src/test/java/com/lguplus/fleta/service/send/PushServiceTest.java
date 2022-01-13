@@ -5,8 +5,8 @@ import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.exception.push.AcceptedException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
@@ -471,7 +471,7 @@ class PushServiceTest {
     void whenResponseFailSocket_ThenReturnException() {
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(pushSingleDomainService.requestPushSingle(any())).willThrow(new NotifyPushRuntimeException());
+        given(pushSingleDomainService.requestPushSingle(any())).willThrow(new AcceptedException());
 
         List items = new ArrayList();
 

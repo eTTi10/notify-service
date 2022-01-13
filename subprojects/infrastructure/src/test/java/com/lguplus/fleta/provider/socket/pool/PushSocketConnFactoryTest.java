@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
@@ -211,6 +214,26 @@ class PushSocketConnFactoryTest {
         poolConfig.setTimeBetweenEvictionRunsMillis(10 * 1000L);
 
         return poolConfig;
+    }
+
+    @Test
+    void createInvalid() throws Exception {
+        //normal case
+        PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
+                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+                .isLgPush(false).build();
+
+        PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
+        PushSocketConnFactory spyFactory = spy(pushSocketConnFactory);
+
+        PushSocketInfo pushSocketInfo = new PushSocketInfo();
+        JunitTestUtils.setValue(pushSocketInfo, "isOpened", false);
+        doReturn(pushSocketInfo).when(spyFactory).createNewSocketInfo();
+
+        PushSocketInfo testSocketInfo = spyFactory.create();
+        Assertions.assertEquals(null, testSocketInfo);
+
     }
 
 }

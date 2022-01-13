@@ -3,10 +3,11 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.PushStatDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.BadRequestException;
 import com.lguplus.fleta.exception.push.MaxRequestOverException;
 import com.lguplus.fleta.exception.push.NotExistRegistIdException;
@@ -47,11 +48,17 @@ class PushSingleDomainServiceTest {
     PushRequestSingleDto pushRequestSingleDto;
 
     List<String> items;
+    List<PushRequestItemDto> addItems;
 
     @BeforeEach
     void setUp() {
 
         SetupProperties();
+
+        addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushSingleDomainService = new PushSingleDomainService(pushConfig, pushSingleClient);
 
@@ -65,10 +72,10 @@ class PushSingleDomainServiceTest {
         pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
 
         ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", "100");
@@ -139,19 +146,18 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_password_null() {
+
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
-                .serviceId("XXXXX")
+                .serviceId("XXXXX") //unknown service id
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
-        Exception thrown = assertThrows(ServiceIdNotFoundException.class, () -> {
+        assertThrows(ServiceIdNotFoundException.class, () -> {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
         });
-
-        Assertions.assertTrue(thrown instanceof ServiceIdNotFoundException);
     }
 
     @Test
@@ -174,10 +180,10 @@ class PushSingleDomainServiceTest {
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
 
@@ -207,11 +213,11 @@ class PushSingleDomainServiceTest {
         for(String code : codeList) {
             given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
 
-            Exception thrown = assertThrows(NotifyPushRuntimeException.class, () -> {
+            Exception thrown = assertThrows(NotifyRuntimeException.class, () -> {
                 pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
             });
 
-            boolean isNotiPush = thrown instanceof NotifyPushRuntimeException;
+            boolean isNotiPush = thrown instanceof NotifyRuntimeException;
             if(isNotiPush)
                 count ++;
         }
@@ -353,10 +359,10 @@ class PushSingleDomainServiceTest {
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("-")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
 
         PushClientResponseDto responseDto1 = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);

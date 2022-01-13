@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.push;
 
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import org.junit.jupiter.api.Assertions;
@@ -37,18 +38,18 @@ class PushSingleServiceTest {
         PushClientResponseDto clientResponseDto = PushClientResponseDto.builder().build();
         given(pushSingleDomainService.requestPushSingle(any())).willReturn(clientResponseDto);
 
-        List<String> items = new ArrayList<>();
-        items.add("badge!^1");
-        items.add("sound!^ring.caf");
-        items.add("cm!^aaaa");
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
-                .appId("30011")
+                .applicationId("30011")
                 .regId("regId")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
 
         PushClientResponseDto responseDto = pushSingleService.requestPushSingle(pushRequestSingleDto);

@@ -47,8 +47,8 @@ public class HttpPushMultiRequestVo {
     private List<String> users;
 
     /** 보낼 메시지 */
-    @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
-    @JsonProperty("msg")
+    @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
+    @JsonProperty("message")
     @ApiModelProperty(position = 5, example = "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", value = "보낼 메시지")
     private String message;
 

@@ -10,6 +10,7 @@ import lombok.ToString;
 
 import javax.validation.GroupSequence;
 import javax.validation.constraints.*;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -23,7 +24,7 @@ public class PushRequestBodyMultiVo {
     @Size(max = 256, message = "파라미터 app_id는 값이 256 이하이어야 함", groups = Groups.C2.class)
     @JsonProperty("app_id")
     @ApiModelProperty(position = 1, example = "lguplushdtvgcm", value = "어플리케이션 ID")
-    private String appId;
+    private String applicationId;
 
     @NotBlank(message = "service_id 파라미터값이 전달이 안됨", groups = Groups.C3.class)
     @JsonProperty("service_id")
@@ -37,21 +38,26 @@ public class PushRequestBodyMultiVo {
     private String pushType;
 
     /** 보낼 메시지 */
-    @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
+    @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
     @JsonProperty("msg")
     @ApiModelProperty(position = 4, example = "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"", value = "보낼 메시지")
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> items;
+    private List<String> addItems = new ArrayList<>();
 
     /** 사용자 ID */
     @NotEmpty(message = "필수 BODY DATA 미존재[users]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C8.class)
     @Size(max = 5000, message = "최대 호출횟수 초과", groups = Groups.C8.class)  // 1120
     @ApiModelProperty(position = 6, example = "[MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=]", value = "사용자 ID")
     private List<String> users;
+
+    /** 재전송 시도 횟수  */
+    @JsonProperty("retry")
+    @ApiModelProperty(position = 7, example = "100", value = "실패시 재전송 시도 횟수")
+    private Integer retryCount = 0;
 
     public void setUsers(List<String> users) {
         this.users = users;
