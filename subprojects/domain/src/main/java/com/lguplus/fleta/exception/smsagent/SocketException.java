@@ -2,7 +2,6 @@ package com.lguplus.fleta.exception.smsagent;
 
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
 /**
  * Exception for error flag 1102

@@ -7,8 +7,15 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
+import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
+import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
+import com.lguplus.fleta.exception.push.PushEtcException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
+import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
+import com.lguplus.fleta.service.push.PushSingleDomainService;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,13 +42,25 @@ class PushDomainServiceTest {
 
     HttpPushSingleRequestDto httpPushSingleRequestDto;
     SendPushCodeRequestDto sendPushCodeRequestDto;
+
+    HttpPushResponseDto httpPushResponseDto;
+
     Map<String, String> serviceTargetDefaultMap = new HashMap<>();
     Map<String, String> serviceTargetMap = new HashMap<>();
     Map<String, String> sendCodeMap = new HashMap<>();
     List<String> items = new ArrayList<>();
 
+    String sFlag = "0000";
+    String sMessage = "성공";
+
     @InjectMocks
     PushDomainService pushDomainService;
+
+    @Mock
+    HttpSinglePushDomainService httpSinglePushDomainService;
+
+    @Mock
+    PushSingleDomainService pushSingleDomainService;
 
     @Mock
     SendPushCodeProps sendPushCodeProps;
@@ -54,9 +73,9 @@ class PushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
+        JunitTestUtils.setValue(pushDomainService, "fcmExtraSend", "N");
         JunitTestUtils.setValue(pushDomainService, "extraServiceId", "30015");
-        JunitTestUtils.setValue(pushDomainService, "extraAppId", "smartuxapp");
-
+        JunitTestUtils.setValue(pushDomainService, "extraApplicationId", "smartuxapp");
 
         //response given
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
@@ -70,7 +89,7 @@ class PushDomainServiceTest {
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
-        items.add("cm!^aaaa");
+        items.add("cmaaaa");
 
         // 기본 입력
         Map<String, String> reserveMap = Map.of("address","111111");
@@ -84,6 +103,13 @@ class PushDomainServiceTest {
                 .reserve(reserveMap)
                 .items(items)
                 .build();
+
+        //response given
+        httpPushResponseDto = HttpPushResponseDto.builder()
+                .code(sFlag)
+                .message(sMessage)
+                .build();
+
 
         serviceTargetDefaultMap.put("gcm.appid", "hdtv_GCM01");
         serviceTargetDefaultMap.put("gcm.serviceid", "20014");
@@ -105,6 +131,298 @@ class PushDomainServiceTest {
 
 
     }
+
+
+
+    @Test
+    @DisplayName("정상적인 응답을 하는지 테스트")
+    void sendPushCode() {
+        //given
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage(sMessage)
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message(sMessage)
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G|A|L")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C|TV")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+
+        SendPushResponseDto responseDto;
+
+        //정상 응답
+        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+//        // if serviceTarget.equalsIgnoreCase("TV") 테스트
+//        sendPushCodeRequestDto.setServiceType("TV");
+//        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+//        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+//
+        // if(sendCode.substring(0,1).equals("T")) 테스트
+        sendPushCodeRequestDto.setSendCode("T001");
+        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+    @Test
+    @DisplayName("응답메시지가 성공이 아닐 때 테스트")
+    void returnFailMessage() {
+        //given
+
+        httpPushResponseDto = HttpPushResponseDto.builder()
+                .code(sFlag)
+                .message("실패")
+                .build();
+
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage("실패")
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message("실패")
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G|A|L")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C|TV")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+
+        SendPushResponseDto responseDto;
+
+        //정상 응답
+        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+    @Test
+    @DisplayName("Push Type이 T인 경우") //else if (pushTypeList[i].equalsIgnoreCase("L")) 까지만 있어 else에 해당하는 조건 추가해야한다.
+    void whenPushTypeL() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage(sMessage)
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message(sMessage)
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("T")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        SendPushResponseDto responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+    /**
+     * TODO 동작 안함 다시 체크
+     */
+    @Test
+    @DisplayName("TV이며 ExtraSend N인 경우 테스트") //if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) 가 아닌 경우
+    void whenTVAndExtraSendIsN() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
+        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        //서비스타입별 결과 저장용 List
+        List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
+
+        PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
+                .sType(sFlag)
+                .sMessage(sMessage)
+                .build();
+
+        pushServiceResultDtoArrayList.add(pushServiceResultDto);
+
+        SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
+                .message(sMessage)
+                .service(pushServiceResultDtoArrayList)
+                .build();
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("A|G")
+                .sendCode("P002")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        SendPushResponseDto responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+
+    }
+
+    @Test
+    @DisplayName("HTTP PUSH에서 오류코드를 제대로 출력되는지 체크")
+    void whenResponseFail_ThenReturnException() {
+        //given
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        httpPushCustomException.setCode("1113");
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G|A")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C|TV")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+    }
+
+    @Test
+    @DisplayName("HTTP PUSH에서 오류코드1118를 제대로 출력되는지 체크")
+    void whenResponseFail1108_ThenReturnException() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        httpPushCustomException.setCode("1108");
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G|A")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C|TV")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+    }
+
 
     @Test
     @DisplayName("정상적으로 regId를 가져오는 지 확인")
@@ -145,43 +463,43 @@ class PushDomainServiceTest {
     void getGcmOrTVRequestDto() {
 
         //given
-        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
-        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
         RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
 
         //serviceType : C
         HttpPushSingleRequestDto result;
-        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "C");
+        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "C", "G");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //serviceType : H
-        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "H");
+        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "H", "G");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //serviceType : ""
-        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "G");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //pushType : "A"
-        sendPushCodeRequestDto.setPushType("A");
-        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "A");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //regType : 2
         sendPushCodeRequestDto.setRegType("2");
-        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "G");
         assertThat(result.equals(httpPushSingleRequestDto));
 
     }
 
     @Test
+    @DisplayName("InvalidSendPushCodeException 처리가 잘되는 지 테스트")
     void checkInvalidSendPushCode() {
 
         //given
         Map<String, String> pushInfoMap = new HashMap<>();
         pushInfoMap.put("gcm.payload.body", "tesst");
+
         pushDomainService.checkInvalidSendPushCode(pushInfoMap);
 
         Map<String, String> pushInfoMapE = new HashMap<>();
@@ -195,48 +513,48 @@ class PushDomainServiceTest {
     }
 
     @Test
+    @DisplayName("pushType이 APNS일 경우 requestDto조립 테스트")
     void getApnsRequestDto() {
 
         //given
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
-        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
         RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
 
         HttpPushSingleRequestDto result;
         //pushType : "A"
-        sendPushCodeRequestDto.setPushType("A");
-        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "C");
+        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "C", "A");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //regType : 2
         sendPushCodeRequestDto.setRegType("2");
-        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "C");
+        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "C", "A");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //serviceType : H
-        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "H");
+        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "H", "A");
         assertThat(result.equals(httpPushSingleRequestDto));
 
         //serviceType : ""
-        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getApnsRequestDto(sendPushCodeRequestDto, "", "A");
         assertThat(result.equals(httpPushSingleRequestDto));
 
 
     }
 
     @Test
+    @DisplayName("pushType이 LG푸시일 경우 requestDto조립 테스트")
     void getPosRequestDto() {
 
         //정상
-        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
         RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
+
 
         HttpPushSingleRequestDto result;
-        sendPushCodeRequestDto.setPushType("L");
-        result = pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C");
+        result = pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C", "L");
         assertThat(result.equals(httpPushSingleRequestDto));
 
 
@@ -244,7 +562,7 @@ class PushDomainServiceTest {
         Map<String, String> serviceTargetMapE = new HashMap<>();
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMapE));
         Exception exception = assertThrows(InvalidSendPushCodeException.class, () -> {
-            pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C");
+            pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C", "G");
         });
         assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
 
@@ -252,7 +570,7 @@ class PushDomainServiceTest {
         serviceTargetMapE.put("pos.serviceid","");
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMapE));
         Exception exception2 = assertThrows(InvalidSendPushCodeException.class, () -> {
-            pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C");
+            pushDomainService.getPosRequestDto(sendPushCodeRequestDto, "C", "G");
         });
         assertThat(exception2.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
 
@@ -260,6 +578,7 @@ class PushDomainServiceTest {
     }
 
     @Test
+    @DisplayName("소켓푸시일 경우 requestDto조립 테스트")
     void getExtraPushRequestDto() {
 
 
@@ -278,34 +597,130 @@ class PushDomainServiceTest {
                 .items(addItems)
                 .build();
 
-        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
-        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
-        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
         RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+        given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
 
         //serviceType : C
         PushRequestSingleDto result;
-        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "C");
+        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "C", "G");
         assertThat(result.equals(pushRequestSingleDto));
 
         //serviceType : H
-        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "H");
+        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "H", "G");
         assertThat(result.equals(pushRequestSingleDto));
 
         //serviceType : ""
-        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "", "G");
         assertThat(result.equals(pushRequestSingleDto));
 
         //pushType : "A"
-        sendPushCodeRequestDto.setPushType("A");
-        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "", "A");
         assertThat(result.equals(pushRequestSingleDto));
 
         //regType : 2
         sendPushCodeRequestDto.setRegType("2");
-        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "");
+        result = pushDomainService.getExtraPushRequestDto(sendPushCodeRequestDto, "", "G");
         assertThat(result.equals(pushRequestSingleDto));
 
     }
+
+
+    @Test
+    @DisplayName("HTTP PUSH에서 오류코드가 1113 혹은 1108이 아닌 경우 테스트")  //if (failCode.equals("1113") || failCode.equals("1108")) else 체크
+    void whenResponseFailHttp_ThenReturnAnotherExceptionCode() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        httpPushCustomException.setCode("1004");
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G|A")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+    }
+
+    @Test
+    @DisplayName("서비스별 성공실패 기록 로직에서 분기 체크") //else if (chk1001 > 0) 체크
+    void whenResponseFailHttp_ThenReturnChk1001() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        httpPushCustomException.setCode("1113");
+        given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("C")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+    }
+
+    @Test
+    @DisplayName("소켓 PUSH에서 오류코드를 제대로 출력되는지 체크")
+    void whenResponseFailSocket_ThenReturnException() {
+        //given
+        given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
+        given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
+        given(pushSingleDomainService.requestPushSingle(any())).willThrow(new PushEtcException());
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        List items = new ArrayList();
+
+        items.add("badge!^1");
+        items.add("sound!^ring.caf");
+        items.add("cm!^aaaa");
+
+        Map<String, String> reserveMap = Map.of("address","111111");
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+                .registrationId("M00020200205")
+                .pushType("G")
+                .sendCode("P001")
+                .regType("1")
+                .serviceType("TV")
+                .reserve(reserveMap)
+                .items(items)
+                .build();
+
+        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+    }
+
 }

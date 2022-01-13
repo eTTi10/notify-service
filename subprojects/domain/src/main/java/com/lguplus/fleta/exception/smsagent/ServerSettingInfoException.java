@@ -2,7 +2,6 @@ package com.lguplus.fleta.exception.smsagent;
 
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
 public class ServerSettingInfoException extends NotifyRuntimeException {
 

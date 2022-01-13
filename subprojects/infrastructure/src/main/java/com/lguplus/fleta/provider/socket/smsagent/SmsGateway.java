@@ -239,8 +239,7 @@ public class SmsGateway {
                 log.debug("timerTask mResult : {}", mResult);
 
                 if (mResult.isEmpty()) {
-//                    mResult = "1500";
-                    mResult = "0000";   //TODO 실제 서버와 연동이 되면 1500으로 수정해야 함
+                    mResult = "1500";
                 }
             }
         };
@@ -336,7 +335,7 @@ public class SmsGateway {
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
                 mStatusLog.error("getResult Error");
             }
 
