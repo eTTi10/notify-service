@@ -6,78 +6,91 @@ import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
-import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
+import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
+import fleta.util.JunitTestUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static java.util.stream.Collectors.toList;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith({ MockitoExtension.class})
-class PushMultiSocketClientImplTest implements PushMultiClient {
+@ExtendWith({MockitoExtension.class})
+@TestMethodOrder(MethodOrderer.MethodName.class)
+@Slf4j
+class PushMultiSocketClientImplTest {
 
-    @InjectMocks
-    PushMultiSocketClientImpl pushMultiSocketClient;
+    static NettyTcpServer server;
+    static Thread thread;
+    static String SERVER_IP = "127.0.0.1";
+    static int SERVER_PORT = 9666;
 
-    //@Mock
-    NettyTcpClient nettyTcpClient;
-
-    AtomicInteger tranactionMsgId = new AtomicInteger(0);
     static int testCnt = 9997;
+
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
     List<String> users = new ArrayList<>();
+    PushMultiSocketClientImpl pushMultiSocketClient;
+    NettyTcpClient nettyTcpClient;
+
+    @BeforeAll
+    static void setUpAll() {
+        server = new NettyTcpServer();
+        thread = new Thread(() -> {
+            server.runServer(SERVER_PORT);
+        });
+        thread.start();
+    }
+
+    @AfterAll
+    static void setUpClose() {
+        server.stopServer();
+    }
 
     @BeforeEach
     void setUp() {
+        //boolean check = nettyTcpClient.isInValid();
         nettyTcpClient = getNettyClient();
         pushMultiSocketClient = new PushMultiSocketClientImpl(nettyTcpClient);
         ReflectionTestUtils.setField(pushMultiSocketClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", "400");
+        ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", "5");
+        ReflectionTestUtils.setField(pushMultiSocketClient, "FLUSH_COUNT", 2);
+        ReflectionTestUtils.setField(pushMultiSocketClient, "tranactionMsgId", new AtomicInteger((int) (Math.pow(16, 4)) - 3));
 
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
-        users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        for (int i = 0; i < 10; i++) {
+            users.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        }
 
         addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
         addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
         addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
-        pushRequestMultiDto = PushRequestMultiDto.builder()
-                .serviceId("30011")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .users(users)
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
-    }
+        pushRequestMultiDto = PushRequestMultiDto.builder().serviceId("30011").pushType("G").applicationId("lguplushdtvgcm").users(users).message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"").items(addItems).build();
 
+        server.responseCode = "200";
+        server.responseCount = 0;
+        server.responseTestMode = "normal";
+    }
 
     private NettyTcpClient getNettyClient() {
         NettyTcpClient nettyTcpClient = new NettyTcpClient();
 
-        ReflectionTestUtils.setField(nettyTcpClient, "host", "211.115.75.227");
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "9600");
+        ReflectionTestUtils.setField(nettyTcpClient, "host", SERVER_IP);
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
         ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
         ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
         ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
@@ -97,7 +110,7 @@ class PushMultiSocketClientImplTest implements PushMultiClient {
         paramMap.put("service_id", dto.getServiceId());
         paramMap.put("app_id", dto.getApplicationId());
         paramMap.put("noti_contents", dto.getMessage());
-        paramMap.put("service_passwd", getSha512Pwd(dto.getServiceId()));
+        paramMap.put("service_passwd", dto.getServiceId());
 
         if (PushMultiClient.LG_PUSH_OLD.equals("00007")) {
             paramMap.put("push_app_id", "smartux0001");
@@ -116,41 +129,176 @@ class PushMultiSocketClientImplTest implements PushMultiClient {
         return oNode.toString();
     }
 
-    private String getSha512Pwd(String servicePwd) {
-        // service_pwd : SHA512 암호화
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-512");
-            digest.reset();
-            digest.update(servicePwd.getBytes(StandardCharsets.UTF_8));
-            return String.format("%0128x", new BigInteger(1, digest.digest()));
-        } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException("기타 오류");
-        }
-    }
-
-    //@Test
-    void receiveAsyncMessage() {
-    }
-
-    /*
     @Test
-    void requestPushMulti() {
+        //normal case
+    void testServer01() {
 
-        nettyTcpClient.connect(this);
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+    }
+
+    @Test
+        //timeMillis >= SECOND
+    void testServer02() {
+
         //Make Message
         PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
 
-        PushMultiResponseDto pushMultiResponseDto = pushMultiSocketClient.requestPushMulti(dto);
-        Assertions.assertEquals("1130", pushMultiResponseDto.getStatusCode());
-    }*/
-
-    @Override
-    public PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto) {
-        return null;
-    }
-
-    @Override
-    public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
+        ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 5000));
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
 
     }
+
+    @Test
+        //exception check
+    void testServer03() {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers().stream().limit(1).collect(toList())).build();
+
+        int[] errCode = new int[]{202, 400, 401, 403, 404};
+        Class[] exlist = new Class[]{AcceptedException.class, BadRequestException.class, UnAuthorizedException.class, ForbiddenException.class, NotFoundException.class};
+
+        for (int i = 0; i < errCode.length; i++) {
+            server.responseCode = "" + errCode[i];
+
+            assertThrows(exlist[i], () -> {
+                pushMultiSocketClient.requestPushMulti(dto);
+            });
+        }
+
+    }
+
+    @Test
+        //exception check : 410, 412, other
+    void testServer04() {
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers().stream().limit(2).collect(toList())).build();
+
+        server.responseCode = "410";
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+        server.responseCode = "412";
+        responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("200", responseMultiDto.getStatusCode());
+
+        server.responseCode = "499";
+        responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        Assertions.assertEquals("1130", responseMultiDto.getStatusCode());
+
+        //NettyTcpServerTest.responseTestMode
+    }
+
+    @Test
+        // test mode abnormal
+    void testServer05() {
+
+        server.responseTestMode = "abnormal";
+
+        //Make Message
+        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
+
+        PushMultiResponseDto responseMultiDto = pushMultiSocketClient.requestPushMulti(dto);
+        log.debug("testServer05: {}", responseMultiDto);
+        Assertions.assertEquals("1130", responseMultiDto.getStatusCode());
+    }
+
+    @Test
+        // isServerInValidStatus
+    void testServer06_isServerInValidStatus() throws Exception {
+
+        //Connect
+        Method methodCheck = pushMultiSocketClient.getClass().getDeclaredMethod("checkGateWayServer");
+        methodCheck.setAccessible(true);
+        methodCheck.invoke(pushMultiSocketClient);
+
+        //Server Status
+        Method method = pushMultiSocketClient.getClass().getDeclaredMethod("isServerInValidStatus");
+
+        server.responseProcessFlag = "1";
+        method.setAccessible(true);
+        boolean status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertFalse(status);
+
+        server.responseProcessFlag = "0";
+        status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertTrue(status);
+
+        server.responseProcessFlag = ""; // not return
+        status = (boolean) method.invoke(pushMultiSocketClient);
+        Assertions.assertTrue(status);
+
+        server.responseProcessFlag = "1";
+    }
+
+    @Test
+    void testServer07_checkGateWayServer() throws Exception {
+
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); //unknown port
+        assertThrows(SocketException.class, () -> {
+            pushMultiSocketClient.checkClientInvalid();
+        });
+
+        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", "01234567890ABCD"); //test channel Id
+        assertThrows(SocketException.class, () -> {
+            pushMultiSocketClient.checkClientInvalid();
+        });
+
+        //normal
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
+        nettyTcpClient.disconnect();
+        nettyTcpClient.connect(pushMultiSocketClient); //normal connect
+        pushMultiSocketClient.checkClientInvalid();
+    }
+
+    @Test
+    void testServer08_checkClientProcess() throws Exception {
+        //connect
+        String channelId = nettyTcpClient.connect(pushMultiSocketClient); //normal connect
+        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", channelId); //test channel Id
+
+        server.responseProcessFlag = "0"; //process check error
+
+        assertThrows(ServiceUnavailableException.class, () -> {
+            pushMultiSocketClient.checkClientProcess();
+        });
+
+    }
+
+    @Test
+    void testServer09_waitTPS() throws Exception {
+        //connect
+        long lastTime = System.currentTimeMillis() - 3000;
+        JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(lastTime)); //test channel Id
+        pushMultiSocketClient.waitTPS();
+        AtomicLong time2 = (AtomicLong) ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");
+        assertTrue(time2.get() > lastTime);
+
+        final class TestThread extends Thread {
+            @Override
+            public void run() {
+                while (true) {
+                    //setTime = ;
+                    JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
+                    pushMultiSocketClient.waitTPS();
+                }
+            }
+        }
+
+        TestThread thread = new TestThread();//.run();
+        thread.start();
+        Thread.sleep(2000);
+        thread.interrupt();
+
+        AtomicLong time3 = (AtomicLong) ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");
+        assertTrue(time2.get() < time3.get());
+
+    }
+
 }

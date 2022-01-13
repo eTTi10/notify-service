@@ -1,11 +1,14 @@
 package com.lguplus.fleta.provider.socket.pool;
 
+import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,11 +25,30 @@ import static org.mockito.Mockito.spy;
 @ExtendWith({ MockitoExtension.class})
 class PushSocketConnFactoryTest {
 
+    static NettyTcpServer server;
+    static Thread thread;
+    static String SERVER_IP = "127.0.0.1";
+    static int SERVER_PORT = 9666;
+
+    @BeforeAll
+    static void setUpAll() {
+        server = new NettyTcpServer();
+        thread = new Thread(() -> {
+            server.runServer(SERVER_PORT);
+        });
+        thread.start();
+    }
+
+    @AfterAll
+    static void setUpClose() {
+        server.stopServer();
+    }
+
     @Test
     void validateObject() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -46,7 +68,7 @@ class PushSocketConnFactoryTest {
     void validateObject_error2() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("8888")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt("1"+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -66,7 +88,7 @@ class PushSocketConnFactoryTest {
     void validateObject2() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -90,7 +112,7 @@ class PushSocketConnFactoryTest {
     void validateObject3() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -125,7 +147,7 @@ class PushSocketConnFactoryTest {
     void validateObject4() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -155,7 +177,7 @@ class PushSocketConnFactoryTest {
     void validateObject5() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
@@ -220,7 +242,7 @@ class PushSocketConnFactoryTest {
     void createInvalid() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host("211.115.75.227").port(Integer.parseInt("9600")).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
                 .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
                 .isLgPush(false).build();
 
