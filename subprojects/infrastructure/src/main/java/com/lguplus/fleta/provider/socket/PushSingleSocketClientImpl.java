@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     @Value("${push-comm.push.socket.timeout}")
     private String timeout;
     @Value("${server.port}")
-    private String channelPort;
+    private String wasPort;
     @Value("${push-comm.push.socket.channelID}")
     private String defaultChannelHost;
     @Value("${push-comm.push.cp.destination_ip}")
@@ -67,8 +66,6 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private String lgPort;
     @Value("${push-comm.lgpush.socket.timeout}")
     private String lgTimeout;
-    @Value("${server.port}")
-    private String lgChannelPort;
     @Value("${push-comm.lgpush.socket.channelID}")
     private String lgDefaultChannelHost;
     @Value("${push-comm.lgpush.cp.destination_ip}")
@@ -87,7 +84,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private long measureIntervalMillis;
 
     //Pool
-    private List<GenericObjectPool<PushSocketInfo>> poolList;
+    private List<GenericObjectPool<PushSocketInfo>> socketPools;
 
     private static final int HDTV_PUSH_IDX = 0;
     private static final int LG_PUSH_IDX = 1;
@@ -104,24 +101,22 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
         PushSocketInfo socketInfo = null;
         boolean bIsLgPush = lgPushServiceId.equals(paramMap.get("service_id"));
 
-        GenericObjectPool<PushSocketInfo> pool = poolList.get(bIsLgPush ? LG_PUSH_IDX : HDTV_PUSH_IDX);
+        GenericObjectPool<PushSocketInfo> socketPool = socketPools.get(bIsLgPush ? LG_PUSH_IDX : HDTV_PUSH_IDX);
 
         try
         {
-            socketInfo = pool.borrowObject();
+            socketInfo = socketPool.borrowObject();
 
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
 
             return PushResponseDto.builder().statusCode(retDto.getStatusCode()).statusMsg(retDto.getStatusMsg()).build();
-        } catch (IOException e) {
-            log.error(e.toString());
-            return PushResponseDto.builder().statusCode("503").statusMsg("Service Unavailable").build();
+
         } catch (Exception e) {
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("500").statusMsg("Internal Error").build();
         } finally {
             if (socketInfo != null)
-                pool.returnObject(socketInfo);
+                socketPool.returnObject(socketInfo);
         }
 
     }
@@ -130,29 +125,29 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private void initialize() {
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(channelPort))
+                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(wasPort))
                 .defaultChannelHost(defaultChannelHost).closeSecond(Integer.parseInt(closeSecond)).destinationIp(destinationIp)
                 .isLgPush(false).build();
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVoLg = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(lgChannelPort))
+                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(wasPort))
                 .defaultChannelHost(lgDefaultChannelHost).closeSecond(Integer.parseInt(lgCloseSecond)).destinationIp(lgDestinationIp)
                 .isLgPush(true).build();
 
-        poolList = new ArrayList<>();
+        socketPools = new ArrayList<>();
 
         AbandonedConfig abandonedConfig = new AbandonedConfig();
         abandonedConfig.setRemoveAbandonedOnMaintenance(true);
         abandonedConfig.setRemoveAbandonedOnBorrow(true);
         abandonedConfig.setRemoveAbandonedTimeout(250);
 
-        poolList.add(new GenericObjectPool<>(
+        socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVo)
                 , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin) ), abandonedConfig));
 
         //AbandonedConfig : Remove 정책
 
-        poolList.add(new GenericObjectPool<>(
+        socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
                 , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig));
 
@@ -163,7 +158,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     @PreDestroy
     private void destroy() {
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close");
-        poolList.forEach(GenericObjectPool::close);
+        socketPools.forEach(GenericObjectPool::close);
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close ...");
     }
 

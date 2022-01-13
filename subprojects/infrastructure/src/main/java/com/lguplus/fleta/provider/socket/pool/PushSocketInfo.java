@@ -19,10 +19,10 @@ import java.util.Map;
 @Getter
 @Slf4j
 public class PushSocketInfo {
-    private final Socket pushSocket;                  //Push 소켓
-    private String channelID;                   //Push Header channelID
-    private String destIp;
-    private int connPort;
+    private final Socket socket;                //Push 소켓
+    private String channelID;                   //Push Header channelId
+    private String destinationIp;
+    private int port;
 
     private static final String PUSH_ENCODING = "euc-kr";
     private static final int PUSH_MSG_HEADER_LEN = 64;
@@ -46,14 +46,14 @@ public class PushSocketInfo {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PushSocketInfo() {
-        pushSocket = new Socket();
+        socket = new Socket();
     }
 
-    public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destIp) throws IOException {
+    public void openSocket(final String _host, final int _port, final int _timeout, final String _channelID, final String _destinationIp) throws IOException {
 
         channelID = _channelID;
-        destIp = _destIp;
-        connPort = _port;
+        destinationIp = _destinationIp;
+        port = _port;
 
         connectPushServer(_host, _port, _timeout);
 
@@ -62,8 +62,8 @@ public class PushSocketInfo {
 
     public void connectPushServer(final String _host, final int _port, final int _timeout) throws IOException {
 
-        pushSocket.connect(new InetSocketAddress(_host, _port), _timeout);
-        pushSocket.setSoTimeout(_timeout);
+        socket.connect(new InetSocketAddress(_host, _port), _timeout);
+        socket.setSoTimeout(_timeout);
     }
 
     public void requestPushServer() throws IOException {
@@ -72,7 +72,7 @@ public class PushSocketInfo {
 
         //Header
         byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-        this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+        this.socket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
         //log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader))
         //log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
@@ -83,7 +83,7 @@ public class PushSocketInfo {
 
         byte[] byteBody = new byte[responseDataLength];
 
-        pushSocket.getInputStream().read(byteBody, 0, byteBody.length);
+        socket.getInputStream().read(byteBody, 0, byteBody.length);
 
         String responseCode = getEncodeStr(byteBody, 0, 2);
         log.trace("[OpenSocket] 서버 응답 response Code = " + responseCode);
@@ -108,7 +108,7 @@ public class PushSocketInfo {
     }
 
     public boolean isInValid() {
-        return (   !pushSocket.isConnected()
+        return (   !socket.isConnected()
                 || !this.isOpened()
                 || this.isFailure());
     }
@@ -126,26 +126,33 @@ public class PushSocketInfo {
     }
 
     public void sendHeaderMsg(int requestMsgId, String notiMsg, String transactionId) throws IOException {
-
-        byte[] byteDATA = new byte[0];
+        /* client -> server header
+         * Message Header Structure (64Byte)
+         * ------------------------------------------------------------------------------
+         *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
+         * ------------------------------------------------------------------------------
+         *             Destination IP(16)          |  Reserved 2(12)  |  Data Length(4)
+         * ------------------------------------------------------------------------------
+         */
+        byte[] byteArrayDatas = new byte[0];
         if(COMMAND_REQUEST == requestMsgId) {
-            byteDATA = notiMsg.getBytes(PUSH_ENCODING);
+            byteArrayDatas = notiMsg.getBytes(PUSH_ENCODING);
         }
 
-        byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteDATA.length];
+        byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteArrayDatas.length];
         System.arraycopy(Ints.toByteArray(requestMsgId), 0, sendHeader, 0, 4);
         if(COMMAND_REQUEST == requestMsgId) {
             System.arraycopy(transactionId.getBytes(PUSH_ENCODING), 0, sendHeader, 4, 12);   //Transaction Id
         }
         System.arraycopy(this.channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
-        System.arraycopy(destIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destIp.getBytes(PUSH_ENCODING).length);
-        System.arraycopy(Ints.toByteArray(byteDATA.length), 0, sendHeader, 60, 4);
+        System.arraycopy(destinationIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destinationIp.getBytes(PUSH_ENCODING).length);
+        System.arraycopy(Ints.toByteArray(byteArrayDatas.length), 0, sendHeader, 60, 4);
         if(COMMAND_REQUEST == requestMsgId) {
-            System.arraycopy(byteDATA, 0, sendHeader, 64, byteDATA.length); //Data
+            System.arraycopy(byteArrayDatas, 0, sendHeader, 64, byteArrayDatas.length); //Data
         }
 
-        this.pushSocket.getOutputStream().write(sendHeader);
-        this.pushSocket.getOutputStream().flush();
+        this.socket.getOutputStream().write(sendHeader);
+        this.socket.getOutputStream().flush();
 
     }
 
@@ -167,8 +174,16 @@ public class PushSocketInfo {
     }
 
     private PushRcvHeaderVo recvPushMessageHeader()  throws IOException {
+        /* server -> client header
+         * Message Header Structure (64Byte)
+         * ------------------------------------------------------------------------------
+         *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
+         * ------------------------------------------------------------------------------
+         *      Channel ID(14)     | Reserved 1(2) |  Reserved 2(12)  |  Data Length(4)
+         * ------------------------------------------------------------------------------
+         */
 
-        InputStream inputStream = pushSocket.getInputStream();
+        InputStream inputStream = socket.getInputStream();
 
         //Header
         byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
@@ -238,7 +253,7 @@ public class PushSocketInfo {
 
             //Header
             byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-            this.pushSocket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+            this.socket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
 
             log.trace("[isServerInValidStatus] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
             //log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
@@ -249,11 +264,11 @@ public class PushSocketInfo {
 
             byte[] byteBody = new byte[responseDataLength];
 
-            pushSocket.getInputStream().read(byteBody, 0, byteBody.length);
+            socket.getInputStream().read(byteBody, 0, byteBody.length);
 
-            short commStatus = byteToShort(byteBody);
+            short healthStatus = byteToShort(byteBody);
             //SUCCESS 1, Fail 0
-            if (commStatus == 1) {
+            if (healthStatus == 1) {
                 log.debug("[" + channelID + "][Health Check] - [SUCCESS]");
                 lastTransactionTime = Instant.now().getEpochSecond();
             }
@@ -279,7 +294,7 @@ public class PushSocketInfo {
 
     public void closeSocketResource() throws IOException {
 
-        try (pushSocket) {
+        try (socket) {
             this.isOpened = false;
             log.debug("[===>closeSocket] {}", this);
         }
@@ -305,7 +320,7 @@ public class PushSocketInfo {
     }
 
     public String toString() {
-        return channelID + ":"  + connPort + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
+        return channelID + ":"  + port + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
     }
 
     @Getter
@@ -324,7 +339,7 @@ public class PushSocketInfo {
     @ToString
     static class PushRcvStatusMsgVo {
         @JsonProperty("msg_id")
-        private String msgId;
+        private String messageId;
 
         @JsonProperty("push_id")
         private String pushId;

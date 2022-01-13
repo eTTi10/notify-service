@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.push;
 
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 1108
@@ -8,7 +9,12 @@ import com.lguplus.fleta.exception.NotifyPushRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class PushEtcException extends NotifyPushRuntimeException {
+public class PushEtcException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
+    }
 
     /**
      *

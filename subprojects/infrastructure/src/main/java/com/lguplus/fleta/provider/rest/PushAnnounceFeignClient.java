@@ -23,6 +23,6 @@ public interface PushAnnounceFeignClient {
      * @return 푸시 결과
      */
     @PostMapping(value = "${push-comm.announce.server.url}")
-    Map<String, Object> requestAnnouncement(URI baseUri, @RequestBody Map<String, Map<String, String>> paramMap);//throws RetryableException;
+    Map<String, Object> requestAnnouncement(URI baseUri, @RequestBody Map<String, Map<String, String>> paramMap);
 
 }

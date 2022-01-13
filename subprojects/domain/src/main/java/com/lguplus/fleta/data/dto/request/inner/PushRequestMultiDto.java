@@ -12,14 +12,16 @@ import java.util.List;
 @Builder
 public class PushRequestMultiDto {
 
-    private String appId;
+    private String applicationId;
     private String serviceId;
     private String pushType;
-    private String msg;
-    private List<String> items;
-
-    private String regId;
-
+    private String message;
+    private List<PushRequestItemDto> items;
     private List<String> users;
+    private Integer retryCount;
+
+    public void setItems(List<PushRequestItemDto> items) {
+        this.items = items;
+    }
 
 }

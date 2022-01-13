@@ -7,7 +7,7 @@ import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
@@ -135,7 +135,7 @@ public class PushService {
 
                         log.debug("pushClientResponseDto:" + pushClientResponseDto);
 
-                    } catch (NotifyPushRuntimeException ne) {
+                    } catch (NotifyRuntimeException ne) {
                         log.debug("NotifyPushRuntimeException:{} {}", ne.toString(), ne.getInnerResponseCodeType());
                     }
 

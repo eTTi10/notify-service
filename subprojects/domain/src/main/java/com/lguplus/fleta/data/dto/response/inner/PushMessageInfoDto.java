@@ -9,16 +9,16 @@ import org.apache.commons.lang3.StringUtils;
 @Builder
 @ToString
 public class PushMessageInfoDto {
-    private int messageID;
-    private String transactionID; //12 char
-    private String channelID;
+    private int messageId;
+    private String transactionId; //12 char
+    private String channelId;
     private String result;
     private String statusCode;
-    private String destIp;
+    private String destinationIp;
     private String data;            //Json
 
-    public String getTransactionID() {
-        return !StringUtils.isEmpty(transactionID) ? transactionID : "";
+    public String getTransactionId() {
+        return !StringUtils.isEmpty(transactionId) ? transactionId : "";
     }
 
     public String getData() {

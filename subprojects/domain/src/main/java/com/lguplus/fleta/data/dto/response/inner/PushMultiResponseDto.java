@@ -13,9 +13,10 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Getter
+@ToString
 public class PushMultiResponseDto {
 
-    private String msgId;
+    private String messageId;
     private String pushId;
     private String statusCode;
     private String statusMsg;

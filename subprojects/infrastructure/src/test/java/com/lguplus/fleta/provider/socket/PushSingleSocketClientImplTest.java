@@ -1,6 +1,7 @@
 package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.data.dto.PushStatDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
@@ -57,18 +58,19 @@ class PushSingleSocketClientImplTest {
 
     @BeforeEach
     void setUp() {
-        List<String> items = new ArrayList<>();
-        items.add("badge!^1");
-        items.add("sound!^ring.caf");
-        items.add("cm!^aaaa");
+
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushRequestSingleDto = PushRequestSingleDto.builder()
                 .serviceId("30011")
                 .pushType("G")
-                .appId("lguplushdtvgcm")
+                .applicationId("lguplushdtvgcm")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
 
         PushRequestSingleDto dto = pushRequestSingleDto;
@@ -77,26 +79,21 @@ class PushSingleSocketClientImplTest {
         paramMap.put("msg_id", "PUSH_NOTI");
         paramMap.put("push_id", "202112200001");
         paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
-        paramMap.put("service_passwd", getSha512Pwd(dto.getAppId()));
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
+        paramMap.put("service_passwd", getSha512Pwd(dto.getApplicationId()));
         paramMap.put("service_key", dto.getRegId());
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         /////////////// LG
         pushRequestSingleDtoLg = PushRequestSingleDto.builder()
                 .serviceId("00007")
                 .pushType("G")
-                .appId("smartux")
+                .applicationId("smartux")
                 .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
 
         dto = pushRequestSingleDtoLg;
@@ -105,19 +102,14 @@ class PushSingleSocketClientImplTest {
         paramMapLg.put("msg_id", "PUSH_NOTI");
         paramMapLg.put("push_id", "202112200101");
         paramMapLg.put("service_id", dto.getServiceId());
-        paramMapLg.put("app_id", dto.getAppId());
-        paramMapLg.put("noti_contents", dto.getMsg());
-        paramMapLg.put("service_passwd", getSha512Pwd(dto.getAppId()));
+        paramMapLg.put("app_id", dto.getApplicationId());
+        paramMapLg.put("noti_contents", dto.getMessage());
+        paramMapLg.put("service_passwd", getSha512Pwd(dto.getApplicationId()));
         paramMapLg.put("push_app_id", "smartux0001");
         paramMapLg.put("noti_type", "POS");
         paramMapLg.put("regist_id", dto.getRegId());
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length == 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMax", "2");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMin", "1");
@@ -127,7 +119,7 @@ class PushSingleSocketClientImplTest {
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "host", "211.115.75.227");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "port", "9600");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "timeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "channelPort", "8080");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "wasPort", "8080");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "defaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "destinationIp", "222.231.13.85");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "closeSecond", "170");
@@ -136,7 +128,6 @@ class PushSingleSocketClientImplTest {
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgHost", "211.115.75.227");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPort", "8100");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgTimeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgChannelPort", "8080");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDefaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDestinationIp", "222.231.13.85");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgCloseSecond", "170");
@@ -152,7 +143,12 @@ class PushSingleSocketClientImplTest {
 
     private void clearPool() {
         //ReflectionTestUtils.invokeMethod(pushSingleSocketClient, "socketClientSch");
-        ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
+        try {
+            ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
+        }
+        catch (Exception e) {
+
+        }
     }
 
     //ok
@@ -195,7 +191,7 @@ class PushSingleSocketClientImplTest {
     @Test // pool empty Exception
     void requestPushSingle_case_04()  {
 
-        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "poolList");
+        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
 
         for(int i=0; i<2; i++) {
             try {

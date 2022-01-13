@@ -8,24 +8,20 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
-import io.netty.channel.epoll.Epoll;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.AttributeKey;
-import io.netty.util.concurrent.Future;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -53,13 +49,13 @@ public class NettyTcpClient {
 	private String destinationIp;
 
 	@Value("${server.port}")
-	private String channelPort;
+	private String wasPort;
 
 	@Value("${push-comm.push.socket.channelID}")
-	private String defaultChannelHost;
+	private String defaultSocketChannelId;
 
 	@Value("${push-comm.push.call.retryCnt}")
-	private String pushCallRetryCnt;
+	private String callRetryCount;
 
 	private static final int CONN_TIMEOUT = 1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
@@ -75,7 +71,6 @@ public class NettyTcpClient {
 	private static final int COMMAND_REQUEST_ACK = 16;
 	private static final String PUSH_ENCODING = "euc-kr";
 
-	private EventLoopGroup workerGroup;
 	private Bootstrap bootstrap = null;
 	private Channel channel = null;
 	private PushMultiClient pushMultiClient;
@@ -88,44 +83,24 @@ public class NettyTcpClient {
 
 		log.debug("[NettyClient] Server IP : " + host + ", port : " + port);
 
-		if(Epoll.isAvailable()) { // Linux Epoll
-			this.workerGroup = new EpollEventLoopGroup(threadCount * 2);
-			bootstrap = new Bootstrap()
-					.group(this.workerGroup)
-					.channel(EpollSocketChannel.class)
-					.option(ChannelOption.TCP_NODELAY, true)
-					.option(ChannelOption.SO_KEEPALIVE, true)
-					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
-					.handler(new ChannelInitializer<SocketChannel>() {
-						public void initChannel(SocketChannel ch) {
-							ChannelPipeline p = ch.pipeline();
-							p.addLast("decoder", new MessageDecoder());
-							p.addLast("encoder", new MessageEncoder());
-							p.addLast("handler", new MessageHandler(pushMultiClient));
-						}
-					});
-		}
-		else {
-			this.workerGroup = new NioEventLoopGroup(threadCount * 2);
-
-			bootstrap = new Bootstrap()
-					.group(this.workerGroup)
-					.channel(NioSocketChannel.class)
-					.option(ChannelOption.TCP_NODELAY, true)
-					.option(ChannelOption.SO_KEEPALIVE, true)
-					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
-					.handler(new ChannelInitializer<SocketChannel>() {
-						public void initChannel(SocketChannel ch) {
-							ChannelPipeline p = ch.pipeline();
-							p.addLast("decoder", new MessageDecoder());
-							p.addLast("encoder", new MessageEncoder());
-							p.addLast("handler", new MessageHandler(pushMultiClient));
-						}
-					});
-		}
+		bootstrap = new Bootstrap()
+				.group(new NioEventLoopGroup(threadCount))
+				.channel(NioSocketChannel.class)
+				.option(ChannelOption.TCP_NODELAY, true)
+				.option(ChannelOption.SO_KEEPALIVE, true)
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+				.handler(new ChannelInitializer<SocketChannel>() {
+					public void initChannel(SocketChannel ch) {
+						ChannelPipeline p = ch.pipeline();
+						p.addLast("decoder", new MessageDecoder());
+						p.addLast("encoder", new MessageEncoder());
+						p.addLast("handler", new MessageHandler(pushMultiClient));
+					}
+				});
 	}
 
 	public String connect(PushMultiClient pushMultiClient) {
+
 		if(bootstrap == null) {
 			this.pushMultiClient = pushMultiClient;
 			initialize();
@@ -148,8 +123,8 @@ public class NettyTcpClient {
 
 		String genChannelID = this.getNextChannelID();
 		PushMessageInfoDto response = (PushMessageInfoDto) writeSync(
-				PushMessageInfoDto.builder().messageID(CHANNEL_CONNECTION_REQUEST)
-						.channelID(genChannelID).destIp(destinationIp)
+				PushMessageInfoDto.builder().messageId(CHANNEL_CONNECTION_REQUEST)
+						.channelId(genChannelID).destinationIp(destinationIp)
 						.build());
 
 		if (response != null && SUCCESS.equals(response.getResult())) {
@@ -163,53 +138,45 @@ public class NettyTcpClient {
 	}
 
 	public void disconnect() {
-		try {
-			if (channel != null && channel.isActive()) { //isConnected -> isActive
-				channel.disconnect();
-				channel.close();
-				channel = null;
-				log.debug("[NettyClient] The current channel has been disconnected.");
-			}
-		} catch (Exception ex) {
-			log.error("[NettyClient] connection closing : {}", ex);
+		if (getChannel() != null && getChannel().isActive()) { //isConnected -> isActive
+			getChannel().disconnect();
+			getChannel().close();
+			channel = null;
+			log.debug("[NettyClient] The current channel has been disconnected.");
 		}
 	}
 
 	public boolean isInValid() {
-		return (channel == null || !channel.isActive() || !channel.isOpen());
+		if(getChannel() == null)
+			return true;
+		//isActive : isOpen() && isConnected()
+		return !getChannel().isActive();
 	}
 
-	public void write(final PushMessageInfoDto message) {
-		if (!this.channel.isActive()) {
+	public Channel getChannel() {
+		return channel;
+	}
+
+	public void write(final PushMessageInfoDto pushMessageInfoDto) {
+		if (isInValid()) {
 			log.error("[NettyClient] write0 isNotActive");
 			return;
 		}
-		ChannelFuture writeFuture = this.channel.write(message);
-
-		writeFuture.addListener((ChannelFutureListener) future -> {
-			if(future.isSuccess())
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_SUCCESS_MSG, message);
-			else
-				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.SEND_FAIL_MSG, message);
-		});
+		getChannel().write(pushMessageInfoDto);
 	}
 
 	public void flush() {
 		//log.debug("[NettyClient] flush channel")
-		this.channel.flush();
+		getChannel().flush();
 	}
 
 	public Object writeSync(PushMessageInfoDto message) {
 		Object response = null;
 
-		if (null == message) {
-			return null;
-		}
-
-		int retryCount = Integer.parseInt(pushCallRetryCnt);
+		int retryCount = Integer.parseInt(callRetryCount);
 
 		//Clear
-		setAttachment(message.getMessageID());
+		setAttachment(message.getMessageId());
 
 		int writeTryTimes = 0;
 		AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
@@ -217,7 +184,7 @@ public class NettyTcpClient {
 		//Send
 		while(writeTryTimes < retryCount && !isFutureSuccess.get()) {
 
-			ChannelFuture awaitFuture = this.channel.writeAndFlush(message);
+			ChannelFuture awaitFuture = getChannel().writeAndFlush(message);
 			waitFutureDone(awaitFuture);
 
 			isFutureSuccess.set(awaitFuture.isSuccess());
@@ -243,14 +210,14 @@ public class NettyTcpClient {
 			} catch (InterruptedException e) {
 				currentThread().interrupt();
 			}
-			response = getAttachment(message.getMessageID());
-			log.trace("try getAttachement: {} {}", readWaited, response);
+			response = getAttachment(message.getMessageId());
+			log.debug("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
 
 		if(response == null) {
-			setAttachment(message.getMessageID());
+			setAttachment(message.getMessageId());
 		}
 
 		if(readWaited >= CONN_TIMEOUT) {
@@ -261,63 +228,73 @@ public class NettyTcpClient {
 		return response;
 	}
 
-	private <T extends Future<?>> void waitFutureDone(final T future) {
+	public void waitFutureDone(final ChannelFuture future) {
 		final CountDownLatch latch = new CountDownLatch(1);
 		future.addListener(f -> latch.countDown());
-		//Uninterruptibles.awaitUninterruptibly(latch, 1000, TimeUnit.MILLISECONDS)
 
 		try {
-			boolean result = latch.await(2000, TimeUnit.MILLISECONDS);
+			boolean result = waitLatch(latch);
 			if(!result) {
-				log.error("waitFutureDone awit Failure!");
+				log.error("waitFutureDone awit timeout!");
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 	}
 
-	private void setAttachment(int messageId) {
+	public boolean waitLatch(CountDownLatch latch) throws InterruptedException {
+		return latch.await(2000, TimeUnit.MILLISECONDS);
+	}
+
+	public void setAttachment(int messageId) {
 		if (messageId == CHANNEL_CONNECTION_REQUEST) {
-			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
+			getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
 		}
 		else if(messageId == PROCESS_STATE_REQUEST) {
-			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
+			getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
+		}
+		else {
+			log.error("unknown messagId {}", messageId);
 		}
 	}
 
 	private Object getAttachment(int messageId) {
 		Object msg;
 		if (messageId == CHANNEL_CONNECTION_REQUEST) {
-			msg = this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).get();
-			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
+			msg = getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).get();
+			getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
 		}
 		else {
-			msg = this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).get();
-			this.channel.attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
+			msg = getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).get();
+			getChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
 		}
 
 		return msg;
 	}
 
-	private String getNextChannelID() {
-		String hostname;
+	public String getNextChannelID() {
+		String hostName;
 		try {
-			InetAddress addr = InetAddress.getLocalHost();
-			hostname = addr.getHostName();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-			hostname = defaultChannelHost;
+			hostName = getHostName();
+		} catch (IOException e) {
+			hostName = defaultSocketChannelId;
 		}
 
-		hostname = hostname.replace("DESKTOP-", "");
-		hostname = hostname + hostname;
+		hostName = hostName.replace("DESKTOP-", "");
+		hostName = hostName + hostName;
 
-		String channelHostNm = (hostname + "00000000").substring(0, 6);
-		String channelPortNm = (channelPort + "0000").substring(0, 4);
+		String channelHostNm = (hostName + "00000000").substring(0, 6);
+		String channelPortNm = (wasPort + "0000").substring(0, 4);
 
 		channelHostNm = "M" +  channelHostNm.substring(1);
 
 		return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0));
+	}
+
+	public String getHostName() throws IOException {
+		InetAddress addr = InetAddress.getLocalHost();
+		String hostName = addr.getHostName();
+		return hostName;
 	}
 
 	@Slf4j
@@ -326,7 +303,7 @@ public class NettyTcpClient {
 		@Override
 		protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
 
-			/*
+			/* client -> server header
 			 * Message Header Structure (64Byte)
 			 * ------------------------------------------------------------------------------
 			 *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
@@ -338,14 +315,14 @@ public class NettyTcpClient {
 			byte[] dataInfo = message.getData().getBytes(PUSH_ENCODING);
 
 			byte[] byteTotalData = new byte[PUSH_MSG_HEADER_LEN + dataInfo.length];
-			System.arraycopy(Ints.toByteArray(message.getMessageID()), 0, byteTotalData, 0, 4);                    //Message Id
-			System.arraycopy(message.getTransactionID().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionID().getBytes(PUSH_ENCODING).length);//12);   //Transaction Id
-			System.arraycopy(message.getChannelID().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelID().getBytes(PUSH_ENCODING).length);//14);             //Channel Id
-			System.arraycopy(message.getDestIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestIp().getBytes(PUSH_ENCODING).length);//Destination IP
+			System.arraycopy(Ints.toByteArray(message.getMessageId()), 0, byteTotalData, 0, 4);                    //Message Id
+			System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);	//Transaction Id
+			System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelId().getBytes(PUSH_ENCODING).length);			// Channel Id
+			System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestinationIp().getBytes(PUSH_ENCODING).length);	//Destination IP
 			System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
 			System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
-			//log.debug("sendHeader Len =" + byteTotalData.length)
+			log.debug("MessageEncoder {}", message);
 
 			out.writeBytes(byteTotalData);
 		}
@@ -353,17 +330,14 @@ public class NettyTcpClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	private static class MessageDecoder extends ByteToMessageDecoder {
+	public static class MessageDecoder extends ByteToMessageDecoder {
 
 		private final ObjectMapper objectMapper = new ObjectMapper();
-
-		private static final String RESPONSE_ID_NM = "response";
-		private static final String RESPONSE_STATUS_CD = "status_code";
 
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
-			/*
+			/* server -> client header
 			 * Message Header Structure (64Byte)
 			 * ------------------------------------------------------------------------------
 			 *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
@@ -373,6 +347,8 @@ public class NettyTcpClient {
 			 */
 
 			Channel channel = ctx.channel();
+
+			log.debug("MessageDecoder in.readableBytes:{}", in.readableBytes());
 
 			if (!channel.isActive()) {
 				log.debug(":: MessageDecoder : isActive Error");
@@ -392,11 +368,6 @@ public class NettyTcpClient {
 			int messageID = byteToInt(byteHeader, 0);
 			int dataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
 
-			if (!isValidMessageType(messageID)) {
-				in.resetReaderIndex();
-				return;
-			}
-
 			if (in.readableBytes() < dataLength) {
 				in.resetReaderIndex();
 				return;
@@ -406,39 +377,56 @@ public class NettyTcpClient {
 			byte[] byteData = new byte[dataLength];
 			in.readBytes(byteData);
 
-			String transactionID = null;
 			String result;
-			String data = null;
-			String statusCode = null;
 			String channelId = new String(byteHeader, 32, 14, PUSH_ENCODING);
 
-			if (messageID == PROCESS_STATE_REQUEST_ACK) {
-				result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
-				//log.debug(":: MessageDecoder : PROCESS_STATE_REQUEST_ACK {} {}", messageID, result)
-			} else {
-				result = new String(byteData,0, 2, PUSH_ENCODING);
+			switch (messageID) {
+				case CHANNEL_CONNECTION_REQUEST_ACK:
+					log.debug("** decode message: CHANNEL_CONNECTION_REQUEST_ACK {}", CHANNEL_CONNECTION_REQUEST_ACK);
 
-				if (messageID == COMMAND_REQUEST_ACK) {
-					//log.debug(":: MessageDecoder : COMMAND_REQUEST_ACK {}", messageID)
-					transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
-					data = new String(byteData,2, byteData.length - 2, PUSH_ENCODING);
+					result = new String(byteData,0, 2, PUSH_ENCODING);
+					out.add(PushMessageInfoDto.builder()
+							.messageId(messageID)
+							.channelId(channelId)
+							.result(result)
+							.build());
+					break;
+
+				case PROCESS_STATE_REQUEST_ACK:
+					log.debug("** decode message: PROCESS_STATE_REQUEST_ACK {}", PROCESS_STATE_REQUEST_ACK);
+
+					result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
+					out.add(PushMessageInfoDto.builder()
+							.messageId(messageID)
+							.channelId(channelId)
+							.result(result)
+							.build());
+					break;
+
+				case COMMAND_REQUEST_ACK:
+					log.debug("** decode message: COMMAND_REQUEST_ACK {}", COMMAND_REQUEST_ACK);
+
+					result = new String(byteData,0, 2, PUSH_ENCODING);
+					String transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
+					String data = new String(byteData,2, byteData.length - 2, PUSH_ENCODING);
 
 					PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, PushRcvStatusMsgWrapperVo.class);
-					statusCode = msgWrapperVo.getResponse().getStatusCode();
-				}
+					String statusCode = msgWrapperVo.getResponse().getStatusCode();
+					out.add(PushMessageInfoDto.builder()
+							.messageId(messageID)
+							.transactionId(transactionID)
+							.channelId(channelId)
+							.result(result)
+							.data(data)
+							.statusCode(statusCode)
+							.build());
+					break;
+				default:
+					log.error("MessageDecoder unknown message {}", messageID);
+					break;
 			}
 
-			PushMessageInfoDto msg = PushMessageInfoDto.builder()
-					.messageID(messageID)
-					.transactionID(transactionID)
-					.channelID(channelId)
-					.result(result)
-					.data(data)
-					.statusCode(statusCode)
-					.build();
-
-			//log.debug(":: MessageDecoder : decode end~ : {}", msg)
-			out.add(msg);
+			log.debug("** decode end: {}", out.size());
 		}
 
 		private short byteToShort(byte[] src) {
@@ -449,27 +437,11 @@ public class NettyTcpClient {
 			return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
 		}
 
-		private boolean isValidMessageType(int type) {
-			switch (type) {
-				case 1:		//CHANNEL_CONNECTION_REQUEST
-				case 2:		//CHANNEL_CONNECTION_REQUEST_ACK
-				case 5:		//CHANNEL_RELEASE_REQUEST
-				case 6:		//CHANNEL_RELEASE_REQUEST_ACK
-				case 13:	//PROCESS_STATE_REQUEST
-				case 14:	//PROCESS_STATE_REQUEST_ACK
-				case 15:	//COMMAND_REQUEST
-				case 16:	//COMMAND_REQUEST_ACK
-					return true;
-				default:
-					return false;
-			}
-		}
-
 	}
 
 	@Slf4j
 	@NoArgsConstructor
-	private static class MessageHandler extends ChannelInboundHandlerAdapter {
+	public static class MessageHandler extends SimpleChannelInboundHandler<PushMessageInfoDto> {
 
 		private PushMultiClient pushMultiClient = null;
 
@@ -478,34 +450,29 @@ public class NettyTcpClient {
 		}
 
 		@Override
-		public void channelRead(ChannelHandlerContext ctx, Object msg) {
+		public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) {
 
-			PushMessageInfoDto message;
-			if (msg instanceof PushMessageInfoDto) {
-				message = (PushMessageInfoDto) msg;
-			} else {
-				log.error("[MessageHandler] message is not valid");
-				return;
-			}
-
-			if (message.getMessageID() == PROCESS_STATE_REQUEST_ACK) {
+			if (message.getMessageId() == PROCESS_STATE_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-				log.trace(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
+				log.debug(":: MessageHandler channelRead : PROCESS_STATE_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(message);
 			}
-			else if (message.getMessageID() == CHANNEL_CONNECTION_REQUEST_ACK) {
+			else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-				log.trace(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
+				log.debug(":: MessageHandler channelRead : CHANNEL_CONNECTION_REQUEST_ACK");
 				ctx.channel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(message);
 			}
-			else if (message.getMessageID() == COMMAND_REQUEST_ACK) {
+			else if (message.getMessageId() == COMMAND_REQUEST_ACK) {
 				// Push 전송인 경우 response 결과를 임시 Map에 저장함.
-				log.trace(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
+				log.debug(":: MessageHandler channelRead : COMMAND_REQUEST_ACK {}", message);
 				pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 			}
+			else {
+				log.error("unknown channelRead ! {}", message.getMessageId());
+			}
 
-			log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageID() + ", " +
-					message.getTransactionID() + ", " + message.getResult());
+			//log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
+			//		message.getTransactionId() + ", " + message.getResult())
 		}
 
 		@Override
@@ -513,13 +480,9 @@ public class NettyTcpClient {
 
 			log.error("[MessageHandler] id : " + ctx.channel().id() + ", exceptionCaught : " + e.toString());
 
-			try {
-				if (ctx.channel().isActive()) { // isConnected -> isActive
-					ctx.channel().disconnect();
-					ctx.channel().close();
-				}
-			} catch (Exception ex) {
-				log.error("[MessageHandler] connection closing : {}", ex.toString());
+			if (ctx.channel().isActive()) { // isConnected -> isActive
+				ctx.channel().disconnect();
+				ctx.channel().close();
 			}
 		}
 
@@ -533,12 +496,6 @@ public class NettyTcpClient {
 		public void channelUnregistered(ChannelHandlerContext ctx) {
 			log.debug("channelUnregistered!");
 			ctx.fireChannelUnregistered();
-		}
-
-		@Override
-		public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-			log.debug("userEventTriggered!");
-			ctx.fireUserEventTriggered(evt);
 		}
 	}
 
