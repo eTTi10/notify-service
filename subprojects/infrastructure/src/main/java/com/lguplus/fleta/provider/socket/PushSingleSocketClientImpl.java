@@ -146,10 +146,14 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
                 , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin) ), abandonedConfig));
 
         //AbandonedConfig : Remove 정책
+        AbandonedConfig abandonedConfig1 = new AbandonedConfig();
+        abandonedConfig1.setRemoveAbandonedOnMaintenance(true);
+        abandonedConfig1.setRemoveAbandonedOnBorrow(true);
+        abandonedConfig1.setRemoveAbandonedTimeout(250);
 
         socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
-                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig));
+                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig1));
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 

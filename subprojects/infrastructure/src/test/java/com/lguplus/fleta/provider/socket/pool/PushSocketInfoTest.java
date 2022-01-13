@@ -2,10 +2,9 @@ package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.FailException;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
 import fleta.util.JunitTestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,13 +18,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSocketInfoTest {
+
+    static NettyTcpServer server;
+    static Thread thread;
+    static String SERVER_IP = "127.0.0.1";
+    static int SERVER_PORT = 9666;
 
     String channelId = "0123456789123";//14char
     String PUSH_ENCODING = "euc-kr";
 
-    String testIp = "211.115.75.227";
-    int testPort = 9600;
     int testTimeout = 2000;
     String testDestIp = "222.231.13.85";
 
@@ -33,12 +36,26 @@ class PushSocketInfoTest {
     void setUp() {
     }
 
+    @BeforeAll
+    static void setUpAll() {
+        server = new NettyTcpServer();
+        thread = new Thread(() -> {
+            server.runServer(SERVER_PORT);
+        });
+        thread.start();
+    }
+
+    @AfterAll
+    static void setUpClose() {
+        server.stopServer();
+    }
+
     @Test
     void isInValid() throws IOException {
 
         String channelId = "01234567890001";//14char
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(testIp, testPort, testTimeout, channelId+"0", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"0", testDestIp);
         Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "socket");
         assertTrue(!pushSocketInfo.isInValid());
 
@@ -71,7 +88,7 @@ class PushSocketInfoTest {
     void recvPushMessageBody() throws IOException {
 
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(testIp, testPort, testTimeout, channelId+"1", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"1", testDestIp);
         //Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "pushSocket");
         assertTrue(!pushSocketInfo.isInValid());
 
@@ -124,7 +141,7 @@ class PushSocketInfoTest {
     @Test
     void test_isServerInValidStatus() throws IOException {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(testIp, testPort, testTimeout, channelId+"2", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"2", testDestIp);
 
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
         short retSuccess = 1;//Success
@@ -155,7 +172,7 @@ class PushSocketInfoTest {
         byte[] reqData = new byte[]{(byte) 0x53, (byte) 0x43, (byte) 0x00, (byte) 0x00};//SC
 
         doReturn("FA").when(spyPushSocket).getEncodeStr(reqData, 0, 2);
-        spyPushSocket.openSocket(testIp, testPort, testTimeout, channelId+"3", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"3", testDestIp);
 
         assertTrue(!spyPushSocket.isOpened());
         spyPushSocket.closeSocket();
@@ -168,7 +185,7 @@ class PushSocketInfoTest {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
 
-        spyPushSocket.openSocket(testIp, testPort, testTimeout, channelId+"4", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"4", testDestIp);
 
         final int CHANNEL_PROCESS_STATE_REQUEST = 13;
         doThrow(new IOException("")).when(spyPushSocket).sendHeaderMsg(CHANNEL_PROCESS_STATE_REQUEST);//, null, null);
@@ -191,7 +208,7 @@ class PushSocketInfoTest {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
 
-        spyPushSocket.openSocket(testIp, testPort, testTimeout, channelId+"5", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"5", testDestIp);
 
         doThrow(new IOException("")).when(spyPushSocket).closeSocketResource();
         assertThrows(IOException.class, () -> {
