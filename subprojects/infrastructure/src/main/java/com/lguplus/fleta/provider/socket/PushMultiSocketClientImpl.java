@@ -10,11 +10,14 @@ import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -39,12 +42,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private String maxLimitPush; //400/1sec
 
     private static final String DATE_FOMAT = "yyyyMMdd";
-    private static final int TRANSACTION_MAX_SEQ_NO = 16*16*16*16;// 10000
+    private static final int TRANSACTION_MAX_SEQ_NO = (int)(Math.pow(16, 4));// 65536
     private static final long SECOND = 1000L;
     private static final String SUCCESS = "SC";
     private static final int PROCESS_STATE_REQUEST = 13;
     private static final int COMMAND_REQUEST = 15;
-    private static final int FLUSH_COUNT = 100;
+    private int FLUSH_COUNT = 100;
 
     private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
     private final AtomicLong sendMsgCount = new AtomicLong(0);
@@ -75,7 +78,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             log.debug("requestPushMulti thread:{} reguser-count: {}",  Thread.currentThread().getId(), sendUsers.size());
 
             // Push 메시지 수신 처리
-            ImmutablePair<List<PushMessageInfoDto>, List<PushMultiResponseDto>> requstInfo = parserAsyncMessage(sendUsers);
+            Pair<List<PushMessageInfoDto>, List<PushMultiResponseDto>> requstInfo = parserAsyncMessage(sendUsers);
             List<PushMessageInfoDto> receivedMessages = requstInfo.getLeft();
             List<PushMultiResponseDto> lastNotReceivedMessages = requstInfo.getRight();
 
@@ -99,19 +102,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     @Override
     public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
-        //log.debug("receiveAsyncMessage : {}, {}", dto.getTransactionId(), dto)
-        switch (msgType)
-        {
-            case RECIVED_MSG:
-                receiveMessageMap.put(dto.getTransactionId(), dto);
-                break;
-            case SEND_SUCCESS_MSG:
-                //sendSuccessMessageMap.put(dto.getTransactionId(), dto)
-                break;
-            case SEND_FAIL_MSG:
-                //sendFailMessageMap.put(dto.getTransactionId(), dto)
-                break;
-        }
+        receiveMessageMap.put(dto.getTransactionId(), dto);
     }
 
     private synchronized void checkGateWayServer() throws NotifyRuntimeException {
@@ -177,7 +168,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         return sendUsers;
     }
 
-    private ImmutablePair<List<PushMessageInfoDto>, List<PushMultiResponseDto>>  parserAsyncMessage(List<PushMultiResponseDto> sendUsers) {
+    private Pair<List<PushMessageInfoDto>, List<PushMultiResponseDto>>  parserAsyncMessage(List<PushMultiResponseDto> sendUsers) {
 
         List<PushMessageInfoDto> receivedMessages = new ArrayList<>();
 
@@ -218,7 +209,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         List<PushMultiResponseDto> lastNotReceivedMessages = sendUsers.stream().filter(e -> processedMap.get(e.getPushId()) == null).collect(Collectors.toList());
 
         log.debug("parserAsyncMessage thread:{} time:{} = {}/{}", Thread.currentThread().getId(), waitTime, sendUsers.size() - lastNotReceivedMessages.size(), sendUsers.size());
-        return new ImmutablePair<>(receivedMessages, lastNotReceivedMessages);
+        return Pair.of(receivedMessages, lastNotReceivedMessages);
     }
 
     private void analyzeReceivedMessage(PushRequestMultiSendDto multiSendDto, List<PushMessageInfoDto> receivedMessages, List<PushMultiResponseDto> sendUsers, List<PushMultiResponseDto> lastNotReceivedMessages) throws NotifyRuntimeException {
@@ -232,25 +223,26 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             if ("200".equals(messageInfoDto.getStatusCode())) {
                 souccesCnt++;
                 log.trace("[MultiPushRequest][Push] - {} : {}", souccesCnt, messageInfoDto);
-                continue;
             }
+            else {
+                //exception check
+                NotifyRuntimeException ex = exceptionHandler(messageInfoDto);
+                if (ex != null) {
+                    throw ex;
+                }
+                else {
+                    if ("410".equals(messageInfoDto.getStatusCode()) || "412".equals(messageInfoDto.getStatusCode())) {
+                        // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip
+                        log.trace("[MultiPushRequest][Push] - skip exception:{} - {}", messageInfoDto.getStatusCode(), messageInfoDto);
+                    } else {
+                        // 메시지 전송 실패 - Retry 대상
+                        log.trace("[MultiPushRequest][Push] - FA :serviceId:{} Code:{}", multiSendDto.getJsonTemplate(), messageInfoDto.getStatusCode());
 
-            //exception
-            NotifyRuntimeException ex = exceptionHandler(messageInfoDto);
-            if(ex != null) {
-                throw ex;
-            }
-
-            if("410".equals(messageInfoDto.getStatusCode()) || "412".equals(messageInfoDto.getStatusCode())) {
-                // 유효하지 않은 Reg ID인 경우 오류처리/Retry 없이 그냥 skip
-                log.trace("[MultiPushRequest][Push] - skip exception:{} - {}", messageInfoDto.getStatusCode(), messageInfoDto);
-            } else {
-                // 메시지 전송 실패 - Retry 대상
-                log.trace("[MultiPushRequest][Push] - FA :serviceId:{} Code:{}", multiSendDto.getJsonTemplate(), messageInfoDto.getStatusCode());
-
-                List<PushMultiResponseDto> list = sendUsers.stream().filter(p -> p.getPushId().equals(transactionId)).collect(Collectors.toList());
-                if(!list.isEmpty())
-                    lastNotReceivedMessages.add(list.get(0));
+                        List<PushMultiResponseDto> list = sendUsers.stream().filter(p -> p.getPushId().equals(transactionId)).collect(Collectors.toList());
+                        //if (!list.isEmpty())
+                        lastNotReceivedMessages.add(list.get(0));
+                    }
+                }
             }
         }
 

@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -47,7 +48,7 @@ public class PushRequestBodySingleVo {
     /** 추가할 항목 입력(name!^value) */
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> addItems;
+    private List<String> addItems = new ArrayList<>();
 
     /** 사용자 ID */
     @NotNull(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C6.class)

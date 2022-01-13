@@ -311,7 +311,7 @@ public class NettyTcpClient {
 		@Override
 		protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
 
-			/*
+			/* client -> server header
 			 * Message Header Structure (64Byte)
 			 * ------------------------------------------------------------------------------
 			 *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
@@ -324,9 +324,9 @@ public class NettyTcpClient {
 
 			byte[] byteTotalData = new byte[PUSH_MSG_HEADER_LEN + dataInfo.length];
 			System.arraycopy(Ints.toByteArray(message.getMessageId()), 0, byteTotalData, 0, 4);                    //Message Id
-			System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);//12);   //Transaction Id
-			System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelId().getBytes(PUSH_ENCODING).length);//14);             //Channel Id
-			System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestinationIp().getBytes(PUSH_ENCODING).length);//Destination IP
+			System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);	//Transaction Id
+			System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getChannelId().getBytes(PUSH_ENCODING).length);			// Channel Id
+			System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getDestinationIp().getBytes(PUSH_ENCODING).length);	//Destination IP
 			System.arraycopy(Ints.toByteArray(dataInfo.length), 0, byteTotalData, 60, 4);                 //Data Length
 			System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
 
@@ -345,7 +345,7 @@ public class NettyTcpClient {
 		@Override
 		protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
 
-			/*
+			/* server -> client header
 			 * Message Header Structure (64Byte)
 			 * ------------------------------------------------------------------------------
 			 *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
@@ -449,7 +449,7 @@ public class NettyTcpClient {
 
 	@Slf4j
 	@NoArgsConstructor
-	public static class MessageHandler extends ChannelInboundHandlerAdapter {
+	public static class MessageHandler extends SimpleChannelInboundHandler<PushMessageInfoDto> {
 
 		private PushMultiClient pushMultiClient = null;
 
@@ -458,9 +458,7 @@ public class NettyTcpClient {
 		}
 
 		@Override
-		public void channelRead(ChannelHandlerContext ctx, Object msg) {
-
-			PushMessageInfoDto message = (PushMessageInfoDto) msg;
+		public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) {
 
 			if (message.getMessageId() == PROCESS_STATE_REQUEST_ACK) {
 				// 메시지 전송을 Sync 방식으로 작동하게 하기 위함.

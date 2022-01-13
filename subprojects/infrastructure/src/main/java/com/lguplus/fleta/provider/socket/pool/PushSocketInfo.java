@@ -126,7 +126,14 @@ public class PushSocketInfo {
     }
 
     public void sendHeaderMsg(int requestMsgId, String notiMsg, String transactionId) throws IOException {
-
+        /* client -> server header
+         * Message Header Structure (64Byte)
+         * ------------------------------------------------------------------------------
+         *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
+         * ------------------------------------------------------------------------------
+         *             Destination IP(16)          |  Reserved 2(12)  |  Data Length(4)
+         * ------------------------------------------------------------------------------
+         */
         byte[] byteArrayDatas = new byte[0];
         if(COMMAND_REQUEST == requestMsgId) {
             byteArrayDatas = notiMsg.getBytes(PUSH_ENCODING);
@@ -167,6 +174,14 @@ public class PushSocketInfo {
     }
 
     private PushRcvHeaderVo recvPushMessageHeader()  throws IOException {
+        /* server -> client header
+         * Message Header Structure (64Byte)
+         * ------------------------------------------------------------------------------
+         *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
+         * ------------------------------------------------------------------------------
+         *      Channel ID(14)     | Reserved 1(2) |  Reserved 2(12)  |  Data Length(4)
+         * ------------------------------------------------------------------------------
+         */
 
         InputStream inputStream = socket.getInputStream();
 
