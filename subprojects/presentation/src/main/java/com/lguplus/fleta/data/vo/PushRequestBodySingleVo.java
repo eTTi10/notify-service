@@ -59,6 +59,6 @@ public class PushRequestBodySingleVo {
     /** 재전송 시도 횟수  */
     @JsonProperty("retry")
     @ApiModelProperty(position = 7, example = "100", value = "실패시 재전송 시도 횟수")
-    private Integer retryCount;
+    private Integer retryCount = 0;
 
 }
