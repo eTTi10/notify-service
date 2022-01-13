@@ -103,10 +103,26 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         receiveMessageMap.put(dto.getTransactionId(), dto);
     }
 
-    private synchronized void checkGateWayServer() throws NotifyRuntimeException {
+    public synchronized void checkGateWayServer() throws NotifyRuntimeException {
 
         checkClientInvalid();
 
+        checkClientProcess();
+    }
+
+    public void checkClientInvalid() {
+        if (nettyTcpClient.isInValid() || this.channelID == null) {
+            nettyTcpClient.disconnect();
+            this.channelID = nettyTcpClient.connect(this);
+        }
+
+        // Push GW 서버 connection이 유효한지 확인
+        if (nettyTcpClient.isInValid()) {
+            throw new SocketException();
+        }
+    }
+
+    public void checkClientProcess() {
         // Channel이 유효한지 확인, 아닌 경우 Channel을 Re-Open함
         if(isServerInValidStatus()) {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
@@ -117,17 +133,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 throw new ServiceUnavailableException();
             }
         }
-    }
-
-    private void checkClientInvalid() {
-        if (nettyTcpClient.isInValid() || this.channelID == null) {
-            nettyTcpClient.disconnect();
-            this.channelID = nettyTcpClient.connect(this);
-        }
-
-        // Push GW 서버 connection이 유효한지 확인
-        if (nettyTcpClient.isInValid()) {
-            throw new SocketException();
+        else {
+            return;
         }
     }
 
@@ -258,7 +265,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         }
     }
 
-    private void waitTPS() {
+    public void waitTPS() {
 
         long timeMillis = System.currentTimeMillis() - lastSendMills.get();
         if (timeMillis < SECOND) {

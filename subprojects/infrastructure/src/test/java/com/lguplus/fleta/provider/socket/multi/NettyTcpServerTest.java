@@ -12,6 +12,7 @@ import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.PushMultiSocketClientImpl;
+import fleta.util.JunitTestUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
@@ -20,27 +21,28 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
-public class NettyTcpServerTest {
+class NettyTcpServerTest {
     static NettyTcpServer server;
     static Thread thread;
     static int testCnt = 9997;
@@ -232,7 +234,7 @@ public class NettyTcpServerTest {
     }
 
     @Test // isServerInValidStatus
-    void testServer06_isServerInValidStatus () throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testServer06_isServerInValidStatus () throws Exception {
 
         //Connect
         Method methodCheck = pushMultiSocketClient.getClass().getDeclaredMethod("checkGateWayServer");
@@ -259,9 +261,67 @@ public class NettyTcpServerTest {
     }
 
     @Test
-    void testServer07_checkGateWayServer () {
+    void testServer07_checkGateWayServer () throws Exception {
 
-        Assertions.assertTrue(true);
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); //unknown port
+        assertThrows(SocketException.class, () -> {
+            pushMultiSocketClient.checkClientInvalid();
+        });
+
+        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", "01234567890ABCD"); //test channel Id
+        assertThrows(SocketException.class, () -> {
+            pushMultiSocketClient.checkClientInvalid();
+        });
+
+        //normal
+        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
+        nettyTcpClient.disconnect();
+        nettyTcpClient.connect(pushMultiSocketClient); //normal connect
+        pushMultiSocketClient.checkClientInvalid();
+    }
+
+    @Test
+    void testServer08_checkClientProcess () throws Exception {
+        //connect
+        String channelId = nettyTcpClient.connect(pushMultiSocketClient); //normal connect
+        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", channelId); //test channel Id
+
+        NettyTcpServerTest.responseProcessFlag = "0"; //process check error
+
+        assertThrows(ServiceUnavailableException.class, () -> {
+            pushMultiSocketClient.checkClientProcess();
+        });
+
+    }
+
+    @Test
+    void testServer09_waitTPS() throws Exception {
+        //connect
+        long lastTime = System.currentTimeMillis() -3000;
+        JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(lastTime)); //test channel Id
+        pushMultiSocketClient.waitTPS();
+        AtomicLong time2 = (AtomicLong)ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");
+        assertTrue(time2.get() > lastTime);
+
+        final class TestThread extends Thread {
+            @Override
+            public void run() {
+                while(true) {
+                    //setTime = ;
+                    JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
+                    pushMultiSocketClient.waitTPS();
+                }
+            }
+        }
+
+        TestThread thread = new TestThread();//.run();
+        thread.start();
+        Thread.sleep(2000);
+        thread.interrupt();
+
+        AtomicLong time3 = (AtomicLong)ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");
+        assertTrue(time2.get() < time3.get());
+
     }
 
 }
@@ -295,329 +355,324 @@ class NettyTcpServer {
         workerGroup.shutdownGracefully();
         bossGroup.shutdownGracefully();
     }
-}
 
-class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
-    @Override
-    protected void initChannel(SocketChannel socketChannel) throws Exception {
-        ChannelPipeline pipeline = socketChannel.pipeline();
-        // 핸들러 설정
-        pipeline.addLast("decoder", new MessageDecoderTest());
-        pipeline.addLast("encoder", new MessageEncoderTest());
-        pipeline.addLast("handler", new MessageHandlerTest());
-    }
-}
-
-@Slf4j
-@NoArgsConstructor
-class MessageEncoderTest extends MessageToByteEncoder<PushMessageInfoDto> {
-    final String PUSH_ENCODING = "euc-kr";
-    final int PUSH_MSG_HEADER_LEN = 64;
-
-    @Override
-    protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
-        /* server -> client header
-         * Message Header Structure (64Byte)
-         * ------------------------------------------------------------------------------
-         *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
-         * ------------------------------------------------------------------------------
-         *      Channel ID(14)     | Reserved 1(2) |  Reserved 2(12)  |  Data Length(4)
-         * ------------------------------------------------------------------------------
-         */
-
-        log.debug("MessageEncoderTest #1 {}", message);
-
-        byte[] dataInfo = message.getData().getBytes(PUSH_ENCODING);
-        int dataLen = dataInfo.length;
-        if(message.getData().startsWith("@Short!^")) {
-            dataLen = 2;
+    static class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
+        @Override
+        protected void initChannel(SocketChannel socketChannel) throws Exception {
+            ChannelPipeline pipeline = socketChannel.pipeline();
+            // 핸들러 설정
+            pipeline.addLast("decoder", new MessageDecoderTest());
+            pipeline.addLast("encoder", new MessageEncoderTest());
+            pipeline.addLast("handler", new MessageHandlerTest());
         }
-
-        log.debug("MessageEncoderTest #2 {}", message);
-
-        byte[] byteTotalData = new byte[PUSH_MSG_HEADER_LEN + dataLen];
-        System.arraycopy(Ints.toByteArray(message.getMessageId()), 0, byteTotalData, 0, 4);                    //Message Id
-        System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);   //Transaction Id
-        System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getDestinationIp().getBytes(PUSH_ENCODING).length);  //Destination IP
-        System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getChannelId().getBytes(PUSH_ENCODING).length);          //Channel Id
-
-        System.arraycopy(Ints.toByteArray(dataLen), 0, byteTotalData, 60, 4);                 //Data Length
-
-        if(message.getData().startsWith("@Short!^")) {
-            log.debug("MessageEncoderTest #2-1 @Short Length:{}", dataLen);
-            byte[] short2bytes = Shorts.toByteArray((short)(message.getData().equals("@Short!^1") ? 1 : 0));
-            log.debug("MessageEncoderTest #2-1 @Short data:{} total:{}", short2bytes, byteTotalData.length);
-            System.arraycopy(short2bytes, 0, byteTotalData, 64, short2bytes.length);
-        }
-        else {
-            log.debug("MessageEncoderTest #2-2 normal {}", message.getData());
-            System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
-        }
-
-        log.debug("MessageEncoderTest #3 {}", message);
-
-        out.writeBytes(byteTotalData);
-    }
-}
-
-@Slf4j
-@NoArgsConstructor
-class MessageDecoderTest extends ByteToMessageDecoder {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    final String PUSH_ENCODING = "euc-kr";
-    final int PUSH_MSG_HEADER_LEN = 64;
-    final String SUCCESS = "SC";
-    final String FAIL = "FA";
-    final int CHANNEL_CONNECTION_REQUEST = 1;
-    final int PROCESS_STATE_REQUEST = 13;
-    final int COMMAND_REQUEST = 15;
-
-    @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        /* client -> server header
-         * Message Header Structure (64Byte)
-         * ------------------------------------------------------------------------------
-         *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
-         * ------------------------------------------------------------------------------
-         *             Destination IP(16)          |  Reserved 2(12)  |  Data Length(4)
-         * ------------------------------------------------------------------------------
-         */
-
-        Channel channel = ctx.channel();
-
-        log.debug("MessageDecoder in.readableBytes:{}", in.readableBytes());
-
-        if (!channel.isActive()) {
-            log.debug(":: MessageDecoderTest : isActive Error");
-            return;
-        }
-
-        in.markReaderIndex();
-        if (in.readableBytes() < PUSH_MSG_HEADER_LEN) {
-            log.trace(":: MessageDecoderTest : less than PUSH_MSG_HEADER_LEN");
-            return;
-        }
-
-        // Message header
-        byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-        in.readBytes(byteHeader);
-
-        int messageID = byteToInt(byteHeader, 0);
-        int dataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
-
-        if (in.readableBytes() < dataLength) {
-            in.resetReaderIndex();
-            return;
-        }
-
-        // Message body
-        byte[] byteData = new byte[dataLength];
-        in.readBytes(byteData);
-
-        String result;
-        String channelId = new String(byteHeader, 16, 14, PUSH_ENCODING);
-        String destIp = new String(byteHeader, 32, 16, PUSH_ENCODING);
-
-        PushMessageInfoDto pushMessageInfoDto;
-
-        switch (messageID) {
-            case CHANNEL_CONNECTION_REQUEST:
-                log.debug("** MessageDecoderTest decode message: CHANNEL_CONNECTION_REQUEST {}", CHANNEL_CONNECTION_REQUEST);
-
-                //result = new String(byteData,0, 2, PUSH_ENCODING);
-                pushMessageInfoDto = PushMessageInfoDto.builder()
-                        .messageId(messageID)
-                        .channelId(channelId)
-                        .destinationIp(destIp)
-                        .build();
-                log.debug("** MessageDecoderTest CHANNEL_CONNECTION_REQUEST {}", pushMessageInfoDto);
-                out.add(pushMessageInfoDto);
-                break;
-
-            case PROCESS_STATE_REQUEST:
-                log.debug("** MessageDecoderTest decode message: PROCESS_STATE_REQUEST {}", PROCESS_STATE_REQUEST);
-
-                //result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
-                pushMessageInfoDto = PushMessageInfoDto.builder()
-                        .messageId(messageID)
-                        .channelId(channelId)
-                        .destinationIp(destIp)
-                        .build();
-                log.debug("** MessageDecoderTest  PROCESS_STATE_REQUEST {}", pushMessageInfoDto);
-                out.add(pushMessageInfoDto);
-                break;
-
-            case COMMAND_REQUEST:
-                log.debug("** MessageDecoderTest decode message: COMMAND_REQUEST {}", COMMAND_REQUEST);
-
-                //result = new String(byteData,0, 2, PUSH_ENCODING);
-                String transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
-                String data = new String(byteData,0, byteData.length, PUSH_ENCODING);
-
-                pushMessageInfoDto = PushMessageInfoDto.builder()
-                        .messageId(messageID)
-                        .transactionId(transactionID)
-                        .channelId(channelId)
-                        .destinationIp(destIp)
-                        .data(data)
-                        .build();
-
-                log.debug("** MessageDecoderTest  COMMAND_REQUEST {}", pushMessageInfoDto);
-                //NettyTcpClient.PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, NettyTcpClient.PushRcvStatusMsgWrapperVo.class);
-                //String statusCode = msgWrapperVo.getResponse().getStatusCode();
-                out.add(pushMessageInfoDto);
-                break;
-            default:
-                log.error("MessageDecoderTest unknown message {}", messageID);
-                break;
-        }
-
-        log.debug("** MessageDecoderTest decode end: {}", out.size());
     }
 
-    private int byteToInt(byte[] src, int offset) {
-        return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
+    static class MessageEncoderTest extends MessageToByteEncoder<PushMessageInfoDto> {
+        final String PUSH_ENCODING = "euc-kr";
+        final int PUSH_MSG_HEADER_LEN = 64;
+
+        @Override
+        protected void encode(ChannelHandlerContext ctx, PushMessageInfoDto message, ByteBuf out) throws Exception {
+            /* server -> client header
+             * Message Header Structure (64Byte)
+             * ------------------------------------------------------------------------------
+             *   Message ID(4)  |  Transaction ID(12)  |         Destination IP(16)
+             * ------------------------------------------------------------------------------
+             *      Channel ID(14)     | Reserved 1(2) |  Reserved 2(12)  |  Data Length(4)
+             * ------------------------------------------------------------------------------
+             */
+
+            log.debug("MessageEncoderTest #1 {}", message);
+
+            byte[] dataInfo = message.getData().getBytes(PUSH_ENCODING);
+            int dataLen = dataInfo.length;
+            if(message.getData().startsWith("@Short!^")) {
+                dataLen = 2;
+            }
+
+            log.debug("MessageEncoderTest #2 {}", message);
+
+            byte[] byteTotalData = new byte[PUSH_MSG_HEADER_LEN + dataLen];
+            System.arraycopy(Ints.toByteArray(message.getMessageId()), 0, byteTotalData, 0, 4);                    //Message Id
+            System.arraycopy(message.getTransactionId().getBytes(PUSH_ENCODING), 0, byteTotalData, 4, message.getTransactionId().getBytes(PUSH_ENCODING).length);   //Transaction Id
+            System.arraycopy(message.getDestinationIp().getBytes(PUSH_ENCODING), 0, byteTotalData, 16, message.getDestinationIp().getBytes(PUSH_ENCODING).length);  //Destination IP
+            System.arraycopy(message.getChannelId().getBytes(PUSH_ENCODING), 0, byteTotalData, 32, message.getChannelId().getBytes(PUSH_ENCODING).length);          //Channel Id
+
+            System.arraycopy(Ints.toByteArray(dataLen), 0, byteTotalData, 60, 4);                 //Data Length
+
+            if(message.getData().startsWith("@Short!^")) {
+                log.debug("MessageEncoderTest #2-1 @Short Length:{}", dataLen);
+                byte[] short2bytes = Shorts.toByteArray((short)(message.getData().equals("@Short!^1") ? 1 : 0));
+                log.debug("MessageEncoderTest #2-1 @Short data:{} total:{}", short2bytes, byteTotalData.length);
+                System.arraycopy(short2bytes, 0, byteTotalData, 64, short2bytes.length);
+            }
+            else {
+                log.debug("MessageEncoderTest #2-2 normal {}", message.getData());
+                System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
+            }
+
+            log.debug("MessageEncoderTest #3 {}", message);
+
+            out.writeBytes(byteTotalData);
+        }
     }
 
-}
+    static class MessageDecoderTest extends ByteToMessageDecoder {
 
-@Slf4j
-@NoArgsConstructor
-class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto> {
+        private final ObjectMapper objectMapper = new ObjectMapper();
+        final String PUSH_ENCODING = "euc-kr";
+        final int PUSH_MSG_HEADER_LEN = 64;
+        final String SUCCESS = "SC";
+        final String FAIL = "FA";
+        final int CHANNEL_CONNECTION_REQUEST = 1;
+        final int PROCESS_STATE_REQUEST = 13;
+        final int COMMAND_REQUEST = 15;
 
-    final int CHANNEL_CONNECTION_REQUEST = 1;
-    final int PROCESS_STATE_REQUEST = 13;
-    final int COMMAND_REQUEST = 15;
-    final int SLEEP_MILLS = 10;
+        @Override
+        protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+            /* client -> server header
+             * Message Header Structure (64Byte)
+             * ------------------------------------------------------------------------------
+             *   Message ID(4)  |  Transaction ID(12)  |  Channel ID(14)    | Reserved 1(2)
+             * ------------------------------------------------------------------------------
+             *             Destination IP(16)          |  Reserved 2(12)  |  Data Length(4)
+             * ------------------------------------------------------------------------------
+             */
 
-    @Override
-    public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) throws InterruptedException {
+            Channel channel = ctx.channel();
 
-        if (message.getMessageId() == PROCESS_STATE_REQUEST) {
-            // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-            log.debug(":: MessageHandlerTest channelRead : PROCESS_STATE_REQUEST");
+            log.debug("MessageDecoder in.readableBytes:{}", in.readableBytes());
 
-            Thread.sleep(SLEEP_MILLS);
+            if (!channel.isActive()) {
+                log.debug(":: MessageDecoderTest : isActive Error");
+                return;
+            }
 
-            if(NettyTcpServerTest.responseProcessFlag.length() > 0 ) {
+            in.markReaderIndex();
+            if (in.readableBytes() < PUSH_MSG_HEADER_LEN) {
+                log.trace(":: MessageDecoderTest : less than PUSH_MSG_HEADER_LEN");
+                return;
+            }
+
+            // Message header
+            byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
+            in.readBytes(byteHeader);
+
+            int messageID = byteToInt(byteHeader, 0);
+            int dataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
+
+            if (in.readableBytes() < dataLength) {
+                in.resetReaderIndex();
+                return;
+            }
+
+            // Message body
+            byte[] byteData = new byte[dataLength];
+            in.readBytes(byteData);
+
+            String result;
+            String channelId = new String(byteHeader, 16, 14, PUSH_ENCODING);
+            String destIp = new String(byteHeader, 32, 16, PUSH_ENCODING);
+
+            PushMessageInfoDto pushMessageInfoDto;
+
+            switch (messageID) {
+                case CHANNEL_CONNECTION_REQUEST:
+                    log.debug("** MessageDecoderTest decode message: CHANNEL_CONNECTION_REQUEST {}", CHANNEL_CONNECTION_REQUEST);
+
+                    //result = new String(byteData,0, 2, PUSH_ENCODING);
+                    pushMessageInfoDto = PushMessageInfoDto.builder()
+                            .messageId(messageID)
+                            .channelId(channelId)
+                            .destinationIp(destIp)
+                            .build();
+                    log.debug("** MessageDecoderTest CHANNEL_CONNECTION_REQUEST {}", pushMessageInfoDto);
+                    out.add(pushMessageInfoDto);
+                    break;
+
+                case PROCESS_STATE_REQUEST:
+                    log.debug("** MessageDecoderTest decode message: PROCESS_STATE_REQUEST {}", PROCESS_STATE_REQUEST);
+
+                    //result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
+                    pushMessageInfoDto = PushMessageInfoDto.builder()
+                            .messageId(messageID)
+                            .channelId(channelId)
+                            .destinationIp(destIp)
+                            .build();
+                    log.debug("** MessageDecoderTest  PROCESS_STATE_REQUEST {}", pushMessageInfoDto);
+                    out.add(pushMessageInfoDto);
+                    break;
+
+                case COMMAND_REQUEST:
+                    log.debug("** MessageDecoderTest decode message: COMMAND_REQUEST {}", COMMAND_REQUEST);
+
+                    //result = new String(byteData,0, 2, PUSH_ENCODING);
+                    String transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);
+                    String data = new String(byteData,0, byteData.length, PUSH_ENCODING);
+
+                    pushMessageInfoDto = PushMessageInfoDto.builder()
+                            .messageId(messageID)
+                            .transactionId(transactionID)
+                            .channelId(channelId)
+                            .destinationIp(destIp)
+                            .data(data)
+                            .build();
+
+                    log.debug("** MessageDecoderTest  COMMAND_REQUEST {}", pushMessageInfoDto);
+                    //NettyTcpClient.PushRcvStatusMsgWrapperVo msgWrapperVo = objectMapper.readValue(data, NettyTcpClient.PushRcvStatusMsgWrapperVo.class);
+                    //String statusCode = msgWrapperVo.getResponse().getStatusCode();
+                    out.add(pushMessageInfoDto);
+                    break;
+                default:
+                    log.error("MessageDecoderTest unknown message {}", messageID);
+                    break;
+            }
+
+            log.debug("** MessageDecoderTest decode end: {}", out.size());
+        }
+
+        private int byteToInt(byte[] src, int offset) {
+            return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
+        }
+
+    }
+
+    static class MessageHandlerTest extends SimpleChannelInboundHandler<PushMessageInfoDto> {
+
+        final int CHANNEL_CONNECTION_REQUEST = 1;
+        final int PROCESS_STATE_REQUEST = 13;
+        final int COMMAND_REQUEST = 15;
+        final int SLEEP_MILLS = 10;
+
+        @Override
+        public void channelRead0(ChannelHandlerContext ctx, PushMessageInfoDto message) throws InterruptedException {
+
+            if (message.getMessageId() == PROCESS_STATE_REQUEST) {
+                // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
+                log.debug(":: MessageHandlerTest channelRead : PROCESS_STATE_REQUEST");
+
+                Thread.sleep(SLEEP_MILLS);
+
+                if(NettyTcpServerTest.responseProcessFlag.length() > 0 ) {
+                    ctx.writeAndFlush(PushMessageInfoDto.builder()
+                            .messageId(PROCESS_STATE_REQUEST + 1)
+                            .channelId(message.getChannelId())
+                            .transactionId(message.getTransactionId())
+                            .destinationIp(message.getDestinationIp())
+                            .data("@Short!^" + NettyTcpServerTest.responseProcessFlag) //Success 1 , Fail  0
+                            .build()
+                    );
+                }
+            }
+            else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST) {
+                // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
+                log.debug(":: MessageHandlerTest channelRead : CHANNEL_CONNECTION_REQUEST");
+
+                Thread.sleep(SLEEP_MILLS);
+
                 ctx.writeAndFlush(PushMessageInfoDto.builder()
-                        .messageId(PROCESS_STATE_REQUEST + 1)
+                        .messageId(CHANNEL_CONNECTION_REQUEST+1)
                         .channelId(message.getChannelId())
                         .transactionId(message.getTransactionId())
                         .destinationIp(message.getDestinationIp())
-                        .data("@Short!^" + NettyTcpServerTest.responseProcessFlag) //Success 1 , Fail  0
+                        .data("SC")
                         .build()
                 );
             }
-        }
-        else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST) {
-            // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
-            log.debug(":: MessageHandlerTest channelRead : CHANNEL_CONNECTION_REQUEST");
+            else if ("normal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
+                // Push 전송인 경우 response 결과를 임시 Map에 저장함.
+                log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST normal {}", message);
 
-            Thread.sleep(SLEEP_MILLS);
+                Thread.sleep(SLEEP_MILLS);
 
-            ctx.writeAndFlush(PushMessageInfoDto.builder()
-                    .messageId(CHANNEL_CONNECTION_REQUEST+1)
-                    .channelId(message.getChannelId())
-                    .transactionId(message.getTransactionId())
-                    .destinationIp(message.getDestinationIp())
-                    .data("SC")
-                    .build()
-            );
-        }
-        else if ("normal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
-            // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST normal {}", message);
+                String data = "SC{\n" +
+                        "\"response\" : {\n" +
+                        "\"msg_id\" : \"PUSH_NOTI\",\n" +
+                        "\"push_id\" : \"@TransactionId\",\n" +
+                        "\"status_code\" : \"@StatusCode\"\n" +
+                        "}\n" +
+                        "}";
 
-            Thread.sleep(SLEEP_MILLS);
-
-            String data = "SC{\n" +
-                    "\"response\" : {\n" +
-                    "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                    "\"push_id\" : \"@TransactionId\",\n" +
-                    "\"status_code\" : \"@StatusCode\"\n" +
-                    "}\n" +
-                    "}";
-
-            String sendData = data.replace("@TransactionId", message.getTransactionId())
-                            .replace("@StatusCode", NettyTcpServerTest.responseCode);
-            PushMessageInfoDto dto =  PushMessageInfoDto.builder()
-                    .messageId(COMMAND_REQUEST+1)
-                    .channelId(message.getChannelId())
-                    .transactionId(message.getTransactionId())
-                    .destinationIp(message.getDestinationIp())
-                    .data(sendData)
-                    .build();
-            log.debug(":: MessageHandlerTest channelWrite : COMMAND_REQUEST_ACK {}", dto);
-            ctx.writeAndFlush(dto);
-        }
-        else if ("abnormal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
-            // Push 전송인 경우 response 결과를 임시 Map에 저장함.
-            log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST abnormal {}", message);
-
-            Thread.sleep(SLEEP_MILLS);
-
-            String data = "SC{\n" +
-                    "\"response\" : {\n" +
-                    "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                    "\"push_id\" : \"@TransactionId\",\n" +
-                    "\"status_code\" : \"@StatusCode\"\n" +
-                    "}\n" +
-                    "}";
-            String sendData = data.replace("@TransactionId", message.getTransactionId())
-                    .replace("@StatusCode", NettyTcpServerTest.responseCode);
-            //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
-
-            NettyTcpServerTest.responseCount++;
-
-            int modeValue = 4;
-
-            //normal
-            if(NettyTcpServerTest.responseCount%modeValue == 1) {
-                ctx.writeAndFlush(PushMessageInfoDto.builder()
-                        .messageId(COMMAND_REQUEST + 1)
+                String sendData = data.replace("@TransactionId", message.getTransactionId())
+                        .replace("@StatusCode", NettyTcpServerTest.responseCode);
+                PushMessageInfoDto dto =  PushMessageInfoDto.builder()
+                        .messageId(COMMAND_REQUEST+1)
                         .channelId(message.getChannelId())
                         .transactionId(message.getTransactionId())
                         .destinationIp(message.getDestinationIp())
                         .data(sendData)
-                        .build()
-                );
+                        .build();
+                log.debug(":: MessageHandlerTest channelWrite : COMMAND_REQUEST_ACK {}", dto);
+                ctx.writeAndFlush(dto);
             }
-            else if(NettyTcpServerTest.responseCount%modeValue == 2) {
-                // not response
+            else if ("abnormal".equals(NettyTcpServerTest.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
+                // Push 전송인 경우 response 결과를 임시 Map에 저장함.
+                log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST abnormal {}", message);
+
+                Thread.sleep(SLEEP_MILLS);
+
+                String data = "SC{\n" +
+                        "\"response\" : {\n" +
+                        "\"msg_id\" : \"PUSH_NOTI\",\n" +
+                        "\"push_id\" : \"@TransactionId\",\n" +
+                        "\"status_code\" : \"@StatusCode\"\n" +
+                        "}\n" +
+                        "}";
+                String sendData = data.replace("@TransactionId", message.getTransactionId())
+                        .replace("@StatusCode", NettyTcpServerTest.responseCode);
+                //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
+
+                NettyTcpServerTest.responseCount++;
+
+                int modeValue = 4;
+
+                //normal
+                if(NettyTcpServerTest.responseCount%modeValue == 1) {
+                    ctx.writeAndFlush(PushMessageInfoDto.builder()
+                            .messageId(COMMAND_REQUEST + 1)
+                            .channelId(message.getChannelId())
+                            .transactionId(message.getTransactionId())
+                            .destinationIp(message.getDestinationIp())
+                            .data(sendData)
+                            .build()
+                    );
+                }
+                else if(NettyTcpServerTest.responseCount%modeValue == 2) {
+                    // not response
+                }
+                else if(NettyTcpServerTest.responseCount%modeValue == 3) {
+                    // delay time
+                    Thread.sleep(500);
+                    ctx.writeAndFlush(PushMessageInfoDto.builder()
+                            .messageId(COMMAND_REQUEST + 1)
+                            .channelId(message.getChannelId())
+                            .transactionId(message.getTransactionId())
+                            .destinationIp(message.getDestinationIp())
+                            .data(sendData)
+                            .build()
+                    );
+                }
+                else { //normal
+                    ctx.writeAndFlush(PushMessageInfoDto.builder()
+                            .messageId(COMMAND_REQUEST + 1)
+                            .channelId(message.getChannelId())
+                            .transactionId(message.getTransactionId())
+                            .destinationIp(message.getDestinationIp())
+                            .data(sendData)
+                            .build()
+                    );
+                }
             }
-            else if(NettyTcpServerTest.responseCount%modeValue == 3) {
-                // delay time
-                Thread.sleep(500);
-                ctx.writeAndFlush(PushMessageInfoDto.builder()
-                        .messageId(COMMAND_REQUEST + 1)
-                        .channelId(message.getChannelId())
-                        .transactionId(message.getTransactionId())
-                        .destinationIp(message.getDestinationIp())
-                        .data(sendData)
-                        .build()
-                );
-            }
-            else { //normal
-                ctx.writeAndFlush(PushMessageInfoDto.builder()
-                        .messageId(COMMAND_REQUEST + 1)
-                        .channelId(message.getChannelId())
-                        .transactionId(message.getTransactionId())
-                        .destinationIp(message.getDestinationIp())
-                        .data(sendData)
-                        .build()
-                );
-            }
+
+            //log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
+            //		message.getTransactionId() + ", " + message.getResult())
         }
 
-        //log.trace("[MessageHandler] id : " + ctx.channel().id() + ", messageReceived : " + message.getMessageId() + ", " +
-        //		message.getTransactionId() + ", " + message.getResult())
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
-        log.error("[MessageHandler] id : " + ctx.channel().id() + ", exceptionCaught : " + e.toString());
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
+            log.error("[MessageHandler] id : " + ctx.channel().id() + ", exceptionCaught : " + e.toString());
+        }
     }
 }
+
 

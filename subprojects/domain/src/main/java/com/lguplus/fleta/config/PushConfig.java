@@ -1,5 +1,6 @@
 package com.lguplus.fleta.config;
 
+import com.lguplus.fleta.exception.push.InternalErrorException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +27,7 @@ public class PushConfig {
 
     private static final String PUSH_COMM_PROPERTY_PREFIX = "push-comm.";
     private static final String PUSH_SERVICE_PROPERTY_PREFIX = "push-service.";
+    public static final String PUSH_SERVICE_ID = ".service_id";
 
     private final Map<String, String> propertiesPushComm = new HashMap<>();
     private final Map<String, String> propertiesPushService = new HashMap<>();
@@ -44,14 +46,14 @@ public class PushConfig {
                     if (propertyName.startsWith(PUSH_COMM_PROPERTY_PREFIX)) {
                         String nm = propertyName.replace(PUSH_COMM_PROPERTY_PREFIX, "");
                         propertiesPushComm.put(nm, String.valueOf(propertyValue));
-                    } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(".service_id")) {
-                        String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "");
+                    } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(PUSH_SERVICE_ID)) {
+                        //String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "")
                         String serviceId = String.valueOf(propertyValue);
-                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(".service_id", ".service_pwd")));
+                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".service_pwd")));
                         propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
 
-                        if(propertySource.getSource().containsKey(propertyName.replace(".service_id", ".linkage_type"))) {
-                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(".service_id", ".linkage_type")));
+                        if(propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".linkage_type"))) {
+                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".linkage_type")));
                             propertiesPushServiceLinkType.put(serviceId, linkType);
                         }
                     }
@@ -72,9 +74,7 @@ public class PushConfig {
 
     public Map<String, Object> getServiceMap() {
         Map<String,Object> serviceMap = new HashMap<>();
-        propertiesPushService.forEach((key, value) -> {
-            serviceMap.put(key, new Object());
-        });
+        propertiesPushService.forEach((key, value) -> serviceMap.put(key, new Object()));
 
         return serviceMap;
     }
@@ -88,7 +88,7 @@ public class PushConfig {
             digest.update(servicePwd.getBytes(StandardCharsets.UTF_8));
             return String.format("%0128x", new BigInteger(1, digest.digest()));
         } catch (NoSuchAlgorithmException ex) {
-            throw new RuntimeException("기타 오류");
+            throw new InternalErrorException("기타 오류");
         }
     }
 }

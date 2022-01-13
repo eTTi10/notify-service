@@ -95,9 +95,11 @@ public class PushSingleDomainService {
         String statusCode = "";
         String statusMsg = "";
 
+        int retryCallCnt = dto.getRetryCount() > 0 ? dto.getRetryCount() : iPushCallRetryCnt;
+
         //2. Send Push
         int reCnt = 0;
-        while (reCnt < iPushCallRetryCnt) {
+        while (reCnt < retryCallCnt) {
             try {
                 setPushProgressCnt(dto.getServiceId(), +1);
                 PushResponseDto pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
@@ -114,11 +116,11 @@ public class PushSingleDomainService {
                 break;
             }
 
-            log.debug("[requestPushSingle][" + statusCode + "] [FAIL] retry:{}/{} ", reCnt+1, iPushCallRetryCnt);
+            log.debug("[requestPushSingle][" + statusCode + "] [FAIL] retry:{}/{} ", reCnt+1, retryCallCnt);
 
             // 재시도 예외 리턴 코드인 경우 재시도 안함.
             // 재시도 횟수에 도달한 경우 바로 반환.
-            if (++reCnt == iPushCallRetryCnt || isRetryExcludeCode(statusCode)) {
+            if (++reCnt == retryCallCnt || isRetryExcludeCode(statusCode)) {
                 throw exceptionHandler(statusCode);
                 //테스트 코드
                 // return PushClientResponseDto.builder().code("503").message("Failure").build()
@@ -175,7 +177,7 @@ public class PushSingleDomainService {
     private NotifyRuntimeException exceptionHandler(String statusCode) {
         switch (statusCode) {
             case "202":
-                return new AcceptedException();
+                throw new AcceptedException();
             case "400":
                 return new BadRequestException();
             case "401":

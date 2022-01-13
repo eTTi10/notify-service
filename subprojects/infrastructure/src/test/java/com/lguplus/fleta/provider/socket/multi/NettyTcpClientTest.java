@@ -34,7 +34,10 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.*;
@@ -161,21 +164,21 @@ class NettyTcpClientTest implements PushMultiClient {
     PushMessageInfoDto receivedMessage = null;
     MsgType receivedMsgType;
     CountDownLatch receivedLatch;// = new CountDownLatch(1);
+
     @Override
     public void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto) {
-        if(msgType == MsgType.SEND_SUCCESS_MSG || msgType == MsgType.SEND_FAIL_MSG) {
+        if (msgType == MsgType.SEND_SUCCESS_MSG || msgType == MsgType.SEND_FAIL_MSG) {
             receivedMessage = dto;
             receivedMsgType = msgType;
             receivedLatch.countDown();
-        }
-        else if(msgType == MsgType.RECIVED_MSG) {
+        } else if (msgType == MsgType.RECIVED_MSG) {
             log.debug("** receiveAsyncMessage {} , {}", msgType, dto);
         }
     }
 
     private String getTransactionId() {
         String DATE_FOMAT = "yyyyMMdd";
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0) & 0xFFFF);
+        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0) & 0xFFFF);
     }
 
     //@Test //error disable
@@ -263,7 +266,7 @@ class NettyTcpClientTest implements PushMultiClient {
         channelHandlerContextActive = new ChannelHandlerContextTest(channelActive);
         messageHandler.exceptionCaught(channelHandlerContextActive, new Throwable("@Exception"));
 
-       // nettyTcpClient.channel.
+        // nettyTcpClient.channel.
     }
 
     public static class Test01Client implements PushMultiClient {
@@ -281,13 +284,13 @@ class NettyTcpClientTest implements PushMultiClient {
         }
     }
 
-     @Test
+    @Test
     void test_messageDecoder() throws Exception {
         ChannelTest channel = new ChannelTest("id", true, false);
         ChannelHandlerContext channelHandlerContext = new ChannelHandlerContextTest(channel);
 
-         ChannelTest channelActive = new ChannelTest("id", true, true);
-         ChannelHandlerContext channelHandlerContextActive = new ChannelHandlerContextTest(channelActive);
+        ChannelTest channelActive = new ChannelTest("id", true, true);
+        ChannelHandlerContext channelHandlerContextActive = new ChannelHandlerContextTest(channelActive);
 
         List<Object> out;
         ByteBuf byteBuf;
@@ -304,94 +307,94 @@ class NettyTcpClientTest implements PushMultiClient {
 
         // less than PUSH_MSG_HEADER_LEN
         out = new ArrayList<>();
-        byteBuf = Unpooled.buffer(PUSH_MSG_HEADER_LEN-1);
+        byteBuf = Unpooled.buffer(PUSH_MSG_HEADER_LEN - 1);
         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
         byteBuf.release();
         Assertions.assertEquals(0, out.size());
 
-         // normal message
-         out = new ArrayList<>();
+        // normal message
+        out = new ArrayList<>();
 
-         int CHANNEL_CONNECTION_REQUEST_ACK = 2;
-         int PROCESS_STATE_REQUEST_ACK = 14;
-         int COMMAND_REQUEST_ACK = 16;
+        int CHANNEL_CONNECTION_REQUEST_ACK = 2;
+        int PROCESS_STATE_REQUEST_ACK = 14;
+        int COMMAND_REQUEST_ACK = 16;
 
-         //CHANNEL_CONNECTION_REQUEST_ACK
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(CHANNEL_CONNECTION_REQUEST_ACK).channelId("0123456789ABC1")
-                 .data("SC").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         byteBuf = Unpooled.wrappedBuffer(byteData);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(1, out.size());
+        //CHANNEL_CONNECTION_REQUEST_ACK
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(CHANNEL_CONNECTION_REQUEST_ACK).channelId("0123456789ABC1")
+                .data("SC").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        byteBuf = Unpooled.wrappedBuffer(byteData);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(1, out.size());
 
-         //PROCESS_STATE_REQUEST_ACK SC
-         out = new ArrayList<>();
-         byte[] byteData1 = new byte[PUSH_MSG_HEADER_LEN + 2];
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(PROCESS_STATE_REQUEST_ACK).channelId("0123456789ABC1")
-                 .data("").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         System.arraycopy(Ints.toByteArray(2), 0, byteData, 60, 4);
-         System.arraycopy(byteData, 0, byteData1, 0, byteData.length);
-         System.arraycopy(Shorts.toByteArray((short) 1), 0, byteData1, 64, 2);
-         byteBuf = Unpooled.wrappedBuffer(byteData1);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(1, out.size());
+        //PROCESS_STATE_REQUEST_ACK SC
+        out = new ArrayList<>();
+        byte[] byteData1 = new byte[PUSH_MSG_HEADER_LEN + 2];
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(PROCESS_STATE_REQUEST_ACK).channelId("0123456789ABC1")
+                .data("").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        System.arraycopy(Ints.toByteArray(2), 0, byteData, 60, 4);
+        System.arraycopy(byteData, 0, byteData1, 0, byteData.length);
+        System.arraycopy(Shorts.toByteArray((short) 1), 0, byteData1, 64, 2);
+        byteBuf = Unpooled.wrappedBuffer(byteData1);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(1, out.size());
 
-         //PROCESS_STATE_REQUEST_ACK FA
-         out = new ArrayList<>();
-         byte[] byteData2 = new byte[PUSH_MSG_HEADER_LEN + 2];
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(PROCESS_STATE_REQUEST_ACK).channelId("0123456789ABC1")
-                 .data("").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         System.arraycopy(Ints.toByteArray(2), 0, byteData, 60, 4);
-         System.arraycopy(byteData, 0, byteData2, 0, byteData.length);
-         System.arraycopy(Shorts.toByteArray((short) 0), 0, byteData2, 64, 2);
-         byteBuf = Unpooled.wrappedBuffer(byteData2);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(1, out.size());
+        //PROCESS_STATE_REQUEST_ACK FA
+        out = new ArrayList<>();
+        byte[] byteData2 = new byte[PUSH_MSG_HEADER_LEN + 2];
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(PROCESS_STATE_REQUEST_ACK).channelId("0123456789ABC1")
+                .data("").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        System.arraycopy(Ints.toByteArray(2), 0, byteData, 60, 4);
+        System.arraycopy(byteData, 0, byteData2, 0, byteData.length);
+        System.arraycopy(Shorts.toByteArray((short) 0), 0, byteData2, 64, 2);
+        byteBuf = Unpooled.wrappedBuffer(byteData2);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(1, out.size());
 
         //COMMAND_REQUEST_ACK
-         out = new ArrayList<>();
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(COMMAND_REQUEST_ACK).channelId("0123456789ABC1")
-                 .data("SC{\"response\" : {\"msg_id\" : \"PUSH_NOTI\",\"push_id\" : \"202201100001\",\"status_code\" : \"200\"}}").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         byteBuf = Unpooled.wrappedBuffer(byteData);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(1, out.size());
+        out = new ArrayList<>();
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(COMMAND_REQUEST_ACK).channelId("0123456789ABC1")
+                .data("SC{\"response\" : {\"msg_id\" : \"PUSH_NOTI\",\"push_id\" : \"202201100001\",\"status_code\" : \"200\"}}").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        byteBuf = Unpooled.wrappedBuffer(byteData);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(1, out.size());
 
-         //isValidMessageType
-         int invalidMessageId = 999;
-         out = new ArrayList<>();
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(invalidMessageId).channelId("0123456789ABC1")
-                 .data("SC").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         byteBuf = Unpooled.wrappedBuffer(byteData);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(0, out.size());
+        //isValidMessageType
+        int invalidMessageId = 999;
+        out = new ArrayList<>();
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(invalidMessageId).channelId("0123456789ABC1")
+                .data("SC").destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        byteBuf = Unpooled.wrappedBuffer(byteData);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(0, out.size());
 
-         //in.readableBytes() < dataLength
-         out = new ArrayList<>();
-         String msg = "SC{\"response\" : {\"msg_id\" : \"PUSH_NOTI\",\"push_id\" : \"202201100001\",\"status_code\" : \"200\"}}";
-         byte[] msgData = msg.getBytes( "euc-kr");
-         messageInfoDto = PushMessageInfoDto.builder()
-                 .messageId(COMMAND_REQUEST_ACK).channelId("0123456789ABC1")
-                 .data(msg).destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
-         byteData = messageTobyteArr(messageInfoDto);
-         System.arraycopy(Ints.toByteArray(msgData.length + 10), 0, byteData, 60, 4);
-         byteBuf = Unpooled.wrappedBuffer(byteData);
-         messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
-         byteBuf.release();
-         Assertions.assertEquals(0, out.size());
+        //in.readableBytes() < dataLength
+        out = new ArrayList<>();
+        String msg = "SC{\"response\" : {\"msg_id\" : \"PUSH_NOTI\",\"push_id\" : \"202201100001\",\"status_code\" : \"200\"}}";
+        byte[] msgData = msg.getBytes("euc-kr");
+        messageInfoDto = PushMessageInfoDto.builder()
+                .messageId(COMMAND_REQUEST_ACK).channelId("0123456789ABC1")
+                .data(msg).destinationIp("222.231.13.85").transactionId(getTransactionId()).build();
+        byteData = messageTobyteArr(messageInfoDto);
+        System.arraycopy(Ints.toByteArray(msgData.length + 10), 0, byteData, 60, 4);
+        byteBuf = Unpooled.wrappedBuffer(byteData);
+        messageDecoder.decode(channelHandlerContextActive, byteBuf, out);
+        byteBuf.release();
+        Assertions.assertEquals(0, out.size());
 
     }
 
@@ -462,8 +465,7 @@ class NettyTcpClientTest implements PushMultiClient {
             doReturn(channelTest1).when(spyNettyTcpClient).getChannel();
             spyNettyTcpClient.disconnect();
             Assertions.assertTrue(spyNettyTcpClient.isInValid());
-        }
-        finally {
+        } finally {
             nettyTcpClient.disconnect();
         }
 
@@ -519,8 +521,7 @@ class NettyTcpClientTest implements PushMultiClient {
                             .channelId(channelID).destinationIp("222.231.13.85").build());
             */
 
-        }
-        finally {
+        } finally {
             nettyTcpClient.disconnect();
         }
 
@@ -544,14 +545,13 @@ class NettyTcpClientTest implements PushMultiClient {
             nettyTcpClient.connect(this);
             Assertions.assertTrue(nettyTcpClient.isInValid());
 */
-        }
-        finally {
+        } finally {
             nettyTcpClient.disconnect();
         }
 
     }
 
-    public static class ChannelFutureTest implements  ChannelFuture {
+    public static class ChannelFutureTest implements ChannelFuture {
 
         boolean isSuccess = false;
         Channel channel;
@@ -705,7 +705,6 @@ class NettyTcpClientTest implements PushMultiClient {
             return false;
         }
     }
-
 
 
     public static class ChannelHandlerContextTest implements ChannelHandlerContext {
@@ -1001,6 +1000,7 @@ class NettyTcpClientTest implements PushMultiClient {
         public boolean isRegistered() {
             return false;
         }
+
         @Override
         public ChannelMetadata metadata() {
             return null;
@@ -1171,6 +1171,7 @@ class NettyTcpClientTest implements PushMultiClient {
             return 0;
         }
     }
+
     @AfterEach
     void tearDown() {
 

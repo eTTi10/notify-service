@@ -18,6 +18,7 @@ public class PushRequestSingleDto {
     private String message;
     private List<PushRequestItemDto> items;
     private String regId;
+    private Integer retryCount;
 
     public void setItems(List<PushRequestItemDto> items) {
         this.items = items;
