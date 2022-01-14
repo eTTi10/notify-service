@@ -112,7 +112,6 @@ public class MmsAgentDomainService {
                     throw new MmsRuntimeException();
             }
         }
-
         return SuccessResponseDto.builder().build();
     }
 
