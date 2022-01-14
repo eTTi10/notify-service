@@ -52,7 +52,7 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
-        List<LatestCheckEntity> checkList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestEntity> checkList = latestRepository.getLatestCheckList(latestRequestDto);
         LatestCheckDto resultLatestCheckDto = LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
 
         if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
@@ -88,7 +88,7 @@ public class LatestDomainService {
         getLatestCheckList(latestRequestDto);
 
         try {
-            insertCnt = latestRepository.insertLatest(latestRequestDto);
+            latestRepository.insertLatest(latestRequestDto);
         }catch(BadSqlGrammarException e){
             throw new DatabaseException();//8999 DB에러
         }catch(Exception e){
