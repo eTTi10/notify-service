@@ -18,6 +18,7 @@ public class PushRequestMultiDto {
     private String message;
     private List<PushRequestItemDto> items;
     private List<String> users;
+    private Integer retryCount;
 
     public void setItems(List<PushRequestItemDto> items) {
         this.items = items;

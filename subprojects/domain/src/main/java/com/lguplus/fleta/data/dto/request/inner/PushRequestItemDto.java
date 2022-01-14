@@ -2,8 +2,6 @@ package com.lguplus.fleta.data.dto.request.inner;
 
 import lombok.*;
 
-import java.util.List;
-
 
 @Getter
 @ToString
