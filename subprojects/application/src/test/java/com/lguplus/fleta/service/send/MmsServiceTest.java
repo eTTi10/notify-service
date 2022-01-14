@@ -1,10 +1,7 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
-import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 import com.lguplus.fleta.service.mmsagent.MmsAgentDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

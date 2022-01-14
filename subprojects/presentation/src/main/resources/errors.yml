@@ -117,6 +117,7 @@ error:
               SocketTimeOutException: "5102"
               ServerSettingInfoException: "5200"
               NoHttpsException: "5400"
+              SmsAgentEtcException: "9999"
             stat:
               StatNotFoundException: "1420"
             subscription:

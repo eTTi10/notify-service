@@ -4,12 +4,8 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +26,7 @@ public class SendPushCodeRequestBodyVo {
         return SendPushCodeRequestDto.builder()
                 .saId(sendPushCodeRequestVo.getSaId())
                 .stbMac(sendPushCodeRequestVo.getStbMac())
-                .regId(sendPushCodeRequestVo.getRegId())
+                .registrationId(sendPushCodeRequestVo.getRegId())
                 .pushType(sendPushCodeRequestVo.getPushType())
                 .sendCode(sendPushCodeRequestVo.getSendCode())
                 .regType(sendPushCodeRequestVo.getRegType())

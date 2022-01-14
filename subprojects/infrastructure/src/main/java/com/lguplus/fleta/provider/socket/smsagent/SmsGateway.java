@@ -72,7 +72,7 @@ public class SmsGateway {
     private Log mFileLog;
     private Log mStatusLog;
 
-    private Socket mSoket;
+    private Socket mSocket;
 
     private Map<Integer, Timer> mTimerMap = new HashMap<>();
 
@@ -132,17 +132,17 @@ public class SmsGateway {
         InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
 
         try {
-            if (null != mSoket) {
-                mSoket.close();
-                mSoket = null;
+            if (null != mSocket) {
+                mSocket.close();
+                mSocket = null;
             }
 
-            mSoket = new Socket();
+            mSocket = new Socket();
 
-            mSoket.connect(socketAddress, TIME_OUT);
+            mSocket.connect(socketAddress, TIME_OUT);
 
-            mInputStream = mSoket.getInputStream();
-            mOutputStream = mSoket.getOutputStream();
+            mInputStream = mSocket.getInputStream();
+            mOutputStream = mSocket.getOutputStream();
 
             isBind = true;
 
@@ -239,8 +239,7 @@ public class SmsGateway {
                 log.debug("timerTask mResult : {}", mResult);
 
                 if (mResult.isEmpty()) {
-//                    mResult = "1500";
-                    mResult = "0000";   //TODO 실제 서버와 연동이 되면 1500으로 수정해야 함
+                    mResult = "1500";
                 }
             }
         };
@@ -336,8 +335,9 @@ public class SmsGateway {
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
-            } catch (InterruptedException ignored) {
+            } catch (InterruptedException e) {
                 mStatusLog.error("getResult Error");
+                Thread.currentThread().interrupt();
             }
 
             if (mResult.equals(InnerResponseCodeType.OK.code())) {  // 0000
@@ -361,7 +361,6 @@ public class SmsGateway {
     //소켓서버의 응답을 파싱한다
     private void readHeader() throws IOException {
         int type = readBufferToInt(4);
-        int len = readBufferToInt(4);
         int result;
 
         String orgAddr;
@@ -372,7 +371,6 @@ public class SmsGateway {
             case BIND_ACK:
 
                 result = readBufferToInt(4);
-                String prefix = readBufferToString(16);
 
                 mStatusLog.info("readHeader() BIND_ACK result:"+result);
 
@@ -402,9 +400,6 @@ public class SmsGateway {
                 break;
             case DELIVER_ACK:
                 result = readBufferToInt(4);
-                orgAddr = readBufferToString(32);
-                dstAddr = readBufferToString(32);
-                sn = readBufferToInt(4);
 
                 mStatusLog.info("readHeader() DELIVER_ACK result:"+result);
 

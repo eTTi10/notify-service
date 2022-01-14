@@ -10,12 +10,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -36,7 +34,7 @@ class PersonalizationDomainFeinClientTest {
 
         //given
         RegIdDto regIdDto = RegIdDto.builder()
-                .regId(REG_ID)
+                .registrationId(REG_ID)
                 .build();
 
         InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
@@ -50,7 +48,7 @@ class PersonalizationDomainFeinClientTest {
         RegIdDto responseDto = personalizationDomainFeinClient.getRegistrationID(paramMap);
 
         //then
-        assertThat(responseDto.getRegId()).isEqualTo(REG_ID);
+        assertThat(responseDto.getRegistrationId()).isEqualTo(REG_ID);
 
     }
 }

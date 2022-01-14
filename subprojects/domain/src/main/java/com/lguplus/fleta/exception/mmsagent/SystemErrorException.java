@@ -1,7 +1,6 @@
 package com.lguplus.fleta.exception.mmsagent;
 
 import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
 public class SystemErrorException extends NotifyMmsRuntimeException {
 

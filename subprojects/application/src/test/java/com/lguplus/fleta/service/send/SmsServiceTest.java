@@ -2,9 +2,7 @@ package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-public class SmsServiceTest {
+class SmsServiceTest {
 
     private static final String SUCCESS_CODE = "0000";
 

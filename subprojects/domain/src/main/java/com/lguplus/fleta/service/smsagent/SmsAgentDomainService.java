@@ -9,14 +9,19 @@ import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.*;
+import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
+import com.lguplus.fleta.exception.smsagent.NotSendTimeException;
+import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
+import com.lguplus.fleta.exception.smsagent.SmsAgentEtcException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -29,9 +34,6 @@ import java.util.*;
 @Component
 @RequiredArgsConstructor
 public class SmsAgentDomainService {
-
-    @Value("${check.https}")
-    private String propertyCheckHttps;
 
     @Value("${agent.no.send.use}")
     private String agentNoSendUse;
@@ -51,47 +53,17 @@ public class SmsAgentDomainService {
     @Value("${sms.sender.no}")
     private String smsSenderNo;
 
-    @Value("${sms.setting.rest_url}")
-    private String smsSettingRestUrl;
-
-    @Value("${sms.setting.rest_path}")
-    private String smsSettingRestPath;
-
-    @Value("${sms.setting.request.method}")
-    private String smsSettingRequestMethod;
-
-    @Value("${sms.setting.timeout}")
-    private String smsSettingTimeout;
-
     @Value("${sms.setting.rest_sa_id}")
     private String smsSettingRestSaId;
 
     @Value("${sms.setting.rest_stb_mac}")
     private String smsSettingRestStbMac;
 
-    @Value("${sms.setting.rest_code_id}")
-    private String smsSettingRestCodeId;
-
     @Value("${sms.setting.rest_svc_type}")
     private String smsSettingRestSvcType;
 
     @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
     private String codeSystemErrorException;
-
-    @Value("${error.message.1500}")
-    private String messageSystemError;
-
-    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SocketException}")
-    private String codeSocketException;
-
-    @Value("${error.message.5101}")
-    private String messageSocketException;
-
-    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SocketTimeOutException}")
-    private String codeSocketTimeOutException;
-
-    @Value("${error.message.5102}")
-    private String messageSocketTimeOutException;
 
     @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemBusyException}")
     private String codeSystemBusyException;
@@ -105,7 +77,7 @@ public class SmsAgentDomainService {
     private final CallSettingDomainClient apiClient;
     private final SmsAgentDomainClient smsAgentClient;
 
-    private final static String sep = "\\|";
+    private static final String SEP = "\\|";
 
     private int callCount = 0;
     private int systemEr = 0;
@@ -120,7 +92,7 @@ public class SmsAgentDomainService {
      * @param sendSmsRequestDto
      * @return SmsGatewayResponseDto
      */
-    public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) {
+    public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         log.debug("[sendSms] - [{}]]", sendSmsRequestDto.toString());
 
@@ -128,55 +100,46 @@ public class SmsAgentDomainService {
         String rCtn = sendSmsRequestDto.getRCtn();
         String msg = sendSmsRequestDto.getMsg();
 
-        try {
+        if ("1".equals(agentNoSendUse)) {
 
-            if ("1".equals(agentNoSendUse)) {
+            try {
 
-                try {
+                if (!agentNoSendTime.isEmpty()) {
+                    Calendar cal = Calendar.getInstance();
+                    Calendar startCal = Calendar.getInstance();
+                    Calendar endCal = Calendar.getInstance();
 
-                    if (!agentNoSendTime.isEmpty()) {
-                        Calendar cal = Calendar.getInstance();
-                        Calendar startCal = Calendar.getInstance();
-                        Calendar endCal = Calendar.getInstance();
+                    String[] noSendAry = agentNoSendTime.split("\\|");
 
-                        String[] noSendAry = agentNoSendTime.split("\\|");
+                    int startTime = Integer.parseInt(noSendAry[0]);
+                    int endTime = Integer.parseInt(noSendAry[1]);
 
-                        int startTime = Integer.parseInt(noSendAry[0]);
-                        int endTime = Integer.parseInt(noSendAry[1]);
+                    startCal.set(Calendar.HOUR_OF_DAY, startTime);
+                    startCal.set(Calendar.MINUTE, 0);
+                    startCal.set(Calendar.SECOND, 0);
+                    startCal.set(Calendar.MILLISECOND, 0);
 
-                        startCal.set(Calendar.HOUR_OF_DAY, startTime);
-                        startCal.set(Calendar.MINUTE, 0);
-                        startCal.set(Calendar.SECOND, 0);
-                        startCal.set(Calendar.MILLISECOND, 0);
-
-                        if (startTime >= endTime) {
-                            endCal.add(Calendar.DAY_OF_MONTH, 1);
-                        }
-
-                        endCal.set(Calendar.HOUR_OF_DAY, endTime);
-                        endCal.set(Calendar.MINUTE, 0);
-                        endCal.set(Calendar.SECOND, 0);
-                        endCal.set(Calendar.MILLISECOND, 0);
-
-                        if (cal.after(startCal) && cal.before(endCal)) {
-
-                            throw new NotSendTimeException("전송 가능한 시간이 아님");
-                        }
+                    if (startTime >= endTime) {
+                        endCal.add(Calendar.DAY_OF_MONTH, 1);
                     }
-                } catch (Exception e) {
 
-                    throw new ServerSettingInfoException("서버 설정 정보 오류");
+                    endCal.set(Calendar.HOUR_OF_DAY, endTime);
+                    endCal.set(Calendar.MINUTE, 0);
+                    endCal.set(Calendar.SECOND, 0);
+                    endCal.set(Calendar.MILLISECOND, 0);
+
+                    if (cal.after(startCal) && cal.before(endCal)) {
+
+                        throw new NotSendTimeException("전송 가능한 시간이 아님");
+                    }
                 }
+            } catch (Exception e) {
+
+                throw new ServerSettingInfoException("서버 설정 정보 오류");
             }
-
-            return smsAgentClient.send(sCtn, rCtn, msg);
-
-        } catch (Exception e) {
-
-            log.info("[SmsAgentDomainService][Ex]"+ e.getClass().getName() + ":" + e.getMessage());
-            throw new RuntimeException("기타오류");
         }
 
+        return smsAgentClient.send(sCtn, rCtn, msg);
 
     }
 
@@ -191,7 +154,11 @@ public class SmsAgentDomainService {
         log.debug ("[smsCode] - {}", sendSMSCodeRequestDto.toString());
 
         String smsCd = sendSMSCodeRequestDto.getSmsCd();
-        String msg = Optional.of(selectSmsMsg(smsCd)).orElseThrow(()-> new NotFoundMsgException("해당 코드에 존재하는 메시지가 없음")); //1506
+        String msg = Optional.of(selectSmsMsg(smsCd)).orElse("");
+
+        if (msg.equals("")) {
+            throw new NotFoundMsgException("해당 코드에 존재하는 메시지가 없음"); //1506
+        }
 
         SmsAgentRequestDto smsAgentRequestDto = SmsAgentRequestDto.builder()
                 .smsCd(sendSMSCodeRequestDto.getSmsCd())
@@ -217,15 +184,23 @@ public class SmsAgentDomainService {
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
-        String sendMsg = "";
+        String sendMessage = "";
 
         SmsGatewayResponseDto smsGatewayResponseDto;
 
         try {
             callCount++;
-            sendMsg = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
+            sendMessage = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
 
-            smsGatewayResponseDto = smsAgentClient.send(smsSenderNo, smsAgentRequestDto.getSmsId(), sendMsg);
+            smsGatewayResponseDto = smsAgentClient.send(smsSenderNo, smsAgentRequestDto.getSmsId(), sendMessage);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(codeRunTimeException)
+                    .message(messageRunTimeException)
+                    .build();
 
         } catch (Exception e) {
 
@@ -249,15 +224,19 @@ public class SmsAgentDomainService {
             busyEr++;
         }
 
-        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
-        //재시도에 해당되지 않는 경우 || 재시도설정횟수보다 재시도한 횟수가 클 경우 || 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
-        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMessage+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
 
+        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+            //재시도에 해당되지 않는 경우 or 재시도설정횟수보다 재시도한 횟수가 클 경우 or 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
             return smsGatewayResponseDto;
         }else{
             try {
                 Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException e) {
+
+                Thread.currentThread().interrupt();
+                throw new SmsAgentEtcException("기타 오류");
+            }
 
 
             return retrySmsSend(smsAgentRequestDto);
@@ -273,17 +252,9 @@ public class SmsAgentDomainService {
      */
     private Map<String,String> callSettingApi(String smsCd) {
 
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
 
         try {
-
-            String url = smsSettingRestUrl + smsSettingRestPath;
-            String method = StringUtils.defaultIfEmpty(smsSettingRequestMethod, "GET");
-            int timeout = Integer.parseInt(StringUtils.defaultIfEmpty(smsSettingTimeout, "5000"));
-            if(StringUtils.isEmpty(url)){
-                log.debug("[selectSmsMsg]Cannot found URL");
-                return null;
-            }
 
             //============ Start [setting API 호출 캐시등록] =============
 
@@ -312,7 +283,7 @@ public class SmsAgentDomainService {
         } catch (Exception e) {
             log.debug("[callSettingApi][Call]["+e.getClass().getName()+"]"+e.getMessage());
             //9999
-            throw new RuntimeException("기타 오류");
+            throw new SmsAgentEtcException("기타 오류");
         }
         return map;
     }
@@ -328,13 +299,12 @@ public class SmsAgentDomainService {
         Map<String, String> map = null;
         try{
             map = callSettingApi(smsCd);
-        }
-        catch(java.lang.Exception e){
-
+        } catch(java.lang.Exception e){
+            log.debug("[selectSmsMsg] java.lang.Exception e");
         }
 
         if(null == map || map.size() == 0){
-            log.debug("[selectSmsMsg] Cannot found URL");
+            log.debug("[selectSmsMsg] Invalid smsCd");
             return "";
         }
 
@@ -354,7 +324,7 @@ public class SmsAgentDomainService {
             return msg;
         }
         else{
-            String[] rep = replacement.split(sep);
+            String[] rep = replacement.split(SEP);
             int i = 1;
             for(String t : rep){
                 String repTxt = "{" + i + "}";
