@@ -48,4 +48,5 @@ public interface LatestJpaRepository extends JpaRepository<LatestEntity,String> 
     int deleteBySaIdAndMacAndCtnAndCatId(String saId, String mac, String ctn, String catId);
 
 
+
 }

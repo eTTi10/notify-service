@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestCheckEntity;
+import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
@@ -187,8 +187,8 @@ class LatestDomainServiceTest {
         // Mock Method
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder().build();
-        List<LatestCheckEntity> list = List.of();
+        LatestEntity rs1 = LatestEntity.builder().build();
+        List<LatestEntity> list = List.of();
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
@@ -208,21 +208,21 @@ class LatestDomainServiceTest {
         // --------- Mock Method 강제 에러 연출 ---------
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+        LatestEntity rs1 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+        LatestEntity rs2 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        List<LatestCheckEntity> list = List.of(rs1, rs2);
+        List<LatestEntity> list = List.of(rs1, rs2);
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         // Mock Object
@@ -248,28 +248,28 @@ class LatestDomainServiceTest {
         */
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+        LatestEntity rs1 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+        LatestEntity rs2 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3022")
                 .build();
 
-        LatestCheckEntity rs3 = LatestCheckEntity.builder()
+        LatestEntity rs3 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3023")
                 .build();
 
-        LatestCheckEntity rs4 = LatestCheckEntity.builder()
+        LatestEntity rs4 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
@@ -277,14 +277,14 @@ class LatestDomainServiceTest {
                 .build();
 
 
-        LatestCheckEntity rs5 = LatestCheckEntity.builder()
+        LatestEntity rs5 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3025")
                 .build();
 
-        LatestCheckEntity rs6 = LatestCheckEntity.builder()
+        LatestEntity rs6 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
@@ -292,7 +292,7 @@ class LatestDomainServiceTest {
                 .build();
 
 
-        List<LatestCheckEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
+        List<LatestEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
 
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 

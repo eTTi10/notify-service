@@ -127,7 +127,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("1111.2222.3333")
                 .ctn("01011112222")
                 .build();
-        List<LatestCheckEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size() == 0);
 
@@ -143,7 +143,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .build();
-        List<LatestCheckEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto2);
+        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size() >= 0);
 

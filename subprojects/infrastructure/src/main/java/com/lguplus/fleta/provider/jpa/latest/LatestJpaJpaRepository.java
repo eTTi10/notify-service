@@ -80,8 +80,6 @@ public class LatestJpaJpaRepository implements LatestRepository {
      * @return
      */
     @Override
-    @Modifying
-    @Transactional
     public int insertLatest(LatestRequestDto latestRequestDto) {
 
         LatestEntity entity = LatestEntity.builder().
