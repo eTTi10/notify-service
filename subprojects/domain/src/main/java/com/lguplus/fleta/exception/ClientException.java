@@ -19,5 +19,4 @@ public class ClientException extends RuntimeException {
     public boolean hasBody() {
         return body != null;
     }
-
 }

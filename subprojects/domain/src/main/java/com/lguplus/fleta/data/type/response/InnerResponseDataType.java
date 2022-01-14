@@ -15,7 +15,10 @@ public enum InnerResponseDataType {
     }
 
     public static int sizeOf(Object data) {
-        return isListType(data) ? ((List<?>) data).size() : (data != null ? 1 : 0);
+        if(isListType(data)) {
+            return ((List<?>) data).size();
+        }
+        return data != null ? 1 : 0;
     }
 
     private static boolean isListType(Object data) {
