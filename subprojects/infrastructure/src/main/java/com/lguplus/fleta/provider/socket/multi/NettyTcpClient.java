@@ -293,8 +293,7 @@ public class NettyTcpClient {
 
 	public String getHostName() throws IOException {
 		InetAddress addr = InetAddress.getLocalHost();
-		String hostName = addr.getHostName();
-		return hostName;
+		return addr.getHostName();
 	}
 
 	@Slf4j
