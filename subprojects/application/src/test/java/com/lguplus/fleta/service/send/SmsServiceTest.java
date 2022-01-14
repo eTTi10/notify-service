@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-public class SmsServiceTest {
+class SmsServiceTest {
 
     private static final String SUCCESS_CODE = "0000";
 

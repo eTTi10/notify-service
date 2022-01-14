@@ -7,5 +7,5 @@ import java.util.concurrent.ExecutionException;
 
 public interface SmsAgentDomainClient {
 
-    SmsGatewayResponseDto send(String s_ctn, String r_ctn, String msg) throws UnsupportedEncodingException, ExecutionException, InterruptedException;
+    SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException;
 }

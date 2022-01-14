@@ -337,6 +337,7 @@ public class SmsGateway {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
                 mStatusLog.error("getResult Error");
+                Thread.currentThread().interrupt();
             }
 
             if (mResult.equals(InnerResponseCodeType.OK.code())) {  // 0000

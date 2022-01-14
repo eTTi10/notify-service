@@ -614,11 +614,7 @@ public class PushDomainService {
      */
     private void setServiceResult(int pushTypeSize) {
 
-        if(chk1001 > 1 && pushTypeSize > 1) { // 푸시타입이 2개 이상이며 1001오류도 2건 이상일 경우 1001 오류 반환
-            sFlag = "1001";
-            sMessage = MESSAGE_1001;
-            check1001Flag = true;
-        } else if( failCount < 2 && pushTypeSize > 1){ //푸시타입이 2개 이상인 경우 실패건수가 1건 이하이면 성공으로 간주
+        if( failCount < 2 && pushTypeSize > 1){ //푸시타입이 2개 이상인 경우 실패건수가 1건 이하이면 성공으로 간주
             sFlag = "0000";
             sMessage = "성공";
             successCheckFlag = true;

@@ -5,7 +5,6 @@ import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;

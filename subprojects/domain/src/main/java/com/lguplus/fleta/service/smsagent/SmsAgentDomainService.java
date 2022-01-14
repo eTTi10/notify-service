@@ -9,8 +9,10 @@ import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
-import com.lguplus.fleta.exception.smsagent.*;
+import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
+import com.lguplus.fleta.exception.smsagent.NotSendTimeException;
+import com.lguplus.fleta.exception.smsagent.ServerSettingInfoException;
+import com.lguplus.fleta.exception.smsagent.SmsAgentEtcException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -75,7 +77,7 @@ public class SmsAgentDomainService {
     private final CallSettingDomainClient apiClient;
     private final SmsAgentDomainClient smsAgentClient;
 
-    private static final String sep = "\\|";
+    private static final String SEP = "\\|";
 
     private int callCount = 0;
     private int systemEr = 0;
@@ -182,15 +184,23 @@ public class SmsAgentDomainService {
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         int checkRetry = 0;
-        String sendMsg = "";
+        String sendMessage = "";
 
         SmsGatewayResponseDto smsGatewayResponseDto;
 
         try {
             callCount++;
-            sendMsg = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
+            sendMessage = convertMsg(smsAgentRequestDto.getSmsMsg(), smsAgentRequestDto.getReplacement());
 
-            smsGatewayResponseDto = smsAgentClient.send(smsSenderNo, smsAgentRequestDto.getSmsId(), sendMsg);
+            smsGatewayResponseDto = smsAgentClient.send(smsSenderNo, smsAgentRequestDto.getSmsId(), sendMessage);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(codeRunTimeException)
+                    .message(messageRunTimeException)
+                    .build();
 
         } catch (Exception e) {
 
@@ -214,10 +224,10 @@ public class SmsAgentDomainService {
             busyEr++;
         }
 
-        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMsg+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
-        //재시도에 해당되지 않는 경우 || 재시도설정횟수보다 재시도한 횟수가 클 경우 || 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
-        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+        log.debug("[smsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMessage+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
 
+        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+            //재시도에 해당되지 않는 경우 or 재시도설정횟수보다 재시도한 횟수가 클 경우 or 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
             return smsGatewayResponseDto;
         }else{
             try {
@@ -225,7 +235,7 @@ public class SmsAgentDomainService {
             } catch (InterruptedException e) {
 
                 Thread.currentThread().interrupt();
-                throw new RuntimeException("기타 오류");
+                throw new SmsAgentEtcException("기타 오류");
             }
 
 
@@ -273,7 +283,7 @@ public class SmsAgentDomainService {
         } catch (Exception e) {
             log.debug("[callSettingApi][Call]["+e.getClass().getName()+"]"+e.getMessage());
             //9999
-            throw new RuntimeException("기타 오류");
+            throw new SmsAgentEtcException("기타 오류");
         }
         return map;
     }
@@ -314,7 +324,7 @@ public class SmsAgentDomainService {
             return msg;
         }
         else{
-            String[] rep = replacement.split(sep);
+            String[] rep = replacement.split(SEP);
             int i = 1;
             for(String t : rep){
                 String repTxt = "{" + i + "}";

@@ -187,12 +187,7 @@ class PushDomainServiceTest {
         responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
 
-//        // if serviceTarget.equalsIgnoreCase("TV") 테스트
-//        sendPushCodeRequestDto.setServiceType("TV");
-//        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
-//        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
-//
-        // if(sendCode.substring(0,1).equals("T")) 테스트
+        // (sendCode.substring(0,1).equals("T")) 테스트
         sendPushCodeRequestDto.setSendCode("T001");
         responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
@@ -304,13 +299,13 @@ class PushDomainServiceTest {
 
     }
 
-    /**
-     * TODO 동작 안함 다시 체크
-     */
     @Test
-    @DisplayName("TV이며 ExtraSend N인 경우 테스트") //if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) 가 아닌 경우
+    @DisplayName("TV이며 ExtraSend N인 경우 테스트") //if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) 에 대한 4가지 케이스를 다 만들기 위해
     void whenTVAndExtraSendIsN() {
         //given
+
+        sendCodeMap.put("pos.send", "N");
+
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(httpSinglePushDomainService.requestHttpPushSingle(any())).willReturn(httpPushResponseDto);
         given(sendPushCodeProps.findMapByServiceType("C")).willReturn(Optional.of(serviceTargetMap));
@@ -344,7 +339,7 @@ class PushDomainServiceTest {
                 .pushType("A|G")
                 .sendCode("P002")
                 .regType("1")
-                .serviceType("C")
+                .serviceType("C|TV")
                 .reserve(reserveMap)
                 .items(items)
                 .build();
@@ -657,7 +652,8 @@ class PushDomainServiceTest {
                 .items(items)
                 .build();
 
-        pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        SendPushResponseDto result = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        assertThat(result.equals(httpPushCustomException));
     }
 
     @Test

@@ -1,7 +1,6 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
-import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
