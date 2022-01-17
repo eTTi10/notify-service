@@ -21,6 +21,9 @@ sms:
     rest_stb_mac: sms
     rest_code_id:
     rest_svc_type: I
+  uflix:
+    simplejoin:
+      sms_message: "[영화월정액ID만들기]\nhttps://uflix.co.kr/ums/initTvg\n비디오포털 회원가입 이동"
 
 #https 예외 사용 여부 (1 : 사용 / 0 : 미사용)
 check:

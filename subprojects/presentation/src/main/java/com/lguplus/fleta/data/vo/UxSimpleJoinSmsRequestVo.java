@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.outer.UXSimpleJoinSmsRequestDto;
 import com.lguplus.fleta.data.type.CarrierType;
 import com.lguplus.fleta.data.type.DeviceInfo;
 import com.lguplus.fleta.data.type.NetworkInfo;
@@ -15,8 +14,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 @Getter
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, UXSimpleJoinSmsRequestVo.class})
-public class UXSimpleJoinSmsRequestVo {
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, UxSimpleJoinSmsRequestVo.class})
+public class UxSimpleJoinSmsRequestVo {
 
     /** 가입자 번호 */
     @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)
@@ -68,13 +67,5 @@ public class UXSimpleJoinSmsRequestVo {
     /** 통합 통계용 통신사 구분 */
     @ParamAlias("carrier_type")
     private CarrierType carrierType;
-
-    public UXSimpleJoinSmsRequestDto convert() {
-        return UXSimpleJoinSmsRequestDto.builder()
-                .saId(getSaId())
-                .stbMac(getStbMac())
-                .ctn(getCtn())
-                .build();
-    }
 
 }
