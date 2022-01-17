@@ -1,7 +1,6 @@
 package com.lguplus.fleta.provider.jpa.latest;
 
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestCheckEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,14 +10,15 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 @Slf4j
 @Repository
 @RequiredArgsConstructor
 public class LatestJpaJpaRepository implements LatestRepository {
+
 
     private final LatestJpaRepository latestJpaRepository;
 
@@ -27,11 +27,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
     @PersistenceContext
     private EntityManager em;
 
-    /**
-     * 최신회 리스트 조회
-     * @param latestRequestDto
-     * @return
-     */
+
     @Override
     public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
         return latestJpaRepository.findBySaIdAndMacAndCtnAndCatIdOrCatIdIsNull(
@@ -42,11 +38,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
         );
     }
 
-    /**
-     * 최신회 체크리스트 조회
-     * @param latestRequestDto
-     * @return
-     */
+
     @Override
     public List<LatestEntity> getLatestCheckList(LatestRequestDto latestRequestDto) {
         return latestJpaRepository.findBySaIdAndMacAndCtn(
@@ -56,11 +48,7 @@ public class LatestJpaJpaRepository implements LatestRepository {
         );
     }
 
-    /**
-     * 최신회 삭제
-     * @param latestRequestDto
-     * @return
-     */
+
     @Override
     @Modifying
     @Transactional
@@ -74,13 +62,9 @@ public class LatestJpaJpaRepository implements LatestRepository {
     }
 
 
-    /**
-     * 최신회 등록
-     * @param latestRequestDto
-     * @return
-     */
+
     @Override
-    public int insertLatest(LatestRequestDto latestRequestDto) {
+    public String insertLatest(LatestRequestDto latestRequestDto) {
 
         LatestEntity entity = LatestEntity.builder().
                 saId(latestRequestDto.getSaId()).
@@ -89,38 +73,13 @@ public class LatestJpaJpaRepository implements LatestRepository {
                 regId(latestRequestDto.getRegId()).
                 catId(latestRequestDto.getCatId()).
                 catName(latestRequestDto.getCatName()).
-                rDate("2022-01-14 17:24:42.000").
+                rDate(new Date()).
                 categoryGb(latestRequestDto.getCategoryGb()).
                 build();
-        //latestRequestDto
-        latestJpaRepository.save(entity);
 
-        return 1;
+        LatestEntity resultEntity = latestJpaRepository.save(entity);
 
-/*
-        //인서트 쿼리
-        String sql = "INSERT INTO SMARTUX.PT_UX_LATEST ( SA_ID, MAC, CTN, REG_ID, CAT_ID, CAT_NAME, R_DATE, CATEGORY_GB ) VALUES ( \n" +
-                ":saId, " +
-                ":mac, " +
-                ":ctn, " +
-                ":regId, " +
-                ":catId, " +
-                ":catName, " +
-                "now(), " +
-                ":categoryGb)";
-
-        Query nativeQuery = em.createNativeQuery(sql)
-                .setParameter("saId",latestRequestDto.getSaId())
-                .setParameter("mac",latestRequestDto.getMac())
-                .setParameter("ctn",latestRequestDto.getCtn())
-                .setParameter("regId",latestRequestDto.getRegId())
-                .setParameter("catId",latestRequestDto.getCatId())
-                .setParameter("catName",latestRequestDto.getCatName())
-                .setParameter("categoryGb",latestRequestDto.getCategoryGb());
-
-        return nativeQuery.executeUpdate();
-
-*/
+        return resultEntity.getSaId();
 
     }
 

@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LatestJpaJpaRepository.class))
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -70,9 +71,9 @@ class LatestJpaJpaRepositoryTest {
                 .catName("놀라운 대회 스타킹")
                 .categoryGb(CATEGORY_GB)
                 .build();
-        int resultCnt = latestRepository.insertLatest(latestRequestDto);
+        String resultString = latestRepository.insertLatest(latestRequestDto);
         // 결과값은 0건 또는 1건
-        assertThat(resultCnt == 1);
+        assertEquals(resultString ,GET_UUID);
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList End");
     }
