@@ -39,7 +39,13 @@ public class HttpPushFeignConfig {
             requestTemplate.header(HttpHeaders.ACCEPT_CHARSET, encodingSingle);
             requestTemplate.header(HttpHeaders.CONTENT_TYPE, contentTypeSingle);
             requestTemplate.header(HttpHeaders.CONTENT_ENCODING, encodingSingle);
-            requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
+
+            if (requestTemplate.url().endsWith("servicekey")) {
+                requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
+
+            } else if (requestTemplate.url().endsWith("announce")) {
+                requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationAnnounce);
+            }
         };
     }
 
