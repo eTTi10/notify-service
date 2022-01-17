@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.util.Date;
 
 @ApiModel(value = "최신회 알림조회", description = "최신회 알림조회 리턴")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,7 +35,7 @@ public class LatestDto implements PlainTextibleDto, Serializable {
     private String catName;
 
     @JsonProperty("r_date") //등록일시
-    private String rDate;
+    private Date rDate;
 
     @JsonProperty("category_gb") //카테고리 구분
     private String categoryGb;
@@ -44,6 +45,6 @@ public class LatestDto implements PlainTextibleDto, Serializable {
         return String.join(CommonResponseDto.Separator.COLUMN
                 , getSaId(), getMac(), getCtn()
                 , getRegId(), getCatId(), getCatName()
-                , getRDate(), getCategoryGb());
+                , getRDate().toString(), getCategoryGb());
     }
 }

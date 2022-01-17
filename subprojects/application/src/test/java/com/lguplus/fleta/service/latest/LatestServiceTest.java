@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +41,7 @@ class LatestServiceTest {
                         .catId("T3021")
                         .regId("500023630832")
                         .catName("놀라운 대회 스타킹")
-                        .rDate("2014-11-09 13:18:14.000")
+                        .rDate(new Date())
                         .categoryGb("")
                         .build();
 
@@ -104,16 +105,11 @@ class LatestServiceTest {
 
 
     //####################### Start 알림등록 ######################
-    @BeforeEach
-    void insertLatestBefore() {
-        List<LatestDto> resultList = new ArrayList<LatestDto>();
-        given(latestDomainService.getLatestList(any())).willReturn(resultList);
-    }
 
     @Test
     @DisplayName("LatestControllerTest.insertLatest 정상적으로 데이터를 등록하는지 확인")
     void insertLatest() {
-        given(latestDomainService.insertLatest(any())).willReturn(1);
+
 
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
                 .saId("500023630832")
@@ -125,10 +121,10 @@ class LatestServiceTest {
                 .rDate("2014-10-27 16:19:38.000")
                 .categoryGb("").build();
 
-        int resultCnt = latestService.insertLatest(latestRequestDto);
-        log.info(resultCnt+"::::::::resultCnt");
-        Assertions.assertTrue(1 == resultCnt);
+        latestService.insertLatest(latestRequestDto);
+
         log.info("LatestServiceTest.insertLatest End");
+
     }
     //####################### End 알림등록 ######################
 }

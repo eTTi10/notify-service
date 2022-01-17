@@ -12,5 +12,5 @@ public interface LatestRepository {
 
     int deleteLatest(LatestRequestDto latestRequestDto);
 
-    String insertLatest(LatestRequestDto latestRequestDto);
+    LatestEntity insertLatest(LatestRequestDto latestRequestDto);
 }

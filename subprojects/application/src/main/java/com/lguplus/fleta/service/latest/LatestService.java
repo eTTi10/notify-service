@@ -6,7 +6,6 @@ import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public class LatestService {
         return latestDomainService.deleteLatest(latestRequestDto);
     }
 
-    public  int insertLatest(LatestRequestDto latestRequestDto) {
-        return latestDomainService.insertLatest(latestRequestDto);
+    public  void insertLatest(LatestRequestDto latestRequestDto) {
+        latestDomainService.insertLatest(latestRequestDto);
     }
 }

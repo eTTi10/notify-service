@@ -3,10 +3,10 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestCheckEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
+import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
@@ -83,18 +83,15 @@ public class LatestDomainService {
      * @param latestRequestDto 최신회 정보등록을 위한 DTO
      * @return 등록건수
      */
-    public int insertLatest(LatestRequestDto latestRequestDto) {
-        int insertCnt = 0;
+    public void insertLatest(LatestRequestDto latestRequestDto) {
         getLatestCheckList(latestRequestDto);
-
         try {
             latestRepository.insertLatest(latestRequestDto);
         }catch(BadSqlGrammarException e){
             throw new DatabaseException();//8999 DB에러
         }catch(Exception e){
-            throw new RuntimeException();
+            throw new ExtRuntimeException();
         }
-        return insertCnt;
     }
 
 }

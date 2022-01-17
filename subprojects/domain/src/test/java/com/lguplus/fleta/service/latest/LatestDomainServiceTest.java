@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -80,7 +81,7 @@ class LatestDomainServiceTest {
     @Test
     @DisplayName("인서트 정상실행")
     void insertLatest() {
-        given(latestRepository.insertLatest(any())).willReturn(1);
+        //given(latestRepository.insertLatest(any())).willReturn(GET_UUID);
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
                 .saId(GET_UUID)
                 .mac(MAC)
@@ -91,8 +92,8 @@ class LatestDomainServiceTest {
                 .categoryGb(CATEGORY_GB)
                 .build();
 
-        int resultCnt = latestDomainService.insertLatest(latestRequestDto);
-        assertThat(resultCnt==1); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
+        latestDomainService.insertLatest(latestRequestDto);
+        //assertEquals(resultCode, GET_UUID); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
         log.info("인서트 정상실행");
     }
@@ -155,7 +156,7 @@ class LatestDomainServiceTest {
                 .catId("T3021")
                 .regId("500023630832")
                 .catName("놀라운 대회 스타킹")
-                .rDate("2014-11-09 13:18:14.000")
+                .rDate(new Date())
                 .categoryGb("")
                 .build();
         List<LatestEntity> list = List.of(rs1);
