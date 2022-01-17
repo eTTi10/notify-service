@@ -21,7 +21,6 @@ public class LatestRepositoryImpl implements LatestRepository {
 
 
     private final LatestJpaRepository latestJpaRepository;
-    private String catIdStr = "catId";
 
     @PersistenceContext
     private EntityManager em;
