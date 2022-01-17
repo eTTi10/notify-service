@@ -14,7 +14,7 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        return (builder) -> builder
+        return builder -> builder
                 .cacheDefaults( RedisCacheConfiguration.defaultCacheConfig()
                         .entryTtl(Duration.ofHours(24)) // Default TTL 값은 24시간
                         .disableCachingNullValues()

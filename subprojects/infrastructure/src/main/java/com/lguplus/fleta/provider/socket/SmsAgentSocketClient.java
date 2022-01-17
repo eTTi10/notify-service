@@ -2,10 +2,7 @@ package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.client.SmsAgentDomainClient;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.MsgTypeErrorException;
-import com.lguplus.fleta.exception.smsagent.PhoneNumberErrorException;
-import com.lguplus.fleta.exception.smsagent.SystemBusyException;
-import com.lguplus.fleta.exception.smsagent.SystemErrorException;
+import com.lguplus.fleta.exception.smsagent.*;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +36,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     @PostConstruct
     private void initGateway() {
 
-        String dir = System.getProperty("user.home");
         log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
         log.debug("index:" + index);
@@ -112,7 +108,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             } catch (IOException e) {
                 SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
                 //9999
-                throw new RuntimeException("기타 오류");
+                throw new SmsAgentEtcException("기타 오류");
             }
 
             SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
@@ -123,7 +119,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
         }
 
         if (null != asyncResult) return asyncResult.get();
-        else throw new RuntimeException("기타 오류");
+        else throw new SmsAgentEtcException("기타 오류");
     }
 
     private int calculateTerm() {

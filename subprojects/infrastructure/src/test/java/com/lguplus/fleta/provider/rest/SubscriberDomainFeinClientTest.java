@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -34,7 +33,7 @@ class SubscriberDomainFeinClientTest {
     void getRegistrationIDbyCtn() {
 
         //given
-        RegIdDto regIdDto = RegIdDto.builder().regId(REG_ID).build();
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
 
         InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
 
@@ -47,7 +46,7 @@ class SubscriberDomainFeinClientTest {
         RegIdDto responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
 
         //then
-        assertThat(responseDto.getRegId().equals(REG_ID));
+        assertThat(responseDto.getRegistrationId().equals(REG_ID));
 
     }
 }

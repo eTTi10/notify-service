@@ -54,7 +54,7 @@ public class PushController {
     @PostMapping(value = "/mims/sendPushCode", consumes = MediaType.APPLICATION_XML_VALUE)
     public SendPushResponseDto sendPushCode(
         @ApiIgnore @Valid SendPushCodeRequestVo sendPushCodeRequestVo,
-        @RequestBody String requestBodyStr) throws JsonProcessingException, RuntimeException {
+        @RequestBody String requestBodyStr) throws JsonProcessingException {
 
         log.debug("body:{}", requestBodyStr);
 
