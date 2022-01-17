@@ -58,8 +58,6 @@ class MmsControllerTest {
 
         // Mock Method
         given(mmsService.sendMms(any())).willReturn(successResponseDto);
-
-        //
     }
 
     @Test

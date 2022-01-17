@@ -11,6 +11,7 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.exception.mmsagent.*;
+import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.lang.NumberFormatException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -365,11 +365,11 @@ class MmsAgentDomainServiceTest {
 
 
         given( mmsSoap.sendMMS(anyMap(), any())).willReturn("9999");
-        thrown = assertThrows(RuntimeException.class, () -> {
+        thrown = assertThrows(MmsRuntimeException.class, () -> {
+            mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
+        });
+        assertEquals(thrown instanceof MmsRuntimeException, true);
         log.info("returnService RuntimeException 9999 End");
-        mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
-    });
-    assertEquals(thrown instanceof RuntimeException, true);
     }
 
 }

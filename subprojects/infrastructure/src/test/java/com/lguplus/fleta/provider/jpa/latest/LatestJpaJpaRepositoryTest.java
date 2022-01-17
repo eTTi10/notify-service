@@ -2,7 +2,6 @@ package com.lguplus.fleta.provider.jpa.latest;
 
 import com.lguplus.fleta.config.InfrastructureConfig;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestCheckEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.repository.LatestRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +22,9 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LatestJpaJpaRepository.class))
+@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LatestJpaRepository.class))
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ImportAutoConfiguration(InfrastructureConfig.class)
 @Slf4j
@@ -70,9 +70,8 @@ class LatestJpaJpaRepositoryTest {
                 .catName("놀라운 대회 스타킹")
                 .categoryGb(CATEGORY_GB)
                 .build();
-        int resultCnt = latestRepository.insertLatest(latestRequestDto);
-        // 결과값은 0건 또는 1건
-        assertThat(resultCnt == 1);
+        latestRepository.insertLatest(latestRequestDto);
+
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList End");
     }
@@ -127,7 +126,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("1111.2222.3333")
                 .ctn("01011112222")
                 .build();
-        List<LatestCheckEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size() == 0);
 
@@ -143,7 +142,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .build();
-        List<LatestCheckEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto2);
+        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size() >= 0);
 

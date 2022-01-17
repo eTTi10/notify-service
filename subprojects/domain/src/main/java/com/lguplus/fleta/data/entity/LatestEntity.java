@@ -1,12 +1,12 @@
 package com.lguplus.fleta.data.entity;
 
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.entity.id.LatestId;
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -40,7 +40,7 @@ public class LatestEntity implements Serializable{
     private String categoryGb;
 
     @Column(name = "r_date")
-    private String rDate;
+    private Date rDate;
 
     @Column(name = "cat_name")
     private String catName;

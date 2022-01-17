@@ -27,9 +27,8 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("stb_mac",parm.getStbMac());
         parmMap.put("code_id",parm.getCodeId());
         parmMap.put("svc_type",parm.getSvcType());
-        CallSettingResultMapDto apiMap = mmsApi.callSettingApi(parmMap);
-        return apiMap;
-    };
+        return mmsApi.callSettingApi(parmMap);
+    }
 
     /**
      * Sms메세지 목록
@@ -43,8 +42,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
         parmMap.put("stb_mac",parm.getStbMac());
         parmMap.put("code_id",parm.getCodeId());
         parmMap.put("svc_type",parm.getSvcType());
-        CallSettingResultMapDto apiMap = smsApi.callSettingApi(parmMap);
-        return apiMap;
-    };
+        return smsApi.callSettingApi(parmMap);
+    }
 
 }

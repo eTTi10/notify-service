@@ -42,7 +42,7 @@ public class MmsAgentController {
      * @throws Exception
      */
     @PostMapping("/smsagent/mmsCode")
-    public SuccessResponseDto sendMmsCode(@Valid SendMmsVo request) throws Exception {
+    public SuccessResponseDto sendMmsCode(@Valid SendMmsVo request) {
 
         //▶ 001 [완료] sa_id, stb_mac, mms_cd, ctn 값이 null인지 체크
         SendMmsRequestDto requestDto = request.convert();

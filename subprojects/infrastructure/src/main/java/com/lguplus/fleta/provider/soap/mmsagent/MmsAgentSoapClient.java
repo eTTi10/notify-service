@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -23,11 +24,10 @@ import java.util.Map;
  * ################### 개발중 입니다. 잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
  */
 public class MmsAgentSoapClient implements MmsAgentDomainClient {
-    private Map<String, ?> mms;//설정 및 속성
-
+   private Random random = new Random();
     @Override
     public String sendMMS(Map<String, ?> mmsConfig, MmsRequestDto mmsDto){
-        this.mms = mmsConfig;
+        Map<String, ?> mms = mmsConfig;
         String url = (String)mms.get("server_url");
         if(StringUtils.isEmpty(url)){
             return "5200";
@@ -38,9 +38,11 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         submitReq.setNamespace((String)mms.get("namespace"));
         submitReq.setMm7Version((String)mms.get("version"));
 
-        // transactionId
+        // transactionID
+        //int ranNum = (int)(Math.random() * (9999999 - 1000000 + 1)) + 1000000;//7자리 난수발생
         String reqDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date(System.currentTimeMillis()));
-        int ranNum = (int)(Math.random() * (9999999 - 1000000 + 1)) + 1000000;//7자리 난수발생
+
+        int ranNum = random.nextInt(10000000);
         String transactionID = ranNum+"_"+reqDate;
 
         // Set submitReq Info
@@ -78,16 +80,7 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
 
         int statusCode = MM7Response.SC_SUCCESS;
         return Integer.toString(statusCode);
-        /*
-        try {
-            //실제 처리 준비중...방화벽 막힘...
-            MM7Response rsp = mmsc.submit(submitReq);
-        }catch(MM7Error e){
-            return e.getFaultCode();
-        }
-        int statusCode = MM7Response.SC_SUCCESS;
-        return Integer.toString(statusCode);
-        */
+
         //[ ASIS에 Swagger관련 코드가 있었지만 TOBE에서는 제외 ] SwaggerDefinition logger;...
     }
 }

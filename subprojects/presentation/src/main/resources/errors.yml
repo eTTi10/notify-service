@@ -33,6 +33,7 @@ error:
             ParameterContainsWhitespaceException: "5013"
             ParameterContainsNonAlphanumericException: "5014"
             ParameterLengthTooShortException: "5017"
+            ExtRuntimeException: "9999"
             openapi:
               AccessKeyNotPermittedException: "1300"
               CpIdNotPermittedException: "1301"
@@ -89,6 +90,7 @@ error:
               DeleteNotFoundException: "1410"
               JpaSocketException: "5101"
               JpaSocketTimeoutException: "5102"
+              LatestException: "9999"
             mmsagent:
               NoResultException: "0001"
               SystemErrorException: "1500"
@@ -106,6 +108,7 @@ error:
               DuplicateKeyException: "8000"
               DatabaseException: "8999"
               MmsServiceException: "9998"
+              MmsException: "9999"
             smsagent:
               SystemErrorException: "1500"
               MsgTypeErrorException: "1501"
