@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.client.HttpPushDomainClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +21,6 @@ import java.util.Map;
 public class HttpPushDomainClientImpl implements HttpPushDomainClient {
 
     private final HttpPushFeignClient httpPushFeignClient;
-
-    private final ObjectMapper objectMapper;
 
     @Value("${singlepush.server.ip}")
     private String hostSingle;
@@ -62,14 +59,30 @@ public class HttpPushDomainClientImpl implements HttpPushDomainClient {
     }
 
     /**
+     * 공지 푸시
+     *
+     * @param paramMap 공지 푸시 정보
+     * @return 공지 푸시 결과
+     */
+    @Override
+    public OpenApiPushResponseDto requestHttpPushAnnouncement(Map<String, Object> paramMap) {
+        return httpPushFeignClient.requestHttpPushAnnouncement(URI.create(getBaseUrl("A")), paramMap);
+    }
+
+    /**
      * 기본 URL 을 가져온다.
      *
      * @return 기본 URL
      */
     private String getBaseUrl(String kind) {
-        log.debug(kind);
         // 단건, 멀티
-        return protocolSingle + "://" + hostSingle + ":" + httpPortSingle;
+        if (kind.equals("S")) {
+            return protocolSingle + "://" + hostSingle + ":" + (protocolSingle.equals("http") ? httpPortSingle : httpsPortSingle);
+
+        // 공지
+        } else {
+            return protocolAnnounce + "://" + hostAnnounce + ":" + (protocolAnnounce.equals("http") ? httpPortAnnounce : httpsPortAnnounce);
+        }
     }
 
 }
