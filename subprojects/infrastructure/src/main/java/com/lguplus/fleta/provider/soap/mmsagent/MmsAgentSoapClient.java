@@ -77,11 +77,8 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
 
-
         int statusCode = MM7Response.SC_SUCCESS;
         return Integer.toString(statusCode);
-
-        //[ ASIS에 Swagger관련 코드가 있었지만 TOBE에서는 제외 ] SwaggerDefinition logger;...
     }
 }
 
