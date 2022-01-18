@@ -50,13 +50,13 @@ class HttpPushSupportTest {
 
     @Test
     void testServiceIdNotFoundExceptionOne() {
-        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인  불가"));
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             httpPushSupport.makePushParameters("lguplushdtvgcm", "notexist_service_id", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", "01099991234", null);
         });
 
-        assertThat(exception.getMessage()).isEqualTo("서비스ID 확인 불가");
+        assertThat(exception.getMessage()).isEqualTo("서비스ID 확인  불가");
     }
 
     @Test

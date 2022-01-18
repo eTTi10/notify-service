@@ -38,7 +38,7 @@ class HttpPushDomainFeignClientTest {
     }
 
     @Test
-    @DisplayName("정상적으로 단건푸시가 성공하는지 확인")
+    @DisplayName("정상적으로 단건푸시가 성공하는지  확인")
     void whenRequestSinglePush_thenReturnSuccess() {
         // given
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").build();
