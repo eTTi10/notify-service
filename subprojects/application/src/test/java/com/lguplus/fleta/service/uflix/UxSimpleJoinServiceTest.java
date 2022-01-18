@@ -17,8 +17,6 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class UxSimpleJoinServiceTest {
 
-    private static final String SUCCESS_CODE = "0000";
-
     @InjectMocks
     UxSimpleJoinService uxSimpleJoinService;
 
