@@ -1,7 +1,6 @@
 package com.lguplus.fleta.api.inner.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
