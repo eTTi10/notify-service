@@ -19,12 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LatestRepositoryImpl implements LatestRepository {
 
-
     private final LatestJpaRepository latestJpaRepository;
-    private String catIdStr = "catId";
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {

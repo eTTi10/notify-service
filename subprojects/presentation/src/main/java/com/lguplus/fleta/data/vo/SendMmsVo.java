@@ -21,27 +21,27 @@ import javax.validation.constraints.Size;
                 SendMmsVo.class})
 public class SendMmsVo {
     @ParamAlias("sa_id")
-    @NotBlank(message = "sa_id가 입력되지 않았습니다.", groups = Groups.C1.class)//5008
+    @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)//5008
     @Pattern(regexp = "[A-Za-z0-9]*$", message = "sa_id의 패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C5.class)//5008
     @Size(min=8, message="sa_id 의 길이가 8보다 작습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C9.class)//5008
     @Size(max=15, message="sa_id 의 길이가 15보다 큽니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C12.class)//5008
     private String saId;
 
     @ParamAlias("stb_mac")
-    @NotBlank(message = "stb_mac가 입력되지 않았습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C2.class)//5008
+    @NotBlank(message = "stb_mac 파라미터값이 전달이 안됨", payload = ParameterTypeMismatchException.class, groups = Groups.C2.class)//5008
     @Pattern(regexp = "[a-zA-Z0-9.]*$", message = "stb_mac의 패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C6.class)//5008
     @Size(min=10, message="stb_mac 의 길이가 10보다 작습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C10.class)//5008
     @Size(max=20, message="stb_mac 의 길이가 20보다 큽니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C13.class)//5008
     private String stbMac;
 
     @ParamAlias("ctn")
-    @NotBlank(message = "ctn이 입력되지 않았습니다.", groups = Groups.C3.class)
+    @NotBlank(message = "ctn 파라미터값이 전달이 안됨", groups = Groups.C3.class)
     @PositiveOrZero(message = "ctn의 패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C7.class)//{ 양수 또는 0} 허용
     @Pattern(regexp = "01([016789])([0-9]{3,4})([0-9]{4})$", message = "전화번호 형식 오류", payload = ParameterTypeMismatchException.class, groups = Groups.C11.class)//asis : flag.phone_number_error = 1502 => 5008로 대체
     private String ctn;
 
     @ParamAlias("mms_cd")
-    @NotBlank(message = "mms_cd가 입력되지 않았습니다.", groups = Groups.C4.class)
+    @NotBlank(message = "mms_cd 파라미터값이 전달이 안됨", groups = Groups.C4.class)
     @Pattern(regexp = "[A-Za-z0-9]*$", message = "mms_cd패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C8.class)//5008
     private String mmsCd;
 
