@@ -36,9 +36,9 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
-        List<LatestEntity> rs = latestRepository.getLatestList(latestRequestDto);
+        List<LatestEntity> records = latestRepository.getLatestList(latestRequestDto);
         List<LatestDto> resultList = new ArrayList<>();
-        rs.forEach(e->{
+        records.forEach(e->{
             LatestDto item = latestMapper.toDto(e);
             resultList.add(item);
         });
@@ -52,12 +52,12 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
-        List<LatestEntity> checkList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestEntity> checks = latestRepository.getLatestCheckList(latestRequestDto);
         LatestCheckDto resultLatestCheckDto = LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
 
-        if (checkList.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
+        if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             throw new DuplicateKeyException("기존 데이터 존재");//1201;//중복
-        }else if(maxCnt < checkList.size()) {
+        }else if(maxCnt < checks.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과
         }
         return resultLatestCheckDto;
@@ -69,12 +69,12 @@ public class LatestDomainService {
      * @return 삭제건수
      */
     public int deleteLatest(LatestRequestDto latestRequestDto) {
-        int deleteCnt = latestRepository.deleteLatest(latestRequestDto);
+        int deleteCount = latestRepository.deleteLatest(latestRequestDto);
 
-        if (0 >= deleteCnt) {
+        if (0 >= deleteCount) {
             throw new DeleteNotFoundException("삭제대상없음");//1410
         } else {
-            return deleteCnt;
+            return deleteCount;
         }
     }
 

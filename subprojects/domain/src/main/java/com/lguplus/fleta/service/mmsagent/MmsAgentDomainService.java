@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-//커밋3
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -53,17 +53,17 @@ public class MmsAgentDomainService {
                 .build();
 
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
-        List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+        List<CallSettingDto> settingApis =  callSettingApi.getResult().getRecordset();
         CallSettingDto settingItem = null;
 
-        if(settingApiList == null){
-            throw new BlackListException();//1506:
+        if(settingApis == null){
+            throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
 
-        if(settingApiList.isEmpty()) {
-            throw new BlackListException();//1506:
+        if(settingApis.isEmpty()) {
+            throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
-        settingItem =  settingApiList.get(0);
+        settingItem =  settingApis.get(0);
 
 
         MmsRequestDto mmsDto = MmsRequestDto.builder()

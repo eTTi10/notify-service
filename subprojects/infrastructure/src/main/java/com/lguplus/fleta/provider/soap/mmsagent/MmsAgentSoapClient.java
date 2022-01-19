@@ -2,10 +2,7 @@ package com.lguplus.fleta.provider.soap.mmsagent;
 
 import com.lguplus.fleta.client.MmsAgentDomainClient;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
-import com.lguplus.fleta.provider.soap.mmsagent.module.BasicMMSC;
-import com.lguplus.fleta.provider.soap.mmsagent.module.MM7Response;
-import com.lguplus.fleta.provider.soap.mmsagent.module.MessageManager;
-import com.lguplus.fleta.provider.soap.mmsagent.module.SubmitReq;
+import com.lguplus.fleta.provider.soap.mmsagent.module.*;
 import com.lguplus.fleta.provider.soap.mmsagent.module.content.BasicContent;
 import com.lguplus.fleta.provider.soap.mmsagent.module.content.UplusContent;
 import com.lguplus.fleta.provider.soap.mmsagent.module.inf.*;
@@ -42,8 +39,8 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         //int ranNum = (int)(Math.random() * (9999999 - 1000000 + 1)) + 1000000;//7자리 난수발생
         String reqDate = new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date(System.currentTimeMillis()));
 
-        int ranNum = random.nextInt(10000000);
-        String transactionID = ranNum+"_"+reqDate;
+        int randomNumber = random.nextInt(10000000);
+        String transactionID = randomNumber+"_"+reqDate;
 
         // Set submitReq Info
         submitReq.setTransactionId(transactionID);
@@ -76,12 +73,19 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         MMSC mmsc = new BasicMMSC(url, mms);
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
-
-
+        /*
         int statusCode = MM7Response.SC_SUCCESS;
         return Integer.toString(statusCode);
+        */
 
-        //[ ASIS에 Swagger관련 코드가 있었지만 TOBE에서는 제외 ] SwaggerDefinition logger;...
+        try {
+            //실제 처리 준비중...방화벽 막힘...
+            MM7Response rsp = mmsc.submit(submitReq);
+        }catch(MM7Error e){
+            return e.getFaultCode();
+        }
+        int statusCode = MM7Response.SC_SUCCESS;
+        return Integer.toString(statusCode);
     }
 }
 
