@@ -87,6 +87,7 @@ public class SmsGateway {
         mFileLog = LogFactory.getLog("SmsGateway");
         mStatusLog = LogFactory.getLog("SmsStatus");
         mStatusLog.info("SmsGateway" + index);
+
         mIpAddress = ip;
         mPort = Integer.parseInt(port);
         mID = id;

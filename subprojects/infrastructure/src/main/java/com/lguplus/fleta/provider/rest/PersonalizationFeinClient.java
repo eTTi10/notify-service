@@ -12,6 +12,6 @@ import java.util.Map;
 @FeignClient(name="personalization", url="${service.personalization.url}")
 public interface PersonalizationFeinClient {
 
-    @GetMapping(value="/personalization/registrationId", produces = "application/json", consumes = "application/json")
+    @GetMapping(value="/auth/getRegistrationId", produces = "application/json", consumes = "application/json")
     InnerResponseDto<RegIdDto> getRegistrationID(@RequestParam Map<String, String> conditions);
 }

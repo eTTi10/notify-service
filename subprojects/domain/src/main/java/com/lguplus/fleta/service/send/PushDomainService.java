@@ -3,6 +3,7 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.SaIdDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
@@ -303,10 +304,10 @@ public class PushDomainService {
         Map<String, String> inputMap = new HashMap<>();
 
         ctn = "0" + ctn;
-        inputMap.put("ctn", ctn);
+        inputMap.put("ctnNo", ctn);
 
-        RegIdDto regIdDto = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
-        return regIdDto.getRegistrationId();
+        List<SaIdDto> saIdDtos = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
+        return saIdDtos.get(0).getSaId();
 
     }
 
