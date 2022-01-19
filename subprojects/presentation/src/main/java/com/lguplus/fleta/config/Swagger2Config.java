@@ -15,7 +15,7 @@ import java.util.Set;
 
 @Configuration
 @EnableSwagger2
-public class Swagger2Config { // implements WebMvcConfigurer {
+public class Swagger2Config {
 
     private static final String API_NAME = "MIMS";
     private static final String API_DESCRIPTION = "API 명세서(스펙)";

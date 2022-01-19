@@ -19,4 +19,12 @@ public interface HttpPushDomainClient {
      */
     OpenApiPushResponseDto requestHttpPushSingle(Map<String, Object> paramMap);
 
+    /**
+     * 공지 푸시
+     *
+     * @param paramMap 공지 푸시 정보
+     * @return 공지 푸시 결과
+     */
+    OpenApiPushResponseDto requestHttpPushAnnouncement(Map<String, Object> paramMap);
+
 }

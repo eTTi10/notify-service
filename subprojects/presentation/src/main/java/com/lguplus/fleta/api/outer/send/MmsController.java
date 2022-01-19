@@ -1,9 +1,7 @@
 package com.lguplus.fleta.api.outer.send;
 
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
-import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
 import com.lguplus.fleta.data.mapper.SendMmsRequestMapper;
 import com.lguplus.fleta.data.vo.SendMmsVo;
 import com.lguplus.fleta.service.send.MmsService;
@@ -18,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-@Api(tags = "sendMmsCode", description = "MMS 발송요청")
+@Api(tags = "MMS 발송요청")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -35,7 +33,7 @@ public class MmsController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",         value="순번: 4<br>자리수: 20<br>설명: 발송대상 번호", example="01051603997"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="replacement", value="순번: 5<br>자리수: 100<br>설명: 대체문구", example="예) 김철수|냉장고")})
     @PostMapping("/mims/sendMms")
-    public SuccessResponseDto setPayment(@Valid SendMmsVo vo) throws Exception {
+    public SuccessResponseDto setPayment(@Valid SendMmsVo vo){
         SendMmsRequestDto sendMmsRequestDto = sendMmsRequestMapper.toDto(vo);
         return smsService.sendMms(sendMmsRequestDto);
     }

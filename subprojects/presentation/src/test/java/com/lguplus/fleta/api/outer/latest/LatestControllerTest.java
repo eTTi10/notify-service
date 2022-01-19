@@ -3,10 +3,16 @@ package com.lguplus.fleta.api.outer.latest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
+import com.lguplus.fleta.data.dto.LatestDto;
+import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
+import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
 import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
 import com.lguplus.fleta.service.latest.LatestService;
+import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,8 +28,18 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +65,51 @@ class LatestControllerTest {
     @MockBean
     private LatestPostRequestMapper latestPostRequestMapper;
 
+    private static String SA_ID = "500058151453";
+    private static final String MAC = "001c.627e.039c";
+    private static final String CTN = "01055805424";
+    private static final String CAT_ID = "T3021";
+    private static final String REG_ID = "500058151453";
+    private static final String CAT_NAME = "놀라운 대회 스타킹";
+    private static final String R_DATE = "2014-11-09 13:18:14.000";
+    private static final String CATEGORY_GB = "JUN";
+
+
+    @BeforeEach
+    void getLatestListBefore() throws Exception {
+
+        LatestEntity rs1 = LatestEntity.builder()
+                .saId(SA_ID).mac(MAC)
+                .ctn(CTN).catId(CAT_ID)
+                .regId(REG_ID).catName(CAT_NAME)
+                .rDate(new Date()).categoryGb(CATEGORY_GB)
+                .build();
+
+        List<LatestEntity> rs = List.of(rs1);
+        List<LatestDto> resultList = new ArrayList<LatestDto>();
+
+        rs.forEach(e -> {
+            LatestDto item = LatestDto.builder()
+                    .saId(e.getSaId())
+                    .mac(e.getMac())
+                    .ctn(e.getCtn())
+                    .catId(e.getCatId())
+                    .catName(e.getCatName())
+                    .rDate(e.getRDate())
+                    .categoryGb(e.getCategoryGb())
+                    .build();
+            resultList.add(item);
+        });
+
+        GenericRecordsetResponseDto<LatestDto> result = GenericRecordsetResponseDto.<LatestDto>genericRecordsetResponseBuilder()
+                .totalCount(resultList.size())
+                .recordset(resultList)
+                .build();
+
+        given(latestService.getLatestList(any())).willReturn(result);
+
+    }
+
 
     //####################### Start 알림등록 ######################
     @Test
@@ -56,14 +117,15 @@ class LatestControllerTest {
     void insertLatest() throws Exception {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.add("saId", "500023630832");
-        params.add("mac", "001c.6284.30a4");
-        params.add("ctn", "01080808526");
-        params.add("catId", "M0241");
-        params.add("regId", "500023630832");
-        params.add("catName", "신 삼국지 32회");
-        params.add("rDate", "2014-10-27 16:19:38.000");
-        params.add("categoryGb", "");
+        params.add("saId", SA_ID);
+        params.add("mac", MAC);
+        params.add("ctn", CTN);
+        params.add("catId", CAT_ID);
+        params.add("regId", REG_ID);
+        params.add("catName", CAT_NAME);
+        params.add("rDate", R_DATE);
+        params.add("categoryGb", CATEGORY_GB);
+
 
         MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
@@ -75,18 +137,17 @@ class LatestControllerTest {
         int status = response.getStatus();
         String responseString = response.getContentAsString();
 
+        System.out.println("RESULT >> ["+responseString+"]");
         assertThat(status).isEqualTo(200);
         assertThat(responseString).contains("0000");
 
         log.info("RESULT >> ["+responseString+"]");
-        log.info("LatestControllerTest.insertLatest End");
+        log.info("LatestControllerTest.getLatestList End");
     }
     //####################### End 알림등록 ######################
 
 
     //####################### Start 알림조회 ######################
-
-
     @Test
     @DisplayName("LatestControllerTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
     void getLatestList() throws Exception {
@@ -107,7 +168,6 @@ class LatestControllerTest {
         String responseString = response.getContentAsString();
 
         assertThat(status).isEqualTo(200);
-        assertThat(responseString).contains("0000");
 
         log.info("RESULT >> ["+responseString+"]");
         log.info("LatestControllerTest.getLatestList End");
@@ -136,7 +196,6 @@ class LatestControllerTest {
         String responseString = response.getContentAsString();
 
         assertThat(status).isEqualTo(200);
-        assertThat(responseString).contains("0000");
 
         log.info("RESULT >> ["+responseString+"]");
         log.info("LatestControllerTest.deleteLatest End");

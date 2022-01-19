@@ -29,6 +29,11 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
  
         final Properties properties = factory.getObject();
         final String sourceName = name == null ? yaml.getFilename() : name;
-        return new PropertiesPropertySource(sourceName, properties);
+		//return new PropertiesPropertySource(sourceName, properties)
+
+		if(sourceName != null && properties != null) {
+			return new PropertiesPropertySource(sourceName, properties);
+		}
+		return null;
 	}
 }

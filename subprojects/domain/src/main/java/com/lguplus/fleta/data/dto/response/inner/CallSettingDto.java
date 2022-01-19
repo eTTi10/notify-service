@@ -2,10 +2,7 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lguplus.fleta.data.dto.PlainTextibleDto;
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 

@@ -6,14 +6,13 @@ import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Slf4j
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
+//@Transactional(readOnly = true) <== 리뷰에서 어노테이션 추가요청을 받았지만 insertLatest인서트가 되지 않아서 일단 주석처리함
 public class LatestService {
 
     private final LatestDomainService latestDomainService;
@@ -27,12 +26,10 @@ public class LatestService {
     }
 
     public  int deleteLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.deleteLatest(latestRequestDto);
-        return result;
+        return latestDomainService.deleteLatest(latestRequestDto);
     }
 
-    public  int insertLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.insertLatest(latestRequestDto);
-        return result;
+    public  void insertLatest(LatestRequestDto latestRequestDto) {
+        latestDomainService.insertLatest(latestRequestDto);
     }
 }

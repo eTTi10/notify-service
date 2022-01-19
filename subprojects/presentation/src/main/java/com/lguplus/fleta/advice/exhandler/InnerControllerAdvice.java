@@ -5,7 +5,6 @@ import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseErrorDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
-import com.lguplus.fleta.exception.ClientException;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
@@ -55,7 +54,6 @@ public class InnerControllerAdvice {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
             for (FieldError fieldError: fieldErrors) {
                 String field = fieldError.getField();
-                // String code = fieldError.getCode();
                 String defaultMessage = fieldError.getDefaultMessage();
                 String detailMessage = "[" + field + "] " + defaultMessage;
                 responseDto.addResponseError(InnerResponseErrorDto.of(InnerResponseErrorType.PARAMETER_ERROR, detailMessage));

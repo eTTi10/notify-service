@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         , MessageConverterConfig.class})
 @Slf4j
 class PushServiceSingleControllerTest {
-
+/*
     @Autowired
     private MockMvc mvc;
 
@@ -109,5 +109,5 @@ class PushServiceSingleControllerTest {
         log.debug("TEST >> ["+responseString+"]");
         Assertions.assertThat(status).isEqualTo(200);
     }
-
+*/
 }

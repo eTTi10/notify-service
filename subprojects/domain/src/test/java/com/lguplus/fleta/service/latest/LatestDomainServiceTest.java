@@ -3,10 +3,11 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestCheckEntity;
+import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
+import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
@@ -18,12 +19,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +42,12 @@ import static org.mockito.BDDMockito.given;
 @Slf4j
 class LatestDomainServiceTest {
 
-
+    private static String GET_UUID;
+    private static final String MAC = "JUNIT_TEST_MAC";
+    private static final String CTN = "01012341234";
+    private static final String CAT_ID = "T0070";
+    private static final String REG_ID = "000011112222";
+    private static final String CATEGORY_GB = "JUN";
 
     @Mock
     LatestMapper latestMapper;
@@ -47,8 +58,19 @@ class LatestDomainServiceTest {
     LatestDomainService latestDomainService;
 
 
+    public static String getUUID(){
+        Date now = new Date();
+        Calendar currentDate = Calendar.getInstance();
+        DateFormat df = new SimpleDateFormat("yyMMddHHmmss"); //yyMMddHHmmss
+        String returnValue = df.format(currentDate.getTime());
+        log.info("GET_UUID : "+ returnValue);
+        return (returnValue);
+    }
+
     @BeforeEach
     void setUp() {
+        GET_UUID = getUUID();
+
         latestDomainService = new LatestDomainService(latestMapper, latestRepository);
         JunitTestUtils.setValue(latestDomainService, "maxCnt", 5);
 
@@ -57,39 +79,37 @@ class LatestDomainServiceTest {
     //####################### Start 알림등록 ######################
 
     @Test
-    @DisplayName("LatestRepositoryTest.insertLatest 정상적으로 리스트 데이터를 수신하는지 확인")
+    @DisplayName("인서트 정상실행")
     void insertLatest() {
-        given(latestRepository.insertLatest(any())).willReturn(1);
+        //given(latestRepository.insertLatest(any())).willReturn(GET_UUID);
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
-                .saId("500058151453")
-                .mac("001c.627e.039c")
-                .ctn("01055805424")
-                .catId("T3021")
-                .regId("500023630832")
+                .saId(GET_UUID)
+                .mac(MAC)
+                .ctn(CTN)
+                .catId(CAT_ID)
+                .regId(REG_ID)
                 .catName("놀라운 대회 스타킹")
-                .rDate("")
-                .categoryGb("-")
+                .categoryGb(CATEGORY_GB)
                 .build();
 
-        int resultCnt = latestDomainService.insertLatest(latestRequestDto);
-        assertThat(resultCnt==0); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
+        latestDomainService.insertLatest(latestRequestDto);
+        //assertEquals(resultCode, GET_UUID); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
-        log.info("LatestRepositoryTest.insertLatest End");
+        log.info("인서트 정상실행");
     }
 
     @Test
-    @DisplayName("LatestRepositoryTest.insertLatest.insertLatest_DatabaseException 에러 확인")
+    @DisplayName("인서트 DatabaseException 에러 확인")
     public void insertLatest_DatabaseException() {
         // Mock Object
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
-                .saId("500058151453")
-                .mac("001c.627e.039c")
-                .ctn("01055805424")
-                .catId("T3021")
-                .regId("500023630832")
+                .saId(GET_UUID)
+                .mac(MAC)
+                .ctn(CTN)
+                .catId(CAT_ID)
+                .regId(REG_ID)
                 .catName("놀라운 대회 스타킹")
-                .rDate("")
-                .categoryGb("-")
+                .categoryGb(CATEGORY_GB)
                 .build();
         SQLException sqlException = new SQLException();
         given(latestRepository.insertLatest(any())).willThrow(new BadSqlGrammarException("task","sql", sqlException));
@@ -97,30 +117,29 @@ class LatestDomainServiceTest {
             latestDomainService.insertLatest(latestRequestDto);
         });
         assertEquals(thrown instanceof DatabaseException, true);
-        log.info("LatestRepositoryTest.insertLatest_DatabaseException End");
+        log.info("인서트 DatabaseException 에러 확인");
     }
 
 
     @Test
-    @DisplayName("LatestRepositoryTest.insertLatest.insertLatest_JpaSocketException 에러 확인")
+    @DisplayName("인서트 JpaSocketException 에러 확인")
     public void insertLatest_RuntimeException() {
         // Mock Object
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
-                .saId("500058151453")
-                .mac("001c.627e.039c")
-                .ctn("01055805424")
-                .catId("T3021")
-                .regId("500023630832")
+                .saId(GET_UUID)
+                .mac(MAC)
+                .ctn(CTN)
+                .catId(CAT_ID)
+                .regId(REG_ID)
                 .catName("놀라운 대회 스타킹")
-                .rDate("")
-                .categoryGb("-")
+                .categoryGb(CATEGORY_GB)
                 .build();
-        given(latestRepository.insertLatest(any())).willThrow(new RuntimeException());
-        Exception thrown = assertThrows(RuntimeException.class, () -> {
+        given(latestRepository.insertLatest(any())).willThrow(new ExtRuntimeException());
+        Exception thrown = assertThrows(ExtRuntimeException.class, () -> {
             latestDomainService.insertLatest(latestRequestDto);
         });
         assertEquals(thrown instanceof RuntimeException, true);
-        log.info("LatestRepositoryTest.insertLatest_RuntimeException End");
+        log.info("인서트 JpaSocketException 에러 확인");
     }
 
     //####################### End 알림등록 ######################
@@ -128,7 +147,7 @@ class LatestDomainServiceTest {
 
     //####################### Start 알림조회 ######################
     @Test
-    @DisplayName("LatestRepositoryTest.getLatestList 정상적으로 리스트 데이터를 수신하는지 확인")
+    @DisplayName("조회 정상적으로 리스트 데이터를 수신하는지 확인")
     void getLatestList() {
         LatestEntity rs1 = LatestEntity.builder()
                 .saId("500058151453")
@@ -137,10 +156,12 @@ class LatestDomainServiceTest {
                 .catId("T3021")
                 .regId("500023630832")
                 .catName("놀라운 대회 스타킹")
-                .rDate("2014-11-09 13:18:14.000")
+                .rDate(new Date())
                 .categoryGb("")
                 .build();
         List<LatestEntity> list = List.of(rs1);
+
+
 
         // Mock Method
         given(latestRepository.getLatestList(any())).willReturn(list);
@@ -155,20 +176,20 @@ class LatestDomainServiceTest {
         List<LatestDto> responseList = latestDomainService.getLatestList(latestRequestDto);
         assertThat(responseList.size()==1); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
-        log.info("LatestRepositoryTest.getLatestList End");
+        log.info("조회 정상적으로 리스트 데이터를 수신하는지 확인");
     }
     //####################### End 알림조회 ######################
 
 
     //####################### Start 알림체크리스트조회 ######################
     @Test
-    @DisplayName("LatestRepositoryTest.getLatestCheckList0 정상적으로 체크리스트 데이터를 수신하는지 확인")
+    @DisplayName("정상적으로 체크리스트 데이터를 수신하는지 확인")
     void getLatestCheckList0() {
         // Mock Method
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder().build();
-        List<LatestCheckEntity> list = List.of();
+        LatestEntity rs1 = LatestEntity.builder().build();
+        List<LatestEntity> list = List.of();
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
@@ -179,30 +200,30 @@ class LatestDomainServiceTest {
         LatestCheckDto responseList = latestDomainService.getLatestCheckList(latestRequestDto);
         assertThat(responseList.getCode().equals(LatestCheckDto.SUCCESS_CODE)); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
-        log.info("LatestRepositoryTest.getLatestCheckList0 End");
+        log.info("정상적으로 체크리스트 데이터를 수신하는지 확인");
     }
 
     @Test
-    @DisplayName("LatestRepositoryTest.getLatestCheckList_DuplicateKeyException 중복체크 조건이 잘 실행되는지 확인")
+    @DisplayName("중복체크 조건이 잘 실행되는지 확인")
     void getLatestCheckList_DuplicateKeyException() {
         // --------- Mock Method 강제 에러 연출 ---------
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+        LatestEntity rs1 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+        LatestEntity rs2 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        List<LatestCheckEntity> list = List.of(rs1, rs2);
+        List<LatestEntity> list = List.of(rs1, rs2);
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         // Mock Object
@@ -216,11 +237,11 @@ class LatestDomainServiceTest {
         });
 
         assertEquals(thrown instanceof DuplicateKeyException, true);
-        log.info("LatestRepositoryTest.getLatestCheckList_DuplicateKeyException End");
+        log.info("중복체크 조건이 잘 실행되는지 확인");
     }
 
     @Test
-    @DisplayName("LatestRepositoryTest.getLatestCheckList_ExceedMaxRequestException 리스트 최대등록개수 체크가 동작하는지 확인")
+    @DisplayName("리스트 최대등록개수 체크가 동작하는지 확인")
     void getLatestCheckList_ExceedMaxRequestException() {
         // --------- Mock Method 강제 에러 연출 ---------
         /*
@@ -228,28 +249,28 @@ class LatestDomainServiceTest {
         */
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestCheckEntity rs1 = LatestCheckEntity.builder()
+        LatestEntity rs1 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021")
                 .build();
 
-        LatestCheckEntity rs2 = LatestCheckEntity.builder()
+        LatestEntity rs2 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3022")
                 .build();
 
-        LatestCheckEntity rs3 = LatestCheckEntity.builder()
+        LatestEntity rs3 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3023")
                 .build();
 
-        LatestCheckEntity rs4 = LatestCheckEntity.builder()
+        LatestEntity rs4 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
@@ -257,14 +278,14 @@ class LatestDomainServiceTest {
                 .build();
 
 
-        LatestCheckEntity rs5 = LatestCheckEntity.builder()
+        LatestEntity rs5 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3025")
                 .build();
 
-        LatestCheckEntity rs6 = LatestCheckEntity.builder()
+        LatestEntity rs6 = LatestEntity.builder()
                 .saId("500058151453")
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
@@ -272,7 +293,7 @@ class LatestDomainServiceTest {
                 .build();
 
 
-        List<LatestCheckEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
+        List<LatestEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
 
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
@@ -287,7 +308,7 @@ class LatestDomainServiceTest {
         });
 
         assertEquals(thrown instanceof ExceedMaxRequestException, true);
-        log.info("LatestRepositoryTest.getLatestCheckList_ExceedMaxRequestException End");
+        log.info("리스트 최대등록개수 체크가 동작하는지 확인");
     }
 
 
@@ -296,7 +317,7 @@ class LatestDomainServiceTest {
 
     //####################### Start 알림삭제 ######################
     @Test
-    @DisplayName("LatestServiceTest.deleteLatest 정상적으로 리스트 데이터를 삭제하는지 확인")
+    @DisplayName("정상적으로 리스트 데이터를 삭제하는지 확인")
     void deleteLatest() {
         given(latestRepository.deleteLatest(any())).willReturn(1);
 
@@ -309,23 +330,19 @@ class LatestDomainServiceTest {
         int deleteCnt = latestDomainService.deleteLatest(latestRequestDto);
         Assertions.assertTrue(1 == deleteCnt);
 
-        log.info("LatestServiceTest.deleteLatest End");
+        log.info("정상적으로 리스트 데이터를 삭제하는지 확인");
     }
 
 
     @Test
     @DisplayName("LatestServiceTest.deleteLatestDeleteNotFoundException 예외 처리 되는지 확인")
     void deleteLatestDeleteNotFoundException() {
+        given(latestRepository.deleteLatest(any())).willReturn(0);
 
-        Exception exception = null;
-        try {
-            given(latestDomainService.deleteLatest(any())).willReturn(0);
-        }catch(Exception e){
-            log.info("DeleteNotFoundException타입의 에러가 발생함");
-            exception = e;
-        }
-        assertThat(exception).isInstanceOf(DeleteNotFoundException.class);
-        assertThat(exception).isInstanceOf(RuntimeException.class);
+        Exception thrown = assertThrows(DeleteNotFoundException.class, () -> {
+            latestDomainService.deleteLatest(any());
+        });
+        assertEquals(thrown instanceof DeleteNotFoundException, true);
 
         log.info("LatestServiceTest.deleteLatestDeleteNotFoundException End");
     }

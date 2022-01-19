@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
-@Api(tags = "sendMmsCode", description = "최신회 알림 조회")
+@Api(tags = "최신회 알림 조회")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -56,7 +56,7 @@ public class LatestController {
     @DeleteMapping("/comm/latest")
     public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) {
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
-        int deleteCnt = latestService.deleteLatest(latestRequestDto);
+        latestService.deleteLatest(latestRequestDto);
         return SuccessResponseDto.builder().build();
     }
 

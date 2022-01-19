@@ -10,14 +10,12 @@ import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
+import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
 import com.lguplus.fleta.exception.mmsagent.*;
-import com.lguplus.fleta.exception.mmsagent.ServerSettingInfoException;
-import com.sun.istack.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import com.lguplus.fleta.exception.mmsagent.DatabaseException;
-import java.lang.NumberFormatException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +39,7 @@ public class MmsAgentDomainService {
      * @param sendMmsRequestDto
      * @return
      */
-    public SuccessResponseDto sendMmsCode(@NotNull SendMmsRequestDto sendMmsRequestDto) {
+    public SuccessResponseDto sendMmsCode(SendMmsRequestDto sendMmsRequestDto) {
         //yml설정파일 객체생성
         mmsConfig = config.getMms();//1레벨 객체
         settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
@@ -54,20 +52,18 @@ public class MmsAgentDomainService {
                 .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
                 .build();
 
-
-
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
-        List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+        List<CallSettingDto> settingApis =  callSettingApi.getResult().getRecordset();
         CallSettingDto settingItem = null;
 
-        if(settingApiList == null){
-            throw new BlackListException();//1506:
+        if(settingApis == null){
+            throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
 
-        if(settingApiList.size() <= 0) {
-            throw new BlackListException();//1506:
+        if(settingApis.isEmpty()) {
+            throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
-        settingItem =  settingApiList.get(0);
+        settingItem =  settingApis.get(0);
 
 
         MmsRequestDto mmsDto = MmsRequestDto.builder()
@@ -113,10 +109,9 @@ public class MmsAgentDomainService {
                 case "9998":
                     throw new MmsServiceException();//MM7 Service Error
                 default :
-                    throw new RuntimeException();//기타에러
+                    throw new MmsRuntimeException();
             }
         }
-
         return SuccessResponseDto.builder().build();
     }
 
