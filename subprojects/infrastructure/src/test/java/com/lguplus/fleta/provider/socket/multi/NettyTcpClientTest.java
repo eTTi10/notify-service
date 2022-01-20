@@ -206,9 +206,9 @@ class NettyTcpClientTest implements PushMultiClient {
         PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
         String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId).replace(REGIST_ID_NM, pushRequestMultiDto.getUsers().get(0));
 
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
+        Optional<PushMessageInfoDto> response = nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
 
-        int processSatusId = response.getMessageId();
+        int processSatusId = response.orElse(PushMessageInfoDto.builder().messageId(0).build()).getMessageId();
         Assertions.assertEquals(14, processSatusId);
 
         //Thread.sleep(3000);

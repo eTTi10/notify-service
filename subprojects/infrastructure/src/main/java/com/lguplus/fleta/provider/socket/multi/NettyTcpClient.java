@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -123,12 +124,12 @@ public class NettyTcpClient {
 		log.debug("[NettyClient] The new socketChannel has been connected. [" + socketChannel.id() + "]");
 
 		String genChannelID = this.getNextChannelID();
-		PushMessageInfoDto response = (PushMessageInfoDto) writeSync(
-				PushMessageInfoDto.builder().messageId(CHANNEL_CONNECTION_REQUEST)
+		Optional<PushMessageInfoDto> response = writeSync(PushMessageInfoDto.builder()
+						.messageId(CHANNEL_CONNECTION_REQUEST)
 						.channelId(genChannelID).destinationIp(destinationIp)
 						.build());
 
-		if (response != null && SUCCESS.equals(response.getResult())) {
+		if(SUCCESS.equals(response.orElse(PushMessageInfoDto.builder().result("FA").build()).getResult())) {
 			log.debug("[PushMultiClient] channelConnectionRequest Success. Channel ID : " + genChannelID);
 			return genChannelID;
 		}
@@ -171,8 +172,8 @@ public class NettyTcpClient {
 		getSocketChannel().flush();
 	}
 
-	public Object writeSync(PushMessageInfoDto message) {
-		Object response = null;
+	public Optional<PushMessageInfoDto> writeSync(PushMessageInfoDto message) {
+		PushMessageInfoDto response = null;
 
 		int retryCount = Integer.parseInt(callRetryCount);
 
@@ -199,7 +200,7 @@ public class NettyTcpClient {
 
 		if (!isFutureSuccess.get()) {
 			log.error("[NettyClient][Sync] write to server failed ");
-			return null;
+			return Optional.ofNullable(null);
 		}
 
 		long readWaited = 0L;
@@ -223,10 +224,10 @@ public class NettyTcpClient {
 
 		if(readWaited >= CONN_TIMEOUT) {
 			log.error("[NettyClient][Sync] Read from server failed after " + CONN_TIMEOUT + "ms");
-			return null;
+			return Optional.ofNullable(null);
 		}
 
-		return response;
+		return Optional.ofNullable(response);
 	}
 
 	public void waitFutureDone(final ChannelFuture future) {
@@ -259,14 +260,14 @@ public class NettyTcpClient {
 		}
 	}
 
-	private Object getAttachment(int messageId) {
-		Object msg;
+	private PushMessageInfoDto getAttachment(int messageId) {
+		PushMessageInfoDto msg;
 		if (messageId == CHANNEL_CONNECTION_REQUEST) {
-			msg = getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).get();
+			msg = (PushMessageInfoDto) getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).get();
 			getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_CONN_ID)).set(null);
 		}
 		else {
-			msg = getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).get();
+			msg = (PushMessageInfoDto) getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).get();
 			getSocketChannel().attr(AttributeKey.valueOf(NettyTcpClient.ATTACHED_DATA_ID)).set(null);
 		}
 

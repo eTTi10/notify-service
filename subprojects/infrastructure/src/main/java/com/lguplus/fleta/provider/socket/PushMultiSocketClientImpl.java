@@ -14,10 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -284,20 +281,11 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
      * 프로세스 상태 확인 메시지 전송
      */
     private boolean isServerInValidStatus() {
-
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(
-                PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST)
+        Optional<PushMessageInfoDto> response = nettyTcpClient.writeSync(PushMessageInfoDto.builder()
+                        .messageId(PROCESS_STATE_REQUEST)
                         .channelId(this.channelID).destinationIp(destinationIp)
                         .build());
-
-        if (response != null) {
-            log.trace("[PushMultiClient] ProcessStateRequest Success. Channel ID : " + channelID);
-            return !SUCCESS.equals(response.getResult());
-        }
-        else {
-            log.info("[PushMultiClient] ProcessStateRequest Fail. Channel ID : " + channelID);
-            return true;
-        }
+        return !response.orElse(PushMessageInfoDto.builder().result("FA").build()).getResult().equals(SUCCESS);
     }
 
     private String getTransactionId() {
