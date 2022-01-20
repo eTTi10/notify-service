@@ -11,6 +11,7 @@ import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
 import fleta.util.JunitTestUtils;
+import io.netty.bootstrap.Bootstrap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -252,6 +253,8 @@ class PushMultiSocketClientImplTest {
 
         //normal
         ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
+        Bootstrap bootstrap = (Bootstrap)ReflectionTestUtils.getField(nettyTcpClient, "bootstrap");
+        bootstrap.remoteAddress(SERVER_IP, SERVER_PORT);
         nettyTcpClient.disconnect();
         nettyTcpClient.connect(pushMultiSocketClient); //normal connect
         pushMultiSocketClient.checkClientInvalid();
