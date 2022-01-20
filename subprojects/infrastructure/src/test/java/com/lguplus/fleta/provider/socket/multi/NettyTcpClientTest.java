@@ -206,9 +206,9 @@ class NettyTcpClientTest implements PushMultiClient {
         PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
         String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId).replace(REGIST_ID_NM, pushRequestMultiDto.getUsers().get(0));
 
-        PushMessageInfoDto response = (PushMessageInfoDto) nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
+        Optional<PushMessageInfoDto> response = nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
 
-        int processSatusId = response.getMessageId();
+        int processSatusId = response.orElse(PushMessageInfoDto.builder().messageId(0).build()).getMessageId();
         Assertions.assertEquals(14, processSatusId);
 
         //Thread.sleep(3000);
@@ -380,36 +380,36 @@ class NettyTcpClientTest implements PushMultiClient {
             String channelId = spyNettyTcpClient.getNextChannelID();
             Assertions.assertFalse(nettyTcpClient.isInValid());
 
-            doReturn(null).when(spyNettyTcpClient).getChannel();
+            doReturn(null).when(spyNettyTcpClient).getSocketChannel();
             boolean isInvalid = spyNettyTcpClient.isInValid();
             Assertions.assertTrue(isInvalid);
 
             spyNettyTcpClient = spy(nettyTcpClient);
             ChannelTest channelTest = new ChannelTest("test", true, true);
-            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            doReturn(channelTest).when(spyNettyTcpClient).getSocketChannel();
             isInvalid = spyNettyTcpClient.isInValid();
             Assertions.assertFalse(isInvalid);
 
             spyNettyTcpClient = spy(nettyTcpClient);
             channelTest = new ChannelTest("test", true, false);
-            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            doReturn(channelTest).when(spyNettyTcpClient).getSocketChannel();
             isInvalid = spyNettyTcpClient.isInValid();
             Assertions.assertTrue(isInvalid);
 
             //disconnect
             spyNettyTcpClient = spy(nettyTcpClient);
-            doReturn(null).when(spyNettyTcpClient).getChannel();
+            doReturn(null).when(spyNettyTcpClient).getSocketChannel();
             spyNettyTcpClient.disconnect();
             //Assertions.assertTrue(spyNettyTcpClient.isInValid());
 
             spyNettyTcpClient = spy(nettyTcpClient);
-            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getChannel();
+            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getSocketChannel();
             spyNettyTcpClient.disconnect();
             //Assertions.assertTrue(spyNettyTcpClient.isInValid());
 
             spyNettyTcpClient = spy(nettyTcpClient);
             ChannelTest channelTest1 = new ChannelTest("test", true, true);
-            doReturn(channelTest1).when(spyNettyTcpClient).getChannel();
+            doReturn(channelTest1).when(spyNettyTcpClient).getSocketChannel();
             spyNettyTcpClient.disconnect();
             Assertions.assertTrue(spyNettyTcpClient.isInValid());
         } finally {
@@ -431,7 +431,7 @@ class NettyTcpClientTest implements PushMultiClient {
             NettyTcpClient spyNettyTcpClient;
 
             spyNettyTcpClient = spy(nettyTcpClient);
-            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getChannel();
+            doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getSocketChannel();
 
             int COMMAND_REQUEST = 15;
             String data = "{\"request\":{\"service_key\":\"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=\",\"badge\":\"1\",\"push_id\":\"202201100001\",\"service_id\":\"30011\",\"sound\":\"ring.caf\",\"service_passwd\":\"5643a19ce9fa3ddf470b33afdfe57a976e9e99af082d1a366d69185299425e45ca8fb3c18539751432e207b99d52d3f8f13956513a1126792072c3d18e8cea3a\",\"cm\":\"aaaa\",\"noti_contents\":\"\\\"PushCtrl\\\":\\\"ON\\\",\\\"MESSGAGE\\\": \\\"NONE\\\"\",\"msg_id\":\"PUSH_NOTI\",\"app_id\":\"lguplushdtvgcm\"}}";
@@ -441,7 +441,7 @@ class NettyTcpClientTest implements PushMultiClient {
             spyNettyTcpClient = spy(nettyTcpClient);
             ChannelTest channelTest = new ChannelTest("test", true, true);
             channelTest.setIsSuccess(true);
-            doReturn(channelTest).when(spyNettyTcpClient).getChannel();
+            doReturn(channelTest).when(spyNettyTcpClient).getSocketChannel();
             spyNettyTcpClient.write(PushMessageInfoDto.builder().messageId(COMMAND_REQUEST).channelId(channelID).destinationIp("222.231.13.85").data(data).build());
 
         } finally {

@@ -76,6 +76,7 @@ class PushSingleDomainServiceTest {
                 .regId("-")
                 .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
+                .retryCount(0)
                 .build();
 
         ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", "100");
@@ -184,6 +185,7 @@ class PushSingleDomainServiceTest {
                 .regId("-")
                 .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
+                .retryCount(0)
                 .build();
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
 
@@ -363,6 +365,7 @@ class PushSingleDomainServiceTest {
                 .regId("-")
                 .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
+                .retryCount(0)
                 .build();
 
         PushClientResponseDto responseDto1 = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
