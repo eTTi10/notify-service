@@ -45,7 +45,6 @@ class PushMultiDomainServiceTest {
     @Mock
     private PushMapper pushMapper;
 
-    //
     List<String> items;
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
@@ -75,7 +74,6 @@ class PushMultiDomainServiceTest {
                 .items(addItems)
                 .build();
 
-
         ReflectionTestUtils.setField(pushMultiDomainService, "oldLgPushAppId", "smartux0001");
         ReflectionTestUtils.setField(pushMultiDomainService, "oldLgPushNotiType", "POS");
     }
@@ -91,9 +89,7 @@ class PushMultiDomainServiceTest {
                 .items(addItems)
                 .build();
 
-        assertThrows(ServiceIdNotFoundException.class, () -> {
-            pushMultiDomainService.requestMultiPush(testDto);
-        });
+        assertThrows(ServiceIdNotFoundException.class, () -> pushMultiDomainService.requestMultiPush(testDto));
     }
 
     @Test

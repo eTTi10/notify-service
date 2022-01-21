@@ -74,9 +74,7 @@ class PushAnnounceDomainServiceTest {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn(null);
 
-        assertThrows(ServiceIdNotFoundException.class, () -> {
-            pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        });
+        assertThrows(ServiceIdNotFoundException.class, () -> pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto));
     }
 
     @Test
@@ -99,13 +97,9 @@ class PushAnnounceDomainServiceTest {
 
         List<String> codeList = Arrays.asList(new String[]{"202", "400", "401","403", "404", "410","412", "500", "502","503", "5102"});//, "-"});
 
-        int count = 0;
         for(String code : codeList) {
             given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
-
-            assertThrows(NotifyRuntimeException.class, () -> {
-                pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-            });
+            assertThrows(NotifyRuntimeException.class, () -> pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto));
         }
     }
 
