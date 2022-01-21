@@ -95,11 +95,10 @@ public class PushSingleDomainService {
         String statusCode = "";
         String statusMsg = "";
 
-        int retryCallCnt = dto.getRetryCount() > 0 ? dto.getRetryCount() : iPushCallRetryCnt;
+        int retryCallCnt = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : iPushCallRetryCnt;
 
         //2. Send Push
-        int reCnt = 0;
-        while (reCnt < retryCallCnt) {
+        for(int reCnt=0; reCnt < retryCallCnt; reCnt++) {
             try {
                 setPushProgressCnt(dto.getServiceId(), +1);
                 PushResponseDto pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
@@ -111,24 +110,15 @@ public class PushSingleDomainService {
             }
 
             //3. Send Result
-            if (statusCode.equals("200")) {
-                log.trace("[requestPushSingle][" + statusCode + "] [SUCCESS]");
+            // 200 : 정상 처리, 재시도 예외인 경우
+            if (statusCode.equals("200") || isRetryExcludeCode(statusCode)) {
                 break;
-            }
-
-            log.debug("[requestPushSingle][" + statusCode + "] [FAIL] retry:{}/{} ", reCnt+1, retryCallCnt);
-
-            // 재시도 예외 리턴 코드인 경우 재시도 안함.
-            // 재시도 횟수에 도달한 경우 바로 반환.
-            if (++reCnt == retryCallCnt || isRetryExcludeCode(statusCode)) {
-                throw exceptionHandler(statusCode);
-                //테스트 코드
-                // return PushClientResponseDto.builder().code("503").message("Failure").build()
             }
         }
 
-        return PushClientResponseDto.builder().code(statusCode).message(statusMsg)
-                .build();
+        exceptionHandler(statusCode);
+
+        return PushClientResponseDto.builder().code(statusCode).message(statusMsg).build();
     }
 
     private Map<String, String> getMessage(PushRequestSingleDto dto, String servicePwd) {
@@ -174,34 +164,36 @@ public class PushSingleDomainService {
         }
     }
 
-    private NotifyRuntimeException exceptionHandler(String statusCode) {
+    private void exceptionHandler(String statusCode) throws NotifyRuntimeException {
         switch (statusCode) {
+            case "200":
+                break;
             case "202":
                 throw new AcceptedException();
             case "400":
-                return new BadRequestException();
+                throw new BadRequestException();
             case "401":
-                return new UnAuthorizedException();
+                throw new UnAuthorizedException();
             case "403":
-                return new ForbiddenException();
+                throw new ForbiddenException();
             case "404":
-                return new NotFoundException();
+                throw new NotFoundException();
             case "410":
-                return new NotExistRegistIdException();
+                throw new NotExistRegistIdException();
             case "412":
-                return new PreConditionFailedException();
+                throw new PreConditionFailedException();
             case "500":
-                return new InternalErrorException();
+                throw new InternalErrorException();
             case "502":
-                return new ExceptionOccursException();
+                throw new ExceptionOccursException();
             case "503":
-                return new ServiceUnavailableException();
+                throw new ServiceUnavailableException();
             case "5102":
-                return new SocketTimeException();
+                throw new SocketTimeException();
             case "5103": //FeignException
-                return new SocketException();
+                throw new SocketException();
             default:
-                return new PushEtcException();//("기타 오류"); //9999
+                throw new PushEtcException();//("기타 오류"); //9999
         }
     }
 
@@ -264,38 +256,39 @@ public class PushSingleDomainService {
     private Long getPushProcessCount(String serviceId) {
         synchronized (progressLock.get(serviceId)) {
             Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
-            return processCounter.isPresent() ? processCounter.get().getTransactionCount() : 0;
+            return processCounter.orElse(ProcessCounter.builder().transactionCount(0L).build()).getTransactionCount();
         }
     }
 
     private void setPushProgressCnt(String serviceId, int changeVal) {
+        setPushProgressCnt(serviceId, changeVal, false);
+    }
+
+    private void setPushProgressCnt(String serviceId, int changeVal, boolean isReset) {
         synchronized (progressLock.get(serviceId)) {
             Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
             if(processCounter.isPresent()) {
-                processCounter.get().setTransactionCount(processCounter.get().getTransactionCount() + changeVal);
+                long setCount = processCounter.get().getTransactionCount() + changeVal;
+                if(isReset) {
+                    setCount = changeVal;
+                }
+                processCounter.get().setTransactionCount(setCount);
             }
             else {
-                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount((long) changeVal).build());
+                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
             }
         }
     }
 
     private void resetPushProgressCnt(String serviceId) {
-        synchronized (progressLock.get(serviceId)) {
-           Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
-           if(processCounter.isPresent()) {
-               processCounter.get().setTransactionCount(0L);
-           }
-           else {
-               pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(0L).build());
-           }
-        }
+        setPushProgressCnt(serviceId, 0, true);
     }
 
     @Getter
     @NoArgsConstructor(access = AccessLevel.PRIVATE)
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
+    @ToString
     static class ProcessCounter {
         private String serviceId;
         private Long transactionCount;

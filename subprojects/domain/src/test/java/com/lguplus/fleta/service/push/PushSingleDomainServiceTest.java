@@ -85,6 +85,7 @@ class PushSingleDomainServiceTest {
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushAppId", "smartux0001");
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushNotiType", "POS");
         ReflectionTestUtils.setField(pushSingleDomainService, "lgPushServceId", "00007");
+        ReflectionTestUtils.setField(pushSingleDomainService, "pushProgressCnt", new ArrayList<>());
 
         pushSingleDomainService.initialize();
     }
@@ -125,7 +126,7 @@ class PushSingleDomainServiceTest {
     }
 
     @Test
-    void requestPushSingle() {
+    void requestPushSingle_normal() {
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
         given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
                 .measurePushCount(0)
@@ -143,6 +144,19 @@ class PushSingleDomainServiceTest {
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         Assertions.assertEquals("200", responseDto.getCode());
 
+        PushRequestSingleDto pushRequestSingleDtoLg = PushRequestSingleDto.builder()
+                .serviceId("00007")
+                .pushType("G")
+                .applicationId("lguplushdtvgcm")
+                .regId("-")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
+                .retryCount(5)
+                .build();
+        //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
+
+        PushClientResponseDto responseDtoLg = pushSingleDomainService.requestPushSingle(pushRequestSingleDtoLg);
+        Assertions.assertEquals("200", responseDtoLg.getCode());
     }
 
     @Test
@@ -156,41 +170,7 @@ class PushSingleDomainServiceTest {
                 .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
                 .items(addItems)
                 .build();
-        assertThrows(ServiceIdNotFoundException.class, () -> {
-            pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
-        });
-    }
-
-    @Test
-    void requestPushSingle_isLgPush() {
-
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
-        );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
-        );
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
-
-        PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
-                .serviceId("00007")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("-")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .retryCount(0)
-                .build();
-        //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
-
-        PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
-        Assertions.assertEquals("200", responseDto.getCode());
+        assertThrows(ServiceIdNotFoundException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto1));
     }
 
     @Test
@@ -211,19 +191,35 @@ class PushSingleDomainServiceTest {
 
         List<String> codeList = Arrays.asList(new String[]{"202", "400", "401","403", "404", "410","412", "500", "502","503", "5102", "5103", "Unknown"});//, "-"});
 
-        int count = 0;
         for(String code : codeList) {
             given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
-
-            Exception thrown = assertThrows(NotifyRuntimeException.class, () -> {
-                pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-            });
-
-            boolean isNotiPush = thrown instanceof NotifyRuntimeException;
-            if(isNotiPush)
-                count ++;
+            assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
         }
-        assertEquals(count, codeList.size());
+    }
+
+    @Test
+    void requestPushSingle_retryExcludeCode() {
+
+        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+                .measurePushCount(0)
+                .measureIntervalMillis(1000L)
+                .measureStartMillis(System.currentTimeMillis())
+                .build()
+        );
+        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+                .measurePushCount(0)
+                .measureIntervalMillis(1000L)
+                .measureStartMillis(System.currentTimeMillis())
+                .build()
+        );
+        //ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "400|401|403");
+        //BadRequestException, UnAuthorizedException, ForbiddenException
+
+        given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("400").build());
+        assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
+
+        given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("202").build());
+        assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
     }
 
     @Test
@@ -261,11 +257,9 @@ class PushSingleDomainServiceTest {
                 .build()
         );
 
-        Exception thrown = assertThrows(MaxRequestOverException.class, () -> {
+        assertThrows(MaxRequestOverException.class, () -> {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         });
-
-        Assertions.assertTrue(thrown instanceof MaxRequestOverException);
 
     }
 
@@ -284,11 +278,9 @@ class PushSingleDomainServiceTest {
                 .build()
         );
 
-        Exception thrown = assertThrows(MaxRequestOverException.class, () -> {
+        assertThrows(MaxRequestOverException.class, () -> {
             pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         });
-
-        Assertions.assertTrue(thrown instanceof MaxRequestOverException);
 
     }
 
@@ -311,9 +303,6 @@ class PushSingleDomainServiceTest {
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         Assertions.assertEquals("200", responseDto.getCode());
     }
-
-    //ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "A|B|C");
-
 
     @Test
     void requestPushSingle_isRetryExcludeCodeTrue() {
@@ -389,14 +378,10 @@ class PushSingleDomainServiceTest {
         );
 
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("410").build());
-        Exception thrown = assertThrows(NotExistRegistIdException.class, () -> {
-            pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        });
-        Assertions.assertTrue(thrown instanceof NotExistRegistIdException);
+        assertThrows(NotExistRegistIdException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
 
         given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("400").build());
-        thrown = assertThrows(BadRequestException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
-        Assertions.assertTrue(thrown instanceof BadRequestException);
+        assertThrows(BadRequestException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
     }
 
 
