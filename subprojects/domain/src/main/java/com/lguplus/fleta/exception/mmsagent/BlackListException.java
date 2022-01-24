@@ -1,8 +1,15 @@
 package com.lguplus.fleta.exception.mmsagent;
 
-import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
-public class BlackListException extends NotifyMmsRuntimeException {
+public class BlackListException extends NotifyRuntimeException {
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
+    }
 
     public BlackListException() {
         super();
