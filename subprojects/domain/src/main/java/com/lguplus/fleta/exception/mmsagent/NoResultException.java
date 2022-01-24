@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exception.mmsagent;
 
-import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 0001.
@@ -8,7 +9,13 @@ import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
  * @author Minwoo Lee
  * @since 1.0
  */
-public class NoResultException extends NotifyMmsRuntimeException {
+public class NoResultException extends NotifyRuntimeException {
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
+    }
 
     /**
      *

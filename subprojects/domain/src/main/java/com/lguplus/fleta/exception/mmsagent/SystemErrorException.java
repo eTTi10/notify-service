@@ -1,9 +1,15 @@
 package com.lguplus.fleta.exception.mmsagent;
 
-import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
-public class SystemErrorException extends NotifyMmsRuntimeException {
+public class SystemErrorException extends NotifyRuntimeException {
 
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
+    }
 
     public SystemErrorException() {
         super();
