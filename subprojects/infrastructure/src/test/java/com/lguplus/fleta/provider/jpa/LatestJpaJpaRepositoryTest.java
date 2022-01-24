@@ -1,4 +1,4 @@
-package com.lguplus.fleta.provider.jpa.latest;
+package com.lguplus.fleta.provider.jpa;
 
 import com.lguplus.fleta.config.InfrastructureConfig;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
