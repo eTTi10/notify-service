@@ -455,7 +455,6 @@ class NettyTcpClientTest implements PushMultiClient {
         NettyTcpClient nettyTcpClient = getNettyClientInvalid();
 
         try {
-
             String channelID = nettyTcpClient.connect(this);
             Assertions.assertTrue(nettyTcpClient.isInValid());
 
@@ -463,6 +462,60 @@ class NettyTcpClientTest implements PushMultiClient {
             nettyTcpClient.disconnect();
         }
 
+    }
+
+    @Test
+    void test_connect_ChannelFuture() {
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try {
+            NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
+            String genChannelId;
+
+            doReturn(new ChannelFutureTest(null, false, false)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            doReturn(new ChannelFutureTest(null, false, true)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            String channelId = "01234567891234";//14
+            doReturn(channelId).when(spyNettyTcpClient).getNextChannelID();
+            doReturn(Optional.ofNullable(null)).when(spyNettyTcpClient).sendConnectRequest(channelId);
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            doReturn(Optional.of(PushMessageInfoDto.builder().result("SC").build())).when(spyNettyTcpClient).sendConnectRequest(channelId);
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(channelId, genChannelId);
+
+        } finally {
+
+        }
+    }
+
+
+   // @Test
+    void test_connect_ChannelFuture1() {
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try {
+            NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
+            String genChannelId;
+
+            doReturn(new ChannelFutureTest(null, false, false)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            doReturn(new ChannelFutureTest(null, false, true)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+        } finally {
+
+        }
     }
 
     @AfterEach
@@ -488,6 +541,7 @@ class NettyTcpClientTest implements PushMultiClient {
     public static class ChannelFutureTest implements ChannelFuture {
 
         boolean isSuccess = false;
+        boolean isDone = true;
         Channel channel;
 
         public ChannelFutureTest(Channel channel, boolean isSuccess) {
@@ -495,11 +549,10 @@ class NettyTcpClientTest implements PushMultiClient {
             this.isSuccess = isSuccess;
         }
 
-        static void notifyListener0(Future future, GenericFutureListener l) {
-            try {
-                l.operationComplete(future);
-            } catch (Throwable t) {
-            }
+        public ChannelFutureTest(Channel channel, boolean isSuccess, boolean isDone) {
+            this.channel = channel;
+            this.isSuccess = isSuccess;
+            this.isDone = isDone;
         }
 
         @Override
@@ -510,6 +563,11 @@ class NettyTcpClientTest implements PushMultiClient {
         @Override
         public boolean isSuccess() {
             return isSuccess;
+        }
+
+        @Override
+        public boolean isDone() {
+            return isDone;
         }
 
         @Override
@@ -597,10 +655,6 @@ class NettyTcpClientTest implements PushMultiClient {
             return false;
         }
 
-        @Override
-        public boolean isDone() {
-            return false;
-        }
 
         @Override
         public Void get() throws InterruptedException, ExecutionException {
