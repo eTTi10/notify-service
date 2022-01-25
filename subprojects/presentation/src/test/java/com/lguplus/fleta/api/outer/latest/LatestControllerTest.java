@@ -82,7 +82,7 @@ class LatestControllerTest {
                 .saId(SA_ID).mac(MAC)
                 .ctn(CTN).catId(CAT_ID)
                 .regId(REG_ID).catName(CAT_NAME)
-                .rDate(R_DATE).categoryGb(CATEGORY_GB)
+                .rDate(new Date()).categoryGb(CATEGORY_GB)
                 .build();
 
         List<LatestEntity> rs = List.of(rs1);

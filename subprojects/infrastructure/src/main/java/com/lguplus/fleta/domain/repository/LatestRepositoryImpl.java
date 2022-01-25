@@ -1,15 +1,14 @@
-package com.lguplus.fleta.provider.jpa.latest;
+package com.lguplus.fleta.domain.repository;
 
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
-import com.lguplus.fleta.repository.LatestRepository;
+import com.lguplus.fleta.provider.jpa.LatestJpaRepository;
+import com.lguplus.fleta.repository.latest.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
@@ -19,12 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LatestRepositoryImpl implements LatestRepository {
 
-
     private final LatestJpaRepository latestJpaRepository;
-    private String catIdStr = "catId";
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Override
     public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
