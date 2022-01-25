@@ -120,10 +120,10 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(BlackListException.class, () -> {
+        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof BlackListException, true);
+        assertEquals(thrown instanceof NotFoundMsgException, true);
 
         log.info("End callSettingApi recordset null");
     }
@@ -153,10 +153,10 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(BlackListException.class, () -> {
+        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof BlackListException, true);
+        assertEquals(thrown instanceof NotFoundMsgException, true);
 
         log.info("End callSettingApi totalcount0");
     }

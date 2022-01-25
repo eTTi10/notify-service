@@ -17,9 +17,7 @@ import java.util.Random;
 
 @Slf4j
 @Component
-/**
- * ################### 개발중 입니다. 잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
- */
+
 public class MmsAgentSoapClient implements MmsAgentDomainClient {
    private Random random = new Random();
     @Override
@@ -73,13 +71,16 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         MMSC mmsc = new BasicMMSC(url, mms);
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
-
+        /**
+         * ################### 처리부분 개발중 입니다. [ 방화벽 막힘 ]잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
+         */
         try {
             //실제 처리 준비중...방화벽 막힘...
             mmsc.submit(submitReq);
         }catch(MM7Error e){
             return e.getFaultCode();
         }
+
         int statusCode = MM7Response.SC_SUCCESS;
         return Integer.toString(statusCode);
     }
