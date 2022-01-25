@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.SaIdDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
@@ -22,7 +21,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(SpringExtension.class)
 class SubscriberDomainFeinClientTest {
 
-    private static final String REG_ID = "M00020200205";
+    private static final String SA_ID = "500223046118";
 
     @Mock
     SubscriberFeinClient subscriberFeinClient;
@@ -36,7 +35,7 @@ class SubscriberDomainFeinClientTest {
 
         //given
 
-        SaIdDto saIdDto = SaIdDto.builder().saId(REG_ID).build();
+        SaIdDto saIdDto = SaIdDto.builder().saId(SA_ID).build();
         List<SaIdDto> saIdDtos = List.of(saIdDto);
 
         InnerResponseDto<List<SaIdDto>> regIdDtoInnerResponseDto = new InnerResponseDto<List<SaIdDto>>(InnerResponseCodeType.OK, saIdDtos);
@@ -44,13 +43,13 @@ class SubscriberDomainFeinClientTest {
         given(subscriberFeinClient.getRegistrationIDbyCtn(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("ctnNo", "M00020200205");
+        paramMap.put("ctnNo", "001039752719");
 
         //when
         List<SaIdDto> responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
 
         //then
-        assertThat(responseDto.get(0).getSaId().equals(REG_ID));
+        assertThat(responseDto.get(0).getSaId().equals(SA_ID));
 
     }
 }

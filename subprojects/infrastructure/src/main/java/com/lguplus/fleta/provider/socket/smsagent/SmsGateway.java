@@ -443,7 +443,7 @@ public class SmsGateway {
                 isLinked = true;
                 break;
             default:
-                mStatusLog.info("Invalid Type [" + type + "]");
+//                mStatusLog.info("Invalid Type [" + type + "]");
                 break;
         }
 

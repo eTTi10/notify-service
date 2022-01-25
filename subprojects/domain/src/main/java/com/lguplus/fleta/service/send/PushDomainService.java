@@ -286,8 +286,8 @@ public class PushDomainService {
 
         Map<String, String> inputMap = new HashMap<>();
 
-        inputMap.put("sa_id", sendPushCodeRequestDto.getSaId());
-        inputMap.put("stb_mac", sendPushCodeRequestDto.getStbMac());
+        inputMap.put("saId", sendPushCodeRequestDto.getSaId());
+        inputMap.put("stbMac", sendPushCodeRequestDto.getStbMac());
 
         RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow();
         return regIdDto.getRegistrationId();

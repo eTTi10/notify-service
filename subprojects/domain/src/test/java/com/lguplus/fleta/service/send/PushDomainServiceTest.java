@@ -40,6 +40,7 @@ import static org.mockito.BDDMockito.given;
 class PushDomainServiceTest {
 
     private static final String REG_ID = "M00020200205";
+    private static final String SA_ID = "500223046118";
 
     HttpPushSingleRequestDto httpPushSingleRequestDto;
     SendPushCodeRequestDto sendPushCodeRequestDto;
@@ -445,7 +446,7 @@ class PushDomainServiceTest {
 
         //given
          SaIdDto saIdDto = SaIdDto.builder()
-                .saId(REG_ID)
+                .saId(SA_ID)
                 .build();
 
         List<SaIdDto> saIdDtos = List.of(saIdDto);
@@ -465,7 +466,7 @@ class PushDomainServiceTest {
 
         //given
         SaIdDto saIdDto = SaIdDto.builder()
-                .saId(REG_ID)
+                .saId(SA_ID)
                 .build();
         List<SaIdDto> saIdDtos = List.of(saIdDto);
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
@@ -524,7 +525,7 @@ class PushDomainServiceTest {
         //given
 
         SaIdDto saIdDto = SaIdDto.builder()
-                .saId(REG_ID)
+                .saId(SA_ID)
                 .build();
         List<SaIdDto> saIdDtos = List.of(saIdDto);
         given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
