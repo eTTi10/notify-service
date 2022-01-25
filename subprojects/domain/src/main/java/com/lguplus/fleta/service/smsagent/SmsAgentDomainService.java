@@ -280,7 +280,6 @@ public class SmsAgentDomainService {
                 throw new SmsAgentEtcException(messageEtcException);
             }
 
-
             return retrySmsSend(smsAgentRequestDto);
         }
 
@@ -293,8 +292,6 @@ public class SmsAgentDomainService {
      * @return Map<sms_cd, 문자내용>
      */
     private String callSettingApi(String smsCd) {
-
-        Map<String, String> map = new HashMap<>();
 
         try {
 
@@ -319,8 +316,7 @@ public class SmsAgentDomainService {
             if(callSettingApi.getResult().getTotalCount() > 0) {
 
                 log.debug("sms_cd(메시지내용) {} " , settingApiList.get(0).getCodeName());
-                map.put("sms_cd", settingApiList.get(0).getCodeName());
-                return map.get("sms_cd");
+                return settingApiList.get(0).getCodeName();
             }
             else {
                 return "";
