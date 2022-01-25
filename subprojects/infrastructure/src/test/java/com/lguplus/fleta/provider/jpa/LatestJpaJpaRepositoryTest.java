@@ -1,9 +1,10 @@
-package com.lguplus.fleta.provider.jpa.latest;
+package com.lguplus.fleta.provider.jpa;
 
 import com.lguplus.fleta.config.InfrastructureConfig;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
-import com.lguplus.fleta.repository.LatestRepository;
+import com.lguplus.fleta.domain.repository.LatestRepositoryImpl;
+import com.lguplus.fleta.repository.latest.LatestRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

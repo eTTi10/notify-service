@@ -1,4 +1,4 @@
-package com.lguplus.fleta.repository;
+package com.lguplus.fleta.repository.latest;
 
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
