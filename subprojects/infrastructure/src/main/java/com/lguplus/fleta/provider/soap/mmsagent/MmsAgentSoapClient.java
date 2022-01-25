@@ -73,14 +73,10 @@ public class MmsAgentSoapClient implements MmsAgentDomainClient {
         MMSC mmsc = new BasicMMSC(url, mms);
         mmsc.getContext().setMm7Namespace((String)mms.get("namespace"));
         mmsc.getContext().setMm7Version((String)mms.get("version"));
-        /*
-        int statusCode = MM7Response.SC_SUCCESS;
-        return Integer.toString(statusCode);
-        */
 
         try {
             //실제 처리 준비중...방화벽 막힘...
-            MM7Response rsp = mmsc.submit(submitReq);
+            mmsc.submit(submitReq);
         }catch(MM7Error e){
             return e.getFaultCode();
         }

@@ -10,7 +10,7 @@ import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
-import com.lguplus.fleta.repository.LatestRepository;
+import com.lguplus.fleta.repository.latest.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

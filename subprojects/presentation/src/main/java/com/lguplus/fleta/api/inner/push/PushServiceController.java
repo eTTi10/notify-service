@@ -1,7 +1,6 @@
 package com.lguplus.fleta.api.inner.push;
 
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
@@ -62,19 +61,6 @@ public class PushServiceController {
 
         PushRequestAnnounceDto pushRequestAnnounceDto = pushRequestMapper.toDtoAnnounce(pushRequestBodyAnnounceVo);
 
-        //추가 Items
-        List<PushRequestItemDto> items = new ArrayList<>();
-        pushRequestBodyAnnounceVo.getAddItems().forEach(e -> {
-            String[] parseItems = e.split("!\\^");
-            if (parseItems.length == 2) {
-                items.add(PushRequestItemDto.builder().itemKey(parseItems[0]).itemValue(parseItems[1]).build());
-            }
-            else {
-                log.error("pushRequestAnnouncement items error");
-            }
-        });
-        pushRequestAnnounceDto.setItems(items);
-
         return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto));
     }
 
@@ -96,19 +82,6 @@ public class PushServiceController {
         if ( ("|" + this.pushRejectRegList + "|" ).contains("|" + pushRequestSingleDto.getRegId().trim() + "|" ) ) {
             return InnerResponseDto.of(PushClientResponseDto.builder().code("0000").message("성공").build());
         }
-
-        //추가 Items
-        List<PushRequestItemDto> items = new ArrayList<>();
-        pushRequestBodySingleVo.getAddItems().forEach(e -> {
-            String[] parseItems = e.split("!\\^");
-            if (parseItems.length == 2) {
-                items.add(PushRequestItemDto.builder().itemKey(parseItems[0]).itemValue(parseItems[1]).build());
-            }
-            else {
-                log.error("pushRequest items error");
-            }
-        });
-        pushRequestSingleDto.setItems(items);
 
         return InnerResponseDto.of(pushSingleService.requestPushSingle(pushRequestSingleDto));
     }
@@ -137,19 +110,6 @@ public class PushServiceController {
         pushRequestBodyMultiVo.setUsers(validUsers);
 
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
-
-        //추가 Items
-        List<PushRequestItemDto> items = new ArrayList<>();
-        pushRequestBodyMultiVo.getAddItems().forEach(e -> {
-            String[] parseItems = e.split("!\\^");
-            if (parseItems.length == 2) {
-                items.add(PushRequestItemDto.builder().itemKey(parseItems[0]).itemValue(parseItems[1]).build());
-            }
-            else {
-                log.error("multiPushRequest items error");
-            }
-        });
-        dto.setItems(items);
 
         PushClientResponseMultiDto responseMultiDto = pushMultiService.requestMultiPush(dto);
 
