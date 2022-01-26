@@ -46,7 +46,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private static final int COMMAND_REQUEST = 15;
     private int FLUSH_COUNT = 100;
 
-    private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
+    private final AtomicInteger transactionMsgId = new AtomicInteger(0);
     private final AtomicLong sendMsgCount = new AtomicLong(0);
     private final AtomicLong lastSendMills = new AtomicLong(System.currentTimeMillis());
 
@@ -105,6 +105,8 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
         checkClientInvalid();
 
         checkClientProcess();
+
+        checkInvalidServerException();
     }
 
     public void checkClientInvalid() {
@@ -125,13 +127,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             log.debug("[MultiPushRequest][C] the current channel is not valid, re-connect again.");
             nettyTcpClient.disconnect();
             this.channelID = nettyTcpClient.connect(this);	// 재접속 (Channel이 유효하지 않는 경우, 접속 강제 종료 후 재접속함)
-
-            if(isServerInValidStatus()) {
-                throw new ServiceUnavailableException();
-            }
         }
-        else {
-            return;
+    }
+
+    public void checkInvalidServerException() {
+        if(isServerInValidStatus()) {
+            throw new ServiceUnavailableException();
         }
     }
 
@@ -289,7 +290,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     }
 
     private String getTransactionId() {
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
+        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
     }
 
 
