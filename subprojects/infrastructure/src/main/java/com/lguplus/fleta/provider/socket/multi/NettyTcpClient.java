@@ -78,6 +78,8 @@ public class NettyTcpClient {
 	private PushMultiClient pushMultiClient;
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
+	//private MessageToByteEncoder<PushMessageInfoDto> nettyMessageEncoder = new MessageEncoder();
+	//private ByteToMessageDecoder nettyMessageDecoder = new MessageDecoder();
 
 	private void initialize() {
 
@@ -199,6 +201,7 @@ public class NettyTcpClient {
 			ChannelFuture awaitFuture = getSocketChannel().writeAndFlush(message);
 			waitFutureDone(awaitFuture);
 			isFutureSuccess.set(awaitFuture.isSuccess());
+			log.debug("[NettyClient][Sync] writeAndFlush {}/{} : {}/{}", sendCnt, retryCount, awaitFuture.isSuccess(), isFutureSuccess.get());
 		});
 
 		if (!isFutureSuccess.get()) {
@@ -216,7 +219,7 @@ public class NettyTcpClient {
 				currentThread().interrupt();
 			}
 			response = getAttachment(message.getMessageId());
-			log.debug("try getAttachement: {} {}", readWaited, response);
+			log.trace("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
@@ -238,10 +241,12 @@ public class NettyTcpClient {
 		future.addListener(f -> latch.countDown());
 
 		try {
+			log.debug("waitLatch start 0");
 			boolean result = waitLatch(latch);
 			if(!result) {
 				log.error("waitFutureDone awit timeout!");
 			}
+			log.debug("waitLatch end 0");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}

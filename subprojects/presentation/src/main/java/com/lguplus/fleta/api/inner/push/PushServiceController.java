@@ -24,8 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Api(tags = "Push", description = "Push Message 전송 서비스")
@@ -100,7 +98,7 @@ public class PushServiceController {
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
         //Reject User Filtering
-        pushRequestBodyMultiVo.setUsers(pushRequestBodyMultiVo.getUsers().stream().filter(u -> isValidRegId(u)).collect(Collectors.toList()));
+        pushRequestBodyMultiVo.setUsers(pushRequestBodyMultiVo.getUsers().stream().filter(this::isValidRegId).collect(Collectors.toList()));
 
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
 
