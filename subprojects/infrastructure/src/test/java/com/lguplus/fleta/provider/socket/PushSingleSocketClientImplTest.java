@@ -39,7 +39,7 @@ class PushSingleSocketClientImplTest {
     Map<String, String> paramMap;
     Map<String, String> paramMapLg;
 
-    List<GenericObjectPool<PushSocketInfo>> poolList;
+    //List<GenericObjectPool<PushSocketInfo>> poolList;
 
     final String sendSuccessCode = "200"; //200
 
@@ -156,7 +156,6 @@ class PushSingleSocketClientImplTest {
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "measureIntervalMillis", 1000);
 
-        //Thread.sleep(1000);
         ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "initialize");
 
     }
@@ -177,6 +176,7 @@ class PushSingleSocketClientImplTest {
 
         PushResponseDto responseDto = pushSingleSocketClientImpl.requestPushSingle(paramMap);
         log.debug("junit result: " + responseDto.getStatusCode());
+        pushSingleSocketClientImpl.socketClientSch();
 
         Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
 
@@ -210,9 +210,10 @@ class PushSingleSocketClientImplTest {
     @Test // pool empty Exception
     void test04_requestPushSingle_case_04()  {
 
+        int EXTRA_CONN_COUNT = 50;
         List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
 
-        for(int i=0; i<2; i++) {
+        for(int i=0; i<2+EXTRA_CONN_COUNT; i++) {
             try {
                 PushSocketInfo pushSocketInfo = poolListEmpty.get(0).borrowObject();
                 //poolListEmpty.get(0).returnObject(pushSocketInfo);
