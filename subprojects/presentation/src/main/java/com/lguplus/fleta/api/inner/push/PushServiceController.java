@@ -24,8 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(tags = "Push", description = "Push Message 전송 서비스")
 @Slf4j
@@ -79,7 +78,7 @@ public class PushServiceController {
         PushRequestSingleDto pushRequestSingleDto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
 
         //Reject User
-        if ( ("|" + this.pushRejectRegList + "|" ).contains("|" + pushRequestSingleDto.getRegId().trim() + "|" ) ) {
+        if (!isValidRegId(pushRequestSingleDto.getRegId())) {
             return InnerResponseDto.of(PushClientResponseDto.builder().code("0000").message("성공").build());
         }
 
@@ -99,21 +98,17 @@ public class PushServiceController {
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
         //Reject User Filtering
-        List<String> validUsers = new ArrayList<>();
-        for(String regId : pushRequestBodyMultiVo.getUsers()) {
-            if (("|" + this.pushRejectRegList + "|").contains("|" + regId + "|")) {
-                log.debug("multiPushRequest reject User: " + regId);
-                continue;
-            }
-            validUsers.add(regId);
-        }
-        pushRequestBodyMultiVo.setUsers(validUsers);
+        pushRequestBodyMultiVo.setUsers(pushRequestBodyMultiVo.getUsers().stream().filter(this::isValidRegId).collect(Collectors.toList()));
 
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
 
         PushClientResponseMultiDto responseMultiDto = pushMultiService.requestMultiPush(dto);
 
         return InnerResponseDto.of(responseMultiDto);
+    }
+
+    private boolean isValidRegId(String regId) {
+        return !("|" + this.pushRejectRegList + "|").contains("|" + regId + "|");
     }
 
 }

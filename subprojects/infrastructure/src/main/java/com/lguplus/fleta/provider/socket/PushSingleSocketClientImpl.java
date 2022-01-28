@@ -13,11 +13,15 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +33,7 @@ import java.util.Map;
 @Slf4j
 @ToString
 @Component
+@EnableScheduling
 public class PushSingleSocketClientImpl implements PushSingleClient {
 
     //Pool Config
@@ -88,6 +93,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
 
     private static final int HDTV_PUSH_IDX = 0;
     private static final int LG_PUSH_IDX = 1;
+    private static final int EXTRA_CONN_COUNT = 50;
 
     /**
      * Push Single 푸시
@@ -145,23 +151,21 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
                 new PushSocketConnFactory(pushServerInfoVo)
                 , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin) ), abandonedConfig));
 
-        //AbandonedConfig : Remove 정책
-        AbandonedConfig abandonedConfig1 = new AbandonedConfig();
-        abandonedConfig1.setRemoveAbandonedOnMaintenance(true);
-        abandonedConfig1.setRemoveAbandonedOnBorrow(true);
-        abandonedConfig1.setRemoveAbandonedTimeout(250);
-
         socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
-                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig1));
+                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig));
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 
     }
 
+    @Scheduled(fixedDelay = 1000 * 10)
+    public void socketClientSch() {
+        socketPools.forEach(p -> log.trace("socketClientSch: Hdtv Time:{} Active{}/Idle{}", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), p.getNumActive(), p.getNumIdle()));
+    }
+
     @PreDestroy
     private void destroy() {
-        log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close");
         socketPools.forEach(GenericObjectPool::close);
         log.debug(":::::::::::::: PushSingleDomainSocketClient Clear/Close ...");
     }
@@ -169,9 +173,9 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal); //100
-        poolConfig.setMaxIdle(maxTotal);  //100
-        poolConfig.setMinIdle(minIdle);   //20
+        poolConfig.setMaxTotal(maxTotal+EXTRA_CONN_COUNT);
+        poolConfig.setMaxIdle(maxTotal);
+        poolConfig.setMinIdle(minIdle);
         poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
         poolConfig.setMaxWaitMillis(2000);// 최대 대기 시간
         poolConfig.setTestOnCreate(true);
