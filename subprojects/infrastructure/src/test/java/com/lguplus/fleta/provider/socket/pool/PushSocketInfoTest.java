@@ -2,11 +2,10 @@ package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.FailException;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -21,10 +20,10 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSocketInfoTest {
 
-    static NettyTcpServer server;
+    static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9666;
+    static int SERVER_PORT = 9600;
 
     String channelId = "0123456789123";//14char
     String PUSH_ENCODING = "euc-kr";
@@ -38,7 +37,7 @@ class PushSocketInfoTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpServer();
+        server = new NettyTcpJunitServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
