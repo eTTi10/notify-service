@@ -16,7 +16,6 @@ public class PersonalizationDomainFeinClient extends CommonDomainFeinClient impl
     @Override
     public RegIdDto getRegistrationID(Map<String, String> sendPushInput) {
 
-//        return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));  // TODO 다른 도메인이 서비스 준비가 되면 사용
-        return RegIdDto.builder().registrationId("M00020200205").build();
+        return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));
     }
 }

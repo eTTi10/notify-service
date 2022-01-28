@@ -20,7 +20,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(SpringExtension.class)
 class PersonalizationDomainFeinClientTest {
 
-    private static final String REG_ID = "M00020200205";
+    private static final String REG_ID = "0kjk7HCvk64QtUd+3Gfw0cdiE53ID/5XstD2so0MCgk=";
 
     @Mock
     PersonalizationFeinClient personalizationFeinClient;
@@ -41,8 +41,8 @@ class PersonalizationDomainFeinClientTest {
         given(personalizationFeinClient.getRegistrationID(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("sa_id", "500058151453");
-        paramMap.put("stb_mac", "001c.627e.039c");
+        paramMap.put("saId", "500223046118");
+        paramMap.put("stbMac", "f83b.1d31.6c36");
 
         //when
         RegIdDto responseDto = personalizationDomainFeinClient.getRegistrationID(paramMap);

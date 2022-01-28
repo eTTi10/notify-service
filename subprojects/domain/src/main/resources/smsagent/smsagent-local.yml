@@ -29,6 +29,12 @@ sms:
 check:
   https: '0'
 
+error:
+  smsagent:
+    etc:
+      flag: 9999
+      message: '기타 오류'
+
 agent:
   "no":
     send:

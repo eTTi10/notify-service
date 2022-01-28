@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.SaIdDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +21,7 @@ import static org.mockito.BDDMockito.given;
 @ExtendWith(SpringExtension.class)
 class SubscriberDomainFeinClientTest {
 
-    private static final String REG_ID = "M00020200205";
+    private static final String SA_ID = "500223046118";
 
     @Mock
     SubscriberFeinClient subscriberFeinClient;
@@ -33,20 +34,22 @@ class SubscriberDomainFeinClientTest {
     void getRegistrationIDbyCtn() {
 
         //given
-        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
 
-        InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
+        SaIdDto saIdDto = SaIdDto.builder().saId(SA_ID).build();
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+
+        InnerResponseDto<List<SaIdDto>> regIdDtoInnerResponseDto = new InnerResponseDto<List<SaIdDto>>(InnerResponseCodeType.OK, saIdDtos);
 
         given(subscriberFeinClient.getRegistrationIDbyCtn(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("ctn", "M00020200205");
+        paramMap.put("ctnNo", "001039752719");
 
         //when
-        RegIdDto responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
+        List<SaIdDto> responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
 
         //then
-        assertThat(responseDto.getRegistrationId().equals(REG_ID));
+        assertThat(responseDto.get(0).getSaId().equals(SA_ID));
 
     }
 }
