@@ -9,7 +9,7 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import fleta.util.JunitTestUtils;
 import io.netty.bootstrap.Bootstrap;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 class PushMultiSocketClientImplTest {
 
-    static NettyTcpServer server;
+    static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9666;
+    static int SERVER_PORT = 9600;
 
     static int testCnt = 9997;
 
@@ -50,7 +50,7 @@ class PushMultiSocketClientImplTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpServer();
+        server = new NettyTcpJunitServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
@@ -64,7 +64,6 @@ class PushMultiSocketClientImplTest {
 
     @BeforeEach
     void setUp() {
-        //boolean check = nettyTcpClient.isInValid();
         nettyTcpClient = getNettyClient();
         pushMultiSocketClient = new PushMultiSocketClientImpl(nettyTcpClient);
         ReflectionTestUtils.setField(pushMultiSocketClient, "destinationIp", "222.231.13.85");
@@ -270,21 +269,6 @@ class PushMultiSocketClientImplTest {
         //abnormal\
         server.responseProcessFlag = "0"; //process check error
         pushMultiSocketClient.checkClientProcess();
-    }
-
-  //  @Test
-    void testServer08_checkClientProcess() throws Exception {
-        //connect
-        String channelId = nettyTcpClient.connect(pushMultiSocketClient); //normal connect
-        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", channelId); //test channel Id
-
-        server.responseProcessFlag = "0"; //process check error
-
-        //assertThrows(ServiceUnavailableException.class, () -> {
-            pushMultiSocketClient.checkClientProcess();
-        //});
-        //Assertions.assertEquals(channelId, nettyTcpClient.get);
-
     }
 
     @Test

@@ -391,7 +391,7 @@ public class NettyTcpClient {
 
 			switch (messageID) {
 				case CHANNEL_CONNECTION_REQUEST_ACK:
-					log.debug("** decode message: CHANNEL_CONNECTION_REQUEST_ACK {}", CHANNEL_CONNECTION_REQUEST_ACK);
+					log.trace("** decode message: CHANNEL_CONNECTION_REQUEST_ACK {}", CHANNEL_CONNECTION_REQUEST_ACK);
 
 					result = new String(byteData,0, 2, PUSH_ENCODING);
 					out.add(PushMessageInfoDto.builder()
@@ -402,7 +402,7 @@ public class NettyTcpClient {
 					break;
 
 				case PROCESS_STATE_REQUEST_ACK:
-					log.debug("** decode message: PROCESS_STATE_REQUEST_ACK {}", PROCESS_STATE_REQUEST_ACK);
+					log.trace("** decode message: PROCESS_STATE_REQUEST_ACK {}", PROCESS_STATE_REQUEST_ACK);
 
 					result = byteToShort(byteData) == 1 ? SUCCESS : FAIL;
 					out.add(PushMessageInfoDto.builder()
@@ -413,7 +413,7 @@ public class NettyTcpClient {
 					break;
 
 				case COMMAND_REQUEST_ACK:
-					log.debug("** decode message: COMMAND_REQUEST_ACK {}", COMMAND_REQUEST_ACK);
+					log.trace("** decode message: COMMAND_REQUEST_ACK {}", COMMAND_REQUEST_ACK);
 
 					result = new String(byteData,0, 2, PUSH_ENCODING);
 					String transactionID = new String(byteHeader, 4, 12, PUSH_ENCODING);

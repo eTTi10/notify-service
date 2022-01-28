@@ -48,16 +48,16 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class NettyTcpClientTest implements PushMultiClient {
 
-    static NettyTcpServer server;
+    static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9777;
+    static int SERVER_PORT = 9600;
 
     static int testCnt = 9997;
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
     List<String> users = new ArrayList<>();
-    AtomicInteger tranactionMsgId = new AtomicInteger(0);
+    AtomicInteger transactionMsgId = new AtomicInteger(0);
 
     NettyTcpClient.MessageHandler messageHandler = new NettyTcpClient.MessageHandler();
     NettyTcpClient.MessageDecoder messageDecoder = new NettyTcpClient.MessageDecoder();
@@ -68,7 +68,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpServer();
+        server = new NettyTcpJunitServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
@@ -156,17 +156,9 @@ class NettyTcpClientTest implements PushMultiClient {
     }
 
     private NettyTcpClient getNettyClientInvalid() {
-        NettyTcpClient nettyTcpClient = new NettyTcpClient();
+        NettyTcpClient nettyTcpClient = getNettyClient();
 
-        ReflectionTestUtils.setField(nettyTcpClient, "host", SERVER_IP);
         ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); // invalid port
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
-        ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
-        ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
-
-        ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
 
         return nettyTcpClient;
     }
@@ -188,32 +180,26 @@ class NettyTcpClientTest implements PushMultiClient {
     }
 
     private String getTransactionId() {
-        String DATE_FOMAT = "yyyyMMdd";
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0) & 0xFFFF);
+        return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04x", transactionMsgId.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0) & 0xFFFF);
     }
 
    @Test
     void test_01_requestPushMulti2() throws InterruptedException {
         NettyTcpClient nettyTcpClient = getNettyClient();
-        String channelID = nettyTcpClient.connect(this);
+        try {
+            String channelID = nettyTcpClient.connect(this);
 
-        nettyTcpClient.setAttachment(-1);
+            nettyTcpClient.setAttachment(-1);
+            int PROCESS_STATE_REQUEST = 13;
 
-        String transactionId = getTransactionId();
-        int PROCESS_STATE_REQUEST = 13;
+            Optional<PushMessageInfoDto> response = nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
 
-        //Make Message
-        PushRequestMultiSendDto dto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(pushRequestMultiDto)).users(pushRequestMultiDto.getUsers()).build();
-        String jsonMsg = dto.getJsonTemplate().replace(TRANSACT_ID_NM, transactionId).replace(REGIST_ID_NM, pushRequestMultiDto.getUsers().get(0));
-
-        Optional<PushMessageInfoDto> response = nettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
-
-        int processSatusId = response.orElse(PushMessageInfoDto.builder().messageId(0).build()).getMessageId();
-        Assertions.assertEquals(14, processSatusId);
-
-        //Thread.sleep(3000);
-        nettyTcpClient.disconnect();
-
+            int processSatusId = response.orElse(PushMessageInfoDto.builder().messageId(0).build()).getMessageId();
+            Assertions.assertEquals(14, processSatusId);
+        }
+        finally {
+            nettyTcpClient.disconnect();
+        }
     }
 
    @Test
@@ -372,12 +358,12 @@ class NettyTcpClientTest implements PushMultiClient {
 
         try {
 
-            String channelID = nettyTcpClient.connect(this);
+            nettyTcpClient.connect(this);
 
             NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
             doThrow(new IOException("")).when(spyNettyTcpClient).getHostName();
 
-            String channelId = spyNettyTcpClient.getNextChannelID();
+            spyNettyTcpClient.getNextChannelID();
             Assertions.assertFalse(nettyTcpClient.isInValid());
 
             doReturn(null).when(spyNettyTcpClient).getSocketChannel();
@@ -423,8 +409,9 @@ class NettyTcpClientTest implements PushMultiClient {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
         try {
+            String channelID;
 
-            String channelID = nettyTcpClient.connect(this);
+            nettyTcpClient.connect(this);
             nettyTcpClient.disconnect();
             channelID = nettyTcpClient.connect(this);
 
@@ -455,7 +442,7 @@ class NettyTcpClientTest implements PushMultiClient {
         NettyTcpClient nettyTcpClient = getNettyClientInvalid();
 
         try {
-            String channelID = nettyTcpClient.connect(this);
+            nettyTcpClient.connect(this);
             Assertions.assertTrue(nettyTcpClient.isInValid());
 
         } finally {
@@ -492,7 +479,7 @@ class NettyTcpClientTest implements PushMultiClient {
             Assertions.assertEquals(channelId, genChannelId);
 
         } finally {
-
+            nettyTcpClient.disconnect();
         }
     }
 
@@ -508,7 +495,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
             NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
 
-            String channelId = spyNettyTcpClient.getNextChannelID();
+            spyNettyTcpClient.getNextChannelID();
             Assertions.assertFalse(nettyTcpClient.isInValid());
 
             spyNettyTcpClient = spy(nettyTcpClient);
@@ -516,9 +503,7 @@ class NettyTcpClientTest implements PushMultiClient {
             channelTest.setIsSuccess(false);
             doReturn(channelTest).when(spyNettyTcpClient).getSocketChannel();
 
-            //String transactionId = getTransactionId();
             int PROCESS_STATE_REQUEST = 13;
-
             Optional<PushMessageInfoDto> response = spyNettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
 
             //return null
@@ -529,11 +514,6 @@ class NettyTcpClientTest implements PushMultiClient {
         {
             nettyTcpClient.disconnect();
         }
-    }
-
-    @AfterEach
-    void tearDown() {
-
     }
 
     public static class Test01Client implements PushMultiClient {
@@ -684,7 +664,6 @@ class NettyTcpClientTest implements PushMultiClient {
             return false;
         }
     }
-
 
     public static class ChannelFutureTest2 implements ChannelFuture {
 

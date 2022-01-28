@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
@@ -25,14 +25,14 @@ import static org.mockito.Mockito.spy;
 @ExtendWith({ MockitoExtension.class})
 class PushSocketConnFactoryTest {
 
-    static NettyTcpServer server;
+    static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9666;
+    static int SERVER_PORT = 9600;
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpServer();
+        server = new NettyTcpJunitServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
