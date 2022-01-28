@@ -1,9 +1,10 @@
 package com.lguplus.fleta.properties;
 
-import com.lguplus.fleta.config.HttpPushConfig;
-import com.lguplus.fleta.config.SendPushCodeConfig;
 import com.lguplus.fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +12,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ExtendWith(SpringExtension.class)
 class SendPushCodePropsTest {
 
-    SendPushCodeProps sendPushCodeProps = new SendPushCodeProps();
+    @InjectMocks
+    SendPushCodeProps sendPushCodeProps;
 
     @Test
     void findMapBySendCode() {

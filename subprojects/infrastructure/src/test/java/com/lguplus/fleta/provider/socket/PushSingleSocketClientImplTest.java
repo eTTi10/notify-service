@@ -4,7 +4,7 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpServer;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -27,10 +27,10 @@ import java.util.Map;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSingleSocketClientImplTest {
 
-    static NettyTcpServer server;
+    static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9666;
+    static int SERVER_PORT = 9600;
 
     private final PushSingleSocketClientImpl pushSingleSocketClientImpl;
 
@@ -39,13 +39,11 @@ class PushSingleSocketClientImplTest {
     Map<String, String> paramMap;
     Map<String, String> paramMapLg;
 
-    List<GenericObjectPool<PushSocketInfo>> poolList;
-
     final String sendSuccessCode = "200"; //200
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpServer();
+        server = new NettyTcpJunitServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
@@ -156,7 +154,6 @@ class PushSingleSocketClientImplTest {
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "measureIntervalMillis", 1000);
 
-        //Thread.sleep(1000);
         ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "initialize");
 
     }
@@ -177,6 +174,7 @@ class PushSingleSocketClientImplTest {
 
         PushResponseDto responseDto = pushSingleSocketClientImpl.requestPushSingle(paramMap);
         log.debug("junit result: " + responseDto.getStatusCode());
+        pushSingleSocketClientImpl.socketClientSch();
 
         Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
 
@@ -210,14 +208,13 @@ class PushSingleSocketClientImplTest {
     @Test // pool empty Exception
     void test04_requestPushSingle_case_04()  {
 
+        int EXTRA_CONN_COUNT = 50;
         List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
 
-        for(int i=0; i<2; i++) {
+        for(int i=0; i<2+EXTRA_CONN_COUNT; i++) {
             try {
                 PushSocketInfo pushSocketInfo = poolListEmpty.get(0).borrowObject();
-                //poolListEmpty.get(0).returnObject(pushSocketInfo);
                 PushSocketInfo pushSocketInfo1 = poolListEmpty.get(1).borrowObject();
-                //poolListEmpty.get(1).returnObject(pushSocketInfo1);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -29,12 +29,6 @@ import java.util.concurrent.Future;
 public class SmsGateway {
 
 
-    @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
-    private String codeSystemErrorException;
-
-    @Value("${error.message.1500}")
-    private String messageSystemError;
-
     private static final int BIND = 0;
     private static final int BIND_ACK = 1;
     private static final int DELIVER = 2;
@@ -87,19 +81,18 @@ public class SmsGateway {
         mFileLog = LogFactory.getLog("SmsGateway");
         mStatusLog = LogFactory.getLog("SmsStatus");
         mStatusLog.info("SmsGateway" + index);
+
         mIpAddress = ip;
         mPort = Integer.parseInt(port);
         mID = id;
         mPassword = password;
         mLastSendDate = new Date();
+        log.debug("mLastSendDate: {}", mLastSendDate.getTime());
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
         mStatusLog.info("id:" + id);
         mStatusLog.info("password:" + password);
-
-        mStatusLog.info("codeSystemErrorException:" + codeSystemErrorException);
-        mStatusLog.info("messageSystemError:" + messageSystemError);
 
         connectGateway();
     }
@@ -235,8 +228,6 @@ public class SmsGateway {
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
-
-                log.debug("timerTask mResult : {}", mResult);
 
                 if (mResult.isEmpty()) {
                     mResult = "1500";
@@ -442,7 +433,6 @@ public class SmsGateway {
                 isLinked = true;
                 break;
             default:
-                mStatusLog.info("Invalid Type [" + type + "]");
                 break;
         }
 

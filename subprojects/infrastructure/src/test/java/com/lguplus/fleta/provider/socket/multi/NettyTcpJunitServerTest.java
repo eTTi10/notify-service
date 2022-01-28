@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-public class NettyTcpServer {
+public class NettyTcpJunitServerTest {
     public String responseCode = "200";
     public int responseCount = 0;
     public String responseTestMode = "normal";
@@ -55,9 +55,9 @@ public class NettyTcpServer {
     }
 
     static class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
-        NettyTcpServer nettyTcpServer;
+        NettyTcpJunitServerTest nettyTcpServer;
 
-        public ChannelInitializerTest(NettyTcpServer server) {
+        public ChannelInitializerTest(NettyTcpJunitServerTest server) {
             this.nettyTcpServer = server;
         }
 
@@ -231,9 +231,9 @@ public class NettyTcpServer {
         final int COMMAND_REQUEST = 15;
         final int SLEEP_MILLS = 10;
 
-        NettyTcpServer nettyTcpServer;
+        NettyTcpJunitServerTest nettyTcpServer;
 
-        public MessageHandlerTest(NettyTcpServer server) {
+        public MessageHandlerTest(NettyTcpJunitServerTest server) {
             this.nettyTcpServer = server;
         }
 

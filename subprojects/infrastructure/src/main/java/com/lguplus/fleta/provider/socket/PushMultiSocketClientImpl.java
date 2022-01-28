@@ -186,7 +186,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
             final List<PushMultiResponseDto> notReceivedMessages = sendUsers.stream().filter(e -> processedMap.get(e.getPushId()) == null)
                     .collect(Collectors.toList());
 
-            log.debug("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, sendUsers.size() - notReceivedMessages.size(), sendUsers.size());
+            log.trace("parserAsyncMessage0 thread:{} [{}] = {}/{}", Thread.currentThread().getId(), waitTime, sendUsers.size() - notReceivedMessages.size(), sendUsers.size());
 
             for (PushMultiResponseDto usr : notReceivedMessages) {
                 PushMessageInfoDto responseMsg = receiveMessageMap.remove(usr.getPushId());

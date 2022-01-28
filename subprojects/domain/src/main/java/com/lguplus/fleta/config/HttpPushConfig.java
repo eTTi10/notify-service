@@ -19,7 +19,7 @@ public class HttpPushConfig {
 
     @Bean
     @ConfigurationProperties(prefix = "error.flag.com.lguplus.fleta.exception")
-    public HttpPushExceptionCode httpPushExcetionCode() {
+    public HttpPushExceptionCode httpPushExceptionCode() {
         return new HttpPushExceptionCode();
     }
 
