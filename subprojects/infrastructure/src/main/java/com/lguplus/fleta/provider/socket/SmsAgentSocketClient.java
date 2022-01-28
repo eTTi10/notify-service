@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
     @Value("${agent.tps}")
-    private static String agentTps;
+    private String agentTps;
 
     private final SmsAgentProps smsAgentProps;
 
@@ -34,7 +34,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
 
     @PostConstruct
-    private void initGateway() {
+    public void initGateway() {
 
         log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
@@ -56,11 +56,8 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             };
             sGatewayQueue.offer(smsGateway);
         }
-
-    }
-
-    static {
         mSendTerm = calculateTerm();
+
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
@@ -86,6 +83,9 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
+
+            log.debug(currentDate +" - "+ prevSendDate + " <= " + SmsAgentSocketClient.mSendTerm);
+            log.debug((currentDate - prevSendDate) + " <= " + SmsAgentSocketClient.mSendTerm);
 
             if (currentDate - prevSendDate <= SmsAgentSocketClient.mSendTerm) {
 
@@ -125,7 +125,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
         else throw new SmsAgentEtcException("기타 오류");
     }
 
-    private static int calculateTerm() {
+    private int calculateTerm() {
 
         int result = 1000;
 
