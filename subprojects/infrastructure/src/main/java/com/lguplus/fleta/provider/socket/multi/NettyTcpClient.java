@@ -21,13 +21,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.IntStream;
 
 import static java.lang.Thread.currentThread;
 import static java.lang.Thread.sleep;
@@ -77,6 +78,8 @@ public class NettyTcpClient {
 	private PushMultiClient pushMultiClient;
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
+	//private MessageToByteEncoder<PushMessageInfoDto> nettyMessageEncoder = new MessageEncoder();
+	//private ByteToMessageDecoder nettyMessageDecoder = new MessageDecoder();
 
 	private void initialize() {
 
@@ -103,20 +106,16 @@ public class NettyTcpClient {
 
 	public String connect(PushMultiClient pushMultiClient) {
 
-		if(bootstrap == null) {
-			this.pushMultiClient = pushMultiClient;
-			initialize();
-		}
+		initBootStrap(pushMultiClient);
 
 		//Connect
-		ChannelFuture future = bootstrap.connect();
-		future.awaitUninterruptibly(); // ChannelOption.CONNECT_TIMEOUT_MILLIS 만큼 대기
+		ChannelFuture future = getConnectionFuture(); // ChannelOption.CONNECT_TIMEOUT_MILLIS 만큼 대기
 
 		if (future.isDone() && future.isSuccess()) {
 			socketChannel = (SocketChannel) future.channel();
 		}
 		else {
-			log.debug("[NettyClient] The new socketChannel has been not connected. {}", future.cause().getMessage());
+			log.debug("[NettyClient] The new socketChannel has been not connected. ");
 			socketChannel = null;
 			return null;
 		}
@@ -124,10 +123,7 @@ public class NettyTcpClient {
 		log.debug("[NettyClient] The new socketChannel has been connected. [" + socketChannel.id() + "]");
 
 		String genChannelID = this.getNextChannelID();
-		Optional<PushMessageInfoDto> response = writeSync(PushMessageInfoDto.builder()
-						.messageId(CHANNEL_CONNECTION_REQUEST)
-						.channelId(genChannelID).destinationIp(destinationIp)
-						.build());
+		Optional<PushMessageInfoDto> response = sendConnectRequest(genChannelID);
 
 		if(SUCCESS.equals(response.orElse(PushMessageInfoDto.builder().result("FA").build()).getResult())) {
 			log.debug("[PushMultiClient] channelConnectionRequest Success. Channel ID : " + genChannelID);
@@ -137,6 +133,24 @@ public class NettyTcpClient {
 		log.error("[PushMultiClient] ChannelConnectionRequest Fail.");
 		return null;
 
+	}
+
+	public void initBootStrap(PushMultiClient pushMultiClient) {
+		if(bootstrap == null) {
+			this.pushMultiClient = pushMultiClient;
+			initialize();
+		}
+	}
+
+	public ChannelFuture getConnectionFuture() {
+		return bootstrap.connect().awaitUninterruptibly();
+	}
+
+	public Optional<PushMessageInfoDto> sendConnectRequest(String channelId) {
+		return writeSync(PushMessageInfoDto.builder()
+				.messageId(CHANNEL_CONNECTION_REQUEST)
+				.channelId(channelId).destinationIp(destinationIp)
+				.build());
 	}
 
 	public void disconnect() {
@@ -180,23 +194,15 @@ public class NettyTcpClient {
 		//Clear
 		setAttachment(message.getMessageId());
 
-		int writeTryTimes = 0;
 		AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
 
 		//Send
-		while(writeTryTimes < retryCount && !isFutureSuccess.get()) {
-
+		IntStream.range(0, retryCount).takeWhile(value -> !isFutureSuccess.get()).forEach(sendCnt -> {
 			ChannelFuture awaitFuture = getSocketChannel().writeAndFlush(message);
 			waitFutureDone(awaitFuture);
-
 			isFutureSuccess.set(awaitFuture.isSuccess());
-
-			writeTryTimes++;
-		}
-
-		if (writeTryTimes >= retryCount) {
-			log.error("[NettyClient][Sync] write to server failed afer retry " + retryCount + "times");
-		}
+			log.debug("[NettyClient][Sync] writeAndFlush {}/{} : {}/{}", sendCnt, retryCount, awaitFuture.isSuccess(), isFutureSuccess.get());
+		});
 
 		if (!isFutureSuccess.get()) {
 			log.error("[NettyClient][Sync] write to server failed ");
@@ -213,7 +219,7 @@ public class NettyTcpClient {
 				currentThread().interrupt();
 			}
 			response = getAttachment(message.getMessageId());
-			log.debug("try getAttachement: {} {}", readWaited, response);
+			log.trace("try getAttachement: {} {}", readWaited, response);
 
 			readWaited += sleepUnit;
 		}
@@ -230,15 +236,17 @@ public class NettyTcpClient {
 		return Optional.ofNullable(response);
 	}
 
-	public void waitFutureDone(final ChannelFuture future) {
+	public void waitFutureDone(final ChannelFuture future)  {
 		final CountDownLatch latch = new CountDownLatch(1);
 		future.addListener(f -> latch.countDown());
 
 		try {
+			log.debug("waitLatch start 0");
 			boolean result = waitLatch(latch);
 			if(!result) {
 				log.error("waitFutureDone awit timeout!");
 			}
+			log.debug("waitLatch end 0");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}

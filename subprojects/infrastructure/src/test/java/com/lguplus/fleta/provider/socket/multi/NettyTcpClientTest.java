@@ -45,7 +45,7 @@ import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class NettyTcpClientTest implements PushMultiClient {
 
     static NettyTcpServer server;
@@ -192,8 +192,8 @@ class NettyTcpClientTest implements PushMultiClient {
         return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", tranactionMsgId.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0) & 0xFFFF);
     }
 
-    @Test
-    void test_requestPushMulti2() throws InterruptedException {
+   @Test
+    void test_01_requestPushMulti2() throws InterruptedException {
         NettyTcpClient nettyTcpClient = getNettyClient();
         String channelID = nettyTcpClient.connect(this);
 
@@ -216,8 +216,8 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-    @Test
-    void test_messageHandler() {
+   @Test
+    void test_02_messageHandler() {
 
         Test01Client test01 = new Test01Client();
         JunitTestUtils.setValue(messageHandler, "pushMultiClient", test01);
@@ -243,8 +243,8 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-    @Test
-    void test_messageDecoder() throws Exception {
+   @Test
+    void test_03_messageDecoder() throws Exception {
         ChannelTest channel = new ChannelTest("id", true, false);
         ChannelHandlerContext channelHandlerContext = new ChannelHandlerContextTest(channel);
 
@@ -366,8 +366,8 @@ class NettyTcpClientTest implements PushMultiClient {
         return byteTotalData;
     }
 
-    @Test
-    void test_clientInvalid() throws IOException {
+   @Test
+    void test_04_clientInvalid() throws IOException {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
         try {
@@ -418,8 +418,8 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-    @Test
-    void test_write() throws IOException, InterruptedException {
+   @Test
+    void test_05_write() throws IOException, InterruptedException {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
         try {
@@ -450,12 +450,11 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-    @Test
-    void test_connect_timeout() {
+   @Test
+    void test_06_connect_timeout() {
         NettyTcpClient nettyTcpClient = getNettyClientInvalid();
 
         try {
-
             String channelID = nettyTcpClient.connect(this);
             Assertions.assertTrue(nettyTcpClient.isInValid());
 
@@ -463,6 +462,73 @@ class NettyTcpClientTest implements PushMultiClient {
             nettyTcpClient.disconnect();
         }
 
+    }
+
+   @Test
+    void test_07_connect_ChannelFuture() {
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try {
+            NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
+            String genChannelId;
+
+            doReturn(new ChannelFutureTest(null, false, false)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            doReturn(new ChannelFutureTest(null, false, true)).when(spyNettyTcpClient).getConnectionFuture();
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            String channelId = "01234567891234";//14
+            doReturn(channelId).when(spyNettyTcpClient).getNextChannelID();
+            doReturn(Optional.ofNullable(null)).when(spyNettyTcpClient).sendConnectRequest(channelId);
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(null, genChannelId);
+
+            doReturn(Optional.of(PushMessageInfoDto.builder().result("SC").build())).when(spyNettyTcpClient).sendConnectRequest(channelId);
+            genChannelId = spyNettyTcpClient.connect(this);
+            Assertions.assertEquals(channelId, genChannelId);
+
+        } finally {
+
+        }
+    }
+
+
+    @Test
+    void test_08_isFutureSuccess_get() {
+
+        NettyTcpClient nettyTcpClient = getNettyClient();
+
+        try
+        {
+            String channelID = nettyTcpClient.connect(this);
+
+            NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
+
+            String channelId = spyNettyTcpClient.getNextChannelID();
+            Assertions.assertFalse(nettyTcpClient.isInValid());
+
+            spyNettyTcpClient = spy(nettyTcpClient);
+            ChannelTest channelTest = new ChannelTest("test", true, true);
+            channelTest.setIsSuccess(false);
+            doReturn(channelTest).when(spyNettyTcpClient).getSocketChannel();
+
+            //String transactionId = getTransactionId();
+            int PROCESS_STATE_REQUEST = 13;
+
+            Optional<PushMessageInfoDto> response = spyNettyTcpClient.writeSync(PushMessageInfoDto.builder().messageId(PROCESS_STATE_REQUEST).channelId(channelID).destinationIp("222.231.13.85").build());
+
+            //return null
+            int msgId = response.orElse(PushMessageInfoDto.builder().messageId(-1).build()).getMessageId();
+            Assertions.assertEquals(-1, msgId);
+        }
+        finally
+        {
+            nettyTcpClient.disconnect();
+        }
     }
 
     @AfterEach
@@ -488,6 +554,7 @@ class NettyTcpClientTest implements PushMultiClient {
     public static class ChannelFutureTest implements ChannelFuture {
 
         boolean isSuccess = false;
+        boolean isDone = true;
         Channel channel;
 
         public ChannelFutureTest(Channel channel, boolean isSuccess) {
@@ -495,11 +562,10 @@ class NettyTcpClientTest implements PushMultiClient {
             this.isSuccess = isSuccess;
         }
 
-        static void notifyListener0(Future future, GenericFutureListener l) {
-            try {
-                l.operationComplete(future);
-            } catch (Throwable t) {
-            }
+        public ChannelFutureTest(Channel channel, boolean isSuccess, boolean isDone) {
+            this.channel = channel;
+            this.isSuccess = isSuccess;
+            this.isDone = isDone;
         }
 
         @Override
@@ -510,6 +576,11 @@ class NettyTcpClientTest implements PushMultiClient {
         @Override
         public boolean isSuccess() {
             return isSuccess;
+        }
+
+        @Override
+        public boolean isDone() {
+            return isDone;
         }
 
         @Override
@@ -597,10 +668,142 @@ class NettyTcpClientTest implements PushMultiClient {
             return false;
         }
 
+
         @Override
-        public boolean isDone() {
+        public Void get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        public Void get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return null;
+        }
+
+        @Override
+        public boolean isVoid() {
             return false;
         }
+    }
+
+
+    public static class ChannelFutureTest2 implements ChannelFuture {
+
+        boolean isSuccess = false;
+        boolean isDone = true;
+        Channel channel;
+
+        public ChannelFutureTest2(Channel channel, boolean isSuccess) {
+            this.channel = channel;
+            this.isSuccess = isSuccess;
+        }
+
+        public ChannelFutureTest2(Channel channel, boolean isSuccess, boolean isDone) {
+            this.channel = channel;
+            this.isSuccess = isSuccess;
+            this.isDone = isDone;
+        }
+
+        @Override
+        public Channel channel() {
+            return channel;
+        }
+
+        @Override
+        public boolean isSuccess() {
+            return isSuccess;
+        }
+
+        @Override
+        public boolean isDone() {
+            return isDone;
+        }
+
+        @Override
+        public boolean isCancellable() {
+            return false;
+        }
+
+        @Override
+        public Throwable cause() {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture addListener(GenericFutureListener<? extends Future<? super Void>> listener) {
+            log.debug("============add Listener ============= ");
+            return null;
+        }
+
+        @Override
+        public ChannelFuture addListeners(GenericFutureListener<? extends Future<? super Void>>... listeners) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture removeListener(GenericFutureListener<? extends Future<? super Void>> listener) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture removeListeners(GenericFutureListener<? extends Future<? super Void>>... listeners) {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture sync() throws InterruptedException {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture syncUninterruptibly() {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture await() throws InterruptedException {
+            return null;
+        }
+
+        @Override
+        public ChannelFuture awaitUninterruptibly() {
+            return null;
+        }
+
+        @Override
+        public boolean await(long timeout, TimeUnit unit) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean await(long timeoutMillis) throws InterruptedException {
+            return false;
+        }
+
+        @Override
+        public boolean awaitUninterruptibly(long timeout, TimeUnit unit) {
+            return false;
+        }
+
+        @Override
+        public boolean awaitUninterruptibly(long timeoutMillis) {
+            return false;
+        }
+
+        @Override
+        public Void getNow() {
+            return null;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
 
         @Override
         public Void get() throws InterruptedException, ExecutionException {
@@ -893,6 +1096,12 @@ class NettyTcpClientTest implements PushMultiClient {
         }
 
         @Override
+        public ChannelFuture writeAndFlush(Object msg) {
+            log.debug("==>writeAndFlush: isSuccess {}", isSuccess);
+            return new ChannelFutureTest2(this, isSuccess, true);
+        }
+
+        @Override
         public EventLoop eventLoop() {
             return null;
         }
@@ -1037,10 +1246,6 @@ class NettyTcpClientTest implements PushMultiClient {
             return null;
         }
 
-        @Override
-        public ChannelFuture writeAndFlush(Object msg) {
-            return null;
-        }
 
         @Override
         public ChannelPromise newPromise() {
@@ -1069,7 +1274,47 @@ class NettyTcpClientTest implements PushMultiClient {
 
         @Override
         public <T> Attribute<T> attr(AttributeKey<T> key) {
-            return null;
+            return new Attribute<T>() {
+                @Override
+                public AttributeKey<T> key() {
+                    return null;
+                }
+
+                @Override
+                public T get() {
+                    return null;
+                }
+
+                @Override
+                public void set(T value) {
+
+                }
+
+                @Override
+                public T getAndSet(T value) {
+                    return null;
+                }
+
+                @Override
+                public T setIfAbsent(T value) {
+                    return null;
+                }
+
+                @Override
+                public T getAndRemove() {
+                    return null;
+                }
+
+                @Override
+                public boolean compareAndSet(T oldValue, T newValue) {
+                    return false;
+                }
+
+                @Override
+                public void remove() {
+
+                }
+            };
         }
 
         @Override

@@ -17,7 +17,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -92,33 +95,33 @@ public class PushSingleDomainService {
         //1. Make Message
         Map<String, String> paramMap = getMessage(dto, servicePwd);
 
-        String statusCode = "";
-        String statusMsg = "";
-
-        int retryCallCnt = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : iPushCallRetryCnt;
+        int retryCount = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : iPushCallRetryCnt;
 
         //2. Send Push
-        for(int reCnt=0; reCnt < retryCallCnt; reCnt++) {
+        AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
+        AtomicReference<String> recvStatusCode = new AtomicReference<>("");
+        AtomicReference<String> recvStatusMsg = new AtomicReference<>("");
+
+        IntStream.range(0, retryCount).takeWhile(value -> !isFutureSuccess.get()).forEach(reCnt -> {
             try {
                 setPushProgressCnt(dto.getServiceId(), +1);
                 PushResponseDto pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
 
-                statusCode = pushResponseDto.getStatusCode();
-                statusMsg = pushResponseDto.getStatusMsg();
+                recvStatusCode.set(pushResponseDto.getStatusCode());
+                recvStatusMsg.set(pushResponseDto.getStatusMsg());
             } finally {
                 setPushProgressCnt(dto.getServiceId(), -1);
             }
 
-            //3. Send Result
             // 200 : 정상 처리, 재시도 예외인 경우
-            if (statusCode.equals("200") || isRetryExcludeCode(statusCode)) {
-                break;
-            }
-        }
+            isFutureSuccess.set( recvStatusCode.get().equals("200") || isRetryExcludeCode(recvStatusCode.get()) );
+        });
 
-        exceptionHandler(statusCode);
+        //test
+        //statusCode = "200"
+        exceptionHandler(recvStatusCode.get());
 
-        return PushClientResponseDto.builder().code(statusCode).message(statusMsg).build();
+        return PushClientResponseDto.builder().code(recvStatusCode.get()).message(recvStatusMsg.get()).build();
     }
 
     private Map<String, String> getMessage(PushRequestSingleDto dto, String servicePwd) {
