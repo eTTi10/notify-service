@@ -297,26 +297,26 @@ public class SmsAgentDomainService {
 
             //============ Start [setting API 호출 캐시등록] =============
 
-            //setting API 호출관련 파라메타 셋팅
+            //setting API 호출관련 파라메타 셋팅 <-- sos6871수정
             CallSettingRequestDto prm = CallSettingRequestDto.builder()
-                    .saId(smsSettingRestSaId)
-                    .stbMac(smsSettingRestStbMac)
-                    .codeId(smsCd)
+                    //.saId(smsSettingRestSaId) <-- sos6871수정
+                    //.stbMac(smsSettingRestStbMac) <-- sos6871수정
+                    .code(smsCd) //<-- sos6871수정
                     .svcType(smsSettingRestSvcType)
                     .build();
 
-            //setting API 호출하여 메세지 등록
+            //setting API 호출하여 메세지 등록 <-- sos6871수정
             CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
 
-            //메세지목록 조회결과 취득
-            List<CallSettingDto> settingApiList =  callSettingApi.getResult().getRecordset();
+            //메세지목록 조회결과 취득 <-- sos6871수정
+            CallSettingDto settingApi =  callSettingApi.getResult().getData();
 
             //============ End [setting API 호CallSettingResultMapDto출 캐시등록] =============
 
-            if(callSettingApi.getResult().getTotalCount() > 0) {
+            if(settingApi != null) { //<-- sos6871수정
 
-                log.debug("sms_cd(메시지내용) {} " , settingApiList.get(0).getCodeName());
-                return settingApiList.get(0).getCodeName();
+                log.debug("sms_cd(메시지내용) {} " , settingApi.getName()); //<-- sos6871
+                return settingApi.getName(); //<-- sos6871수정
             }
             else {
                 return "";

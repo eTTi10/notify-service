@@ -44,30 +44,22 @@ public class MmsAgentDomainService {
 
         //setting API 호출관련 파라메타 셋팅
         CallSettingRequestDto prm = CallSettingRequestDto.builder()
-                .saId((String)settingConfig.get("rest_sa_id"))//ex) MMS:mms SMS:sms
-                .stbMac((String)settingConfig.get("rest_stb_mac"))//ex) MMS:mms SMS:sms
-                .codeId(sendMmsRequestDto.getMmsCd())//ex) M011
+                .code(sendMmsRequestDto.getMmsCd())//ex) M011
                 .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
                 .build();
 
         CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
-        List<CallSettingDto> settingApis =  callSettingApi.getResult().getRecordset();
-        CallSettingDto settingItem = null;
+        CallSettingDto settingApi =  callSettingApi.getResult().getData();
 
-        if(settingApis == null){
+        if(settingApi == null){
             throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
-
-        if(settingApis.isEmpty()) {
-            throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
-        }
-        settingItem =  settingApis.get(0);
 
 
         MmsRequestDto mmsDto = MmsRequestDto.builder()
                 .ctn(sendMmsRequestDto.getCtn())
                 .mmsTitle(sendMmsRequestDto.getMmsCd())
-                .mmsMsg(settingItem.getCodeName())//메세지
+                .mmsMsg(settingApi.getName())//메세지
                 .mmsRep(sendMmsRequestDto.getReplacement())
                 .build();
         String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);

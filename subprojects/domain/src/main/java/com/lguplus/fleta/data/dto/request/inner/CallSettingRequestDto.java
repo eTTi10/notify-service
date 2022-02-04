@@ -10,14 +10,8 @@ import java.io.Serializable;
 @Builder
 public class CallSettingRequestDto implements Serializable {
 
-    @JsonProperty("sa_id")
-    private String saId;
-
-    @JsonProperty("stb_mac")
-    private String stbMac;
-
-    @JsonProperty("code_id")
-    private String codeId;
+    @JsonProperty("code")
+    private String code;
 
     @JsonProperty("svc_type")
     private String svcType;

@@ -98,14 +98,17 @@ class MmsAgentDomainServiceTest {
     @Test
     @DisplayName("callSettingApi recordset null")
     void sendMmsCode_callSettingApi_recordset_null() {
-        List<CallSettingDto> rs = new ArrayList<>();
-        CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(0)
-                .memberGroup("")
-                .recordset(null)
+        CallSettingDto dto = CallSettingDto.builder()
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
+
+        CallSettingResultDto result = CallSettingResultDto.builder()
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(null)
+                .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();
@@ -127,7 +130,7 @@ class MmsAgentDomainServiceTest {
 
         log.info("End callSettingApi recordset null");
     }
-
+/*
     @Test
     @DisplayName("callSettingApi totalcount0")
     void sendMmsCode_callSettingApi_totalcount0() {
@@ -160,23 +163,22 @@ class MmsAgentDomainServiceTest {
 
         log.info("End callSettingApi totalcount0");
     }
+*/
 
     @Test
     @DisplayName("MMS Success case")
     void sendMmsCode_success() {
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("M011")
-                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
-        List<CallSettingDto> rs = new ArrayList<>();
-        rs.add(dto);
+
         CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(rs.size())
-                .memberGroup("")
-                .recordset(rs)
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(dto)
                 .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();
@@ -204,18 +206,16 @@ class MmsAgentDomainServiceTest {
     @DisplayName("returnMmsCodeError")
     void returnMmsCodeError() {
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("M011")
-                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
-        List<CallSettingDto> rs = new ArrayList<>();
-        rs.add(dto);
+
         CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(rs.size())
-                .memberGroup("")
-                .recordset(rs)
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(dto)
                 .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();

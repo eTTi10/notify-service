@@ -130,14 +130,14 @@ class SmsAgentDomainServiceTest {
         smsAgentDomainService.sendSms(request);
 
     }
-
+    /*
     @Test
     @DisplayName("코드를 이용한 SMS발송 테스트")
     void sendSmsCode() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
@@ -522,6 +522,6 @@ class SmsAgentDomainServiceTest {
 
     }
 
-
+    */
 
 }

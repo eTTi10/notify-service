@@ -13,8 +13,10 @@ import java.util.Map;
 @Component
 @AllArgsConstructor
 public class CallSettingDomainFeignClient implements CallSettingDomainClient {
+
     private final MmsCallSettingFeignClient mmsApi;
     private final SmsCallSettingFeignClient smsApi;
+
     /**
      * Mms메세지 목록
      * @return
@@ -23,9 +25,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
     //@Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
     public CallSettingResultMapDto mmsCallSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
-        parmMap.put("sa_id",parm.getSaId());
-        parmMap.put("stb_mac",parm.getStbMac());
-        parmMap.put("code_id",parm.getCodeId());
+        parmMap.put("code",parm.getCode());
         parmMap.put("svc_type",parm.getSvcType());
         return mmsApi.callSettingApi(parmMap);
     }
@@ -38,9 +38,7 @@ public class CallSettingDomainFeignClient implements CallSettingDomainClient {
     //@Cacheable(value="SMS_CACHE", key="'smsMessageCache'")
     public CallSettingResultMapDto smsCallSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
-        parmMap.put("sa_id",parm.getSaId());
-        parmMap.put("stb_mac",parm.getStbMac());
-        parmMap.put("code_id",parm.getCodeId());
+        parmMap.put("code",parm.getCode());
         parmMap.put("svc_type",parm.getSvcType());
         return smsApi.callSettingApi(parmMap);
     }

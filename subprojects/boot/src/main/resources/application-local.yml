@@ -42,7 +42,7 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
-  ## Cache - Redis
+## Cache - Redis
 #  cache:
 #    type: redis
 #  redis:
