@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.SmsAgentDomainClient;
+import com.lguplus.fleta.client.SmsCallSettingDomainClient;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
@@ -77,7 +77,7 @@ public class SmsAgentDomainService {
     @Value("${error.smsagent.etc.message}")
     private String messageEtcException;
 
-    private final CallSettingDomainClient apiClient;
+    private final SmsCallSettingDomainClient apiClient;
     private final SmsAgentDomainClient smsAgentClient;
 
     private static final String SEP = "\\|";

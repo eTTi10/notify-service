@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.mmsagent;
 
-import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.MmsAgentDomainClient;
+import com.lguplus.fleta.client.MmsCallSettingDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -24,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 
 public class MmsAgentDomainService {
-    private final CallSettingDomainClient apiClient;
+    private final MmsCallSettingDomainClient apiClient;
     private final MmsAgentConfig config;
     private final MmsAgentDomainClient mmsSoap;
 

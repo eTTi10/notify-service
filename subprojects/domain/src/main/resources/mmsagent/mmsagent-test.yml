@@ -10,7 +10,7 @@ mmsroot:
         prefix: mm7
         readtimeout: 5000
         sender: "01057404003"
-        server_url: "http://61.101.246.151:888"
+        server_url: "http://61.101.246.151:8887"
         setting:
             request_method: GET
             timeout: 5000

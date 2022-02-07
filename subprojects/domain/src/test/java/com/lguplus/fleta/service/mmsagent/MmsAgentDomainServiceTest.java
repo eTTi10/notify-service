@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.mmsagent;
 
-import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.MmsAgentDomainClient;
+import com.lguplus.fleta.client.MmsCallSettingDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
@@ -10,8 +10,8 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
-import com.lguplus.fleta.exception.mmsagent.*;
 import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
+import com.lguplus.fleta.exception.mmsagent.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +39,7 @@ class MmsAgentDomainServiceTest {
     private MmsAgentDomainService mmsAgentDomainService;
 
     @Mock
-    CallSettingDomainClient apiClient;
+    MmsCallSettingDomainClient apiClient;
 
     @Mock
     private static MmsAgentDomainClient mmsSoap;
