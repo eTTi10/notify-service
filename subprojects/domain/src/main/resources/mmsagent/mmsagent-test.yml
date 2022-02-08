@@ -10,13 +10,13 @@ mmsroot:
         prefix: mm7
         readtimeout: 5000
         sender: "01057404003"
-        server_url: "http://61.101.246.151:888"
+        server_url: "http://61.101.246.151:8887"
         setting:
             request_method: GET
             timeout: 5000
-            url: http://hdtv.suxm.uplus.co.kr/hdtv/comm/setting?sa_id=mms&stb_mac=mms&code_id=&svc_type=E
-            rest_url: "http://hdtv.suxm.uplus.co.kr"
-            rest_path: "/hdtv/comm/setting"
+            url: http://localhost:8082/settings/configuration
+            rest_url: "http://localhost:8082"
+            rest_path: "/settings/configuration"
             rest_sa_id: mms
             rest_stb_mac: mms
             rest_code_id:

@@ -16,21 +16,12 @@ import java.util.List;
 public class CallSettingResultDto implements Serializable{
 
     /** 응답코드 */
-    private String flag;
+    private String dataType;
 
     /** 응답메시지 */
-    private String message;
+    private int dataCount;
 
-    /** 레코드수 */
-    @JsonProperty("total_count")
-    @Builder.Default private int totalCount = 0;
-
-
-    /** 사용자그룹 */
-    @JsonProperty("memberGroup")
-    private String memberGroup;
-
-    /** 리스트 */
-    @JsonProperty("recordset")
-    private List<CallSettingDto> recordset;
+    /** 데이터 */
+    @JsonProperty("data")
+    private CallSettingDto data;
 }

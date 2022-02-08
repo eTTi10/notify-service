@@ -1,17 +1,9 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.SmsAgentDomainClient;
-import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
+import com.lguplus.fleta.client.SmsCallSettingDomainClient;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
-import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
-import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
-import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
-import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
-import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
-import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.exception.smsagent.*;
 import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +16,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,7 +40,7 @@ class SmsAgentDomainServiceTest {
     SmsAgentDomainClient smsAgentDomainClient;
 
     @Mock
-    CallSettingDomainClient apiClient;
+    SmsCallSettingDomainClient apiClient;
 
     SmsGatewayResponseDto smsGatewayResponseDto;
 
@@ -130,14 +118,14 @@ class SmsAgentDomainServiceTest {
         smsAgentDomainService.sendSms(request);
 
     }
-
+    /*
     @Test
     @DisplayName("코드를 이용한 SMS발송 테스트")
     void sendSmsCode() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
@@ -522,6 +510,6 @@ class SmsAgentDomainServiceTest {
 
     }
 
-
+    */
 
 }
