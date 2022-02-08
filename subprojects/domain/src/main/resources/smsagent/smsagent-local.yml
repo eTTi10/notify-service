@@ -34,7 +34,12 @@ error:
     etc:
       flag: 9999
       message: '기타 오류'
-
+    success:
+      flag: '0000'
+      message: '성공'
+    system_error:
+      flag: '1500'
+      message: '성공'
 agent:
   "no":
     send:

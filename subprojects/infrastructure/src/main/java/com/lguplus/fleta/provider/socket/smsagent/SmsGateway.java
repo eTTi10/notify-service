@@ -28,6 +28,14 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class SmsGateway {
 
+//    @Value("${error.smsagent.success.flag}")
+//    private String codeSuccess;
+//
+//    @Value("${error.smsagent.system_error.flag}")
+//    private String codeSystemError;
+
+    private String codeSuccess = "0000";
+    private String codeSystemError = "1500";
 
     private static final int BIND = 0;
     private static final int BIND_ACK = 1;
@@ -53,7 +61,7 @@ public class SmsGateway {
     private boolean isBind = false; //true인 상태는 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
 
     private String mIpAddress;
-    private String mResult = "";
+    private String mResult = "0000";
     private String mID;
     private String mPassword;
     private int mPort;
@@ -76,6 +84,7 @@ public class SmsGateway {
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
+        log.debug("TIMER_TIME_OUT:{}", TIMER_TIME_OUT);
 
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
         mFileLog = LogFactory.getLog("SmsGateway");
@@ -230,6 +239,7 @@ public class SmsGateway {
             public void run() {
 
                 if (mResult.isEmpty()) {
+                    log.debug("mResult.isEmpty() then 1500");
                     mResult = "1500";
                 }
             }
@@ -326,22 +336,31 @@ public class SmsGateway {
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
+//                log.debug("try timer");
             } catch (InterruptedException e) {
-                mStatusLog.error("getResult Error");
+                log.debug("catch interrupt");
+//                mStatusLog.error("getResult Error");
                 Thread.currentThread().interrupt();
             }
 
-            if (mResult.equals(InnerResponseCodeType.OK.code())) {  // 0000
+            log.debug("getResult() - mResult:{}", mResult);
+            log.debug("getResult() - codeSuccess:{}", codeSuccess);
+            log.debug("getResult() - codeSystemError:{}", codeSystemError);
+
+
+            if (mResult.equals(codeSuccess)) {  // 0000
                 smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                         .flag("0000")
                         .message("성공")
                         .build();
-            } else if (mResult.equals(InnerResponseErrorType.INTERNAL_SERVER_ERROR.code())) {   // 1500
+            } else if (mResult.equals(codeSystemError)) {   // 1500
                 smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                         .flag(mResult)
                         .message("시스템 장애")
                         .build();
             }
+
+            if (smsGatewayResponseDto != null) log.debug("smsGatewayResponseDto:{}", smsGatewayResponseDto.toString());
         }
 
         clearResult();
@@ -396,10 +415,10 @@ public class SmsGateway {
 
                 switch (result) {
                     case 0:
-                        mResult = InnerResponseCodeType.OK.code();  // 0000
+                        mResult = codeSuccess;  // 0000
                         break;
                     case 1:
-                        mResult = InnerResponseErrorType.INTERNAL_SERVER_ERROR.code(); // 1500
+                        mResult = codeSystemError; // 1500
                         break;
                     default:
                         break;
