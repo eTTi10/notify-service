@@ -38,7 +38,7 @@ public class HttpPushAnnounceRequestVo {
     private String pushType;
 
     /** 보낼 메시지 */
-    @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
+    @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
     @JsonProperty("msg")
     private String message;
 

@@ -50,13 +50,13 @@ class HttpPushSupportTest {
 
     @Test
     void testServiceIdNotFoundExceptionOne() {
-        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인  불가"));
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             httpPushSupport.makePushParameters("lguplushdtvgcm", "notexist_service_id", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", "01099991234", null);
         });
 
-        assertThat(exception.getMessage()).isEqualTo("서비스ID 확인 불가");
+        assertThat(exception.getMessage()).isEqualTo("서비스ID 확인  불가");
     }
 
     @Test
@@ -85,6 +85,20 @@ class HttpPushSupportTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
 
         Map<String, Object> rstMap = httpPushSupport.makePushParameters("lguplushdtvgcm", "30015", "A", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", "01099991234", List.of("badge!^1", "sound!^ring.caf", "cm!^aaaa"));
+
+        assertThat(rstMap).containsEntry("APPLICATION_ID", "lguplushdtvgcm");
+    }
+
+    @Test
+    void testApnPayload2() {
+        Map<String, String> keyMap = new HashMap<>();
+        keyMap.put("service_id", "30015");
+        keyMap.put("service_pwd", "lguplusuflix");
+
+        given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+
+        Map<String, Object> rstMap = httpPushSupport.makePushParameters("lguplushdtvgcm", "30015", "A", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", List.of("badge!^1", "sound!^ring.caf", "cm!^aaaa"));
 
         assertThat(rstMap).containsEntry("APPLICATION_ID", "lguplushdtvgcm");
     }
@@ -133,6 +147,54 @@ class HttpPushSupportTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
 
         Map<String, Object> rstMap = httpPushSupport.makePushParameters("lguplushdtvgcm", "30015", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", "01099991234", null);
+
+        assertThat(rstMap).containsEntry("APPLICATION_ID", "lguplushdtvgcm");
+    }
+
+    @Test
+    void testAnnounceTransactionIdNum() {
+        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+
+        Map<String, String> keyMap = new HashMap<>();
+        keyMap.put("service_id", "30015");
+        keyMap.put("service_pwd", "testservicepwd");
+
+        given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+
+        Map<String, Object> rstMap = httpPushSupport.makePushParameters("testservicepwd", "30015", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", List.of("gcm_multi_count!^100"));
+
+        assertThat(rstMap).containsEntry("APPLICATION_ID", "testservicepwd");
+    }
+
+    @Test
+    void testAnnounceTransactionIdNum2() {
+        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+
+        Map<String, String> keyMap = new HashMap<>();
+        keyMap.put("service_id", "30015");
+        keyMap.put("service_pwd", "lguplusuflix");
+
+        given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+
+        Map<String, Object> rstMap = httpPushSupport.makePushParameters("lguplushdtvgcm", "30015", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", List.of("dummy!^100"));
+
+        assertThat(rstMap).containsEntry("APPLICATION_ID", "lguplushdtvgcm");
+    }
+
+    @Test
+    void testAnnounceTransactionIdNum3() {
+        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+
+        Map<String, String> keyMap = new HashMap<>();
+        keyMap.put("service_id", "30015");
+        keyMap.put("service_pwd", "lguplusuflix");
+
+        given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
+        given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
+
+        Map<String, Object> rstMap = httpPushSupport.makePushParameters("lguplushdtvgcm", "30015", "G", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", List.of("dummy"));
 
         assertThat(rstMap).containsEntry("APPLICATION_ID", "lguplushdtvgcm");
     }
