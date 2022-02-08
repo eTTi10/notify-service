@@ -20,8 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
 @Slf4j
@@ -57,8 +56,8 @@ class PushAnnounceDomainClientImplTest {
         paramMap = new HashMap<>();
         paramMap.put("msg_id", "PUSH_ANNOUNCEMENT");
         paramMap.put("push_id", DateFormatUtils.format(new Date(), "yyyyMMdd") + "0001");
-        paramMap.put("service_id", "lguplushdtvgcm");
-        paramMap.put("app_id", "30011");
+        paramMap.put("service_id", "30011");
+        paramMap.put("app_id", "lguplushdtvgcm");
         paramMap.put("noti_contents", "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"");
         paramMap.put("service_passwd", "servicePwd");
 
@@ -88,13 +87,20 @@ class PushAnnounceDomainClientImplTest {
         retMap.put("response", contMap);
         //{msg_id=PUSH_ANNOUNCEMENT, push_id=202112080002, status_code=200, status_msg=OK}
 
+        //test 1
+        given( pushConfig.getCommPropValue("30011.announce.server.ip") ).willReturn(null);
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willReturn(retMap);
-
-        PushResponseDto mockDto = PushResponseDto.builder().statusCode("200").build();
-        given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
+        given( pushMapper.toResponseDto(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+        Assertions.assertEquals("200", responseDto.getStatusCode());
 
+        //test2
+        given( pushConfig.getCommPropValue("30011.announce.server.ip") ).willReturn("192.168.1.1");
+        given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willReturn(retMap);
+        given( pushMapper.toResponseDto(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+
+        responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
         Assertions.assertEquals("200", responseDto.getStatusCode());
     }
 

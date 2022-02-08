@@ -3,6 +3,7 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.SaIdDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
@@ -39,6 +40,7 @@ import static org.mockito.BDDMockito.given;
 class PushDomainServiceTest {
 
     private static final String REG_ID = "M00020200205";
+    private static final String SA_ID = "500223046118";
 
     HttpPushSingleRequestDto httpPushSingleRequestDto;
     SendPushCodeRequestDto sendPushCodeRequestDto;
@@ -443,8 +445,13 @@ class PushDomainServiceTest {
     void getRegistrationIDbyCtn() {
 
         //given
-        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
-        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
+         SaIdDto saIdDto = SaIdDto.builder()
+                .saId(SA_ID)
+                .build();
+
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
         String ctn = REG_ID;
 
         //when
@@ -458,8 +465,12 @@ class PushDomainServiceTest {
     void getGcmOrTVRequestDto() {
 
         //given
-        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
-        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
+        SaIdDto saIdDto = SaIdDto.builder()
+                .saId(SA_ID)
+                .build();
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
+
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
 
@@ -512,10 +523,16 @@ class PushDomainServiceTest {
     void getApnsRequestDto() {
 
         //given
+
+        SaIdDto saIdDto = SaIdDto.builder()
+                .saId(SA_ID)
+                .build();
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
+
         given(sendPushCodeProps.findMapBySendCode(anyString())).willReturn(Optional.of(sendCodeMap));
         given(sendPushCodeProps.findMapByServiceType("default")).willReturn(Optional.of(serviceTargetDefaultMap));
-        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
-        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(regIdDto);
+
 
         HttpPushSingleRequestDto result;
         //pushType : "A"

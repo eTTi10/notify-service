@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.mmsagent;
 
-import com.lguplus.fleta.client.CallSettingDomainClient;
 import com.lguplus.fleta.client.MmsAgentDomainClient;
+import com.lguplus.fleta.client.MmsCallSettingDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
@@ -10,8 +10,8 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
-import com.lguplus.fleta.exception.mmsagent.*;
 import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
+import com.lguplus.fleta.exception.mmsagent.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,9 +22,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +39,7 @@ class MmsAgentDomainServiceTest {
     private MmsAgentDomainService mmsAgentDomainService;
 
     @Mock
-    CallSettingDomainClient apiClient;
+    MmsCallSettingDomainClient apiClient;
 
     @Mock
     private static MmsAgentDomainClient mmsSoap;
@@ -98,14 +96,17 @@ class MmsAgentDomainServiceTest {
     @Test
     @DisplayName("callSettingApi recordset null")
     void sendMmsCode_callSettingApi_recordset_null() {
-        List<CallSettingDto> rs = new ArrayList<>();
-        CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(0)
-                .memberGroup("")
-                .recordset(null)
+        CallSettingDto dto = CallSettingDto.builder()
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
+
+        CallSettingResultDto result = CallSettingResultDto.builder()
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(null)
+                .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();
@@ -120,14 +121,14 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(BlackListException.class, () -> {
+        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof BlackListException, true);
+        assertEquals(thrown instanceof NotFoundMsgException, true);
 
         log.info("End callSettingApi recordset null");
     }
-
+/*
     @Test
     @DisplayName("callSettingApi totalcount0")
     void sendMmsCode_callSettingApi_totalcount0() {
@@ -153,30 +154,29 @@ class MmsAgentDomainServiceTest {
                 .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
 
-        Exception thrown = assertThrows(BlackListException.class, () -> {
+        Exception thrown = assertThrows(NotFoundMsgException.class, () -> {
             mmsAgentDomainService.sendMmsCode(sendMmsRequestDto);
         });
-        assertEquals(thrown instanceof BlackListException, true);
+        assertEquals(thrown instanceof NotFoundMsgException, true);
 
         log.info("End callSettingApi totalcount0");
     }
+*/
 
     @Test
     @DisplayName("MMS Success case")
     void sendMmsCode_success() {
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("M011")
-                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
-        List<CallSettingDto> rs = new ArrayList<>();
-        rs.add(dto);
+
         CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(rs.size())
-                .memberGroup("")
-                .recordset(rs)
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(dto)
                 .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();
@@ -204,18 +204,16 @@ class MmsAgentDomainServiceTest {
     @DisplayName("returnMmsCodeError")
     void returnMmsCodeError() {
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("M011")
-                .codeName("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
+                .code("M011")
+                .name("U+아이들나라는 네이버 예약과 함께 매 주 아이들과 함께 하기 좋은 체험 장소를 소개합니다.")
                 .build();
-        List<CallSettingDto> rs = new ArrayList<>();
-        rs.add(dto);
+
         CallSettingResultDto result = CallSettingResultDto.builder()
-                .flag("0000")
-                .message("성공")
-                .totalCount(rs.size())
-                .memberGroup("")
-                .recordset(rs)
+                .dataType("SINGLE")
+                .dataCount(1)
+                .data(dto)
                 .build();
+
         CallSettingResultMapDto callSettingDto = CallSettingResultMapDto.builder()//결과객체
                 .result(result)
                 .build();

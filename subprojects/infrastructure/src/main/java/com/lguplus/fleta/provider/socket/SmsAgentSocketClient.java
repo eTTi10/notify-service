@@ -34,7 +34,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
 
     @PostConstruct
-    private void initGateway() {
+    public void initGateway() {
 
         log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
@@ -56,8 +56,8 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             };
             sGatewayQueue.offer(smsGateway);
         }
-
         mSendTerm = calculateTerm();
+
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
@@ -78,15 +78,18 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
         if (SmsAgentSocketClient.sGatewayQueue.size() > 0) {
 
-            SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();
+            SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
 
+            log.debug(currentDate +" - "+ prevSendDate + " <= " + SmsAgentSocketClient.mSendTerm);
+            log.debug((currentDate - prevSendDate) + " <= " + SmsAgentSocketClient.mSendTerm);
+
             if (currentDate - prevSendDate <= SmsAgentSocketClient.mSendTerm) {
 
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
                 //1503
                 throw new SystemBusyException("메시지 처리 수용 한계 초과");
             }
@@ -123,6 +126,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     }
 
     private int calculateTerm() {
+
         int result = 1000;
 
         try {

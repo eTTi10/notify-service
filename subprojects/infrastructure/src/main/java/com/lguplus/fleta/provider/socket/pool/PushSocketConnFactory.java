@@ -34,7 +34,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
             return null;
         }
         else {
-            log.debug("=== factory create Socket : {}", socketInfo);
+            log.trace("=== factory create Socket : {}", socketInfo);
             return socketInfo;
         }
     }

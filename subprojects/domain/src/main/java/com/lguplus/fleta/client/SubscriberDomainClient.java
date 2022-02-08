@@ -1,10 +1,12 @@
 package com.lguplus.fleta.client;
 
 import com.lguplus.fleta.data.dto.RegIdDto;
+import com.lguplus.fleta.data.dto.SaIdDto;
 
+import java.util.List;
 import java.util.Map;
 
 public interface SubscriberDomainClient {
 
-    RegIdDto getRegistrationIDbyCtn(Map<String, String> sendPushInput);
+    List<SaIdDto> getRegistrationIDbyCtn(Map<String, String> sendPushInput);
 }
