@@ -78,8 +78,6 @@ public class NettyTcpClient {
 	private PushMultiClient pushMultiClient;
 
 	private final AtomicInteger commChannelNum = new AtomicInteger(0);
-	//private MessageToByteEncoder<PushMessageInfoDto> nettyMessageEncoder = new MessageEncoder();
-	//private ByteToMessageDecoder nettyMessageDecoder = new MessageDecoder();
 
 	private void initialize() {
 

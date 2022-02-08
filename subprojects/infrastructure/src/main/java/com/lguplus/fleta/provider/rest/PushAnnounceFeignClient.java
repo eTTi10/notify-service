@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.rest;
 
-import feign.RetryableException;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
