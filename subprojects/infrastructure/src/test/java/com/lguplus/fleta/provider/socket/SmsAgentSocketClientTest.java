@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,7 +37,7 @@ class SmsAgentSocketClientTest {
     @InjectMocks
     SmsAgentSocketClient smsAgentSocketClient;
 
-    String sFlag = "0000";
+    private static final String S_FLAG = "0000";
     String sCtn = "01011112222";
     String rCtn = "01011112222";
     String message = "테스트메시지";
@@ -54,12 +53,12 @@ class SmsAgentSocketClientTest {
         serverMap.put("password","test");
 
         JunitTestUtils.setValue(smsAgentProps, "servers", List.of(serverMap));
-        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
+//        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
 
         smsAgentSocketClient.initGateway();
-        Thread.sleep(1500);
+        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
 
     @Test
@@ -67,6 +66,6 @@ class SmsAgentSocketClientTest {
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         SmsGatewayResponseDto responseDto = smsAgentSocketClient.send(sCtn, rCtn, message);
-        assertThat(responseDto.getFlag().equals(sFlag));
+        assertThat(responseDto.getFlag().equals(S_FLAG));
     }
 }

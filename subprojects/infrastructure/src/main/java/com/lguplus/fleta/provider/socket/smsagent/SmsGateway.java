@@ -1,14 +1,11 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
-import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
@@ -28,14 +25,10 @@ import java.util.concurrent.Future;
 @RequiredArgsConstructor
 public class SmsGateway {
 
-//    @Value("${error.smsagent.success.flag}")
-//    private String codeSuccess;
-//
-//    @Value("${error.smsagent.system_error.flag}")
-//    private String codeSystemError;
-
-    private String codeSuccess = "0000";
-    private String codeSystemError = "1500";
+    private static final String CODE_SUCCESS = "0000";
+    private static final String MESSAGE_SUCCESS = "성공";
+    private static final String CODE_SYSTEM_ERROR = "1500";
+    private static final String MESSAGE_SYSTEM_ERROR = "시스템 장애";
 
     private static final int BIND = 0;
     private static final int BIND_ACK = 1;
@@ -58,10 +51,10 @@ public class SmsGateway {
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
 
     private boolean isLinked = false;
-    private boolean isBind = false; //true인 상태는 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
+    private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
 
     private String mIpAddress;
-    private String mResult = "0000";
+    private String mResult = "";
     private String mID;
     private String mPassword;
     private int mPort;
@@ -78,13 +71,13 @@ public class SmsGateway {
 
     private Map<Integer, Timer> mTimerMap = new HashMap<>();
 
+
     public SmsGateway(String ip, String port, String id, String password) {
 
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
-        log.debug("TIMER_TIME_OUT:{}", TIMER_TIME_OUT);
 
         String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
         mFileLog = LogFactory.getLog("SmsGateway");
@@ -96,7 +89,6 @@ public class SmsGateway {
         mID = id;
         mPassword = password;
         mLastSendDate = new Date();
-        log.debug("mLastSendDate: {}", mLastSendDate.getTime());
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
@@ -240,7 +232,7 @@ public class SmsGateway {
 
                 if (mResult.isEmpty()) {
                     log.debug("mResult.isEmpty() then 1500");
-                    mResult = "1500";
+                    mResult = CODE_SYSTEM_ERROR;
                 }
             }
         };
@@ -336,27 +328,20 @@ public class SmsGateway {
         while (mResult.isEmpty()) {
             try {
                 Thread.sleep(10);
-//                log.debug("try timer");
             } catch (InterruptedException e) {
                 log.debug("catch interrupt");
-//                mStatusLog.error("getResult Error");
                 Thread.currentThread().interrupt();
             }
 
-            log.debug("getResult() - mResult:{}", mResult);
-            log.debug("getResult() - codeSuccess:{}", codeSuccess);
-            log.debug("getResult() - codeSystemError:{}", codeSystemError);
-
-
-            if (mResult.equals(codeSuccess)) {  // 0000
-                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .build();
-            } else if (mResult.equals(codeSystemError)) {   // 1500
+            if (mResult.equals(CODE_SUCCESS)) {  // 0000
                 smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                         .flag(mResult)
-                        .message("시스템 장애")
+                        .message(MESSAGE_SUCCESS)
+                        .build();
+            } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
+                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                        .flag(mResult)
+                        .message(MESSAGE_SYSTEM_ERROR)
                         .build();
             }
 
@@ -415,10 +400,10 @@ public class SmsGateway {
 
                 switch (result) {
                     case 0:
-                        mResult = codeSuccess;  // 0000
+                        mResult = CODE_SUCCESS;  // 0000
                         break;
                     case 1:
-                        mResult = codeSystemError; // 1500
+                        mResult = CODE_SYSTEM_ERROR; // 1500
                         break;
                     default:
                         break;

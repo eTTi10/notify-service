@@ -83,9 +83,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
 
-            log.debug(currentDate +" - "+ prevSendDate + " <= " + mSendTerm);
-            log.debug((currentDate - prevSendDate) + " <= " + mSendTerm);
-
             if (currentDate - prevSendDate <= mSendTerm) {
 
                 SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
