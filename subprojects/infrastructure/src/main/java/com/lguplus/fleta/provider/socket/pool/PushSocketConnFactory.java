@@ -1,42 +1,48 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.lguplus.fleta.exception.push.PushBizException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 @Getter
 public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInfo> {
 
-    private final PushServerInfoVo serverInfo;
+    private final PushServerInfoVo serverInfoVo;
 
     private final AtomicInteger commChannelNum = new AtomicInteger(0);
+    private static final int CHANNEL_MAX_SEQ_NO = 10000;
 
     public PushSocketConnFactory(PushServerInfoVo pushServerInfoVo) {
-        this.serverInfo = pushServerInfoVo;
+        this.serverInfoVo = pushServerInfoVo;
     }
 
     @Override
-    public PushSocketInfo create() {
+    public PushSocketInfo create() throws IOException {
 
-        PushSocketInfo socketInfo = new PushSocketInfo(new Socket());
+        PushSocketInfo socketInfo = createNewSocketInfo();
 
-        try {
-            socketInfo.openSocket(serverInfo.getHost(), serverInfo.getPort(), serverInfo.getTimeout(), getChannelId(), serverInfo.getDestinationIp());
-            log.trace("=== factory create Socket : {}", socketInfo);
-        } catch (PushBizException e) {
-            e.printStackTrace();
-            log.debug("=== factory create Socket failure: {}", socketInfo);
+        if(socketInfo.isInValid()) {
+            socketInfo.closeSocket();
+            log.error("=== factory create Socket failure: {}", socketInfo);
+            return null;
         }
+        else {
+            log.trace("=== factory create Socket : {}", socketInfo);
+            return socketInfo;
+        }
+    }
+
+    public PushSocketInfo createNewSocketInfo() throws IOException {
+
+        PushSocketInfo socketInfo = new PushSocketInfo();
+        socketInfo.openSocket(serverInfoVo.getHost(), serverInfoVo.getPort(), serverInfoVo.getTimeout(), getChannelId(), serverInfoVo.getDestinationIp());
 
         return socketInfo;
     }
@@ -45,20 +51,16 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     public boolean validateObject(PooledObject<PushSocketInfo> p) {
 
         PushSocketInfo socketInfo = p.getObject();
-        Socket socket = socketInfo.getPushSocket();
 
-        if(socket == null || socket.getInetAddress() == null || !socket.isConnected()
-                || !socketInfo.isOpened() ||  socketInfo.getFailCount() > 0
-                || socketInfo.getSocketTime() == -1)
-        {
+        if(socketInfo.isInValid()) {
             return false;
         }
 
-        long lastTime = socketInfo.getSocketTime();
-        long currTime = Instant.now().getEpochSecond();
+        if(socketInfo.isTimeoutStatus(serverInfoVo.getCloseSecond()) && socketInfo.getLastUsedSeconds() < 300) {
+            socketInfo.isServerInValidStatus();
+        }
 
-        return serverInfo.getCloseSecond() > (currTime - lastTime);
-
+        return !socketInfo.isTimeoutStatus(serverInfoVo.getCloseSecond());
     }
 
     @Override
@@ -73,31 +75,20 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         socketInfo.closeSocket();
     }
 
-    private String getChannelId() {
-        if(commChannelNum.get() >= 9999) {
-            commChannelNum.set(0);
-        }
+    private String getChannelId() throws IOException {
 
-        String hostname;
-        try {
-            InetAddress addr = InetAddress.getLocalHost();
-            hostname = addr.getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            hostname = serverInfo.getDefaultChannelHost();
-        }
+        InetAddress addr = InetAddress.getLocalHost();
+        String hostname = addr.getHostName();
 
         hostname = hostname.replace("DESKTOP-", "");
         hostname = hostname + hostname;
 
         String channelHostNm = (hostname + "00000000").substring(0, 6);
-        String channelPortNm = (serverInfo.getChannelPort() + "0000").substring(0, 4);
+        String channelPortNm = (serverInfoVo.getChannelPort() + "0000").substring(0, 4);
 
-        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.incrementAndGet());
-    }
+        channelHostNm = "S" +  channelHostNm.substring(1);
 
-    public boolean isLgPush() {
-        return this.serverInfo.isLgPush();
+        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0));
     }
 
     @Getter
@@ -114,6 +105,5 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         private int closeSecond;
         private boolean isLgPush;
     }
-
 
 }

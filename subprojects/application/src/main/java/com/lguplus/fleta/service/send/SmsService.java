@@ -1,9 +1,8 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,16 +15,14 @@ public class SmsService {
 
     private final SmsAgentDomainService smsAgentDomainService;
 
-    public SuccessResponseDto sendSmsCode(SendSmsCodeRequestDto request) {
+    public SendSmsResponseDto sendSmsCode(SendSmsCodeRequestDto request) {
 
-        SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(request);
+        SmsGatewayResponseDto smsGatewayResponseDto = smsAgentDomainService.sendSmsCode(request);
 
-        if (responseDto != null && responseDto.getFlag().equals("0000")) {
-            return SuccessResponseDto.builder().build();
-        }
-        else {
-            throw new NotifySmsRuntimeException();
-        }
+        return SendSmsResponseDto.builder()
+                .flag(smsGatewayResponseDto.getFlag())
+                .message(smsGatewayResponseDto.getMessage())
+                .build();
     }
 
 }

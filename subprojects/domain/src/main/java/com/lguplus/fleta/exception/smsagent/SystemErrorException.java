@@ -1,9 +1,14 @@
 package com.lguplus.fleta.exception.smsagent;
 
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
-public class SystemErrorException extends NotifySmsRuntimeException {
+public class SystemErrorException extends NotifyRuntimeException {
 
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
+    }
 
     public SystemErrorException() {
         super();

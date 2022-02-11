@@ -6,8 +6,9 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.*;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -15,11 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -54,9 +55,12 @@ public class PushSingleDomainService {
 
     private Map<String,Object> requestLock;
     private Map<String,Object> progressLock;
-    private final Map<String, Long> pushProgressCnt = new Hashtable<>();
+    private final List<ProcessCounter> pushProgressCnt = new ArrayList<>();
 
     private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String PUSH_COMMAND = "PUSH_NOTI";
+    private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
+    private static final int TRANSACTION_MAX_SEQ_NO = 10000;
 
     @PostConstruct
     public void initialize(){
@@ -79,43 +83,58 @@ public class PushSingleDomainService {
      */
     public PushClientResponseDto requestPushSingle(PushRequestSingleDto dto) {
 
-        // 서비스별 초당 처리 건수 오류 처리
-        ImmutablePair<Long, Long> requstInfo = getPushCountInterval(dto.getServiceId());
-        long pushCnt = requstInfo.getLeft();
-        //long pushWaitTime = requstInfo.getRight();//Mili Seconds
-
-        // 처리량 초과
-        if (pushCnt > lPushDelayReqCnt) {
-            //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime);
-
-            // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
-            // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
-            if (lPushDelayReqCnt * 2 < pushCnt) {
-                resetPushProgressCnt(dto.getServiceId());
-            }
-           // throw new MaxRequestOverException();
-            return PushClientResponseDto.builder()
-                    .code("max-count-over")
-                    .message("max-count-over")
-                    .build();
-        }
-
-        //1. Make Message
-        Map<String, String> paramMap = new HashMap<>();
-        paramMap.put("msg_id", "PUSH_NOTI");
-        paramMap.put("push_id", getTransactionId(dto.getServiceId()));
-        paramMap.put("service_id", dto.getServiceId());
-        paramMap.put("app_id", dto.getAppId());
-        paramMap.put("noti_contents", dto.getMsg());
-
         String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
         if (servicePwd == null) {
             log.error("ServiceId Not Found:" + dto.getServiceId());
             throw new ServiceIdNotFoundException();
         }
+
+        // 서비스별 초당 처리 건수 오류 처리
+        checkThroughput(dto.getServiceId());
+
+        //1. Make Message
+        Map<String, String> paramMap = getMessage(dto, servicePwd);
+
+        int retryCount = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : iPushCallRetryCnt;
+
+        //2. Send Push
+        AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
+        AtomicReference<String> recvStatusCode = new AtomicReference<>("");
+        AtomicReference<String> recvStatusMsg = new AtomicReference<>("");
+
+        IntStream.range(0, retryCount).takeWhile(value -> !isFutureSuccess.get()).forEach(reCnt -> {
+            try {
+                setPushProgressCnt(dto.getServiceId(), +1);
+                PushResponseDto pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
+
+                recvStatusCode.set(pushResponseDto.getStatusCode());
+                recvStatusMsg.set(pushResponseDto.getStatusMsg());
+            } finally {
+                setPushProgressCnt(dto.getServiceId(), -1);
+            }
+
+            // 200 : 정상 처리, 재시도 예외인 경우
+            isFutureSuccess.set( recvStatusCode.get().equals("200") || isRetryExcludeCode(recvStatusCode.get()) );
+        });
+
+        //test
+        //statusCode = "200"
+        exceptionHandler(recvStatusCode.get());
+
+        return PushClientResponseDto.builder().code(recvStatusCode.get()).message(recvStatusMsg.get()).build();
+    }
+
+    private Map<String, String> getMessage(PushRequestSingleDto dto, String servicePwd) {
+
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("msg_id", PUSH_COMMAND);
+        paramMap.put("push_id", getTransactionId(dto.getServiceId()));
+        paramMap.put("service_id", dto.getServiceId());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
         paramMap.put("service_passwd", servicePwd);
 
-        if ("LGUPUSH_OLD".equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+        if (LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
             paramMap.put("push_app_id", oldLgPushAppId);
             paramMap.put("noti_type", oldLgPushNotiType);
             paramMap.put("regist_id", dto.getRegId());
@@ -123,56 +142,35 @@ public class PushSingleDomainService {
             paramMap.put("service_key", dto.getRegId());
         }
 
-        dto.getItems().forEach(e -> {
-            String[] item = e.split("\\!\\^");
-            if (item.length >= 2) {
-                paramMap.put(item[0], item[1]);
-            }
-        });
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
-        PushResponseDto pushResponseDto;
-        String statusCode = "";
-        String statusMsg = "";
+        return paramMap;
 
-        //2. Send Push
-        for (int i = 0; i < iPushCallRetryCnt; i++) {
-
-            try {
-                setPushProgressCnt(dto.getServiceId(), +1);
-                pushResponseDto = pushSingleClient.requestPushSingle(paramMap);
-            }
-            finally {
-                setPushProgressCnt(dto.getServiceId(), -1);
-            }
-
-            //3. Send Result
-            statusCode = pushResponseDto.getStatusCode();
-            statusMsg = pushResponseDto.getStatusMsg();
-
-            if (statusCode.equals("200")) {
-                log.trace("[requestPushSingle][" + statusCode + "] [SUCCESS]");
-            } else {
-                log.trace("[requestPushSingle][" + statusCode + "] [FAIL]");
-
-                boolean isRetryExclude = isRetryExcludeCode(statusCode);
-
-                if (!isRetryExclude && (i + 1) < iPushCallRetryCnt) {
-                    continue;
-                }
-
-                //실패
-                //return getPushClientResponseDto(status_code);
-                return PushClientResponseDto.builder().code(statusCode).message("Error")
-                        .build();
-            }
-        }
-
-        return PushClientResponseDto.builder().code(statusCode).message(statusMsg)
-                .build();
     }
 
-    static PushClientResponseDto getPushClientResponseDto(String statusCode) {
+    private void checkThroughput(String serviceId) {
+        // 서비스별 초당 처리 건수 오류 처리
+        ImmutablePair<Long, Long> requstInfo = getPushCountInterval(serviceId);
+        long pushCnt = requstInfo.getLeft();
+        //long pushWaitTime = requstInfo.getRight() //Mili Seconds
+
+        // 처리량 초과
+        if (pushCnt > lPushDelayReqCnt) {
+            //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime)
+
+            // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
+            // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
+            if (lPushDelayReqCnt * 2 < pushCnt) {
+                resetPushProgressCnt(serviceId);
+            }
+            throw new MaxRequestOverException();
+        }
+    }
+
+    private void exceptionHandler(String statusCode) throws NotifyRuntimeException {
         switch (statusCode) {
+            case "200":
+                break;
             case "202":
                 throw new AcceptedException();
             case "400":
@@ -202,25 +200,20 @@ public class PushSingleDomainService {
         }
     }
 
+    private boolean isRetryExcludeCode(String code) {
+        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
+    }
+
     private boolean isLgPushServiceId(String serviceId) {
         return lgPushServceId.equals(serviceId);
     }
 
-
     private String getTransactionId(String serviceId) {
         if(!isLgPushServiceId(serviceId)) {
-            if (tranactionMsgId1.get() >= 9999) {
-                tranactionMsgId1.set(0);
-                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.get());
-            }
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
         else {
-            if(tranactionMsgId2.get() >= 9999) {
-                tranactionMsgId2.set(0);
-                return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.get());
-            }
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.incrementAndGet());
+            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
     }
 
@@ -251,11 +244,11 @@ public class PushSingleDomainService {
             }
             else {
                 resultCnt = pushStatDto.getMeasurePushCount();
-                //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis);
+                //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis)
             }
 
             pushSingleClient.putPushStatus(serviceId, ++resultCnt, pushStatDto.getMeasureStartMillis());
-            //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis());
+            //log.debug(":: getPushCountInterval putPushStatus resultCnt={} time:{}", resultCnt, pushStatDto.getMeasureStartMillis())
 
             return new ImmutablePair<>(resultCnt, timeoutgap);
         }
@@ -265,27 +258,46 @@ public class PushSingleDomainService {
     //Push Count
     private Long getPushProcessCount(String serviceId) {
         synchronized (progressLock.get(serviceId)) {
-            return pushProgressCnt.get(serviceId);
+            Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
+            return processCounter.orElse(ProcessCounter.builder().transactionCount(0L).build()).getTransactionCount();
         }
     }
 
     private void setPushProgressCnt(String serviceId, int changeVal) {
+        setPushProgressCnt(serviceId, changeVal, false);
+    }
+
+    private void setPushProgressCnt(String serviceId, int changeVal, boolean isReset) {
         synchronized (progressLock.get(serviceId)) {
-            if (changeVal != 0) {
-                pushProgressCnt.put(serviceId, pushProgressCnt.get(serviceId) + changeVal);
+            Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
+            if(processCounter.isPresent()) {
+                long setCount = processCounter.get().getTransactionCount() + changeVal;
+                if(isReset) {
+                    setCount = changeVal;
+                }
+                processCounter.get().setTransactionCount(setCount);
+            }
+            else {
+                pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
             }
         }
     }
 
     private void resetPushProgressCnt(String serviceId) {
-        synchronized (progressLock.get(serviceId)) {
-            pushProgressCnt.put(serviceId, 0L);
+        setPushProgressCnt(serviceId, 0, true);
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @Builder
+    @ToString
+    static class ProcessCounter {
+        private String serviceId;
+        private Long transactionCount;
+
+        public void setTransactionCount(Long transactionCount) {
+            this.transactionCount = transactionCount;
         }
     }
-
-    private boolean isRetryExcludeCode(String code) {
-        return true;
-        //return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
-    }
-
 }

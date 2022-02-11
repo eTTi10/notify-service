@@ -10,15 +10,12 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @AllArgsConstructor
-/**
- * ################### 개발중 입니다. 잠시 개발 중단 상태입니다. 리뷰대상이 아닙니다. #####################
- */
+
 public class MmsService {
 
     private final MmsAgentDomainService mmsAgentDomainService;
 
-    public SuccessResponseDto sendMms(SendMmsRequestDto request)  throws Exception{
-
+    public SuccessResponseDto sendMms(SendMmsRequestDto request) {
         return mmsAgentDomainService.sendMmsCode(request);
     }
 

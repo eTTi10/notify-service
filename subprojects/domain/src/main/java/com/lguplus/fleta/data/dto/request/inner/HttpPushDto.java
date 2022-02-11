@@ -1,9 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 /**
  * HttpPush 관련 DTO

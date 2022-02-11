@@ -12,6 +12,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
+//@Transactional(readOnly = true) <== 리뷰에서 어노테이션 추가요청을 받았지만 insertLatest인서트가 되지 않아서 일단 주석처리함
 public class LatestService {
 
     private final LatestDomainService latestDomainService;
@@ -23,15 +24,12 @@ public class LatestService {
                 .recordset(result)
                 .build();
     }
-    /*
-    public  int deleteLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.deleteLatest(latestRequestDto);
-        return result;
-    }
-    */
 
-    public  int insertLatest(LatestRequestDto latestRequestDto) {
-        int result = latestDomainService.insertLatest(latestRequestDto);
-        return result;
+    public  int deleteLatest(LatestRequestDto latestRequestDto) {
+        return latestDomainService.deleteLatest(latestRequestDto);
+    }
+
+    public  void insertLatest(LatestRequestDto latestRequestDto) {
+        latestDomainService.insertLatest(latestRequestDto);
     }
 }

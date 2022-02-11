@@ -1,62 +1,116 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.exception.httppush.*;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.properties.HttpServiceProps;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
 @Slf4j
+@RequiredArgsConstructor
 @Component
 public class HttpPushErrorDecoder implements ErrorDecoder {
+
+    private final HttpServiceProps httpServiceProps;
+
 
     @Override
     public Exception decode(String methodKey, Response response) {
         log.debug("\n{} 에러 발생 :::::::::::::: status: {}\nbody: {}", methodKey, response.status(), response.body());
 
-        switch (response.status()) {
+        int status = response.status();
+
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        httpPushCustomException.setStatusCode(status);
+
+        Pair<String, String> cdMsgPair;
+
+        switch (status) {
             case 202:
                 // code "1112", message "The request Accepted"
-                throw new AcceptedException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("AcceptedException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 400:
                 // code "1104", message "Push GW BadRequest"
-                throw new BadRequestException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("BadRequestException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 401:
                 // code "1105", message "Push GW UnAuthorized"
-                throw new UnAuthorizedException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("UnAuthorizedException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 403:
                 // code "1106", message "Push GW Forbidden"
-                throw new ForbiddenException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("ForbiddenException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 404:
                 // code "1107", message "Push GW Not Found"
-                throw new NotFoundException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("NotFoundException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 410:
                 // code "1113", message "Not Exist RegistID"
-                throw new NotExistRegistIdException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("NotExistRegistIdException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 412:
                 // code "1108", message "Push GW Precondition Failed"
-                throw new PreConditionFailedException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("PreConditionFailedException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 500:
                 // code "1109", message "Push GW Internal Error"
-                throw new InternalErrorException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("InternalErrorException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 502:
                 // code "1114", message "Exception Occurs"
-                throw new ExceptionOccursException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("ExceptionOccursException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             case 503:
                 // code "1110", message "Push GW Service Unavailable"
-                throw new ServiceUnavailableException();
+                cdMsgPair = httpServiceProps.getExceptionCodeMessage("ServiceUnavailableException");
+                httpPushCustomException.setCode(cdMsgPair.getLeft());
+                httpPushCustomException.setMessage(cdMsgPair.getRight());
+
+                return httpPushCustomException;
 
             default:
-                throw new RuntimeException("기타 오류");
+                return new RuntimeException("기타 오류");
         }
     }
 

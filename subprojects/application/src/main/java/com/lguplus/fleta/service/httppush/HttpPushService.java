@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
+import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +17,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class HttpPushService {
 
-    private final HttpPushDomainService httpPushDomainService;
+    private final HttpSinglePushDomainService httpSinglePushDomainService;
+
+    private final HttpMultiPushDomainService httpMultiPushDomainService;
+
 
     /**
      * 단건푸시등록
@@ -25,7 +29,17 @@ public class HttpPushService {
      * @return 단건푸시등록 결과
      */
     public HttpPushResponseDto requestHttpPushSingle(HttpPushSingleRequestDto httpPushSingleRequestDto) {
-        return httpPushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+        return httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+    }
+
+    /**
+     * 멀티푸시등록
+     *
+     * @param httpPushMultiRequestDto 멀티푸시등록을 위한 DTO
+     * @return 멀티푸시등록 결과
+     */
+    public HttpPushResponseDto requestHttpPushMulti(HttpPushMultiRequestDto httpPushMultiRequestDto) {
+        return httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
     }
 
 }

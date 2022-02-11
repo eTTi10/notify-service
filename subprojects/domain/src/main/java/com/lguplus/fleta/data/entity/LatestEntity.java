@@ -1,15 +1,17 @@
 package com.lguplus.fleta.data.entity;
 
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.entity.id.LatestId;
 import lombok.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Date;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
+@Builder
 @Entity
 @Table(name = "SMARTUX.PT_UX_LATEST")
 @IdClass(LatestId.class)
@@ -38,15 +40,9 @@ public class LatestEntity implements Serializable{
     private String categoryGb;
 
     @Column(name = "r_date")
-    private String rDate;
+    private Date rDate;
 
     @Column(name = "cat_name")
     private String catName;
 
-    public String toPlainText() {
-        return String.join(CommonResponseDto.Separator.COLUMN
-                , getSaId(), getMac(), getCtn()
-                , getRegId(), getCatId(), getCatName()
-                , getRDate(), getCategoryGb());
-    }
 }

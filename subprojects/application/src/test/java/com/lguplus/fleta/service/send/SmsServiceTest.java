@@ -1,9 +1,8 @@
 package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,9 +18,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-public class SmsServiceTest {
+class SmsServiceTest {
 
-    private static final String SUCCESS_CDE = "0000";
+    private static final String SUCCESS_CODE = "0000";
+
+    SendSmsCodeRequestDto request;
 
     @InjectMocks
     SmsService smsService;
@@ -32,7 +33,17 @@ public class SmsServiceTest {
     @BeforeEach
     void setUp() {
 
-        smsService = new SmsService(smsAgentDomainService);
+//        smsService = new SmsService(smsAgentDomainService);
+
+
+        // mock object
+        request = SendSmsCodeRequestDto.builder()
+                .saId("M15030600001")
+                .stbMac("v150.3060.0001")
+                .smsCd("S001")
+                .ctn("01051603997")
+                .replacement("http://google.com/start/we09gn2ks")
+                .build();
 
     }
 
@@ -55,28 +66,10 @@ public class SmsServiceTest {
                 .build();
 
         // when
-        SuccessResponseDto responseDto = smsService.sendSmsCode(request);
+        SendSmsResponseDto responseDto = smsService.sendSmsCode(request);
 
         // then
-        assertThat(responseDto.getFlag()).isEqualTo(SUCCESS_CDE);
+        assertThat(responseDto.getFlag()).isEqualTo(SUCCESS_CODE);
     }
 
-    @Test
-    @DisplayName("SMS 발송이 실패일 경우 예외처리가 되는지 확인")
-    void whenFailCondition_thenReturnExcepetion() {
-        // mock object
-        SendSmsCodeRequestDto request = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
-
-        Exception exception = assertThrows(NotifySmsRuntimeException.class, () -> {
-            smsService.sendSmsCode(request);
-        });
-
-        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.NotifySmsRuntimeException");
-    }
 }

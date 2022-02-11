@@ -5,6 +5,7 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.data.vo.PushRequestBodyAnnounceVo;
 import com.lguplus.fleta.data.vo.PushRequestBodyMultiVo;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @Api(tags = "Push", description = "Push Message 전송 서비스")
 @Slf4j
@@ -56,9 +58,9 @@ public class PushServiceController {
 
         log.debug("PushAnnounceController : {}", pushRequestBodyAnnounceVo);
 
-        PushRequestAnnounceDto dto = pushRequestMapper.toDtoAnnounce(pushRequestBodyAnnounceVo);
+        PushRequestAnnounceDto pushRequestAnnounceDto = pushRequestMapper.toDtoAnnounce(pushRequestBodyAnnounceVo);
 
-        return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(dto));
+        return InnerResponseDto.of(pushAnnouncementService.requestAnnouncement(pushRequestAnnounceDto));
     }
 
     /**
@@ -72,15 +74,15 @@ public class PushServiceController {
     public InnerResponseDto<PushClientResponseDto> pushRequest(
             @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
-        //log.debug("PushSingleController : {}", pushRequestBodySingleVo);
-        PushRequestSingleDto dto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
+        //log.debug("PushSingleController : {}", pushRequestBodySingleVo)
+        PushRequestSingleDto pushRequestSingleDto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
 
         //Reject User
-        if ( ("|" + this.pushRejectRegList).contains("|" + dto.getRegId().trim()) ) {
+        if (!isValidRegId(pushRequestSingleDto.getRegId())) {
             return InnerResponseDto.of(PushClientResponseDto.builder().code("0000").message("성공").build());
         }
 
-        return InnerResponseDto.of(pushSingleService.requestPushSingle(dto));
+        return InnerResponseDto.of(pushSingleService.requestPushSingle(pushRequestSingleDto));
     }
 
 
@@ -92,14 +94,21 @@ public class PushServiceController {
      */
     @PostMapping(value = "/notify/push/multi")
     @ApiOperation(value="Multi Push Message 등록", notes="Multi Push Message를 등록한다.")
-    public InnerResponseDto<?> multiPushRequest(
+    public InnerResponseDto<PushClientResponseMultiDto> multiPushRequest(
             @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
-        //PushRequestMultiDto dto = pushRequestBodyMultiVo.convert(pushRequestParamMultiVo);
-        //
+        //Reject User Filtering
+        pushRequestBodyMultiVo.setUsers(pushRequestBodyMultiVo.getUsers().stream().filter(this::isValidRegId).collect(Collectors.toList()));
+
         PushRequestMultiDto dto = pushRequestMapper.toDtoMulti(pushRequestBodyMultiVo);
 
-        return InnerResponseDto.of(pushMultiService.requestMultiPush(dto));
+        PushClientResponseMultiDto responseMultiDto = pushMultiService.requestMultiPush(dto);
+
+        return InnerResponseDto.of(responseMultiDto);
+    }
+
+    private boolean isValidRegId(String regId) {
+        return !("|" + this.pushRejectRegList + "|").contains("|" + regId + "|");
     }
 
 }

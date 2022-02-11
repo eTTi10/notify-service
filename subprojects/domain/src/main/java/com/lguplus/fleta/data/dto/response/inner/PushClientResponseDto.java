@@ -28,7 +28,4 @@ public class PushClientResponseDto {
     @JsonProperty("message")
     private String message = "Success";
 
-    /* 메시지전송 실패 사용자 */
-    //private List<String> failUsers;
-
 }

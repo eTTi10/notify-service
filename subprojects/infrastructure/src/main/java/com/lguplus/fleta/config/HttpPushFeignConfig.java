@@ -1,5 +1,6 @@
 package com.lguplus.fleta.config;
 
+import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.provider.rest.HttpPushErrorDecoder;
 import feign.Logger;
 import feign.RequestInterceptor;
@@ -27,8 +28,8 @@ public class HttpPushFeignConfig {
     private String authorizationAnnounce;
 
     @Bean
-    public ErrorDecoder errorDecoder() {
-        return new HttpPushErrorDecoder();
+    public ErrorDecoder errorDecoder(HttpServiceProps httpServiceProps) {
+        return new HttpPushErrorDecoder(httpServiceProps);
     }
 
     @Bean
@@ -38,17 +39,13 @@ public class HttpPushFeignConfig {
             requestTemplate.header(HttpHeaders.ACCEPT_CHARSET, encodingSingle);
             requestTemplate.header(HttpHeaders.CONTENT_TYPE, contentTypeSingle);
             requestTemplate.header(HttpHeaders.CONTENT_ENCODING, encodingSingle);
-            requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
 
-            /*if (requestTemplate.url().endsWith("servicekey")) {
-                System.out.println("servicekey autho :::::::::: " + authorizationSingle);
+            if (requestTemplate.url().endsWith("servicekey")) {
                 requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);
 
             } else if (requestTemplate.url().endsWith("announce")) {
-                System.out.println("announce autho :::::::::: " + authorizationAnnounce);
                 requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationAnnounce);
-
-            }*/
+            }
         };
     }
 

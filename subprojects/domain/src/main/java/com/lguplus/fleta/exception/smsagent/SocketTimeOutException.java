@@ -1,7 +1,8 @@
 package com.lguplus.fleta.exception.smsagent;
 
 
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * Exception for error flag 1103
@@ -9,7 +10,13 @@ import com.lguplus.fleta.exception.NotifySmsRuntimeException;
  * @author Taekuk Song
  * @since 1.0
  */
-public class SocketTimeOutException extends NotifySmsRuntimeException {
+public class SocketTimeOutException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
+    }
+
 
     /**
      *

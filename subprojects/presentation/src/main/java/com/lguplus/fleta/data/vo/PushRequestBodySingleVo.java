@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
@@ -10,7 +9,11 @@ import lombok.Getter;
 import lombok.ToString;
 
 import javax.validation.GroupSequence;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,7 +26,7 @@ public class PushRequestBodySingleVo {
     @Size(max = 256, message = "파라미터 app_id는 값이 256 이하이어야 함", groups = Groups.C2.class)
     @JsonProperty("app_id")
     @ApiModelProperty(position = 1, example = "lguplushdtvgcm", value = "어플리케이션 ID")
-    private String appId;
+    private String applicationId;
 
     @NotBlank(message = "service_id 파라미터값이 전달이 안됨", groups = Groups.C3.class)
     @JsonProperty("service_id")
@@ -37,17 +40,15 @@ public class PushRequestBodySingleVo {
     private String pushType;
 
     /** 보낼 메시지 */
-    @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
+    @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C7.class)
     @JsonProperty("msg")
     @ApiModelProperty(position = 4, example = "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"", value = "보낼 메시지")
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
-    //@NotEmpty(message = "필수 BODY DATA 미존재[items]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C6.class)
-    //@Size(max = 1, message = "최대 호출횟수 초과", groups = Groups.C8.class)  // 1120
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
-    private List<String> items;
+    private List<String> addItems = new ArrayList<>();
 
     /** 사용자 ID */
     @NotNull(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C6.class)
@@ -55,15 +56,9 @@ public class PushRequestBodySingleVo {
     @ApiModelProperty(position = 6, example = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=", value = "사용자 ID")
     private String regId;
 
-    public PushRequestSingleDto convert() {
-        return PushRequestSingleDto.builder()
-                .appId(getAppId())
-                .serviceId(getServiceId())
-                .pushType(getPushType())
-                .msg(getMsg())
-                .items(getItems())
-                .regId(getRegId())
-                .build();
-    }
+    /** 재전송 시도 횟수  */
+    @JsonProperty("retry")
+    @ApiModelProperty(position = 7, example = "100", value = "실패시 재전송 시도 횟수")
+    private Integer retryCount = 0;
 
 }

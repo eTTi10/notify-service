@@ -19,9 +19,9 @@ push-comm:
       cacheName: pushDelayCnt
       reqCnt: '100' # '100'
     socket:
-      max: '80' # 20
-      close_secend: '170'
-      min: '20'
+      max: '30' # 20
+      close_secend: '150'
+      min: '5'
       channelID: PsAgt # PsAgt
       timeout: '2000' # 2000
       channelNum: '0000'
@@ -52,14 +52,14 @@ push-comm:
   ####################LGPUSH 개별########################
   lgpush:
     #개별Push중 IPTVPush로 나가야 하는 대상 service_id
-    service_id: '30021' #00007
+    service_id: '00007'
     server:
       ip: 211.115.75.227
       port: '8100'
     socket:
-      max: '50'
-      min: '10'
-      close_secend: '90'
+      max: '10'
+      min: '5'
+      close_secend: '150'
       initCnt: '10'
       channelNum: '0000'
       timeout: '2000'

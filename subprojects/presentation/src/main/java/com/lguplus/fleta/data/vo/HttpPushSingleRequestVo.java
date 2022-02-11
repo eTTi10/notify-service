@@ -1,31 +1,21 @@
 package com.lguplus.fleta.data.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
-import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import javax.validation.GroupSequence;
 import javax.validation.constraints.*;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * 단건푸시등록 요청 VO
  *
  */
 @Getter
-@NoArgsConstructor
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, HttpPushSingleRequestVo.class})
 @ApiModel(value = "단건푸시등록 요청 VO", description = "단건푸시등록 요청 VO")
 public class HttpPushSingleRequestVo {
@@ -35,7 +25,7 @@ public class HttpPushSingleRequestVo {
     @Size(max = 256, message = "파라미터 app_id는 값이 256 이하이어야 함", groups = Groups.C2.class)
     @JsonProperty("app_id")
     @ApiModelProperty(position = 1, example = "lguplushdtvgcm", value = "어플리케이션 ID")
-    private String appId;
+    private String applicationId;
 
     /** 서비스 등록시 부여받은 Unique ID */
     @NotBlank(message = "service_id 파라미터값이 전달이 안됨", groups = Groups.C3.class)
@@ -58,8 +48,9 @@ public class HttpPushSingleRequestVo {
 
     /** 보낼 메시지 */
     @NotBlank(message = "필수 BODY DATA 미존재[msg]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
+    @JsonProperty("msg")
     @ApiModelProperty(position = 5, example = "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}", value = "보낼 메시지")
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     @ApiModelProperty(position = 6, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")

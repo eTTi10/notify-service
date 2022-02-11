@@ -1,11 +1,18 @@
 package com.lguplus.fleta.exception.mmsagent;
 
-import com.lguplus.fleta.exception.NotifyMmsRuntimeException;
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 /**
  * 5200: 서버 설정 정보 오류
  */
-public class NoHttpsException extends NotifyMmsRuntimeException {
+public class NoHttpsException extends NotifyRuntimeException {
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
+    }
 
     public NoHttpsException() {
         super();

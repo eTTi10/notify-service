@@ -1,8 +1,8 @@
 package com.lguplus.fleta.client;
 
-import com.lguplus.fleta.data.dto.response.inner.PushSingleResponseDto;
-
-import java.util.Map;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
+import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
+import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 
 /**
  * Push Multi Socket client
@@ -11,12 +11,27 @@ import java.util.Map;
  */
 public interface PushMultiClient {
 
+    String PUSH_COMMAND = "PUSH_NOTI";
+    String LG_PUSH_OLD = "LGUPUSH_OLD";
+    String REGIST_ID_NM = "[@RegistId]";
+    String TRANSACT_ID_NM = "[@TransactionId]";
+
+    enum MsgType {
+        RECIVED_MSG, SEND_SUCCESS_MSG, SEND_FAIL_MSG
+    }
+
     /**
-     * Push Announcement
+     * Push Multi 전송
      *
-     * @param paramMap Push Multi 정보
+     * @param dto Push Multi 정보
      * @return Push Multi 결과
      */
-    PushSingleResponseDto requestPushMulti(Map<String, String> paramMap);
+    PushMultiResponseDto requestPushMulti(PushRequestMultiSendDto dto);
+
+    /**
+     * Push 비동기 수신시 저장
+     * @param dto
+     */
+    void receiveAsyncMessage(MsgType msgType, PushMessageInfoDto dto);
 
 }

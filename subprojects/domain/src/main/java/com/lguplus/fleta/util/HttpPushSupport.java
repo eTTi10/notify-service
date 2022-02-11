@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
-import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
 import com.lguplus.fleta.properties.HttpServiceProps;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  *  Http Push 관련 유틸 클래스
@@ -32,10 +34,12 @@ import java.util.function.Function;
  */
 @Slf4j
 @RequiredArgsConstructor
+@Getter
 @Component
 public class HttpPushSupport {
 
     private final HttpServiceProps httpServiceProps;
+
 
     /**
      * transactionId 를 가져온다.
@@ -59,10 +63,11 @@ public class HttpPushSupport {
             MessageDigest digest = MessageDigest.getInstance("SHA-512");
             digest.reset();
             digest.update(password.getBytes(StandardCharsets.UTF_8));
+
             return String.format("%0128x", new BigInteger(1, digest.digest()));
 
         } catch (Exception ex) {
-            throw new RuntimeException("기타 오류");
+            throw new HttpPushEtcException("기타 오류");
         }
     }
 
@@ -93,16 +98,19 @@ public class HttpPushSupport {
      */
     private String getEncryptedServicePassword(String serviceId) {
         //서비스 KEY
-        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가;
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
+        Pair<String, String> cdMsgPair = httpServiceProps.getExceptionCodeMessage("ServiceIdNotFoundException");
+        httpPushCustomException.setCode(cdMsgPair.getLeft());
+        httpPushCustomException.setMessage(cdMsgPair.getRight());
 
-        String servicePwd = Optional.of(serviceMap.get("service_pwd")).orElseThrow(ServiceIdNotFoundException::new);    // 1115 서비스ID 확인 불가;
+        Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
+
+        String servicePwd = Optional.ofNullable(serviceMap.get("service_pwd")).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
 
         log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, servicePwd);
 
         // service_pwd : SHA512 암호화
         servicePwd = encryptServicePassword(servicePwd);
-
-//        log.debug("encrypted service_pwd :::::::::::::::::::::: {}", servicePwd);
 
         return servicePwd;
     }
@@ -110,49 +118,41 @@ public class HttpPushSupport {
     /**
      * 푸시(단건, 멀티) Open API 를 호춣할 파라미터를 만든다.
      *
-     * @param appId 어플리케이션 ID
+     * @param applicationId 어플리케이션 ID
      * @param serviceId 서비스 등록시 부여받은 Unique ID
      * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @param msg 보낼 메시지
+     * @param message 보낼 메시지
      * @param regId 사용자 ID
      * @param items 추가할 항목 입력(name!^value)
      * @return 푸시(단건, 멀티) Open API 를 호춣할 생성된 파라미터
      */
-    public Map<String, Object> makePushParameters(String appId, String serviceId, String pushType, String msg, String regId, List<String> items) {
-//        log.debug("before msg ::::::::::::::::::::::::::::::: {}", msg);
-
+    public Map<String, Object> makePushParameters(String applicationId, String serviceId, String pushType, String message, String regId, List<String> items) {
         String servicePwd = getEncryptedServicePassword(serviceId);
 
         // 4자리수 넘지 않도록 방어코드
-        if (HttpServiceProps.singleTransactionIDNum.get() >= 9999) {
-            HttpServiceProps.singleTransactionIDNum.set(0);
+        if (HttpServiceProps.singleTransactionIdNum.get() >= 9999) {
+            HttpServiceProps.singleTransactionIdNum.set(0);
         }
 
-//        log.debug("transactionDate :::::::: {}", transactionDate);
-
-        int transactionNum = HttpServiceProps.singleTransactionIDNum.incrementAndGet();
+        int transactionNum = HttpServiceProps.singleTransactionIdNum.incrementAndGet();
 
         String transactionId = getTransactionId(transactionNum);
-
-//        log.debug("transactionId :::::::: {}", transactionId);
 
         // PAYLOAD
         String payload = "";
 
         // 안드로이드
         if (pushType.equals("G")) {
-            Function<String, String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
+            UnaryOperator<String> gcmPushOpenApiPayload = m -> "{" + replacePayload(m) + "}";
 
-            payload = gcmPushOpenApiPayload.apply(msg);
+            payload = gcmPushOpenApiPayload.apply(message);
 
         // 아이폰("A")
         } else {
             Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
-            payload = apnOpenApiPayload.apply(Pair.of(msg, items));
+            payload = apnOpenApiPayload.apply(Pair.of(message, items));
         }
-
-//        log.debug("after msg ::::::::::::::::::::::::::::::: {}", payload);
 
         HttpPushDto httpPushDto = HttpPushDto.builder()
                 .requestPart(HttpServiceProps.PUSH_REQUEST_PART)
@@ -160,14 +160,80 @@ public class HttpPushSupport {
                 .pushId(transactionId)
                 .serviceId(serviceId)
                 .servicePass(servicePwd)
-                .applicationId(appId)
+                .applicationId(applicationId)
                 .serviceKey(regId)
                 .payload(payload)
                 .build();
 
-//        log.debug("HttpPushDto ::::::::::::::::::::::::::: {}", httpPushDto);
-
         return makePushMap(httpPushDto, "S", "");
+    }
+
+    /**
+     * 공지 Open API 를 호춣할 파라미터를 만든다.
+     *
+     * @param applicationId 어플리케이션 ID
+     * @param serviceId 서비스 등록시 부여받은 Unique ID
+     * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
+     * @param message 보낼 메시지
+     * @param items 추가할 항목 입력(name!^value)
+     * @return 공지 Open API 를 호춣할 생성된 파라미터
+     */
+    public Map<String, Object> makePushParameters(String applicationId, String serviceId, String pushType, String message, List<String> items) {
+        String servicePwd = getEncryptedServicePassword(serviceId);
+
+        // 4자리수 넘지 않도록 방어코드
+        if (HttpServiceProps.announceTransactionIdNum.get() >= 9999) {
+            HttpServiceProps.announceTransactionIdNum.set(0);
+        }
+
+        int transactionNum = HttpServiceProps.announceTransactionIdNum.incrementAndGet();
+
+        String transactionId = getTransactionId(transactionNum);
+
+        // PAYLOAD
+        String payload = "";
+        String gcmMultiCount = HttpServiceProps.GCM_MULTI_COUNT;
+
+        // 안드로이드
+        if (pushType.equals("G")) {
+            Function<String, Pair<String, String>> gcmAnnounceOpenApiPayload = m -> {
+                String[] config;
+                String tmpGcmMultiCount = "";
+
+                for (String item : items) {
+                    config = item.split("!\\^");
+
+                    if (config.length >= 2 && config[0].equalsIgnoreCase("gcm_multi_count")) {
+                        tmpGcmMultiCount = config[1];
+                    }
+                }
+
+                return Pair.of("{" + replacePayload(m) + "}", tmpGcmMultiCount);
+            };
+
+            Pair<String, String> tmpPair = gcmAnnounceOpenApiPayload.apply(message);
+            payload = tmpPair.getLeft();
+            gcmMultiCount = tmpPair.getRight();
+
+        // 아이폰("A")
+        } else {
+            Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
+
+            payload = apnOpenApiPayload.apply(Pair.of(message, items));
+        }
+
+        HttpPushDto httpPushDto = HttpPushDto.builder()
+                .requestPart(HttpServiceProps.ANNOUNCE_REQUEST_PART)
+                .requestTime(getRequestTime())
+                .pushId(transactionId)
+                .serviceId(serviceId)
+                .servicePass(servicePwd)
+                .applicationId(applicationId)
+                .payload(payload)
+                .gcmMultiCount(gcmMultiCount)
+                .build();
+
+        return makePushMap(httpPushDto, "A", pushType);
     }
 
     /**
@@ -179,6 +245,7 @@ public class HttpPushSupport {
      * @return 생성된 푸시맵
      */
     private Map<String, Object> makePushMap(HttpPushDto httpPushDto, String kind, String pushType) {
+        log.debug(kind, pushType);
         Map<String, Object> pushMap = new HashMap<>();
         pushMap.put("REQUEST_PART", httpPushDto.getRequestPart());
         pushMap.put("REQUEST_TIME", httpPushDto.getRequestTime());
@@ -189,13 +256,22 @@ public class HttpPushSupport {
         try {
             pushMap.put("PAYLOAD", new ObjectMapper().readValue(httpPushDto.getPayload(), new TypeReference<Object>(){}));
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("기타 오류");
+        } catch (JsonProcessingException ex) {
+            throw new HttpPushEtcException("기타 오류");
         }
 
         // 단건, 멀티
-        pushMap.put("SERVICE_KEY", httpPushDto.getServiceKey());
-        pushMap.put("SUB_SERVICE_ID", httpPushDto.getSubServiceId());
+        if (kind.equals("S")) {
+            pushMap.put("SERVICE_KEY", httpPushDto.getServiceKey());
+            pushMap.put("SUB_SERVICE_ID", httpPushDto.getSubServiceId());
+
+        // 공지
+        } else {
+            // GCM(안드로이드)
+            if (pushType.equals("G")) {
+                pushMap.put("GCM_MULTI_COUNT", httpPushDto.getGcmMultiCount());
+            }
+        }
 
         return pushMap;
     }

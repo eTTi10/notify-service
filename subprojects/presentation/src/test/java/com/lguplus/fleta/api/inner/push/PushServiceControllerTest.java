@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
+import com.lguplus.fleta.service.push.PushMultiService;
+import com.lguplus.fleta.service.push.PushSingleService;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +49,13 @@ class PushServiceControllerTest {
     private MockMvc mvc;
 
     @MockBean
+    private PushSingleService pushSingleService;
+
+    @MockBean
     private PushAnnouncementService pushAnnouncementService;
+
+    @MockBean
+    private PushMultiService pushMultiService;
 
     @MockBean
     private PushRequestMapper pushRequestMapper;
@@ -64,6 +73,10 @@ class PushServiceControllerTest {
 
         // Mock Method
         given(pushAnnouncementService.requestAnnouncement(any())).willReturn(dto);
+
+        given(pushRequestMapper.toDtoSingle(any())).willReturn(PushRequestSingleDto.builder().regId("test").build());
+
+        // PushRequestSingleDto dto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
     }
 
     @Test
@@ -102,5 +115,86 @@ class PushServiceControllerTest {
         log.debug("TEST >> ["+responseString+"]");
         Assertions.assertThat(status).isEqualTo(200);
     }
+
+    @Test
+    void pushRequest() throws Exception {
+
+        List<String> list = new ArrayList<>();
+        list.add("badge!^1");
+        list.add("sound!^ring.caf");
+        list.add("cm!^aaaa");
+
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("app_id", "lguplusuflix");
+        queryParams.put("push_type", "G");
+        queryParams.put("reg_id", "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+        queryParams.put("service_id", "30015");
+        queryParams.put("msg", "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"");
+        queryParams.put("items",list);
+
+        String requestContent = MAPPER.writeValueAsString(queryParams);
+
+        log.debug("===: " + requestContent);
+
+        MvcResult mvcResult = mvc.perform(
+                        MockMvcRequestBuilders.post("/notify/push/single")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                                .content(requestContent)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        //System.out.println("TEST >> ["+responseString+"]");
+        log.debug("TEST >> ["+responseString+"]");
+        Assertions.assertThat(status).isEqualTo(200);
+    }
+
+
+    @Test
+    void multiPushRequest() throws Exception {
+
+        List<String> list = new ArrayList<>();
+        list.add("badge!^1");
+        list.add("sound!^ring.caf");
+        list.add("cm!^aaaa");
+
+        List<String> listUser = new ArrayList<>();
+        listUser.add("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=");
+
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("app_id", "lguplusuflix");
+        queryParams.put("push_type", "G");
+        queryParams.put("users", listUser);
+        queryParams.put("service_id", "30015");
+        queryParams.put("msg", "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"");
+        queryParams.put("items",list);
+
+        String requestContent = MAPPER.writeValueAsString(queryParams);
+
+        log.debug("===: " + requestContent);
+
+        MvcResult mvcResult = mvc.perform(
+                        MockMvcRequestBuilders.post("/notify/push/multi")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                                .content(requestContent)
+                ).andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpServletResponse response = mvcResult.getResponse();
+        int status = response.getStatus();
+        String responseString = response.getContentAsString();
+
+        //System.out.println("TEST >> ["+responseString+"]");
+        log.debug("TEST >> ["+responseString+"]");
+        Assertions.assertThat(status).isEqualTo(200);
+    }
+
 
 }

@@ -1,8 +1,6 @@
 package com.lguplus.fleta.data.dto.request.inner;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ import java.util.List;
 public class HttpPushMultiRequestDto {
 
     /** 어플리케이션 ID */
-    private String appId;
+    private String applicationId;
 
     /** 서비스 등록시 부여받은 Unique ID */
     private String serviceId;
@@ -27,7 +25,7 @@ public class HttpPushMultiRequestDto {
     @Builder.Default private String pushType = "G";
 
     /** 보낼 메시지 */
-    private String msg;
+    private String message;
 
     /** 추가할 항목 입력(name!^value) */
     private List<String> items;
@@ -36,6 +34,6 @@ public class HttpPushMultiRequestDto {
     private List<String> users;
 
     /** 초당 최대 Push 전송 허용 갯수  */
-    @Builder.Default private Integer multiCount = 0;
+    private Integer multiCount;
 
 }

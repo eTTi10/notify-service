@@ -2,10 +2,7 @@ package com.lguplus.fleta.data.dto.response.inner;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lguplus.fleta.data.dto.PlainTextibleDto;
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
@@ -17,9 +14,19 @@ import java.io.Serializable;
 @Builder
 public class CallSettingDto implements Serializable {
 
-    @JsonProperty("code_id")
-    private String codeId;
+    @JsonProperty("code")
+    private String code;
 
-    @JsonProperty("code_name")
-    private String codeName;
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("serviceType")
+    private String serviceType;
+
+    @JsonProperty("etc")
+    private String etc;
+
+    @JsonProperty("terminals")
+    private String[] terminals;
+
 }

@@ -1,17 +1,21 @@
 package com.lguplus.fleta.service.push;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.lguplus.fleta.client.PushMultiClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
-import com.lguplus.fleta.exception.push.*;
-import com.lguplus.fleta.properties.HttpServiceProps;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
+import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
+import com.lguplus.fleta.data.mapper.PushMapper;
+import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -20,163 +24,63 @@ import java.util.Map;
 public class PushMultiDomainService {
 
     private final PushConfig pushConfig;
-    private final HttpServiceProps httpServiceProps;
+    private final PushMultiClient pushMultiClient;
+    private final PushMapper pushMapper;
 
+    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    private String oldLgPushAppId;
+
+    @Value("${push-comm.push.old.lgupush.notiType}")
+    private String oldLgPushNotiType;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * 단건푸시등록
+     * Multi 푸시등록
      *
-     * @param pushRequestMultiDto 단건푸시등록을 위한 DTO
-     * @return 단건푸시등록 결과
+     * @param dto Multi 푸시등록을 위한 DTO
+     * @return Multi 푸시등록 결과
      */
-    public String requestMultiPush(PushRequestMultiDto pushRequestMultiDto) {
-        log.debug("pushSingleRequestDto ::::::::::::::: {}", pushRequestMultiDto);
+    public PushClientResponseMultiDto requestMultiPush(PushRequestMultiDto dto) {
+        //log.trace("requestMultiPush ::::::::::::::: {}", dto)
 
-        log.debug(pushConfig.getCommPropValue("announce.server.url"));
-        log.debug(pushConfig.getCommPropValue("announce.server.header"));
-        log.debug(pushConfig.getServicePassword("key7.push.service_id"));
-        log.debug(pushConfig.getServicePassword("key7.push.service_pwd"));
-
-        //httpServiceProps.getKeys().forEach(m -> log.debug(m.toString()));
-
-        String serviceId = pushRequestMultiDto.getServiceId();
-        String pushType = pushRequestMultiDto.getPushType();
-        String msg = pushRequestMultiDto.getMsg();
-
-        //test
-        if(serviceId.equals("1101")) {
-            throw new SocketNotFoundException();
-        } else if(serviceId.equals("1102")) {
-            throw new SocketException();
-        } else if(serviceId.equals("1103")) {
-            throw new SocketTimeException();
-        } else if(serviceId.equals("1104")) {
-            throw new BadRequestException();
-        } else if(serviceId.equals("1105")) {
-            throw new UnAuthorizedException();
-        } else if(serviceId.equals("1106")) {
-            throw new ForbiddenException();
-        } else if(serviceId.equals("1107")) {
-            throw new NotFoundException();
-        } else if(serviceId.equals("1108")) {
-            throw new PreConditionFailedException();
-        } else if(serviceId.equals("1109")) {
-            throw new InternalErrorException();
-        } else if(serviceId.equals("1110")) {
-            throw new ServiceUnavailableException();
-        } else if(serviceId.equals("1111")) {
-            throw new FailException();
-        } else if(serviceId.equals("1112")) {
-            throw new AcceptedException();
-        } else if(serviceId.equals("1113")) {
-            throw new NotExistRegistIdException();
-        } else if(serviceId.equals("1114")) {
-            throw new ExceptionOccursException();
-        } else if(serviceId.equals("1115")) {
+        String servicePwd = pushConfig.getServicePassword(dto.getServiceId());
+        if (servicePwd == null) {
+            log.error("ServiceId Not Found:" + dto.getServiceId());
             throw new ServiceIdNotFoundException();
-        } else if(serviceId.equals("1116")) {
-            throw new TimeoutException();
-        } else if(serviceId.equals("1120")) {
-            throw new MaxRequestOverException();
-        } else if(serviceId.equals("1130")) {
-            throw new SendingFailedException();
         }
 
-        try {
-            // 4자리수 넘지 않도록 방어코드
-            if (HttpServiceProps.singleTransactionIDNum.get() >= 9999) {
-                HttpServiceProps.singleTransactionIDNum.set(0);
-            }
+        //Make Message
+        PushRequestMultiSendDto multiSendDto = PushRequestMultiSendDto.builder().jsonTemplate(getMessage(dto)).users(dto.getUsers()).build();
 
-            String tRealTransaction = "";
-            String tTransactionDate = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+        PushMultiResponseDto responseDto = pushMultiClient.requestPushMulti(multiSendDto);
 
-            log.debug("tTransactionDate :::::::: {}", tTransactionDate);
+        return pushMapper.toClientResponseDto(responseDto);
+    }
 
-            int tTransactionNum = HttpServiceProps.singleTransactionIDNum.incrementAndGet();
+    private String getMessage(PushRequestMultiDto dto) {
 
-            try {
-                NumberFormat nf = new DecimalFormat("0000");
-                tRealTransaction = tTransactionDate + nf.format(tTransactionNum);
+        Map<String, String> paramMap = new HashMap<>();
+        paramMap.put("msg_id", PushMultiClient.PUSH_COMMAND);
+        paramMap.put("push_id", PushMultiClient.TRANSACT_ID_NM);
+        paramMap.put("service_id", dto.getServiceId());
+        paramMap.put("app_id", dto.getApplicationId());
+        paramMap.put("noti_contents", dto.getMessage());
+        paramMap.put("service_passwd", pushConfig.getServicePassword(dto.getServiceId()));
 
-                log.debug("tRealTransaction :::::::: {}", tRealTransaction);
-
-            } catch (Exception e) {
-//                multiLogger.info("[pushHttpSingle][setPushData][TransactionID Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
-//                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
-            }
-
-            //서비스 KEY
-            String tServicePwd = "";
-            try{
-                Map<String, String> serviceMap = null;//httpServiceProps.findMapByServiceId(serviceId).orElseGet(HashMap::new);
-
-                log.debug("serviceMap ::::::::::::::::: {}", serviceMap);
-
-                tServicePwd = serviceMap.get("service_pwd");
-
-                log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, tServicePwd);
-
-                if (tServicePwd == null || tServicePwd.isBlank()) {
-                    log.debug("========no found service_pwd!!===========");
-//                    throw new CustomExceptionHandler(Properties.getProperty("flag.pushgw.servicenotfound"), Properties.getProperty("message.pushgw.servicenotfound"));
-                }
-
-            } catch (Exception e) {
-//                multiLogger.info("[pushHttpSingle][setPushData][ServicePass Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
-//                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
-            }
-
-            // PAYLOAD
-            /*String tPayLoadStr = "";
-            try {
-                if (pushType.equals("G")) {
-                    StringBuffer sb = new StringBuffer();
-
-                    sb.append("{");
-//					sb.append("\"MSG1\":"+"\""+msg+"\",");
-//					sb.append("\"PushCtrl\":"+"\"MSG\"");
-                    sb.append(msg.replace('\b', ' ').replace('\t', ' ').replace('\n', ' ').replace('\f', ' ').replace('\r', ' ').replace("\\\\\\\"", "&quot;").replace("\\", "").replace("&quot;","\\\\\\\""));
-                    sb.append("}");
-
-                    tPayLoadStr = sb.toString();
-
-                } else {
-                    StringBuffer sb = new StringBuffer();
-                    String tCmStr = "";
-
-                    sb.append("{");
-                    sb.append("\"aps\":{");
-                    sb.append("\"alert\":{");
-//					sb.append("\"MESSAGE\":"+"\""+msg+"\"}");
-                    sb.append(msg.replace('\b', ' ').replace('\t', ' ').replace('\n', ' ').replace('\f', ' ').replace('\r', ' ').replace("\\\\\\\"", "&quot;").replace("\\", "").replace("&quot;","\\\\\\\"")+"}");
-
-                    for (String itemList : arrItem) {
-                        String[] item = itemList.split("\\!\\^");
-                        if (item.length >= 2) {
-                            if (item[0].equalsIgnoreCase("cm")) {
-                                tCmStr = ",\""+item[0]+"\":\""+item[1]+"\"";
-                            } else {
-                                sb.append(",\""+item[0]+"\":\""+item[1]+"\"");
-                            }
-                        }
-                    }
-                    sb.append("}"+ tCmStr +"}");
-
-                    tPayLoadStr = sb.toString();
-                }
-            } catch(Exception e) {
-                multiLogger.info("[pushHttpSingle][setPushData][PAYLOAD Error]["+e.getClass().getName()+"]["+e.getMessage()+"]");
-                throw new CustomExceptionHandler(Properties.getProperty("flag.etc"),Properties.getProperty("message.etc")+"["+e.getMessage()+"]");
-            }*/
-
-        } catch (Exception e){
-
+        if (PushMultiClient.LG_PUSH_OLD.equals(pushConfig.getServiceLinkType(dto.getServiceId()))) {
+            paramMap.put("push_app_id", oldLgPushAppId);
+            paramMap.put("noti_type", oldLgPushNotiType);
+            paramMap.put("regist_id", PushMultiClient.REGIST_ID_NM);
+        } else {
+            paramMap.put("service_key", PushMultiClient.REGIST_ID_NM);
         }
 
+        dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
-
-        return null;
+        ObjectNode oNode = objectMapper.createObjectNode();
+        oNode.set("request", objectMapper.valueToTree(paramMap));
+        return oNode.toString();
     }
 
 }

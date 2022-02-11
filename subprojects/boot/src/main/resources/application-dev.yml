@@ -64,3 +64,20 @@ service:
     url: http://vodlookup:8080
   programming:
     url: http://programming:8080
+
+############################################
+#### Feign Client 설정
+feign:
+  client:
+    config:
+      default:    # 전역 이름
+        connectTimeout: 1000
+        readTimeout: 1000
+      pushannounce: # Push Announce
+        connectTimeout: 2000
+        readTimeout: 2000
+        loggerLevel: full # NONE, BASIC, HEADERS, FULL
+        #defaultRequestHeaders:
+        #  header1: header1Value
+        requestInterceptors:
+          - com.lguplus.fleta.config.PushFeignInterceptor

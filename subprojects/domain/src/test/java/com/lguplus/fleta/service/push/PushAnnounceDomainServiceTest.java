@@ -3,9 +3,10 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.client.PushAnnounceDomainClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
+import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
-import com.lguplus.fleta.exception.NotifyPushRuntimeException;
+import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,10 +15,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -42,17 +45,17 @@ class PushAnnounceDomainServiceTest {
     void setUp() {
         pushAnnounceDomainService = new PushAnnounceDomainService(pushConfig, pushAnnounceDomainClient);
 
-        List<String> items = new ArrayList<>();
-        items.add("badge!^1");
-        items.add("sound!^ring.caf");
-        items.add("cm!^aaaa");
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushRequestAnnounceDto = PushRequestAnnounceDto.builder()
                 .serviceId("lguplushdtvgcm")
                 .pushType("G")
-                .appId("30011")
-                .msg("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(items)
+                .applicationId("30011")
+                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+                .items(addItems)
                 .build();
     }
 
@@ -63,20 +66,15 @@ class PushAnnounceDomainServiceTest {
         given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
     void requestAnnouncement_password_null() {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn(null);
-//        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(new PushAnnounceResponseDto("200", ""));
 
-        Exception thrown = assertThrows(ServiceIdNotFoundException.class, () -> {
-            PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        });
-
-        assertEquals(thrown.getClass().getName(), "com.lguplus.fleta.exception.push.ServiceIdNotFoundException");
+        assertThrows(ServiceIdNotFoundException.class, () -> pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto));
     }
 
     @Test
@@ -86,57 +84,23 @@ class PushAnnounceDomainServiceTest {
         given( pushConfig.getServiceLinkType(anyString()) ).willReturn("LGUPUSH_OLD");
         given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
+        ReflectionTestUtils.setField(pushAnnounceDomainService, "tranactionMsgId", new AtomicInteger(9999));
+
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-        Assertions.assertTrue("200".equals(responseDto.getCode()));
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
-    @Test
+   // @Test
     void requestAnnouncement_etc_return() {
         //servicePwd null case
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
 
         List<String> codeList = Arrays.asList(new String[]{"202", "400", "401","403", "404", "410","412", "500", "502","503", "5102"});//, "-"});
 
-        int count = 0;
         for(String code : codeList) {
             given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
-
-            Exception thrown = assertThrows(NotifyPushRuntimeException.class, () -> {
-                PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-            });
-
-            boolean isNotiPush = thrown instanceof NotifyPushRuntimeException;
-            if(isNotiPush)
-                count ++;
+            assertThrows(NotifyRuntimeException.class, () -> pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto));
         }
-        assertEquals(count, codeList.size());
     }
 
-    @Test
-    void requestAnnouncement_runtime_exception() {
-        //servicePwd null case
-        given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
-
-        List<String> codeList = Arrays.asList(new String[]{"-"});
-
-        int count = 0;
-        for(String code : codeList) {
-            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
-
-            Exception thrown = assertThrows(RuntimeException.class, () -> {
-                PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
-            });
-
-            boolean isNotiPush = thrown instanceof RuntimeException;
-            if(isNotiPush)
-                count ++;
-        }
-        assertEquals(count, codeList.size());
-    }
-
-    /*
-    when(personApiService.getPersonListByFirstChar('c'))
-        .thenReturn(Collections.singletonList(Person.builder().name("corn").citySeq(4L).build()));
-    personService.savePerson('c');
-     */
 }

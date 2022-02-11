@@ -1,9 +1,14 @@
 package com.lguplus.fleta.exception.smsagent;
 
+import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
-import com.lguplus.fleta.exception.NotifySmsRuntimeException;
 
-public class NotSendTimeException extends NotifySmsRuntimeException {
+public class NotSendTimeException extends NotifyRuntimeException {
+
+    public InnerResponseCodeType getInnerResponseCodeType()
+    {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
+    }
 
     public NotSendTimeException() {
         super();
