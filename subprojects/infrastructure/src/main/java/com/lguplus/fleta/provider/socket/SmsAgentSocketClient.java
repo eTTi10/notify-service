@@ -30,7 +30,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
     private final SmsAgentProps smsAgentProps;
 
-    public static int mSendTerm;
+    public int mSendTerm;
     public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
 
     @PostConstruct
@@ -57,7 +57,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
-
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
@@ -84,10 +83,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
 
-            log.debug(currentDate +" - "+ prevSendDate + " <= " + SmsAgentSocketClient.mSendTerm);
-            log.debug((currentDate - prevSendDate) + " <= " + SmsAgentSocketClient.mSendTerm);
-
-            if (currentDate - prevSendDate <= SmsAgentSocketClient.mSendTerm) {
+            if (currentDate - prevSendDate <= mSendTerm) {
 
                 SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
                 //1503
