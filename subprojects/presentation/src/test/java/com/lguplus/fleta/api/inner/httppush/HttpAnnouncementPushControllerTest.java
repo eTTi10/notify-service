@@ -51,7 +51,7 @@ class HttpAnnouncementPushControllerTest {
     private HttpAnnouncementPushService httpAnnouncementPushService;
 
     @Test
-    @DisplayName("정상적으로 공지푸시가 성공하는지  확인")
+    @DisplayName("정상적으로 공지푸시가 성공하는지 확인")
     void whenRequestAnnouncementPush_thenReturnSuccess() throws Exception {
         // given
         HttpPushResponseDto httpPushResponseDto = HttpPushResponseDto.builder().build();

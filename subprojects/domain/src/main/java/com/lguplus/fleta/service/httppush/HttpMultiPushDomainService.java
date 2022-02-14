@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * Http Push Component
+ * Http MultiPush Component
  *
  * 멀티 푸시등록
  */
