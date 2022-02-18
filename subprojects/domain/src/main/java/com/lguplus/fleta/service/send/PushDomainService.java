@@ -83,11 +83,12 @@ public class PushDomainService {
      */
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        HttpPushResponseDto httpPushResponseDto = null;
-
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String serviceType = sendPushCodeRequestDto.getServiceType();
+
+        HttpPushResponseDto httpPushResponseDto = null;
+        pushServiceResultDtoArrayList.clear();
 
         String[] pushTypes;
         String[] serviceTypes;
