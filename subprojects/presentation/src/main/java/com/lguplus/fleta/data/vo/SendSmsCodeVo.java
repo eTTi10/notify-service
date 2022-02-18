@@ -18,16 +18,9 @@ import javax.validation.constraints.Size;
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendSmsCodeVo.class})
 public class SendSmsCodeVo {
 
-    @Pattern(regexp = "^[^\\s]+$", message = "파라미터 sa_id는 값에 공백이 없어야 함", payload = ParameterContainsWhitespaceException.class, groups = Groups.C1.class)
-    @Pattern(regexp = "^[a-zA-Z0-9]*$", message = "파라미터 sa_id는 값에 영문,숫자만 포함되어야 함", payload = ParameterContainsNonAlphanumericException.class, groups = Groups.C2.class)
-    @Size(min=12, max=12, message = "파라미터 sa_id의 길이는 12 자리 이어야 함", payload = ParameterExceedMaxSizeException.class, groups = Groups.C3.class)
-//    @NotBlank(message = "sa_id 파라미터값이 전달이 안됨")
     @ParamAlias("sa_id")
     private String saId;
 
-    @Pattern(regexp = "^([\\w.]+|\\s*)?$", message = "잘못된 포맷 형식 전달 및 응답 결과 지원하지 않는 포맷(stb_mac 의 패턴이 일치하지 않습니다.)", groups = Groups.C4.class)
-    @Size(max=38, message = "파라미터 stb_mac는 값이 38 이하이어야 함", payload = ParameterOverBoundsException.class, groups = Groups.C5.class)
-//    @NotBlank(message = "stb_mac 파라미터값이 전달이 안됨")
     @ParamAlias("stb_mac")
     private String stbMac;
 

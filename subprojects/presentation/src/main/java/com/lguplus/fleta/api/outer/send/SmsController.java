@@ -1,11 +1,9 @@
 package com.lguplus.fleta.api.outer.send;
 
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
-import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.mapper.SendSmsCodeMapper;
 import com.lguplus.fleta.data.vo.SendSmsCodeVo;
-import com.lguplus.fleta.data.vo.SendSmsVo;
 import com.lguplus.fleta.service.send.SmsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -13,12 +11,13 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
-@Api(tags = "SendSmsCode", description = "SMS 발송요청")
+@Api(tags = "SendSmsCode")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
