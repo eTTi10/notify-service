@@ -1,14 +1,11 @@
 package com.lguplus.fleta.api.inner.httppush;
 
-import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
-import com.lguplus.fleta.data.mapper.HttpPushMultiMapper;
 import com.lguplus.fleta.data.mapper.HttpPushSingleMapper;
-import com.lguplus.fleta.data.vo.HttpPushMultiRequestVo;
 import com.lguplus.fleta.data.vo.HttpPushSingleRequestVo;
-import com.lguplus.fleta.service.httppush.HttpPushService;
+import com.lguplus.fleta.service.httppush.HttpSinglePushService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -21,22 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 /**
- * Http Push RestController
+ * Http SinglePush RestController
  *
- * 단건, 멀티 푸시등록
+ * 단건 푸시등록
  */
-@Api(tags = "HttpPush 단건, 멀티 푸시등록")
+@Api(tags = "HttpPush 단건 푸시등록")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/notify")
-public class HttpPushController {
+public class HttpSinglePushController {
 
-    private final HttpPushService httpPushService;
+    private final HttpSinglePushService httpSinglePushService;
 
     private final HttpPushSingleMapper httpPushSingleMapper;
-
-    private final HttpPushMultiMapper httpPushMultiMapper;
 
 
     /**
@@ -56,27 +51,7 @@ public class HttpPushController {
         log.debug("==================단건푸시등록 END======================");
 
         // 성공
-        return InnerResponseDto.of(httpPushService.requestHttpPushSingle(httpPushSingleRequestDto));
-    }
-
-    /**
-     * 멀티푸시등록
-     *
-     * @param httpPushMultiRequestVo 멀티푸시등록 위한 VO
-     * @return 멀티푸시등록 결과 응답
-     */
-    @ApiOperation(value="멀티푸시등록", notes="멀티푸시를 등록한다.")
-    @PostMapping(value = "/httppush/multi")
-    public InnerResponseDto<HttpPushResponseDto> requestHttpPushMulti(@RequestBody @Valid HttpPushMultiRequestVo httpPushMultiRequestVo) {
-        log.debug("==================멀티푸시등록 BEGIN======================");
-        HttpPushMultiRequestDto httpPushMultiRequestDto = httpPushMultiMapper.toDto(httpPushMultiRequestVo);
-
-        log.debug("mapstruct httpPushMultiRequestDto :::::::::::::::::::::::::: {}", httpPushMultiRequestDto);
-
-        log.debug("==================멀티푸시등록 END======================");
-
-        // 성공
-        return InnerResponseDto.of(httpPushService.requestHttpPushMulti(httpPushMultiRequestDto));
+        return InnerResponseDto.of(httpSinglePushService.requestHttpPushSingle(httpPushSingleRequestDto));
     }
 
 }
