@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Http Push Announce Component
+ * Http AnnouncementPush Component
  *
  * 공지 푸시등록
  */
