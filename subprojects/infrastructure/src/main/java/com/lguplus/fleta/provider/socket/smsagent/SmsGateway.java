@@ -54,7 +54,7 @@ public class SmsGateway {
     private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
 
     private String mIpAddress;
-    private String mResult = "";
+    public String mResult = "";
     private String mID;
     private String mPassword;
     private int mPort;
@@ -92,8 +92,6 @@ public class SmsGateway {
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
-        mStatusLog.info("id:" + id);
-        mStatusLog.info("password:" + password);
 
         connectGateway();
     }
@@ -241,7 +239,7 @@ public class SmsGateway {
         //3초후에 mResult가 빈 값인지 체크하여 1500 처리
     }
 
-    private void checkLink() throws IOException {
+    public void checkLink() throws IOException {
 
         mStatusLog.info("checkLink[" + mPort + "]");
 
@@ -332,21 +330,22 @@ public class SmsGateway {
                 log.debug("catch interrupt");
                 Thread.currentThread().interrupt();
             }
-
-            if (mResult.equals(CODE_SUCCESS)) {  // 0000
-                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(MESSAGE_SUCCESS)
-                        .build();
-            } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
-                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(MESSAGE_SYSTEM_ERROR)
-                        .build();
-            }
-
-            if (smsGatewayResponseDto != null) log.debug("smsGatewayResponseDto:{}", smsGatewayResponseDto.toString());
         }
+
+        log.debug("mResult:{}", mResult);
+
+        if (mResult.equals(CODE_SUCCESS)) {  // 0000
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(mResult)
+                    .message(MESSAGE_SUCCESS)
+                    .build();
+        } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(mResult)
+                    .message(MESSAGE_SYSTEM_ERROR)
+                    .build();
+        }
+
 
         clearResult();
         mTimerMap.get(TIMER_TIME_OUT).cancel();

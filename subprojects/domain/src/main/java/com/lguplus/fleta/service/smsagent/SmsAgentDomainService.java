@@ -6,6 +6,7 @@ import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
+import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
@@ -112,16 +113,24 @@ public class SmsAgentDomainService {
         String rCtn = sendSmsRequestDto.getRCtn();
         String message = sendSmsRequestDto.getMsg();
 
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+
         if (StringUtils.isEmpty(agentNoSendUse)) {
 
-            throw new SmsAgentEtcException(messageEtcException);
+            //9999
+            smsAgentCustomException.setCode("9999");
+            smsAgentCustomException.setMessage("기타 오류");
+            throw smsAgentCustomException;
         }
 
         if ("1".equals(agentNoSendUse)) {
 
             if (StringUtils.isEmpty(agentNoSendTime)) {
 
-                throw new ServerSettingInfoException("서버 설정 정보 오류");
+                //5200
+                smsAgentCustomException.setCode("5200");
+                smsAgentCustomException.setMessage("서버 설정 정보 오류");
+                throw smsAgentCustomException;
             }
             else {
 
@@ -152,7 +161,10 @@ public class SmsAgentDomainService {
 
                 if (cal.after(startCal) && cal.before(endCal)) {
 
-                    throw new NotSendTimeException("전송 가능한 시간이 아님");
+                    //1504
+                    smsAgentCustomException.setCode("1504");
+                    smsAgentCustomException.setMessage("전송 가능한 시간이 아님");
+                    throw smsAgentCustomException;
                 }
 
             }
@@ -222,38 +234,10 @@ public class SmsAgentDomainService {
                     .message(messageEtcException)
                     .build();
 
-        } catch (PhoneNumberErrorException e) {
+        } catch (SmsAgentCustomException e) {
 
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codePhoneNumberErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (MsgTypeErrorException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeMsgTypeErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SystemBusyException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeSystemBusyException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SystemErrorException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeSystemErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SmsAgentEtcException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(messageEtcException)
+                    .flag(e.getCode())
                     .message(e.getMessage())
                     .build();
 

@@ -17,7 +17,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 
-@Api(tags = "SendSmsCode")
+@Api(tags = "sendSms")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
