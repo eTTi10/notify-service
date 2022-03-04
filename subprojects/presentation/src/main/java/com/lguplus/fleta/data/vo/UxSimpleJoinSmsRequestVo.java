@@ -4,32 +4,20 @@ import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.type.CarrierType;
 import com.lguplus.fleta.data.type.DeviceInfo;
 import com.lguplus.fleta.data.type.NetworkInfo;
-import com.lguplus.fleta.exception.InvalidRequestTypeException;
-import com.lguplus.fleta.validation.Groups;
 import lombok.Getter;
 
-import javax.validation.GroupSequence;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-
 @Getter
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, UxSimpleJoinSmsRequestVo.class})
 public class UxSimpleJoinSmsRequestVo {
 
     /** 가입자 번호 */
-    @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)
     @ParamAlias("sa_id")
     private String saId;
 
     /** 가입자 맥주소 */
-    @NotBlank(message = "stb_mac 파라미터값이 전달이 안됨", groups = Groups.C2.class)
     @ParamAlias("stb_mac")
     private String stbMac;
 
     /** 전화번호 */
-    @NotNull(message = "필수 요청정보 누락 오류", groups = Groups.C3.class)
-    @Pattern(regexp = "^\\d+$", message = "잘못된 요청정보 타입 전달", payload = InvalidRequestTypeException.class, groups = Groups.C4.class)
     private String ctn;
 
     /** 통합 통계용 서비스명 */
