@@ -9,10 +9,13 @@ import com.lguplus.fleta.exception.push.FailException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Map;
 
@@ -44,6 +47,8 @@ public class PushSocketInfo {
     private boolean isOpened = false;
     private boolean isFailure = false;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private BufferedInputStream mInputStream;
+    private BufferedOutputStream mOutputStream;
 
     public PushSocketInfo() {
         socket = new Socket();
@@ -64,6 +69,8 @@ public class PushSocketInfo {
 
         socket.connect(new InetSocketAddress(_host, _port), _timeout);
         socket.setSoTimeout(_timeout);
+        mOutputStream = new BufferedOutputStream(socket.getOutputStream());
+        mInputStream = new BufferedInputStream(socket.getInputStream());
     }
 
     public void requestPushServer() throws IOException {
@@ -71,8 +78,7 @@ public class PushSocketInfo {
         sendHeaderMsg(CHANNEL_CONNECTION_REQUEST);
 
         //Header
-        byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-        this.socket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+        byte[] byteHeader = readByteBuffer(PUSH_MSG_HEADER_LEN);
 
         //log.trace("[OpenSocket] 서버 응답 response_MessageID = " + byteToInt(byteHeader))
         //log.trace("[OpenSocket] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
@@ -81,9 +87,7 @@ public class PushSocketInfo {
         int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
         log.trace("[OpenSocket] 서버 응답 response_DataLength = " + responseDataLength);
 
-        byte[] byteBody = new byte[responseDataLength];
-
-        socket.getInputStream().read(byteBody, 0, byteBody.length);
+        byte[] byteBody = readByteBuffer(responseDataLength);
 
         String responseCode = getEncodeStr(byteBody, 0, 2);
         log.trace("[OpenSocket] 서버 응답 response Code = " + responseCode);
@@ -151,8 +155,8 @@ public class PushSocketInfo {
             System.arraycopy(byteArrayDatas, 0, sendHeader, 64, byteArrayDatas.length); //Data
         }
 
-        this.socket.getOutputStream().write(sendHeader);
-        this.socket.getOutputStream().flush();
+        mOutputStream.write(sendHeader);
+        mOutputStream.flush();
 
     }
 
@@ -183,12 +187,8 @@ public class PushSocketInfo {
          * ------------------------------------------------------------------------------
          */
 
-        InputStream inputStream = socket.getInputStream();
-
         //Header
-        byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-
-        inputStream.read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+        byte[] byteHeader = readByteBuffer(PUSH_MSG_HEADER_LEN);
 
         log.trace("[setNoti] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
         log.trace("[setNoti] 서버 응답 Transaction ID = " + getEncodeStr(byteHeader, 4, 12));
@@ -199,9 +199,7 @@ public class PushSocketInfo {
         log.trace("[setNoti] 서버 응답 responseDataLength = " + responseDataLength);
 
         log.trace("======================= Body =========================");
-        byte[] byteBody = new byte[responseDataLength];
-
-        inputStream.read(byteBody, 0, byteBody.length);
+        byte[] byteBody = readByteBuffer(responseDataLength);
 
         byte[] bResponseCode = new byte[2];
         System.arraycopy(byteBody, 0, bResponseCode, 0, bResponseCode.length);
@@ -252,8 +250,7 @@ public class PushSocketInfo {
             sendHeaderMsg(CHANNEL_PROCESS_STATE_REQUEST);
 
             //Header
-            byte[] byteHeader = new byte[PUSH_MSG_HEADER_LEN];
-            this.socket.getInputStream().read(byteHeader, 0, PUSH_MSG_HEADER_LEN);
+            byte[] byteHeader = readByteBuffer(PUSH_MSG_HEADER_LEN);
 
             log.trace("[isServerInValidStatus] 서버 응답 response_MessageID = " + byteToInt(byteHeader));
             //log.trace("[isServerInValidStatus] 서버 응답 Destination IP = " + getEncodeStr(byteHeader, 16, 16))
@@ -262,9 +259,7 @@ public class PushSocketInfo {
             int responseDataLength = byteToInt(byteHeader, PUSH_MSG_HEADER_LEN - 4);
             log.trace("[isServerInValidStatus] 서버 응답 response_DataLength = " + responseDataLength);
 
-            byte[] byteBody = new byte[responseDataLength];
-
-            socket.getInputStream().read(byteBody, 0, byteBody.length);
+            byte[] byteBody = readByteBuffer(responseDataLength);
 
             short healthStatus = byteToShort(byteBody);
             //SUCCESS 1, Fail 0
@@ -279,6 +274,25 @@ public class PushSocketInfo {
         } catch (IOException e) {
             log.error("isServerInValidStatus error: {}", e.getMessage());
         }
+    }
+
+    private byte[] readByteBuffer(int bufferSize) throws IOException {
+
+        byte[] buffer = new byte[bufferSize];
+
+        int length = mInputStream.read(buffer);
+
+        if (length >= 0 && length < bufferSize) {
+            log.error("readByteBuffer length < bufferSize error!");
+        } else if (length == -1){
+            log.error("readByteBuffer error!");
+            StackTraceElement[] stacks = (new Throwable()).getStackTrace();
+            for (StackTraceElement element : stacks) {
+                log.error("readByteBuffer error! + {}", element);
+            }
+        }
+
+        return buffer;
     }
 
     public void closeSocket()  {
