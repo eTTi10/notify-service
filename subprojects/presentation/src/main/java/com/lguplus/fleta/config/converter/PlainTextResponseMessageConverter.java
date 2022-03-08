@@ -1,5 +1,6 @@
 package com.lguplus.fleta.config.converter;
 
+import com.lguplus.fleta.data.dto.PlainTextibleDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -16,7 +17,7 @@ import java.nio.charset.StandardCharsets;
  * @since 1.0
  */
 public class PlainTextResponseMessageConverter
-        extends AbstractHttpMessageConverter<CommonResponseDto> {
+        extends AbstractHttpMessageConverter<PlainTextibleDto> {
 
     /**
      *
@@ -48,7 +49,7 @@ public class PlainTextResponseMessageConverter
      *
      */
     @Override
-    protected CommonResponseDto readInternal(final Class<? extends CommonResponseDto> clazz,
+    protected CommonResponseDto readInternal(final Class<? extends PlainTextibleDto> clazz,
                                           final HttpInputMessage inputMessage) {
 
         throw new UnsupportedOperationException();
@@ -58,7 +59,7 @@ public class PlainTextResponseMessageConverter
      *
      */
     @Override
-    protected void writeInternal(final CommonResponseDto response,
+    protected void writeInternal(final PlainTextibleDto response,
                                  final HttpOutputMessage outputMessage) throws IOException {
 
         StreamUtils.copy(response.toPlainText(), StandardCharsets.UTF_8, outputMessage.getBody());
