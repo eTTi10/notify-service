@@ -127,7 +127,7 @@ class LatestControllerTest {
         params.add("categoryGb", CATEGORY_GB);
 
 
-        MvcResult mvcResult = mockMvc.perform(post("/comm/latest")
+        MvcResult mvcResult = mockMvc.perform(post("/smartux/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
                         .queryParams(params)
                 ).andExpect(status().isOk())
@@ -157,7 +157,7 @@ class LatestControllerTest {
         params.add("ctn", "01055805424");
         params.add("catId", "T3021");
 
-        MvcResult mvcResult = mockMvc.perform(get("/comm/latest")
+        MvcResult mvcResult = mockMvc.perform(get("/smartux/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
                         .queryParams(params)
                 ).andExpect(status().isOk())
@@ -185,7 +185,7 @@ class LatestControllerTest {
         params.add("ctn", "01055805424");
         params.add("catId", "T3021");
 
-        MvcResult mvcResult = mockMvc.perform(delete("/comm/latest")
+        MvcResult mvcResult = mockMvc.perform(delete("/smartux/comm/latest")
                         .accept(MediaType.APPLICATION_JSON)
                         .queryParams(params)
                 ).andExpect(status().isOk())
