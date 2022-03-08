@@ -42,7 +42,6 @@ import javax.validation.Payload;
          * @param cause
          */
         public ParameterPhoneNumberErrorException(final Throwable cause) {
-
             super(cause);
         }
     }
