@@ -1,6 +1,8 @@
 package com.lguplus.fleta.advice.exhandler;
 
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
+import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
+import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,10 +13,28 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.outer")
 public class OuterControllerAdvice {
+
+    private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
+
+    private static final String defaultConverterNm = "**DEFAULT**";
+
+    static {
+        //Default
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(defaultConverterNm,
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+
+    }
 
     /**
      *

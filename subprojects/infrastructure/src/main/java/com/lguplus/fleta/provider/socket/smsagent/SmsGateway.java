@@ -45,9 +45,9 @@ public class SmsGateway {
     private static final int TIMER_TIME_OUT = 3;
 
     private static final int TIME_OUT = 5000;				        // 타임아웃(5초)
-    private static final int RECONNECT_TERM = 1000 * 60 * 3;        // 재접속 시간(3분)
+    private int RECONNECT_TERM = 1000 * 60 * 3;        // 재접속 시간(3분)
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
-    private static final int LINK_CHECK_TERM = 1000 * 50;           // 링크 체크 주기(50초)
+    private int LINK_CHECK_TERM = 1000 * 50;           // 링크 체크 주기(50초)
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
 
     private boolean isLinked = false;

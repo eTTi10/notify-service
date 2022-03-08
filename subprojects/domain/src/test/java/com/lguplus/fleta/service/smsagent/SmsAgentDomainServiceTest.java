@@ -85,10 +85,10 @@ class SmsAgentDomainServiceTest {
 
         /* 1 */
         Exception exception;
-        exception = assertThrows(SmsAgentEtcException.class, () -> {
+        exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
-        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.smsagent.SmsAgentEtcException");
+        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.smsagent.SmsAgentCustomException");
 
         /* 정상리턴 */
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendUse", "0");
@@ -99,7 +99,7 @@ class SmsAgentDomainServiceTest {
 
         /* agentNoSendTime 빈값일때 */
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendUse", "1");
-        exception = assertThrows(ServerSettingInfoException.class, () -> {
+        exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
 
@@ -109,7 +109,7 @@ class SmsAgentDomainServiceTest {
 
         /* 전송할 수 있는 시간이 아닐 때 */
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", "03|23");
-        exception = assertThrows(NotSendTimeException.class, () -> {
+        exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
 
@@ -264,8 +264,10 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new PhoneNumberErrorException());
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
+
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
+
     }
 
     @Test
@@ -296,7 +298,7 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new MsgTypeErrorException ());
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException ());
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -328,7 +330,7 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SystemBusyException());
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -360,7 +362,7 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SystemErrorException());
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -392,7 +394,7 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentEtcException());
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 

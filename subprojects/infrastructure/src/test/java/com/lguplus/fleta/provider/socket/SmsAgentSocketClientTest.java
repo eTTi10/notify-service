@@ -96,12 +96,12 @@ class SmsAgentSocketClientTest {
     @DisplayName("02 PhoneNumberErrorException 테스트")
     void send_PhoneNumberErrorException() {
 
-        Exception exception = assertThrows(PhoneNumberErrorException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, "1101111", message);
         });
 
-        exception = assertThrows(PhoneNumberErrorException.class, () -> {
+        exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, "0110111", message);
         });
@@ -112,7 +112,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("03 MsgTypeErrorException 테스트")
     void send_MsgTypeErrorException() {
 
-        Exception exception = assertThrows(MsgTypeErrorException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, "가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하");
         });
@@ -124,7 +124,7 @@ class SmsAgentSocketClientTest {
 
         smsAgentSocketClient.initGateway();
         smsAgentSocketClient.mSendTerm = 10000;
-        Exception exception = assertThrows(SystemBusyException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
     }
@@ -135,7 +135,7 @@ class SmsAgentSocketClientTest {
 
 //        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
         SmsAgentSocketClient.sGatewayQueue.clear();
-        Exception exception = assertThrows(SystemBusyException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
@@ -148,7 +148,7 @@ class SmsAgentSocketClientTest {
         smsAgentSocketClient.initGateway();
         server.stopServer();
         Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-        Exception exception = assertThrows(SmsAgentEtcException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
@@ -162,7 +162,7 @@ class SmsAgentSocketClientTest {
         SmsGateway fakeGateway = new SmsGateway(SERVER_IP, "1", id, password);
         SmsAgentSocketClient.sGatewayQueue.offer(fakeGateway);
         Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-        Exception exception = assertThrows(SystemErrorException.class, () -> {
+        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
@@ -176,21 +176,5 @@ class SmsAgentSocketClientTest {
         smsAgentSocketClient.initGateway();
     }
 
-    @Test
-    @DisplayName("05 Null Result 테스트")
-    void result_Null() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
-
-        SmsAgentSocketClient.sGatewayQueue.clear();
-        SmsGateway otherGateway = new SmsGateway(SERVER_IP, "7777", id, password);
-        SmsAgentSocketClient.sGatewayQueue.offer(otherGateway);
-//        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-
-        JunitTestUtils.setValue(otherGateway, "mResult", "1101");
-        Future<SmsGatewayResponseDto> dto2 =  otherGateway.getResult();
-        SmsGatewayResponseDto smsGatewayResponseDto2 = dto2.get();
-//        given(otherGateway.clearResult()).getMock();
-        smsAgentSocketClient.send(sCtn, rCtn, message);
-
-    }
 
 }

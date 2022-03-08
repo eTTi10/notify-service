@@ -4,11 +4,9 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -23,13 +21,13 @@ import static org.mockito.Mockito.spy;
 
 @Slf4j
 @ExtendWith({MockitoExtension.class})
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class SmsGatewayTest {
-
 
     static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 9600;
+    static int SERVER_PORT = 7777;
 
     String id = "@id";
     String password = "@password";
@@ -73,8 +71,13 @@ class SmsGatewayTest {
         spy_gw.sendMessage("01041112222", "01041113333", "callback", "test", 1);
 
         //reconnect
+        JunitTestUtils.setValue(gateway, "RECONNECT_TERM", 3000);
         ReflectionTestUtils.invokeMethod(spy_gw, "connectGateway");
         assertTrue(spy_gw.isBind());
+
+        //checkLink
+        JunitTestUtils.setValue(gateway, "LINK_CHECK_TERM", 1000);
+        ReflectionTestUtils.invokeMethod(spy_gw, "checkLink");
 
         //sendReport
         ReflectionTestUtils.invokeMethod(spy_gw, "sendReport");
@@ -119,7 +122,7 @@ class SmsGatewayTest {
 
     //readHeader
     @Test
-    void test_04_() {
+    void test_04_() throws InterruptedException {
 
         int BIND_ACK = 1;
         int DELIVER_ACK = 3;
@@ -135,10 +138,12 @@ class SmsGatewayTest {
                 , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
-        ReflectionTestUtils.invokeMethod(gateway, "readHeader");
-        assertFalse(gateway.isBind());
+//        JunitTestUtils.setValue(gateway, "mInputStream"
+//                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
+//        ReflectionTestUtils.invokeMethod(gateway, "readHeader");
+//        assertFalse(gateway.isBind());
+
+        thread.sleep(3000); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
 
         //DELIVER_ACK
         JunitTestUtils.setValue(gateway, "mInputStream"
