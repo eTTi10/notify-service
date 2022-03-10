@@ -6,7 +6,6 @@ import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import javax.validation.GroupSequence;
@@ -16,7 +15,6 @@ import java.util.List;
 
 
 @Getter
-@Setter
 @ToString
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, Groups.C8.class, PushRequestBodyMultiVo.class})
 @ApiModel(value = "Push (Multi) 요청 VO", description = "Push (Multi) 요청 VO")
