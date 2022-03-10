@@ -43,8 +43,7 @@ public class LatestController {
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
         GenericRecordsetResponseDto<LatestDto> result;
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
-        result = latestService.getLatestList(latestRequestDto);
-        return result;
+        return latestService.getLatestList(latestRequestDto);
     }
 
     @ApiOperation(value="최신회 알림 삭제", notes="최신회 알림을 삭제한다.")
