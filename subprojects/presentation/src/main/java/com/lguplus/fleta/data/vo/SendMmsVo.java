@@ -38,10 +38,8 @@ public class SendMmsVo {
     @ParamAlias("ctn")
     @NotBlank(message = "ctn 파라미터값이 전달이 안됨", groups = Groups.C3.class)
     @PositiveOrZero(message = "ctn의 패턴이 일치하지 않습니다.", payload = ParameterTypeMismatchException.class, groups = Groups.C7.class)//{ 양수 또는 0} 허용
-    @Pattern(regexp = "01([016789])([0-9]{3,4})([0-9]{4})$", message = "전화번호 형식 오류", payload = ParameterPhoneNumberErrorException.class, groups = Groups.C11.class)//asis : flag.phone_number_error = 1502
+    @Pattern(regexp = "01([016789])([0-9]{3,4})([0-9]{4})$", message = "전화번호 형식 오류", payload = ParameterPhoneNumberErrorException.class, groups = Groups.C11.class)//asis : flag.phone_number_error = 1502 => 5008로 대체
     private String ctn;
-    // ParameterTypeMismatchException.class 5008
-    // com.lguplus.fleta.exception.mmsagent.PhoneNumberErrorException: "1502"
 
     @ParamAlias("mms_cd")
     @NotBlank(message = "mms_cd 파라미터값이 전달이 안됨", groups = Groups.C4.class)

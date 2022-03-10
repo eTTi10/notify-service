@@ -3,7 +3,9 @@ package com.lguplus.fleta.api.inner.push;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
-import com.lguplus.fleta.data.dto.response.inner.*;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.data.vo.PushRequestBodyAnnounceVo;
 import com.lguplus.fleta.data.vo.PushRequestBodyMultiVo;
@@ -47,7 +49,7 @@ public class PushServiceController {
      * 공지 푸시 등록
      *
      * @param pushRequestBodyAnnounceVo Announcement 푸시등록을 위한 VO
-     * @return 공지 푸시 등록 결과 응답
+     * @return 단건푸시등록 결과 응답
      */
     @ApiOperation(value="공지 Push Message 등록", notes="공지 Push Message를 등록한다.")
     @PostMapping(value = "/notify/push/announcement")
@@ -83,6 +85,7 @@ public class PushServiceController {
         return InnerResponseDto.of(pushSingleService.requestPushSingle(pushRequestSingleDto));
     }
 
+
     /**
      * Multi 푸시등록
      *
@@ -107,4 +110,5 @@ public class PushServiceController {
     private boolean isValidRegId(String regId) {
         return !("|" + this.pushRejectRegList + "|").contains("|" + regId + "|");
     }
+
 }
