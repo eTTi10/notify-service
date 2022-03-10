@@ -102,11 +102,11 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
 
                 switch (ex.status()) {
                     case 500:
-                        return new InternalErrorException();
+                        return new InternalErrorException(ex);
                     case 502:
-                        return new ExceptionOccursException();
+                        return new ExceptionOccursException(ex);
                     case 503:
-                        return new ServiceUnavailableException();
+                        return new ServiceUnavailableException(ex);
                     default:
                         break;
                 }
@@ -127,28 +127,28 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
 
                 switch (ex.status()) {
                     case 400:
-                        return new BadRequestException();
+                        return new BadRequestException(ex);
                     case 401:
-                        return new UnAuthorizedException();
+                        return new UnAuthorizedException(ex);
                     case 403:
-                        return new ForbiddenException();
+                        return new ForbiddenException(ex);
                     case 404:
-                        return new NotFoundException();
+                        return new NotFoundException(ex);
                     case 410:
-                        return new NotExistRegistIdException();
+                        return new NotExistRegistIdException(ex);
                     case 412:
-                        return new PreConditionFailedException();
+                        return new PreConditionFailedException(ex);
                     default:
                         break;
                 }
             }
             else {
                 if(202 == ex.status()) {
-                    return new AcceptedException();
+                    return new AcceptedException(ex);
                 }
             }
 
-            return new PushEtcException();
+            return new PushEtcException(ex);
         }
     }
 }
