@@ -1,6 +1,5 @@
 package com.lguplus.fleta.advice.exhandler;
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
@@ -71,6 +70,12 @@ public class OuterControllerAdvice {
                                                         final Throwable th) {
         log.error(th.getMessage(), th);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> httpException(final HttpServletRequest request,
+                                                        final Throwable th) {
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
     /**
