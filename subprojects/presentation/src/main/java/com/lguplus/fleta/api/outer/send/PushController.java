@@ -53,14 +53,11 @@ public class PushController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true, name="send_code",   value="순번: 5<br>자리수: 4<br>설명: 발송코드", example="P001"),
             @ApiImplicitParam(paramType="query", dataType="string", required=true, name="reg_type",   value="순번: 5<br>자리수: 1<br>설명: 발송ID 타입", example="1"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="service_type",   value="순번: 5<br>자리수: 5<br>설명: Push 대상 타입<br>ex) U+tv : TV / 모바일tv : H / 프로야구 : B / 아이들나라 : K / 골프 : O / 아이돌Live : C,  ‘|’구분자를 통해 멀티 선택 가능", example="")})
-    @PostMapping(value = "/mims/sendPushCode", consumes = MediaType.APPLICATION_XML_VALUE)
+    @PostMapping(value = "/mims/sendPushCode")
     public SendPushResponseDto sendPushCode(
-        @ApiIgnore @Valid SendPushCodeRequestVo sendPushCodeRequestVo,
-        @RequestBody(required = false) String requestBodyStr) throws JsonProcessingException {
-
-        if (StringUtils.isEmpty(requestBodyStr)) {
-            throw new HttpPushEtcException();
-        }
+            @RequestBody String requestBodyStr,
+            @ApiIgnore @Valid SendPushCodeRequestVo sendPushCodeRequestVo
+        ) throws JsonProcessingException {
 
         log.debug("body:{}", requestBodyStr);
 
