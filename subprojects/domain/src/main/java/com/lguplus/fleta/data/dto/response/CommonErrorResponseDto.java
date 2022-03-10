@@ -21,17 +21,9 @@ public interface CommonErrorResponseDto extends PlainTextibleDto {
 	@JsonGetter("message")
 	String getMessage();
 
-	class Separator {
-		public static final String ROW = "\f";
-		public static final String COLUMN = "!^";
-		public static final String RECORD = "!@";
-		public static final String ARRAY = "\b";
-	}
-
 	@Override
 	default String toPlainText() {
-
-		return String.join(Separator.COLUMN,
-				getFlag(), getMessage());
+		String columnSep = "!^";
+		return String.join(columnSep, getFlag(), getMessage());
 	}
 }

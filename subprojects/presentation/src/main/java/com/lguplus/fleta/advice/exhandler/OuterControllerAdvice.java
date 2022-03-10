@@ -26,19 +26,10 @@ public class OuterControllerAdvice {
      */
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
 
-    private static final String defaultConverterNm = "**DEFAULT**";
+    private static final String DEFAULT_CUSTOM_CONVERTER_NM = "DEFAULT_CUSTOM_CONVERTER";
 
     static {
-        //Default
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(defaultConverterNm,
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-
-        //Push
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /pushagent/v1/push",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /pushagent/v1/announcement",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /pushagent/v1/multi",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(DEFAULT_CUSTOM_CONVERTER_NM,
                 new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
     }
 
@@ -76,17 +67,6 @@ public class OuterControllerAdvice {
 
     /**
      *
-     * @return
-     */
-    @ExceptionHandler(NotifyRuntimeException.class)
-    public ResponseEntity<Object> handleNotifyException(final HttpServletRequest request,
-                                                             final Throwable th) {
-        log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
-    }
-
-    /**
-     *
      * @param th
      * @return
      */
@@ -110,7 +90,7 @@ public class OuterControllerAdvice {
 
         try {
             if (converter == null) {
-                final CustomErrorResponseConverter converterDefault = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(defaultConverterNm);
+                final CustomErrorResponseConverter converterDefault = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(DEFAULT_CUSTOM_CONVERTER_NM);
                 return converterDefault.convert(response);
             }
             return converter.convert(response);
