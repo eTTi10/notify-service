@@ -49,12 +49,12 @@ class PushMultiSocketClientImplTest {
     NettyTcpClient nettyTcpClient;
 
     @BeforeAll
-    static void setUpAll() throws InterruptedException {
+    static void setUpAll() {
         server = new NettyTcpJunitServerTest();
-        new Thread(() -> {
+        thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
-        }).start();
-        Thread.sleep(200);
+        });
+        thread.start();
     }
 
     @AfterAll
