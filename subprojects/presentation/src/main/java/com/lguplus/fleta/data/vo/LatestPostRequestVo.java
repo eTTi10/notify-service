@@ -20,7 +20,7 @@ public class LatestPostRequestVo {
 
 
     @ParamAlias("sa_id")
-    @NotBlank(message = "[가입자 번호]가 입력되지 않았습니다.", groups = Groups.C1.class)
+    @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)
     @Pattern(regexp = "^[A-Za-z0-9]*$", message = "sa_id의 패턴이 일치하지 않습니다.)", groups = Groups.C7.class)
     private String saId;
 
