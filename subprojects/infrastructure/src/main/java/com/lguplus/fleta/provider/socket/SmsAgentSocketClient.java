@@ -71,7 +71,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             smsAgentCustomException.setCode("1502");
             smsAgentCustomException.setMessage("전화번호 형식 오류");
             throw smsAgentCustomException;
-//            throw new PhoneNumberErrorException("전화번호 형식 오류");
         }
 
         if (80 < message.getBytes("KSC5601").length) {

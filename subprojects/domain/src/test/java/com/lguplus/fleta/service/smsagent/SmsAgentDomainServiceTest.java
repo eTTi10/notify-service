@@ -83,7 +83,7 @@ class SmsAgentDomainServiceTest {
                 .msg("문자내용")
                 .build();
 
-        /* 1 */
+        /* 1 SmsAgentEtcException */
         Exception exception;
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
@@ -97,7 +97,7 @@ class SmsAgentDomainServiceTest {
         assertThat(responseDto.getFlag().equals(smsGatewayResponseDto.getFlag()));
 
 
-        /* agentNoSendTime 빈값일때 */
+        /* agentNoSendTime 빈값일때 ServerSettingInfoException */
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendUse", "1");
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
@@ -107,7 +107,7 @@ class SmsAgentDomainServiceTest {
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", "23|06");
         smsAgentDomainService.sendSms(request);
 
-        /* 전송할 수 있는 시간이 아닐 때 */
+        /* 전송할 수 있는 시간이 아닐 때 NotSendTimeException */
         JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", "03|23");
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
@@ -264,14 +264,18 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
+
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("1502");
+        smsAgentCustomException.setMessage("전화번호 형식 오류");
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
 
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
 
     }
 
     @Test
-    @DisplayName("PhoneNumberErrorException 테스트")
+    @DisplayName("MsgTypeErrorException 테스트")
     void sendSmsCode_MsgTypeErrorException () throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
@@ -298,7 +302,10 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException ());
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("1501");
+        smsAgentCustomException.setMessage("전화번호 형식 오류");
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -330,7 +337,10 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("1503");
+        smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -362,7 +372,11 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("1500");
+        smsAgentCustomException.setMessage("시스템 장애");
+
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -394,7 +408,10 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SmsAgentCustomException());
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("9999");
+        smsAgentCustomException.setMessage("기타 오류");
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
         smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
     }
 
@@ -491,7 +508,10 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         given(apiClient.smsCallSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(new SystemBusyException());
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+        smsAgentCustomException.setCode("1503");
+        smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
+        given(smsAgentDomainClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()

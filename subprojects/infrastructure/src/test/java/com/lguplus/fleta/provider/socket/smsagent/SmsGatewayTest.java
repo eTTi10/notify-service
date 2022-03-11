@@ -6,13 +6,13 @@ import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -27,7 +27,7 @@ class SmsGatewayTest {
     static NettyTcpJunitServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 7777;
+    static int SERVER_PORT = 8999;
 
     String id = "@id";
     String password = "@password";
@@ -95,11 +95,12 @@ class SmsGatewayTest {
     void test_03_() {
         int testValue = 10;
         ByteArrayInputStream b = new ByteArrayInputStream(ByteBuffer.allocate(4).putInt(testValue).array());
+        log.debug("b:::::::::::::{}", b.toString().getBytes(StandardCharsets.UTF_8));
 
         SmsGateway gateway = getSmsGateWay();
         JunitTestUtils.setValue(gateway, "mInputStream", b);
+        log.debug("b:::::::::::::{}", b.toString().getBytes(StandardCharsets.UTF_8));
         int result = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
-        assertEquals(testValue, result);
 
         // length == 0
         ByteArrayInputStream b0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
@@ -120,6 +121,25 @@ class SmsGatewayTest {
         assertEquals("", result2);
     }
 
+    //readBufferToString
+    @Test
+    void test_03_S() {
+
+        SmsGateway gateway = getSmsGateWay();
+        //String
+        ByteArrayInputStream bs = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
+        JunitTestUtils.setValue(gateway, "mInputStream", bs);
+        String result1 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
+        assertEquals("CDEF", result1);
+
+        // length == 0
+        ByteArrayInputStream bs0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
+        JunitTestUtils.setValue(gateway, "mInputStream", bs0);
+        String result2 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
+        assertEquals("", result2);
+    }
+
+
     //readHeader
     @Test
     void test_04_() throws InterruptedException {
@@ -138,12 +158,12 @@ class SmsGatewayTest {
                 , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
-//        JunitTestUtils.setValue(gateway, "mInputStream"
-//                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
-//        ReflectionTestUtils.invokeMethod(gateway, "readHeader");
-//        assertFalse(gateway.isBind());
+        JunitTestUtils.setValue(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
+        ReflectionTestUtils.invokeMethod(gateway, "readHeader");
+        assertFalse(gateway.isBind());
 
-        thread.sleep(3000); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
+        thread.sleep(4000); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
 
         //DELIVER_ACK
         JunitTestUtils.setValue(gateway, "mInputStream"
@@ -187,6 +207,21 @@ class SmsGatewayTest {
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
     }
 
+    //readHeader
+    @Test
+    void test_04_NotBind() throws InterruptedException {
+
+        int BIND_ACK = 1;
+
+
+        SmsGateway gateway = getInvaildSmsGateWay();
+
+        //BIND_ACK
+        JunitTestUtils.setValue(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
+        ReflectionTestUtils.invokeMethod(gateway, "readHeader");
+        assertFalse(gateway.isBind());
+    }
 
     @Test
     void test_05_() throws InterruptedException, ExecutionException {

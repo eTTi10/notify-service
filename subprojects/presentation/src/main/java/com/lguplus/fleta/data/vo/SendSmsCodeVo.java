@@ -24,7 +24,7 @@ public class SendSmsCodeVo {
     @ParamAlias("stb_mac")
     private String stbMac;
 
-    @NotBlank(message = "필수 요청 정보 누락(sms_cd 가 Null 혹은 빈값 입니다.).", groups = Groups.C6.class)
+    @NotBlank(message = "필수 요청 정보 누락(sms_cd 가 Null 혹은 빈값 입니다.)", groups = Groups.C6.class)
     @ParamAlias("sms_cd")
     private String smsCd;
 

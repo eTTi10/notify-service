@@ -346,6 +346,12 @@ public class SmsGateway {
                     .build();
         }
 
+        /* 시험자동화용 강제 성공 리턴 */
+//        smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+//                .flag(CODE_SUCCESS)
+//                .message(MESSAGE_SUCCESS)
+//                .build();
+        /* 시험자동화용 강제 성공 리턴 */
 
         clearResult();
         mTimerMap.get(TIMER_TIME_OUT).cancel();
