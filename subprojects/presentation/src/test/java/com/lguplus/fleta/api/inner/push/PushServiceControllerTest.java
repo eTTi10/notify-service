@@ -11,6 +11,7 @@ import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
 import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
+import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +27,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Slf4j
 class PushServiceControllerTest {
 
-    @Autowired
+    //@Autowired
     private MockMvc mvc;
 
     @MockBean
@@ -60,6 +62,8 @@ class PushServiceControllerTest {
     @MockBean
     private PushRequestMapper pushRequestMapper;
 
+    PushServiceController pushServiceController1;
+
     private final ObjectMapper MAPPER = new ObjectMapper()
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -68,6 +72,10 @@ class PushServiceControllerTest {
 
     @BeforeEach
     void setUp() {
+        pushServiceController1 = new PushServiceController(pushAnnouncementService, pushSingleService, pushMultiService, pushRequestMapper);
+        JunitTestUtils.setValue(pushServiceController1, "pushRejectRegList", "REJECT_USER1|REJECT_USER2");
+        this.mvc = MockMvcBuilders.standaloneSetup(pushServiceController1).build();
+
         // Mock Dto
         PushClientResponseDto dto = PushClientResponseDto.builder().build();
 
@@ -152,6 +160,17 @@ class PushServiceControllerTest {
         //System.out.println("TEST >> ["+responseString+"]");
         log.debug("TEST >> ["+responseString+"]");
         Assertions.assertThat(status).isEqualTo(200);
+
+        given(pushRequestMapper.toDtoSingle(any())).willReturn(PushRequestSingleDto.builder().regId("REJECT_USER1").build());
+        mvcResult = mvc.perform(
+                        MockMvcRequestBuilders.post("/notify/push/single")
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .characterEncoding("UTF-8")
+                                .content(requestContent)
+                ).andExpect(status().isOk())
+                .andReturn();
+        Assertions.assertThat(status).isEqualTo(mvcResult.getResponse().getStatus());
     }
 
 
