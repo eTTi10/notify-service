@@ -1,8 +1,8 @@
 package com.lguplus.fleta.advice.exhandler;
 
+import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
-import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +26,18 @@ public class OuterControllerAdvice {
      */
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
 
-    private static final String DEFAULT_CUSTOM_CONVERTER_NM = "DEFAULT_CUSTOM_CONVERTER";
-
     static {
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(DEFAULT_CUSTOM_CONVERTER_NM,
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/comm/latest",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
     }
 
@@ -59,7 +67,7 @@ public class OuterControllerAdvice {
      * @return
      */
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<Object> handleBindException(final HttpServletRequest request,
+    public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
                                                                  final BindException ex) {
         log.info(ex.getMessage(), ex);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
@@ -71,7 +79,7 @@ public class OuterControllerAdvice {
      * @return
      */
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<Object> handleThrowable(final HttpServletRequest request,
+    public ResponseEntity<CommonResponseDto> handleThrowable(final HttpServletRequest request,
                                                              final Throwable th) {
         log.error(th.getMessage(), th);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
@@ -83,16 +91,14 @@ public class OuterControllerAdvice {
      * @param response
      * @return
      */
-    private Object getCustomErrorResponse(final HttpServletRequest request,
+    private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
                                                           final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
-
+        if (converter == null) {
+            return response;
+        }
         try {
-            if (converter == null) {
-                final CustomErrorResponseConverter converterDefault = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(DEFAULT_CUSTOM_CONVERTER_NM);
-                return converterDefault.convert(response);
-            }
             return converter.convert(response);
         } catch (final Throwable e) {
             log.warn(e.getMessage(), e);
