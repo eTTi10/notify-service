@@ -42,7 +42,7 @@ public class PlainTextResponseMessageConverter
     @Override
     protected boolean supports(final Class<?> clazz) {
 
-        return CommonResponseDto.class.isAssignableFrom(clazz);
+        return PlainTextibleDto.class.isAssignableFrom(clazz);
     }
 
     /**
@@ -50,7 +50,7 @@ public class PlainTextResponseMessageConverter
      */
     @Override
     protected CommonResponseDto readInternal(final Class<? extends PlainTextibleDto> clazz,
-                                          final HttpInputMessage inputMessage) {
+                                             final HttpInputMessage inputMessage) {
 
         throw new UnsupportedOperationException();
     }

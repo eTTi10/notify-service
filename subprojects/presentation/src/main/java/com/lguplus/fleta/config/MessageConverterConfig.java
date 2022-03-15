@@ -54,12 +54,14 @@ public class MessageConverterConfig implements WebMvcConfigurer {
                             .result((CommonResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                } else if (object instanceof CommonErrorResponseDto) {
+                }
+                else if (object instanceof CommonErrorResponseDto) {
                     final Object wrappedObject = RootErrorResponseDto.builder()
                             .error((CommonErrorResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                } else {
+                }
+                else {
                     super.writeInternal(object, type, outputMessage);
                 }
             }
@@ -71,10 +73,12 @@ public class MessageConverterConfig implements WebMvcConfigurer {
                 if (TypeUtils.isAssignable(type, CommonResponseDto.class)) {
                     final Type wrappedType = TypeUtils.parameterize(RootResponseDto.class, type);
                     return ((RootResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getResult();
-                } else if (TypeUtils.isAssignable(type, CommonErrorResponseDto.class)) {
+                }
+                else if (TypeUtils.isAssignable(type, CommonErrorResponseDto.class)) {
                     final Type wrappedType = TypeUtils.parameterize(RootErrorResponseDto.class, type);
                     return ((RootErrorResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getError();
-                } else {
+                }
+                else {
                     return super.read(type, contextClass, inputMessage);
                 }
             }

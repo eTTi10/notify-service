@@ -1,9 +1,7 @@
 package com.lguplus.fleta.advice.exhandler;
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
-import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import lombok.extern.slf4j.Slf4j;
@@ -22,20 +20,16 @@ import java.util.Map;
 @RestControllerAdvice("com.lguplus.fleta.api.outer")
 public class OuterControllerAdvice {
 
+    /**
+     *
+     */
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
 
-    private static final String defaultConverterNm = "**DEFAULT**";
+    private static final String DEFAULT_CUSTOM_CONVERTER_NM = "DEFAULT_CUSTOM_CONVERTER";
 
     static {
-        //Default
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(defaultConverterNm,
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put(DEFAULT_CUSTOM_CONVERTER_NM,
                 new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
-
     }
 
     /**
@@ -65,20 +59,22 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(BindException.class)
     public ResponseEntity<Object> handleBindException(final HttpServletRequest request,
-                                                                 final BindException ex) {
+                                                      final BindException ex) {
         log.info(ex.getMessage(), ex);
-
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
     }
 
-
-    @ExceptionHandler(NotifyRuntimeException.class)
-    public ResponseEntity<Object> handleNotifyException(final HttpServletRequest request,
-                                                        final Throwable th) {
-        log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
+    /**
+     *  /mims/sendPushCode RequestBody가 Null일 때 Exception 처리 용
+     * @param request
+     * @param th
+     * @return
+     */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Object> httpException(final HttpServletRequest request,
+                                                final Throwable th) {
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
-
 
     /**
      *
@@ -87,21 +83,25 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<Object> handleThrowable(final HttpServletRequest request,
-                                                             final Throwable th) {
+                                                  final Throwable th) {
         log.error(th.getMessage(), th);
-
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
     }
 
-
-    private Object getCustomErrorResponse(final HttpServletRequest request, final ErrorResponseDto response) {
-
+    /**
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    private Object getCustomErrorResponse(final HttpServletRequest request,
+                                          final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
 
         try {
             if (converter == null) {
-                final CustomErrorResponseConverter converterDefault = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(defaultConverterNm);
+                final CustomErrorResponseConverter converterDefault = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(DEFAULT_CUSTOM_CONVERTER_NM);
                 return converterDefault.convert(response);
             }
             return converter.convert(response);
@@ -110,7 +110,4 @@ public class OuterControllerAdvice {
             return response;
         }
     }
-
-
 }
-
