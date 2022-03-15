@@ -74,6 +74,18 @@ public class OuterControllerAdvice {
     }
 
     /**
+     *  /mims/sendPushCode RequestBody가 Null일 때 Exception 처리 용
+     * @param request
+     * @param th
+     * @return
+     */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
+                                                final Throwable th) {
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
+    }
+
+    /**
      *
      * @param th
      * @return
