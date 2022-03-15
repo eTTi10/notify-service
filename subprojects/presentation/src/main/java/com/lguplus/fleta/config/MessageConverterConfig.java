@@ -54,12 +54,14 @@ public class MessageConverterConfig implements WebMvcConfigurer {
                             .result((CommonResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                } else if (object instanceof CommonErrorResponseDto) {
+                }
+                else if (object instanceof CommonErrorResponseDto) {
                     final Object wrappedObject = RootErrorResponseDto.builder()
-                            .error((CommonErrorResponseDto) object)
+                            .error((CommonErrorResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                } else {
+                }
+                else {
                     super.writeInternal(object, type, outputMessage);
                 }
             }

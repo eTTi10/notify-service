@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Http Push Component
+ * Http SinglePush Component
  *
  * 단건 푸시등록
  */

@@ -49,8 +49,8 @@ public class PlainTextResponseMessageConverter
      *
      */
     @Override
-    protected PlainTextibleDto readInternal(final Class<? extends PlainTextibleDto> clazz,
-                                          final HttpInputMessage inputMessage) {
+    protected CommonResponseDto readInternal(final Class<? extends PlainTextibleDto> clazz,
+                                             final HttpInputMessage inputMessage) {
 
         throw new UnsupportedOperationException();
     }

@@ -12,7 +12,7 @@ public class CustomErrorResponseConverter {
     private final Class<? extends CommonErrorResponseDto> responseClass;
     private final String builderName;
 
-    public CommonErrorResponseDto convert (final ErrorResponseDto error) throws Throwable {
+    public CommonErrorResponseDto convert(final ErrorResponseDto error) throws Throwable {
 
         final Object builder = responseClass.getMethod(builderName).invoke(null);
         final Class<?> builderClass = builder.getClass();

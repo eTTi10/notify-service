@@ -28,8 +28,7 @@ public class ErrorResponseVo implements CommonErrorResponseDto {
 
     @Override
     public String toPlainText() {
-        return String.join(Separator.COLUMN,
-                getFlag(), getMessage());
+        String columnSep = "!^";
+        return String.join(columnSep, getFlag(), getMessage());
     }
-
 }
