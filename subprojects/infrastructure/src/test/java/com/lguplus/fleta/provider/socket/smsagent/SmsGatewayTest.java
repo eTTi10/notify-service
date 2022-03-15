@@ -24,7 +24,7 @@ import static org.mockito.Mockito.spy;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class SmsGatewayTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettySmsAgentServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 8999;
@@ -34,7 +34,7 @@ class SmsGatewayTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpJunitServerTest();
+        server = new NettySmsAgentServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
@@ -59,7 +59,7 @@ class SmsGatewayTest {
     }
 
     @Test
-    void test_01_() throws IOException {
+    void test_01() throws IOException {
         SmsGateway gateway = getSmsGateWay();
 
         int port = gateway.getPort();
@@ -83,24 +83,34 @@ class SmsGatewayTest {
         ReflectionTestUtils.invokeMethod(spy_gw, "sendReport");
     }
 
+    @Test
+    void test_06_NotLinked() {
+        SmsGateway gateway = getSmsGateWay();
+        SmsGateway spy_gw = spy(gateway);
+
+        //checkLink
+        JunitTestUtils.setValue(gateway, "LINK_CHECK_TERM", 1000);
+        JunitTestUtils.setValue(gateway, "isLinked",false);
+        ReflectionTestUtils.invokeMethod(spy_gw, "checkLink");
+    }
+
     //Invalid Socket Port
     @Test
-    void test_02_() {
+    void test_08() {
         SmsGateway gateway = getInvaildSmsGateWay();
         assertFalse(gateway.isBind());
     }
 
     //readBufferToString
     @Test
-    void test_03_() {
+    void test_00() {
         int testValue = 10;
-        ByteArrayInputStream b = new ByteArrayInputStream(ByteBuffer.allocate(4).putInt(testValue).array());
-        log.debug("b:::::::::::::{}", b.toString().getBytes(StandardCharsets.UTF_8));
+        ByteArrayInputStream b1 = new ByteArrayInputStream(ByteBuffer.allocate(4).putInt(testValue).array());
 
         SmsGateway gateway = getSmsGateWay();
-        JunitTestUtils.setValue(gateway, "mInputStream", b);
-        log.debug("b:::::::::::::{}", b.toString().getBytes(StandardCharsets.UTF_8));
+        JunitTestUtils.setValue(gateway, "mInputStream", b1);
         int result = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
+        assertEquals(testValue, result);
 
         // length == 0
         ByteArrayInputStream b0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
@@ -108,27 +118,16 @@ class SmsGatewayTest {
         int result0 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
         assertEquals(-1, result0);
 
-        //String
-        ByteArrayInputStream bs = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", bs);
-        String result1 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
-        assertEquals("CDEF", result1);
-
-        // length == 0
-        ByteArrayInputStream bs0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", bs0);
-        String result2 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
-        assertEquals("", result2);
     }
 
     //readBufferToString
     @Test
-    void test_03_S() {
+    void test_00_S() {
 
         SmsGateway gateway = getSmsGateWay();
         //String
-        ByteArrayInputStream bs = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", bs);
+        ByteArrayInputStream bss = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
+        JunitTestUtils.setValue(gateway, "mInputStream", bss);
         String result1 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
         assertEquals("CDEF", result1);
 
@@ -142,7 +141,7 @@ class SmsGatewayTest {
 
     //readHeader
     @Test
-    void test_04_() throws InterruptedException {
+    void test_04() throws InterruptedException {
 
         int BIND_ACK = 1;
         int DELIVER_ACK = 3;
@@ -209,7 +208,7 @@ class SmsGatewayTest {
 
     //readHeader
     @Test
-    void test_04_NotBind() throws InterruptedException {
+    void test_07_NotBind() throws InterruptedException {
 
         int BIND_ACK = 1;
 
@@ -224,9 +223,10 @@ class SmsGatewayTest {
     }
 
     @Test
-    void test_05_() throws InterruptedException, ExecutionException {
+    void test_05() throws InterruptedException, ExecutionException, IOException {
 
         SmsGateway gateway = getSmsGateWay();
+        SmsGateway spy_gw = spy(gateway);
         assertTrue(gateway.isBind());
 
         gateway.clearResult();
@@ -234,6 +234,8 @@ class SmsGatewayTest {
         Future<SmsGatewayResponseDto> dto =  gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto = dto.get();
         assertEquals("0000", smsGatewayResponseDto.getFlag());
+        spy_gw.sendMessage("01041112222", "01041113333", "callback", "test", 1);
+
 
         gateway.clearResult();
         JunitTestUtils.setValue(gateway, "mResult", "1500");

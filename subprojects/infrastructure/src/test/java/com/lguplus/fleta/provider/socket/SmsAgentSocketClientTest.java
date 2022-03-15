@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.*;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
+import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServerTest;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +44,7 @@ class SmsAgentSocketClientTest {
     String rCtn = "01011112222";
     String message = "테스트메시지";
 
-    static NettyTcpJunitServerTest server;
+    static NettySmsAgentServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 7777;
@@ -53,7 +54,7 @@ class SmsAgentSocketClientTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettyTcpJunitServerTest();
+        server = new NettySmsAgentServerTest();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
