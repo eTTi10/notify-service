@@ -31,7 +31,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     private final SmsAgentProps smsAgentProps;
 
     public int mSendTerm;
-    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
+    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
 
     @PostConstruct
     public void initGateway() {
@@ -81,7 +81,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             throw smsAgentCustomException;
         }
 
-        if (SmsAgentSocketClient.sGatewayQueue.size() > 0) {
+        if (!SmsAgentSocketClient.sGatewayQueue.isEmpty()) {
 
             SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 

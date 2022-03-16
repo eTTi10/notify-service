@@ -47,7 +47,7 @@ class SmsAgentSocketClientTest {
     static NettySmsAgentServerTest server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
-    static int SERVER_PORT = 7777;
+    static int SERVER_PORT = 8888;
 
     String id = "@id";
     String password = "@password";
@@ -72,7 +72,7 @@ class SmsAgentSocketClientTest {
         Map<String, String> serverMap = new HashMap<>();
         serverMap.put("index","1");
         serverMap.put("ip","localhost");
-        serverMap.put("port","7777");
+        serverMap.put("port","8888");
         serverMap.put("id","test");
         serverMap.put("password","test");
 
@@ -87,7 +87,8 @@ class SmsAgentSocketClientTest {
     @DisplayName("04 SMS전송 테스트")
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        smsAgentSocketClient.initGateway();
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
         Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
         SmsGatewayResponseDto responseDto = smsAgentSocketClient.send(sCtn, rCtn, message);
         assertThat(responseDto.getFlag().equals(S_FLAG));
@@ -123,7 +124,9 @@ class SmsAgentSocketClientTest {
     @DisplayName("10 SystemBusyException 테스트")
     void send_SystemBusyException2() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        smsAgentSocketClient.initGateway();
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
+
         smsAgentSocketClient.mSendTerm = 10000;
         Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentSocketClient.send(sCtn, rCtn, message);
@@ -146,7 +149,9 @@ class SmsAgentSocketClientTest {
     @DisplayName("07 SmsAgentEtcException 테스트")
     void isBind() throws IOException, InterruptedException {
 
-        smsAgentSocketClient.initGateway();
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
+
         server.stopServer();
         Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
         Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
@@ -170,9 +175,10 @@ class SmsAgentSocketClientTest {
     }
 
     @Test
-    @DisplayName("08 calculateTerm_Exception 테스트")
+    @DisplayName("11 calculateTerm_Exception 테스트")
     void calculateTerm_Exception()  {
 
+        smsAgentSocketClient.initGateway();
         JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", null);
         smsAgentSocketClient.initGateway();
     }
