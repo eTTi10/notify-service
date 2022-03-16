@@ -19,7 +19,7 @@ class AlphabetPatternTest {
     @Test
     void testIsValid_1() {
         boolean result = validator.isValid("a", null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
 
 }

@@ -1,6 +1,7 @@
 package com.lguplus.fleta.api.inner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 
@@ -24,6 +25,7 @@ class InnerControllerTest {
     @Test
     void testSendMessage() {
 
+        assertDoesNotThrow(() -> new InnerController());
     }
 
 }
