@@ -49,7 +49,6 @@ import static org.mockito.Mockito.*;
 class NettyTcpClientTest implements PushMultiClient {
 
     static NettyTcpJunitServerTest server;
-    static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
@@ -67,12 +66,12 @@ class NettyTcpClientTest implements PushMultiClient {
     CountDownLatch receivedLatch;// = new CountDownLatch(1);
 
     @BeforeAll
-    static void setUpAll() {
+    static void setUpAll() throws InterruptedException {
         server = new NettyTcpJunitServerTest();
-        thread = new Thread(() -> {
+        new Thread(() -> {
             server.runServer(SERVER_PORT);
-        });
-        thread.start();
+        }).start();
+        Thread.sleep(200);
     }
 
     @AfterAll
