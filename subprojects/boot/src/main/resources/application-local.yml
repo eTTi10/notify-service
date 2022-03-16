@@ -13,18 +13,19 @@ server:
 ####  Spring
 spring:
   datasource:
-    hikari:
-      #driver-class-name: org.postgresql.Driver
-
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+    writer:
+      #DEV
       username: postgres
       password: devadmin!
-
-      #platform: postgres
-      #auto-commit: false
-      #connection-test-query: SELECT 1
-      #transaction-isolation: TRANSACTION_READ_UNCOMMITTED
-      maximum-pool-size: 4
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      minimum-idle: 5
+      maximum-pool-size: 5
+    reader:
+      username: postgres
+      password: devadmin!
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      minimum-idle: 10
+      maximum-pool-size: 10
   jpa:
     database: postgresql
     hibernate:

@@ -3,7 +3,7 @@ package com.lguplus.fleta.util;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class NaverAiKeywordFormatterTest {
+class NaverAiKeywordFormatterTest {
 
     @Test
     void testFormat() {
