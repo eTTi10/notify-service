@@ -21,7 +21,7 @@ class CommonVoTest {
     }
 
     @Test
-    public void getId() {
+    void getId() {
         final CommonVo memberVo = CommonVo.builder().saId("saId").appName("appName").build();
         final String saId = memberVo.getSaId();
         assertEquals("saId", saId);

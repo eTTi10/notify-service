@@ -15,12 +15,12 @@ public enum NetworkInfo {
 	/**
 	 *
 	 */
-	_3G("3G"),
+	NET_3G("3G"),
 
 	/**
 	 *
 	 */
-	_4G("4G"),
+	NET_4G("4G"),
 
 	/**
 	 *

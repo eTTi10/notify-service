@@ -201,7 +201,7 @@ class ErrorResponseResolverTest {
         Method method = ReflectionUtils.findMethod(errorResponseResolver.getClass(), "resolveByPayload", Class.class, String.class);
         method.setAccessible(true);
         ErrorResponseDto response = (ErrorResponseDto)method.invoke(errorResponseResolver, Payload.class, null);
-        assertThat(response).isEqualTo(null);
+        assertThat(response).isNull();
     }
 
     @Test
@@ -209,7 +209,7 @@ class ErrorResponseResolverTest {
         Method method = ReflectionUtils.findMethod(errorResponseResolver.getClass(), "resolveByPayload", Class.class, String.class);
         method.setAccessible(true);
         ErrorResponseDto response = (ErrorResponseDto)method.invoke(errorResponseResolver, InvalidRequestTypeException.class, "필수 요청 정보 누락");
-        assertThat(response).isEqualTo(null);
+        assertThat(response).isNull();
     }
 
     @Test
@@ -225,7 +225,7 @@ class ErrorResponseResolverTest {
         Method method = ReflectionUtils.findMethod(errorResponseResolver.getClass(), "resolveByPayload", Class.class, String.class);
         method.setAccessible(true);
         ErrorResponseDto response = (ErrorResponseDto)method.invoke(errorResponseResolver, NotInstantiatableException.class, "필수 요청 정보 누락");
-        assertThat(response).isEqualTo(null);
+        assertThat(response).isNull();
     }
 
     @Test
