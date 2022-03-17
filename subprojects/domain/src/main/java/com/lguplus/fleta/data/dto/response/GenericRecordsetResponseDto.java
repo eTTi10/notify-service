@@ -43,12 +43,12 @@ public class GenericRecordsetResponseDto<S> extends SuccessResponseDto {
 
 		final StringBuilder buffer = new StringBuilder()
 				.append(getTotalCount());
-		final List<S> recordset = getRecordset();
-		if (recordset != null && !recordset.isEmpty()) {
+		final List<S> localRecordset = getRecordset();
+		if (localRecordset != null && !localRecordset.isEmpty()) {
 			buffer.append(Separator.RECORD)
-					.append(recordset.stream()
-							.filter(record -> record instanceof PlainTextibleDto)
-							.map(record -> ((PlainTextibleDto)record).toPlainText())
+					.append(localRecordset.stream()
+							.filter(PlainTextibleDto.class::isInstance)
+							.map(value -> ((PlainTextibleDto)value).toPlainText())
 							.collect(Collectors.joining(Separator.ROW)));
 		}
 

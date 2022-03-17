@@ -23,7 +23,7 @@ public class Groups {
     public interface R8 {}  // Bounds for start_num
 
     // Custom Groups
-    public interface C1 {};
+    public interface C1 {}
     public interface C2 {}
     public interface C3 {}
     public interface C4 {}

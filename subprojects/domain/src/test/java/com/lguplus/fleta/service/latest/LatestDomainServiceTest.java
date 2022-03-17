@@ -7,6 +7,7 @@ import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
+import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.exception.database.DatabaseException;
 import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
@@ -229,7 +230,7 @@ class LatestDomainServiceTest {
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .catId("T3021").build();
-        Exception thrown = assertThrows(DuplicateKeyException.class, () -> {
+        Exception thrown = assertThrows(DataAlreadyExistsException.class, () -> {
             LatestCheckDto responseDto = latestDomainService.getLatestCheckList(latestRequestDto);
         });
 
