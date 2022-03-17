@@ -23,13 +23,13 @@ public class LatestPostRequestVo {
 
     @ParamAlias("sa_id")
     @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.C1.class)
-    @Pattern(regexp = "^[A-Za-z0-9]*$", message = "sa_id의 패턴이 일치하지 않습니다.)", groups = Groups.C7.class)
+    @Pattern(regexp = "^[A-Za-z0-9]*$", message = "DB 에러", payload = ParameterDatabaseException.class, groups = Groups.C7.class)
     @Size(max=12, message = "DB 에러", payload = ParameterDatabaseException.class)
     private String saId;
 
     @ParamAlias("stb_mac")
     @NotBlank(message = "stb_mac 파라미터값이 전달이 안됨", groups = Groups.C2.class)
-    @Pattern(regexp = "^[a-zA-Z0-9.]*$", message = "stb_mac의 패턴이 일치하지 않습니다.)", groups = Groups.C8.class)
+    @Pattern(regexp = "^[a-zA-Z0-9.]*$", message = "stb_mac의 패턴이 일치하지 않음", groups = Groups.C8.class)
     @Size(max=14, message = "DB 에러", payload = ParameterDatabaseException.class)
     private String mac;
 

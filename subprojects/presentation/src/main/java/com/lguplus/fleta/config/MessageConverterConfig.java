@@ -49,15 +49,15 @@ public class MessageConverterConfig implements WebMvcConfigurer {
                                          final HttpOutputMessage outputMessage)
                     throws IOException, HttpMessageNotWritableException {
 
-                if (object instanceof CommonResponseDto) {
-                    final Object wrappedObject = RootResponseDto.builder()
-                            .result((CommonResponseDto)object)
+                if (object instanceof CommonErrorResponseDto) {
+                    final Object wrappedObject = RootErrorResponseDto.builder()
+                            .error((CommonErrorResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
                 }
-                else if (object instanceof CommonErrorResponseDto) {
-                    final Object wrappedObject = RootErrorResponseDto.builder()
-                            .error((CommonErrorResponseDto)object)
+                else if (object instanceof CommonResponseDto) {
+                    final Object wrappedObject = RootResponseDto.builder()
+                            .result((CommonResponseDto)object)
                             .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
                 }
@@ -70,13 +70,13 @@ public class MessageConverterConfig implements WebMvcConfigurer {
             public Object read(final Type type, final  Class<?> contextClass, final HttpInputMessage inputMessage)
                     throws IOException, HttpMessageNotReadableException {
 
-                if (TypeUtils.isAssignable(type, CommonResponseDto.class)) {
-                    final Type wrappedType = TypeUtils.parameterize(RootResponseDto.class, type);
-                    return ((RootResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getResult();
-                }
-                else if (TypeUtils.isAssignable(type, CommonErrorResponseDto.class)) {
+                if (TypeUtils.isAssignable(type, CommonErrorResponseDto.class)) {
                     final Type wrappedType = TypeUtils.parameterize(RootErrorResponseDto.class, type);
                     return ((RootErrorResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getError();
+                }
+                else if (TypeUtils.isAssignable(type, CommonResponseDto.class)) {
+                    final Type wrappedType = TypeUtils.parameterize(RootResponseDto.class, type);
+                    return ((RootResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getResult();
                 }
                 else {
                     return super.read(type, contextClass, inputMessage);
