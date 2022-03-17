@@ -81,7 +81,8 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
-                                                           final Throwable th) {
+
+                                                final Throwable th) {
         return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
@@ -104,7 +105,7 @@ public class OuterControllerAdvice {
      * @return
      */
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
-                                                     final ErrorResponseDto response) {
+                                                          final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {
