@@ -11,7 +11,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 @JacksonXmlRootElement(localName = "error")
 public interface CommonErrorResponseDto extends CommonResponseDto {
 
-    @JsonGetter("code")
-    String getFlag();
+	@JsonGetter("code")
+	String getFlag();
 
 }
