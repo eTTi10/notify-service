@@ -1,6 +1,7 @@
 package com.lguplus.fleta.config.binder;
 
 import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
 import org.springframework.web.servlet.mvc.method.annotation.ExtendedServletRequestDataBinder;
 
 import javax.servlet.ServletRequest;
@@ -44,9 +45,9 @@ public class ParamAliasDataBinder extends ExtendedServletRequestDataBinder {
 
 		for (final Entry<String, String> entry : paramAliases.entrySet()) {
 			final String paramAlias = entry.getKey();
-			if (propertyValues.contains(paramAlias)) {
-				propertyValues.add(entry.getValue(),
-						propertyValues.getPropertyValue(paramAlias).getValue());
+			final PropertyValue propertyValue = propertyValues.getPropertyValue(paramAlias);
+			if (propertyValue != null) {
+				propertyValues.add(entry.getValue(), propertyValue.getValue());
 			}
 		}
 	}

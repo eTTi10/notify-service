@@ -12,10 +12,10 @@ public class ParameterValidateException extends RuntimeException {
 
     public ParameterValidateException(List<ObjectError> allErrors, String errorMsg) {
         super(errorMsg);
-        Optional.ofNullable(allErrors).ifPresent(errors -> {
+        Optional.ofNullable(allErrors).ifPresent(errors ->
             log.error(errors.stream()
                 .map(e -> String.format("Error in object '%s': %s", e.getObjectName(), e.getDefaultMessage()))
-                .collect(Collectors.joining(" && ")));
-        });
+                .collect(Collectors.joining(" && ")))
+        );
     }
 }

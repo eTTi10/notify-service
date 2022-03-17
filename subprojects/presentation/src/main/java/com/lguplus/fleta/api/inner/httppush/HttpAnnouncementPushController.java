@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 /**
- * Http Push Announce RestController
+ * Http AnnouncementPush RestController
  *
  * 공지 푸시등록
  */

@@ -19,13 +19,13 @@ class AlphabetAndNumberOrEmptyPatternTest {
     @Test
     void test() {
         boolean result = validator.isValid("12", null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
     
     @Test
     void test_2() {
         boolean result = validator.isValid("", null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
 
 }

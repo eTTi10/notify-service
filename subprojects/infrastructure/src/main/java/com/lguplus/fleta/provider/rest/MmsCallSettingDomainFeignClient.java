@@ -8,7 +8,7 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
+import org.springframework.cache.annotation.Cacheable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,12 +24,11 @@ public class MmsCallSettingDomainFeignClient implements MmsCallSettingDomainClie
      * @return
      */
     @Override
-    //@Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
+    @Cacheable(value="MMS_CACHE", key="'mmsMessageCache'")
     public CallSettingResultMapDto mmsCallSettingApi(CallSettingRequestDto parm){
         Map<String, String> parmMap = new HashMap<>();
         parmMap.put("code",parm.getCode());
         parmMap.put("svc_type",parm.getSvcType());
-
 
         CallSettingDto data = CallSettingDto.builder()
                 .code("M011")

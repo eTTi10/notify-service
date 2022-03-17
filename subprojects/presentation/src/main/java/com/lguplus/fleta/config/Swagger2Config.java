@@ -50,10 +50,6 @@ public class Swagger2Config {
         Set<String> produces = new HashSet<>();
         produces.add("application/json");
         produces.add("application/xml");
-        //produces.add("text/plain");
-        //produces.add("application/json;charset=UTF-8");
-        //produces.add("application/xml;charset=UTF-8");
-        //produces.add("text/plain;charset=UTF-8");
         return produces;
     }
 
@@ -64,13 +60,4 @@ public class Swagger2Config {
                 .version(API_VERSION)
                 .build();
     }
-
-//    @Override
-//    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        registry.addResourceHandler("swagger-ui.html")
-//                .addResourceLocations("classpath:/META-INF/resources/");
-//
-//        registry.addResourceHandler("/webjars/**")
-//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
-//    }
 }
