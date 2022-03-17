@@ -20,7 +20,7 @@ import java.util.concurrent.Future;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.*;
 
 @Slf4j
 @ExtendWith({MockitoExtension.class})
@@ -39,25 +39,23 @@ class SmsGatewayBindTaskTest {
     @Test
     void test_01() throws IOException {
 
-        given(smsGateway.checkLink()).willReturn(true);
+        doNothing().when(smsGateway).checkLink();
 
         bindTimerTask = new SmsGateway.BindTimerTask(smsGateway);
         bindTimerTask.run();
 
-        given(smsGateway.checkLink()).willThrow(new IOException());
+        doThrow(IOException.class).when(smsGateway).checkLink();
         bindTimerTask.run();
     }
 
     @Test
     void test_02() throws IOException {
 
-//        given(smsGateway.checkLink()).willReturn(true);
-//
         JunitTestUtils.setValue(smsGateway, "isLinked", true);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
         linkTimerTask.run();
 
-        given(smsGateway.connectGateway()).willReturn(true);
+        doNothing().when(smsGateway).connectGateway();
         JunitTestUtils.setValue(smsGateway, "isLinked", false);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
         linkTimerTask.run();

@@ -114,7 +114,7 @@ public class SmsGateway {
         mResult = "";
     }
 
-    public boolean connectGateway() {
+    public void connectGateway() {
 
         mStatusLog.info("Connect Try[" + mPort + "]");
 
@@ -153,7 +153,6 @@ public class SmsGateway {
             //reConnectGateway(); <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
         }
 
-        return  true;
     }
 
     private void reConnectGateway() {
@@ -234,7 +233,7 @@ public class SmsGateway {
         //3초후에 mResult가 빈 값인지 체크하여 1500 처리
     }
 
-    public boolean checkLink() throws IOException {
+    public void checkLink() throws IOException {
 
         mStatusLog.info("checkLink[" + mPort + "]");
 
@@ -251,7 +250,6 @@ public class SmsGateway {
 
         mTimerMap.get(TIMER_LINK_RESULT).schedule(timerTask, LINK_ERROR_TERM);
 
-        return true;
     }
 
     private void sendReport() throws IOException {
