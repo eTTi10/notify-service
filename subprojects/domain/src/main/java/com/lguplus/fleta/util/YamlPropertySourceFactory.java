@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 
+import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -29,11 +30,7 @@ public class YamlPropertySourceFactory implements PropertySourceFactory {
  
         final Properties properties = factory.getObject();
         final String sourceName = name == null ? yaml.getFilename() : name;
-		//return new PropertiesPropertySource(sourceName, properties)
-
-		if(sourceName != null && properties != null) {
-			return new PropertiesPropertySource(sourceName, properties);
-		}
-		return null;
+		return new PropertiesPropertySource(sourceName == null ? "" : sourceName,
+				Optional.of(properties).get());
 	}
 }

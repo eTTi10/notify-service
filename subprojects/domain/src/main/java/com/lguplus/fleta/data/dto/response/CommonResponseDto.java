@@ -22,6 +22,7 @@ public interface CommonResponseDto extends PlainTextibleDto {
 	String getMessage();
 
 	class Separator {
+		private Separator() {}
 		public static final String ROW = "\f";
 		public static final String COLUMN = "!^";
 		public static final String RECORD = "!@";

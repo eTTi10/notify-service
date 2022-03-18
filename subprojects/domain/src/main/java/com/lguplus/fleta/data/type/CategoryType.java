@@ -119,7 +119,7 @@ public enum CategoryType {
     }
 
     public static List<String> getI20Categories() {
-        return new ArrayList<String>(i20Categories);
+        return new ArrayList<>(i20Categories);
     }
 
     public static boolean isBestVodCategory(final CategoryType categoryType) {
@@ -131,7 +131,7 @@ public enum CategoryType {
     }
 
     public static List<String> getBestVodCategories() {
-        return new ArrayList<String>(bestVodCategories);
+        return new ArrayList<>(bestVodCategories);
     }
 
     public static boolean isSuxmCategory(final CategoryType categoryType) {
@@ -143,6 +143,6 @@ public enum CategoryType {
     }
 
     public static List<String> getSuxmCategories() {
-        return new ArrayList<String>(suxmCategories);
+        return new ArrayList<>(suxmCategories);
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumSet;
+import java.util.Locale;
 
 /**
  * HTTP API 표준 응답 Error 코드
@@ -19,11 +20,6 @@ public enum InnerResponseErrorType {
 
     private String code;
     private String message;
-
-    private void setProperties(String code, String message) {
-        this.code = code;
-        this.message = message;
-    }
 
     public String code() {
         return code;
@@ -41,9 +37,9 @@ public enum InnerResponseErrorType {
     @Slf4j
     @RequiredArgsConstructor
     @Component
-    private static class ResponseErrorTypePropertySetter {
+    static class ResponseErrorTypePropertySetter {
 
-        private final static String MESSAGE_CODE_PREFIX = "responseErrorType";
+        private static final String MESSAGE_CODE_PREFIX = "responseErrorType";
 
         private final MessageSource messageSource;
 
@@ -54,13 +50,18 @@ public enum InnerResponseErrorType {
                 String message = getMessage("message", type.name());
                 log.trace("===> MessageSource : {}.{} : {}, {}",
                     MESSAGE_CODE_PREFIX, type.name(), code, message);
-                type.setProperties(code, message);
+                setProperties(type, code, message);
             }
+        }
+
+        private void setProperties(InnerResponseErrorType type, String code, String message) {
+            type.code = code;
+            type.message = message;
         }
 
         private String getMessage(String propName, String name) {
             String msgCode = MESSAGE_CODE_PREFIX + "." + name + "." + propName;
-            return messageSource.getMessage(msgCode, null, name, null);
+            return messageSource.getMessage(msgCode, null, name, Locale.getDefault());
         }
     }
 }

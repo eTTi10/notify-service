@@ -21,19 +21,19 @@ class NetworkTypePatternTest {
     @Test
     void testIsValid_1() {
         boolean result = validator.isValid("1", null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
     
     @Test
     void testIsValid_2() {
         boolean result = validator.isValid(null, null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
     
     @Test
     void testIsValid_3() {
         boolean result = validator.isValid("NONE", null);
-        assertThat(result).isEqualTo(false);
+        assertThat(result).isFalse();
     }
 
 }
