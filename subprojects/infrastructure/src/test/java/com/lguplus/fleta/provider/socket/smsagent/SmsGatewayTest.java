@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -238,5 +239,4 @@ class SmsGatewayTest {
         SmsGatewayResponseDto smsGatewayResponseDto2 = dto2.get();
 
     }
-
 }

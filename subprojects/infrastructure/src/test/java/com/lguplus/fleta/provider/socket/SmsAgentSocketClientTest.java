@@ -1,14 +1,18 @@
 package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+
 import com.lguplus.fleta.exception.smsagent.*;
+
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
 import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServerTest;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
+
 import org.junit.jupiter.api.*;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -21,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -77,10 +80,12 @@ class SmsAgentSocketClientTest {
         serverMap.put("password","test");
 
         JunitTestUtils.setValue(smsAgentProps, "servers", List.of(serverMap));
-        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
+//        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
 
+        smsAgentSocketClient.initGateway();
+        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
 
     @Test
@@ -181,6 +186,7 @@ class SmsAgentSocketClientTest {
         smsAgentSocketClient.initGateway();
         JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", null);
         smsAgentSocketClient.initGateway();
+
     }
 
 

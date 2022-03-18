@@ -31,6 +31,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
     private final SmsAgentProps smsAgentProps;
 
     public int mSendTerm;
+  
     public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
 
     @PostConstruct

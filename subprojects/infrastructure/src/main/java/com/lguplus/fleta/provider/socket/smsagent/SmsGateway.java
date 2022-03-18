@@ -227,6 +227,7 @@ public class SmsGateway {
 
         mTimerMap.get(TIMER_TIME_OUT).cancel();
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
+
         TimerTask timerTask = new ErrorTimerTask(this);
 
         mTimerMap.get(TIMER_TIME_OUT).schedule(timerTask, TIMEOUT_TERM);
