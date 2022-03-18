@@ -153,8 +153,8 @@ class PushDomainServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .sType(sFlag)
-                .sMessage(sMessage)
+                .type(sFlag)
+                .message(sMessage)
                 .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
@@ -218,8 +218,8 @@ class PushDomainServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .sType(sFlag)
-                .sMessage("실패")
+                .type(sFlag)
+                .message("실패")
                 .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
@@ -267,8 +267,8 @@ class PushDomainServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .sType(sFlag)
-                .sMessage(sMessage)
+                .type(sFlag)
+                .message(sMessage)
                 .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
@@ -317,8 +317,8 @@ class PushDomainServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .sType(sFlag)
-                .sMessage(sMessage)
+                .type(sFlag)
+                .message(sMessage)
                 .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
@@ -459,6 +459,21 @@ class PushDomainServiceTest {
 
         //then
         assertThat(regId.equals(REG_ID));
+    }
+
+    @Test
+    @DisplayName("ctn을 입력으로 받아 regId 조회하지 못한 경우 확인")
+    void getRegistrationIDbyCtn_Fail() {
+
+        //given
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(List.of());
+        String ctn = REG_ID;
+
+        //when
+        String regId = pushDomainService.getRegistrationIDbyCtn(ctn);
+
+        //then
+        assertThat(regId.equals(""));
     }
 
     @Test

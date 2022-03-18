@@ -83,11 +83,12 @@ public class PushDomainService {
      */
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
-        HttpPushResponseDto httpPushResponseDto = null;
-
         String pushType = sendPushCodeRequestDto.getPushType();
         String sendCode = sendPushCodeRequestDto.getSendCode();
         String serviceType = sendPushCodeRequestDto.getServiceType();
+
+        HttpPushResponseDto httpPushResponseDto = null;
+        pushServiceResultDtoArrayList.clear();
 
         String[] pushTypes;
         String[] serviceTypes;
@@ -110,8 +111,8 @@ public class PushDomainService {
 
         /*FCM POS 추가발송 설정값 체크*/
         String extraSendYn = StringUtils.defaultIfEmpty(pushInfoMap.get("pos.send"), fcmExtraSend);
-        log.debug("pushInfoMap.getpos.send" + pushInfoMap.get("pos.send"));
-        log.debug("fcmExtraSend" + fcmExtraSend);
+        log.debug("pushInfoMap.getpos.send props:" + pushInfoMap.get("pos.send"));
+        log.debug("fcmExtraSend props:" + fcmExtraSend);
 
         pushTypes = pushType.split("\\|");
         serviceTypes = serviceType.split("\\|");
@@ -133,6 +134,8 @@ public class PushDomainService {
             for(int i=0; i<pushTypes.length; i++) {
 
                 HttpPushSingleRequestDto httpPushSingleRequestDto = setHttpPushRequestDto(sendPushCodeRequestDto, serviceTarget, pushTypes[i]);
+
+                log.debug("httpPushSingleRequestDto:{}", httpPushSingleRequestDto);
 
                 try {
 
@@ -180,9 +183,9 @@ public class PushDomainService {
             firstFailMessage = StringUtils.defaultIfEmpty(firstFailMessage, failMessage);
 
             PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                    .sType(sType)
-                    .sFlag(sFlag)
-                    .sMessage(sMessage)
+                    .type(sType)
+                    .flag(sFlag)
+                    .message(sMessage)
                     .build();
 
             pushServiceResultDtoArrayList.add(pushServiceResultDto);
@@ -289,7 +292,10 @@ public class PushDomainService {
         inputMap.put("saId", sendPushCodeRequestDto.getSaId());
         inputMap.put("stbMac", sendPushCodeRequestDto.getStbMac());
 
-        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElseThrow();
+        RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElse(RegIdDto.builder().registrationId("").build());
+
+        log.debug("personalizationDomainClient.getRegistrationID() regIdDto:{}", regIdDto);
+
         return regIdDto.getRegistrationId();
 
     }
@@ -307,7 +313,11 @@ public class PushDomainService {
         inputMap.put("ctnNo", ctn);
 
         List<SaIdDto> saIdDtos = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
-        return saIdDtos.get(0).getSaId();
+        log.debug("subscriberDomainClient.getRegistrationIDbyCtn() saIdDtos:{}", saIdDtos);
+        if (saIdDtos.size() > 0) {
+            return StringUtils.defaultIfEmpty(saIdDtos.get(0).getSaId(), "");
+        }
+        else return "";
 
     }
 
@@ -388,6 +398,8 @@ public class PushDomainService {
             //APNS일 경우 items의 맨 앞에 payloaditem를 끼워 넣는다.
             items.add(0, payloadItem);
         }
+
+        log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
 
         return HttpPushSingleRequestDto.builder()
                 .applicationId(applicationId)
