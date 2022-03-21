@@ -18,12 +18,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.util.NestedServletException;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -54,7 +56,7 @@ class PushControllerTest {
         SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
                 .flag("0000")
                 .message("성공")
-                .service(List.of(PushServiceResultDto.builder().sFlag("0000").sMessage("성공").sType("C").build()))
+                .service(List.of(PushServiceResultDto.builder().flag("0000").message("성공").type("C").build()))
                 .build();
 
         given(pushService.sendPushCode(any())).willReturn(sendPushResponseDto);
@@ -107,6 +109,47 @@ class PushControllerTest {
 
         //then
         Assertions.assertThat(responseString.contains(SUCCESS_MESSAGE)); // 성공 플래그가 있는지 확인
+
+    }
+
+    @Test
+    @DisplayName(value = "body를 입력하지 않을 경우 Exception 테스트")
+    void sendPushCode_Exception() throws Exception {
+
+        //given
+        Map<String, String> paramMap = new HashMap<>();
+
+        paramMap.put("sa_id", "");
+        paramMap.put("stb_mac", "");
+        paramMap.put("reg_id", "");
+        paramMap.put("send_code", "");
+        paramMap.put("push_type", "");
+        paramMap.put("reg_type", "");
+        paramMap.put("service_type", "");
+
+        String body = "";
+
+
+        //when
+
+        Exception exception = assertThrows(NestedServletException.class, () -> {
+
+            MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE)
+                            .queryParam("sa_id","")
+                            .queryParam("stb_mac","")
+                            .queryParam("reg_id","")
+                            .queryParam("send_code","")
+                            .queryParam("push_type","")
+                            .queryParam("reg_type","")
+                            .queryParam("service_type","")
+                            .content(body)
+                            .contentType(MediaType.APPLICATION_XML)
+                            .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print())
+                    .andReturn();
+
+        });
 
     }
 

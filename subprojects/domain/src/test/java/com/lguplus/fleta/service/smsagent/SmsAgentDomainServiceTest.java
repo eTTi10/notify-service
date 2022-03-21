@@ -2,7 +2,11 @@ package com.lguplus.fleta.service.smsagent;
 
 import com.lguplus.fleta.client.SmsAgentDomainClient;
 import com.lguplus.fleta.client.SmsCallSettingDomainClient;
+import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
+import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.*;
 import com.lguplus.fleta.util.JunitTestUtils;
@@ -18,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,7 +69,7 @@ class SmsAgentDomainServiceTest {
         JunitTestUtils.setValue(smsAgentDomainService, "codeEtcException", "9999");
         JunitTestUtils.setValue(smsAgentDomainService, "messageEtcException", "기타 오류");
 
-
+        smsAgentDomainService.init();
     }
 
     @Test
@@ -118,7 +123,7 @@ class SmsAgentDomainServiceTest {
         smsAgentDomainService.sendSms(request);
 
     }
-    /*
+
     @Test
     @DisplayName("코드를 이용한 SMS발송 테스트")
     void sendSmsCode() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
@@ -129,12 +134,11 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -171,17 +175,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -205,17 +208,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_Exception() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -239,17 +241,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_PhoneNumberErrorException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -272,17 +273,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_MsgTypeErrorException () throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -305,17 +305,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SystemBusyException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -338,17 +337,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SystemErrorException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -371,17 +369,16 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SmsAgentEtcException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -403,13 +400,17 @@ class SmsAgentDomainServiceTest {
     @DisplayName("해당 코드에 존재하는 메시지가 없음 예외처리 테스트")
     void callSettingApi_returnTotalCountZero() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
+        CallSettingDto dto = CallSettingDto.builder()
+                .code("")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .build();
+
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(0)
-                        .memberGroup("")
-                        .recordset(List.of())
+                        .dataCount(0)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -474,17 +475,16 @@ class SmsAgentDomainServiceTest {
         th.start();
 
         CallSettingDto dto = CallSettingDto.builder()
-                .codeId("S001")
-                .codeName("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+                .code("S001")
+                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
                 .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+                .code("0000")
+                .message("성공")
                 .result(CallSettingResultDto.builder()
-                        .flag("0000")
-                        .message("성공")
-                        .totalCount(1)
-                        .memberGroup("")
-                        .recordset(List.of(dto))
+                        .dataCount(1)
+                        .data(dto)
                         .build())
                 .build();
 
@@ -510,6 +510,6 @@ class SmsAgentDomainServiceTest {
 
     }
 
-    */
+
 
 }

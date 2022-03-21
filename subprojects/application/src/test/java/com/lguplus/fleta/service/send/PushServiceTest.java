@@ -38,9 +38,9 @@ class PushServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .sType("H")
-                .sFlag(sFlag)
-                .sMessage(sMessage)
+                .type("H")
+                .flag(sFlag)
+                .message(sMessage)
                 .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
