@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -87,6 +88,20 @@ public class SmsAgentDomainService {
     private int callCount = 0;
     private int systemEr = 0;
     private int busyEr = 0;
+    private int retry;
+    private int busyRetry;
+    private int sleepTime;
+
+    /**
+     * @Value로 가져온 프로퍼티 초기화를 위해
+     */
+    @PostConstruct
+    public void init() {
+
+        retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
+        busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
+        sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
+    }
 
     /**
      * 문자발송(문자내용으로발송)
@@ -122,7 +137,6 @@ public class SmsAgentDomainService {
 
                 int startTime = Integer.parseInt(noSendAry[0]);
                 int endTime = Integer.parseInt(noSendAry[1]);
-                log.debug("startTime: {} endTime: {}", startTime, endTime);
 
                 startCal.set(Calendar.HOUR_OF_DAY, startTime);
                 startCal.set(Calendar.MINUTE, 0);
@@ -131,7 +145,6 @@ public class SmsAgentDomainService {
 
                 if (startTime >= endTime) {
                     endCal.add(Calendar.DAY_OF_MONTH, 1);
-                    log.debug("startTime >= endTime YES");
                 }
 
                 endCal.set(Calendar.HOUR_OF_DAY, endTime);
@@ -157,6 +170,10 @@ public class SmsAgentDomainService {
      * @return SmsGatewayResponseDto
      */
     public SmsGatewayResponseDto sendSmsCode(SendSmsCodeRequestDto sendSMSCodeRequestDto) {
+
+        callCount = 0;
+        systemEr = 0;
+        busyEr = 0;
 
         //#########[LOG SET]#########
         log.debug ("[smsCode] sendSMSCodeRequestDto - {}", sendSMSCodeRequestDto.toString());
@@ -185,10 +202,6 @@ public class SmsAgentDomainService {
      * @return
      */
     public SmsGatewayResponseDto retrySmsSend(SmsAgentRequestDto smsAgentRequestDto) {
-
-        int retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
-        int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
-        int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
         CheckRetryType checkRetry = CheckRetryType.NO_RETRY;
@@ -299,26 +312,24 @@ public class SmsAgentDomainService {
 
             //============ Start [setting API 호출 캐시등록] =============
 
-            //setting API 호출관련 파라메타 셋팅 <-- sos6871수정
+            //setting API 호출관련 파라메타 셋팅
             CallSettingRequestDto prm = CallSettingRequestDto.builder()
-                    //.saId(smsSettingRestSaId) <-- sos6871수정
-                    //.stbMac(smsSettingRestStbMac) <-- sos6871수정
-                    .code(smsCd) //<-- sos6871수정
+                    .code(smsCd)
                     .svcType(smsSettingRestSvcType)
                     .build();
 
-            //setting API 호출하여 메세지 등록 <-- sos6871수정
+            //setting API 호출하여 메세지 등록
             CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
 
-            //메세지목록 조회결과 취득 <-- sos6871수정
+            //메세지목록 조회결과 취득
             CallSettingDto settingApi =  callSettingApi.getResult().getData();
 
             //============ End [setting API 호CallSettingResultMapDto출 캐시등록] =============
 
-            if(settingApi != null) { //<-- sos6871수정
+            if(callSettingApi.getResult().getDataCount() > 0) {
 
-                log.debug("sms_cd(메시지내용) {} " , settingApi.getName()); //<-- sos6871
-                return settingApi.getName(); //<-- sos6871수정
+                log.debug("sms_cd(메시지내용) {} " , settingApi.getName());
+                return settingApi.getName();
             }
             else {
                 return "";

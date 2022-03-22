@@ -4,7 +4,6 @@ package com.lguplus.fleta.data.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.swagger.annotations.ApiModel;
 import lombok.*;
 
 
@@ -18,11 +17,11 @@ import lombok.*;
 public class PushServiceResultDto {
 
     @JsonProperty(value = "type")
-    private String sType;
+    private String type;
 
-    @JsonProperty(value="s_flag")
-    private String sFlag;
+    @JsonProperty(value = "s_flag")
+    private String flag;
 
-    @JsonProperty(value="s_message")
-    private String sMessage;
+    @JsonProperty(value = "s_message")
+    private String message;
 }

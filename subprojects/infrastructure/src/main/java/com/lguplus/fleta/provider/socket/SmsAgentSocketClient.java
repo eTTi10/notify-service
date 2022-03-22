@@ -56,7 +56,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
-
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
@@ -82,9 +81,6 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
-
-            log.debug(currentDate +" - "+ prevSendDate + " <= " + mSendTerm);
-            log.debug((currentDate - prevSendDate) + " <= " + mSendTerm);
 
             if (currentDate - prevSendDate <= mSendTerm) {
 

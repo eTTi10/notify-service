@@ -18,6 +18,7 @@ public class SendPushCodeRequestBodyVo {
     private Map<String, String> reserve;
 
     @JacksonXmlElementWrapper(localName = "items")
+
     @JacksonXmlProperty(localName = "item")
     private List<String> items;
 
