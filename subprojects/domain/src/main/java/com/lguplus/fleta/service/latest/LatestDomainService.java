@@ -7,8 +7,8 @@ import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
+import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.exception.database.DatabaseException;
-import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.repository.latest.LatestRepository;
 import lombok.RequiredArgsConstructor;
@@ -56,9 +56,9 @@ public class LatestDomainService {
         LatestCheckDto resultLatestCheckDto = LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
 
         if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
-            throw new DuplicateKeyException("기존 데이터 존재");//1201;//중복
+            throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
         }else if(maxCnt < checks.size()) {
-            throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과
+            throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
         }
         return resultLatestCheckDto;
     }
@@ -72,7 +72,7 @@ public class LatestDomainService {
         int deleteCount = latestRepository.deleteLatest(latestRequestDto);
 
         if (0 >= deleteCount) {
-            throw new DeleteNotFoundException("삭제대상없음");//1410
+            throw new DeleteNotFoundException("삭제대상 없음");//1410
         } else {
             return deleteCount;
         }

@@ -1,6 +1,7 @@
 package com.lguplus.fleta.exhandler;
 
 import com.lguplus.fleta.data.dto.response.CommonErrorResponseDto;
+import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +24,7 @@ class CustomErrorResponseConverterTest {
     @Test
     void testConvert() throws Throwable {
         ErrorResponseDto error = ErrorResponseDto.builder().flag("9999").message("기타 에러").build();
-        CommonErrorResponseDto result = customErrorResponseConverter.convert(error);
+        CommonResponseDto result = customErrorResponseConverter.convert(error);
 
         String flag = result.getFlag();
         assertThat(flag).isEqualTo("9999");

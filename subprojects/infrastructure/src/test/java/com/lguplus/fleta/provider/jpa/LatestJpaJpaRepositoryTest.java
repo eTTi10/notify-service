@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.jpa;
 
-import com.lguplus.fleta.config.InfrastructureConfig;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.entity.LatestEntity;
 import com.lguplus.fleta.domain.repository.LatestRepositoryImpl;
@@ -9,13 +8,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import javax.persistence.EntityManager;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,16 +21,20 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@DataJpaTest(includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = LatestRepositoryImpl.class))
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ImportAutoConfiguration(InfrastructureConfig.class)
 @Slf4j
+@ExtendWith(SpringExtension.class)
 class LatestJpaJpaRepositoryTest {
+    @Mock
+    private EntityManager em;
 
-    @Autowired
-    private LatestRepository latestRepository;
+    @Mock
+    LatestRepository latestRepository;
+
+    @Mock
+    LatestJpaRepository latestJpaRepository;
+
+    @InjectMocks
+    LatestRepositoryImpl latestRepositoryImpl;
 
     private static String GET_UUID;
     private static final String MAC = "JUNIT_TEST_MAC";
@@ -71,8 +73,7 @@ class LatestJpaJpaRepositoryTest {
                 .catName("놀라운 대회 스타킹")
                 .categoryGb(CATEGORY_GB)
                 .build();
-        latestRepository.insertLatest(latestRequestDto);
-
+        latestRepositoryImpl.insertLatest(latestRequestDto);
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList End");
     }
@@ -91,7 +92,7 @@ class LatestJpaJpaRepositoryTest {
                 .ctn(CTN)
                 .catId(CAT_ID)
                 .build();
-        List<LatestEntity> responseList = latestRepository.getLatestList(latestRequestDto);
+        List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size() < 2);
 
@@ -108,7 +109,7 @@ class LatestJpaJpaRepositoryTest {
                 .ctn(CTN)
                 .catId("")
                 .build();
-        List<LatestEntity> responseList = latestRepository.getLatestList(latestRequestDto2);
+        List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size() >= 0);
 
@@ -127,7 +128,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("1111.2222.3333")
                 .ctn("01011112222")
                 .build();
-        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto);
+        List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size() == 0);
 
@@ -143,7 +144,7 @@ class LatestJpaJpaRepositoryTest {
                 .mac("001c.627e.039c")
                 .ctn("01055805424")
                 .build();
-        List<LatestEntity> responseList = latestRepository.getLatestCheckList(latestRequestDto2);
+        List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size() >= 0);
 
@@ -165,7 +166,7 @@ class LatestJpaJpaRepositoryTest {
                 .ctn(CTN)
                 .catId(CAT_ID)
                 .build();
-        int resultCnt = latestRepository.deleteLatest(latestRequestDto);
+        int resultCnt = latestRepositoryImpl.deleteLatest(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(resultCnt == 1);
 
