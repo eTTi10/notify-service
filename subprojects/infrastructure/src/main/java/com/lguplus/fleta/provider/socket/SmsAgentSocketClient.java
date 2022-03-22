@@ -17,8 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -30,8 +29,8 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
     private final SmsAgentProps smsAgentProps;
 
-    public static int mSendTerm;
-    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
+    private int mSendTerm;
+    private Queue<SmsGateway> sGatewayQueue = new LinkedBlockingDeque<>();
 
     @PostConstruct
     public void initGateway() {
@@ -76,20 +75,20 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             throw new MsgTypeErrorException("메시지 형식 오류");
         }
 
-        if (SmsAgentSocketClient.sGatewayQueue.size() > 0) {
+        if (!sGatewayQueue.isEmpty()) {
 
-            SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
+            SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
 
-            log.debug(currentDate +" - "+ prevSendDate + " <= " + SmsAgentSocketClient.mSendTerm);
-            log.debug((currentDate - prevSendDate) + " <= " + SmsAgentSocketClient.mSendTerm);
+            log.debug(currentDate +" - "+ prevSendDate + " <= " + mSendTerm);
+            log.debug((currentDate - prevSendDate) + " <= " + mSendTerm);
 
-            if (currentDate - prevSendDate <= SmsAgentSocketClient.mSendTerm) {
+            if (currentDate - prevSendDate <= mSendTerm) {
 
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
+                sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
                 //1503
                 throw new SystemBusyException("메시지 처리 수용 한계 초과");
             }
@@ -104,17 +103,17 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
                 } else {
 
-                    SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                    sGatewayQueue.offer(smsGateway);
                     //1500
                     throw new SystemErrorException("시스템 장애");
                 }
             } catch (IOException e) {
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                sGatewayQueue.offer(smsGateway);
                 //9999
                 throw new SmsAgentEtcException("기타 오류");
             }
 
-            SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+            sGatewayQueue.offer(smsGateway);
 
         } else {
             //1503

@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
+import static com.lguplus.fleta.service.smsagent.SmsAgentDomainService.CheckRetryType;
+
 
 /**
  *
@@ -189,7 +191,7 @@ public class SmsAgentDomainService {
         int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
 
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
-        int checkRetry = 0;
+        CheckRetryType checkRetry = CheckRetryType.NO_RETRY;
         String sendMessage = "";
 
         SmsGatewayResponseDto smsGatewayResponseDto;
@@ -257,18 +259,18 @@ public class SmsAgentDomainService {
         //retry여부를 판단한다.
         if( smsGatewayResponseDto.getFlag().equals(codeSystemErrorException) || smsGatewayResponseDto.getFlag().equals(codeEtcException) ){
             // 시스템 장애이거나 기타오류 일 경우
-            checkRetry = 1;
+            checkRetry = CheckRetryType.RETRY_CAUSE_ERROR;
             systemEr++;
 
         }else if( smsGatewayResponseDto.getFlag().equals(codeSystemBusyException) ){
             // 메시지 처리 수용 한계 초과일 경우
-            checkRetry = 2;
+            checkRetry = CheckRetryType.RETRY_CAUSE_BUSY;
             busyEr++;
         }
 
         log.debug("[retrySmsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMessage+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
 
-        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+        if(checkRetry == CheckRetryType.NO_RETRY || systemEr > retry || busyEr > busyRetry){
             //재시도에 해당되지 않는 경우 or 재시도설정횟수보다 재시도한 횟수가 클 경우 or 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
             return smsGatewayResponseDto;
         }else{
@@ -350,5 +352,10 @@ public class SmsAgentDomainService {
         return msg;
     }
 
+    enum CheckRetryType {
 
+        NO_RETRY,
+        RETRY_CAUSE_ERROR,
+        RETRY_CAUSE_BUSY
+    }
 }
