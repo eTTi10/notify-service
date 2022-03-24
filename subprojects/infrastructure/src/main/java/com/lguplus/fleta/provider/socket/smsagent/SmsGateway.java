@@ -2,6 +2,7 @@ package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -19,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
 @Component
@@ -45,16 +47,16 @@ public class SmsGateway {
     private static final int TIMER_TIME_OUT = 3;
 
     private static final int TIME_OUT = 5000;				        // 타임아웃(5초)
-    private static final int RECONNECT_TERM = 1000 * 60 * 3;        // 재접속 시간(3분)
+    private int RECONNECT_TERM = 1000 * 60 * 3;        // 재접속 시간(3분)
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
-    private static final int LINK_CHECK_TERM = 1000 * 50;           // 링크 체크 주기(50초)
+    private int LINK_CHECK_TERM = 1000 * 50;           // 링크 체크 주기(50초)
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
 
     private boolean isLinked = false;
     private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
 
     private String mIpAddress;
-    private String mResult = "";
+    public String mResult = "";
     private String mID;
     private String mPassword;
     private int mPort;
@@ -92,8 +94,6 @@ public class SmsGateway {
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
-        mStatusLog.info("id:" + id);
-        mStatusLog.info("password:" + password);
 
         connectGateway();
     }
@@ -114,7 +114,7 @@ public class SmsGateway {
         mResult = "";
     }
 
-    private void connectGateway() {
+    public void connectGateway() {
 
         mStatusLog.info("Connect Try[" + mPort + "]");
 
@@ -152,6 +152,7 @@ public class SmsGateway {
             mStatusLog.error("connectGateway Error");
             //reConnectGateway(); <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
         }
+
     }
 
     private void reConnectGateway() {
@@ -226,22 +227,14 @@ public class SmsGateway {
 
         mTimerMap.get(TIMER_TIME_OUT).cancel();
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
 
-                if (mResult.isEmpty()) {
-                    log.debug("mResult.isEmpty() then 1500");
-                    mResult = CODE_SYSTEM_ERROR;
-                }
-            }
-        };
+        TimerTask timerTask = new ErrorTimerTask(this);
 
         mTimerMap.get(TIMER_TIME_OUT).schedule(timerTask, TIMEOUT_TERM);
         //3초후에 mResult가 빈 값인지 체크하여 1500 처리
     }
 
-    private void checkLink() throws IOException {
+    public void checkLink() throws IOException {
 
         mStatusLog.info("checkLink[" + mPort + "]");
 
@@ -254,20 +247,10 @@ public class SmsGateway {
 
         mTimerMap.get(TIMER_LINK_RESULT).cancel();
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                if (isLinked) {
-                    isLinked = false;
-                } else {
-                    mStatusLog.info("Link Fail[" + mPort + "]");
-                    isBind = false;
-                    connectGateway();
-                }
-            }
-        };
+        TimerTask timerTask = new LinkTimerTask(this);
 
         mTimerMap.get(TIMER_LINK_RESULT).schedule(timerTask, LINK_ERROR_TERM);
+
     }
 
     private void sendReport() throws IOException {
@@ -326,27 +309,24 @@ public class SmsGateway {
         SmsGatewayResponseDto smsGatewayResponseDto = null;
 
         while (mResult.isEmpty()) {
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                log.debug("catch interrupt");
-                Thread.currentThread().interrupt();
-            }
-
-            if (mResult.equals(CODE_SUCCESS)) {  // 0000
-                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(MESSAGE_SUCCESS)
-                        .build();
-            } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
-                smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                        .flag(mResult)
-                        .message(MESSAGE_SYSTEM_ERROR)
-                        .build();
-            }
-
-            if (smsGatewayResponseDto != null) log.debug("smsGatewayResponseDto:{}", smsGatewayResponseDto.toString());
+            LockSupport.parkNanos(10 * 1000000);
         }
+
+        log.debug("mResult:{}", mResult);
+
+        if (mResult.equals(CODE_SUCCESS)) {  // 0000
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(mResult)
+                    .message(MESSAGE_SUCCESS)
+                    .build();
+        } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
+            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
+                    .flag(mResult)
+                    .message(MESSAGE_SYSTEM_ERROR)
+                    .build();
+        }
+
+        /* 서버 연동 안될 때 이 곳에 성공 smsGatewayResponseDto 강제 리턴 */
 
         clearResult();
         mTimerMap.get(TIMER_TIME_OUT).cancel();
@@ -374,16 +354,9 @@ public class SmsGateway {
                 if (isBind) {
                     mTimerMap.get(TIMER_LINK_CHECK).cancel();
                     mTimerMap.put(TIMER_LINK_CHECK, new Timer());
-                    TimerTask timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            try {
-                                checkLink();
-                            } catch (IOException ignored) {
-                                mStatusLog.error("BIND_ACK Error");
-                            }
-                        }
-                    };
+
+                    TimerTask timerTask = new BindTimerTask(this);
+//                    timerTask.run();
 
                     mTimerMap.get(TIMER_LINK_CHECK).schedule(timerTask, LINK_CHECK_TERM, LINK_CHECK_TERM);
 
@@ -453,6 +426,59 @@ public class SmsGateway {
                     mStatusLog.error("readHeader Error");
                     reConnectGateway();
                 }
+            }
+        }
+    }
+
+    static public class BindTimerTask extends TimerTask {
+        private SmsGateway smsGateway;
+
+        public BindTimerTask(SmsGateway gw) {
+            smsGateway = gw;
+        }
+
+        @Override
+        public void run() {
+            try {
+                smsGateway.checkLink();
+            } catch (IOException e) {
+                log.error("BIND_ACK Error");
+                //smsGateway.mStatusLog.error("BIND_ACK Error");
+            }
+        }
+    }
+
+    static public class LinkTimerTask extends TimerTask {
+        private SmsGateway smsGateway;
+
+        public LinkTimerTask(SmsGateway gw) {
+            smsGateway = gw;
+        }
+
+        @Override
+        public void run() {
+            if (smsGateway.isLinked) {
+                smsGateway.isLinked = false;
+            } else {
+                log.info("Link Fail[" + smsGateway.mPort + "]");
+                smsGateway.isBind = false;
+                smsGateway.connectGateway();
+            }
+        }
+    }
+
+    static public class ErrorTimerTask extends TimerTask {
+        private SmsGateway smsGateway;
+
+        public ErrorTimerTask(SmsGateway gw) {
+            smsGateway = gw;
+        }
+
+        @Override
+        public void run() {
+            if (smsGateway.mResult.isEmpty()) {
+                log.debug("mResult.isEmpty() then 1500");
+                smsGateway.mResult = CODE_SYSTEM_ERROR;
             }
         }
     }
