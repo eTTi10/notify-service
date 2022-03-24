@@ -39,12 +39,11 @@ public class LatestController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="stb_mac", value="순번: 2<br>자리수: 20<br>설명: 맥주소", example="001c.627e.039c"),
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",     value="순번: 3<br>자리수: 11<br>전화번호 or 단말 맥 어드레스<br>ex) S001, S002" , example="01055805424"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="cat_id",  value="순번: 4<br>자리수: 5<br>설명: 카테고리 아이디", example="T3021")})
-    @GetMapping(value = "/comm/latest")
+    @GetMapping(value = "/smartux/comm/latest")
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
         GenericRecordsetResponseDto<LatestDto> result;
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
-        result = latestService.getLatestList(latestRequestDto);
-        return result;
+        return latestService.getLatestList(latestRequestDto);
     }
 
     @ApiOperation(value="최신회 알림 삭제", notes="최신회 알림을 삭제한다.")
@@ -53,7 +52,7 @@ public class LatestController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="stb_mac", value="순번: 2<br>자리수: 20<br>설명: 맥주소", example="001c.627e.039c"),
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",     value="순번: 3<br>자리수: 11<br>전화번호 or 단말 맥 어드레스<br>ex) S001, S002" , example="01055805424"),
             @ApiImplicitParam(paramType="query", dataType="string", required=true, name="cat_id",  value="순번: 4<br>자리수: 5<br>설명: 카테고리 아이디", example="T3021")})
-    @DeleteMapping("/comm/latest")
+    @DeleteMapping("/smartux/comm/latest")
     public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) {
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
         latestService.deleteLatest(latestRequestDto);
@@ -70,7 +69,7 @@ public class LatestController {
             @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="reg_id",      value="순번: 6<br>자리수: 64<br>설명: Push 할 Reg ID", example="500058151453"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="category_gb", value="순번: 7<br>자리수: 3<br>설명: 카테고리 구분 - 디폴트 I20", example="I20")
     })
-    @PostMapping("/comm/latest")
+    @PostMapping("/smartux/comm/latest")
     public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) {
         LatestRequestDto latestRequestDto = latestPostRequestMapper.toDto(vo);
         latestService.insertLatest(latestRequestDto);

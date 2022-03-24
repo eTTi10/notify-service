@@ -19,7 +19,7 @@ class NumberPatternTest {
     @Test
     void test() {
         boolean result = validator.isValid("1", null);
-        assertThat(result).isEqualTo(true);
+        assertThat(result).isTrue();
     }
 
 }

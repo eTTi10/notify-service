@@ -6,6 +6,7 @@ import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
+import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
@@ -16,9 +17,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+
+import static com.lguplus.fleta.service.smsagent.SmsAgentDomainService.CheckRetryType;
 
 
 /**
@@ -85,6 +89,20 @@ public class SmsAgentDomainService {
     private int callCount = 0;
     private int systemEr = 0;
     private int busyEr = 0;
+    private int retry;
+    private int busyRetry;
+    private int sleepTime;
+
+    /**
+     * @Value로 가져온 프로퍼티 초기화를 위해
+     */
+    @PostConstruct
+    public void init() {
+
+        retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
+        busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
+        sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
+    }
 
     /**
      * 문자발송(문자내용으로발송)
@@ -97,16 +115,24 @@ public class SmsAgentDomainService {
         String rCtn = sendSmsRequestDto.getRCtn();
         String message = sendSmsRequestDto.getMsg();
 
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+
         if (StringUtils.isEmpty(agentNoSendUse)) {
 
-            throw new SmsAgentEtcException(messageEtcException);
+            //9999
+            smsAgentCustomException.setCode("9999");
+            smsAgentCustomException.setMessage("기타 오류");
+            throw smsAgentCustomException;
         }
 
         if ("1".equals(agentNoSendUse)) {
 
             if (StringUtils.isEmpty(agentNoSendTime)) {
 
-                throw new ServerSettingInfoException("서버 설정 정보 오류");
+                //5200
+                smsAgentCustomException.setCode("5200");
+                smsAgentCustomException.setMessage("서버 설정 정보 오류");
+                throw smsAgentCustomException;
             }
             else {
 
@@ -120,7 +146,6 @@ public class SmsAgentDomainService {
 
                 int startTime = Integer.parseInt(noSendAry[0]);
                 int endTime = Integer.parseInt(noSendAry[1]);
-                log.debug("startTime: {} endTime: {}", startTime, endTime);
 
                 startCal.set(Calendar.HOUR_OF_DAY, startTime);
                 startCal.set(Calendar.MINUTE, 0);
@@ -129,7 +154,6 @@ public class SmsAgentDomainService {
 
                 if (startTime >= endTime) {
                     endCal.add(Calendar.DAY_OF_MONTH, 1);
-                    log.debug("startTime >= endTime YES");
                 }
 
                 endCal.set(Calendar.HOUR_OF_DAY, endTime);
@@ -139,7 +163,10 @@ public class SmsAgentDomainService {
 
                 if (cal.after(startCal) && cal.before(endCal)) {
 
-                    throw new NotSendTimeException("전송 가능한 시간이 아님");
+                    //1504
+                    smsAgentCustomException.setCode("1504");
+                    smsAgentCustomException.setMessage("전송 가능한 시간이 아님");
+                    throw smsAgentCustomException;
                 }
 
             }
@@ -155,6 +182,10 @@ public class SmsAgentDomainService {
      * @return SmsGatewayResponseDto
      */
     public SmsGatewayResponseDto sendSmsCode(SendSmsCodeRequestDto sendSMSCodeRequestDto) {
+
+        callCount = 0;
+        systemEr = 0;
+        busyEr = 0;
 
         //#########[LOG SET]#########
         log.debug ("[smsCode] sendSMSCodeRequestDto - {}", sendSMSCodeRequestDto.toString());
@@ -184,12 +215,8 @@ public class SmsAgentDomainService {
      */
     public SmsGatewayResponseDto retrySmsSend(SmsAgentRequestDto smsAgentRequestDto) {
 
-        int retry = Integer.parseInt(StringUtils.defaultIfEmpty(smsRetry, "0"));
-        int busyRetry = Integer.parseInt(StringUtils.defaultIfEmpty(smsBusyRetry, "5"));
-        int sleepTime = Integer.parseInt(StringUtils.defaultIfEmpty(smsSleepTime, "1000"));
-
         //0:재처리 안함 1:SMS서버 에러로 재처리 2:서버가 busy하여 재처리
-        int checkRetry = 0;
+        CheckRetryType checkRetry = CheckRetryType.NO_RETRY;
         String sendMessage = "";
 
         SmsGatewayResponseDto smsGatewayResponseDto;
@@ -209,38 +236,10 @@ public class SmsAgentDomainService {
                     .message(messageEtcException)
                     .build();
 
-        } catch (PhoneNumberErrorException e) {
+        } catch (SmsAgentCustomException e) {
 
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codePhoneNumberErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (MsgTypeErrorException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeMsgTypeErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SystemBusyException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeSystemBusyException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SystemErrorException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(codeSystemErrorException)
-                    .message(e.getMessage())
-                    .build();
-
-        } catch (SmsAgentEtcException e) {
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(messageEtcException)
+                    .flag(e.getCode())
                     .message(e.getMessage())
                     .build();
 
@@ -257,18 +256,18 @@ public class SmsAgentDomainService {
         //retry여부를 판단한다.
         if( smsGatewayResponseDto.getFlag().equals(codeSystemErrorException) || smsGatewayResponseDto.getFlag().equals(codeEtcException) ){
             // 시스템 장애이거나 기타오류 일 경우
-            checkRetry = 1;
+            checkRetry = CheckRetryType.RETRY_CAUSE_ERROR;
             systemEr++;
 
         }else if( smsGatewayResponseDto.getFlag().equals(codeSystemBusyException) ){
             // 메시지 처리 수용 한계 초과일 경우
-            checkRetry = 2;
+            checkRetry = CheckRetryType.RETRY_CAUSE_BUSY;
             busyEr++;
         }
 
         log.debug("[retrySmsSend]["+smsAgentRequestDto.getPtDay()+"]["+smsAgentRequestDto.getSmsCd()+"]["+smsAgentRequestDto.getSmsId()+"]["+sendMessage+"][callCount:"+callCount+"][systemEr:"+systemEr+"] [retry:"+retry+"] [busyEr:"+busyEr+"] [busyRetry:"+busyRetry+"] ["+smsGatewayResponseDto.getFlag()+"]["+smsGatewayResponseDto.getMessage()+"]");
 
-        if(checkRetry == 0 || systemEr > retry || busyEr > busyRetry){
+        if(checkRetry == CheckRetryType.NO_RETRY || systemEr > retry || busyEr > busyRetry){
             //재시도에 해당되지 않는 경우 or 재시도설정횟수보다 재시도한 횟수가 클 경우 or 메시지 처리 수용한계 설정횟수보다 처리 횟수가 클 경우
             return smsGatewayResponseDto;
         }else{
@@ -297,26 +296,24 @@ public class SmsAgentDomainService {
 
             //============ Start [setting API 호출 캐시등록] =============
 
-            //setting API 호출관련 파라메타 셋팅 <-- sos6871수정
+            //setting API 호출관련 파라메타 셋팅
             CallSettingRequestDto prm = CallSettingRequestDto.builder()
-                    //.saId(smsSettingRestSaId) <-- sos6871수정
-                    //.stbMac(smsSettingRestStbMac) <-- sos6871수정
-                    .code(smsCd) //<-- sos6871수정
+                    .code(smsCd)
                     .svcType(smsSettingRestSvcType)
                     .build();
 
-            //setting API 호출하여 메세지 등록 <-- sos6871수정
+            //setting API 호출하여 메세지 등록
             CallSettingResultMapDto callSettingApi = apiClient.smsCallSettingApi(prm);
 
-            //메세지목록 조회결과 취득 <-- sos6871수정
+            //메세지목록 조회결과 취득
             CallSettingDto settingApi =  callSettingApi.getResult().getData();
 
             //============ End [setting API 호CallSettingResultMapDto출 캐시등록] =============
 
-            if(settingApi != null) { //<-- sos6871수정
+            if(callSettingApi.getResult().getDataCount() > 0) {
 
-                log.debug("sms_cd(메시지내용) {} " , settingApi.getName()); //<-- sos6871
-                return settingApi.getName(); //<-- sos6871수정
+                log.debug("sms_cd(메시지내용) {} " , settingApi.getName());
+                return settingApi.getName();
             }
             else {
                 return "";
@@ -350,5 +347,10 @@ public class SmsAgentDomainService {
         return msg;
     }
 
+    enum CheckRetryType {
 
+        NO_RETRY,
+        RETRY_CAUSE_ERROR,
+        RETRY_CAUSE_BUSY
+    }
 }

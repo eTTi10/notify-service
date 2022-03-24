@@ -32,9 +32,8 @@ check:
 error:
   smsagent:
     etc:
-      flag: 9999
+      flag: '9999'
       message: '기타 오류'
-
 agent:
   "no":
     send:

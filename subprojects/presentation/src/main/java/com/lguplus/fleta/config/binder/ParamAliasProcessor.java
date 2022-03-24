@@ -52,6 +52,10 @@ public class ParamAliasProcessor extends ServletModelAttributeMethodProcessor {
 			final NativeWebRequest request) {
 
 		final Object target = binder.getTarget();
+		if (target == null) {
+			return;
+		}
+
 		final ParamAliasDataBinder newBinder = new ParamAliasDataBinder(target,
 				binder.getObjectName(), getParamAliases(target.getClass()));
 		newBinder.initDirectFieldAccess();

@@ -1,10 +1,5 @@
 package com.lguplus.fleta.exception;
 
-import org.springframework.validation.ObjectError;
-
-import java.util.List;
-import java.util.Optional;
-
 /**
  * Exception for error flag 5010.
  *
@@ -48,15 +43,4 @@ public class ResultNotFoundException extends RuntimeException {
 
         super(cause);
     }
-
-    public ResultNotFoundException(List<ObjectError> allErrors, String errorMsg) {
-        super(errorMsg);
-        Optional.ofNullable(allErrors).ifPresent(errors -> {
-
-//            log.error(errors.stream()
-//                    .map(e -> String.format("Error in object '%s': %s", e.getObjectName(), e.getDefaultMessage()))
-//                    .collect(Collectors.joining(" && ")));
-        });
-    }
-
 }

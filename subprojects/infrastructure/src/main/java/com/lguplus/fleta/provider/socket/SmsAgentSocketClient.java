@@ -17,8 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -30,8 +29,9 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
     private final SmsAgentProps smsAgentProps;
 
-    public static int mSendTerm;
-    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<SmsGateway>();
+    public int mSendTerm;
+  
+    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
 
     @PostConstruct
     public void initGateway() {
@@ -57,41 +57,46 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
-
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         Future<SmsGatewayResponseDto> asyncResult;
 
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
+
         if (!rCtn.startsWith("01") || 7 >= rCtn.length()) {
 
             //1502
-            throw new PhoneNumberErrorException("전화번호 형식 오류");
+            smsAgentCustomException.setCode("1502");
+            smsAgentCustomException.setMessage("전화번호 형식 오류");
+            throw smsAgentCustomException;
         }
 
         if (80 < message.getBytes("KSC5601").length) {
 
             //1501
-            throw new MsgTypeErrorException("메시지 형식 오류");
+            smsAgentCustomException.setCode("1501");
+            smsAgentCustomException.setMessage("메시지 형식 오류");
+            throw smsAgentCustomException;
         }
 
-        if (SmsAgentSocketClient.sGatewayQueue.size() > 0) {
+        if (!SmsAgentSocketClient.sGatewayQueue.isEmpty()) {
 
-            SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
+            SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
             long currentDate = System.currentTimeMillis();
 
-            log.debug(currentDate +" - "+ prevSendDate + " <= " + SmsAgentSocketClient.mSendTerm);
-            log.debug((currentDate - prevSendDate) + " <= " + SmsAgentSocketClient.mSendTerm);
-
-            if (currentDate - prevSendDate <= SmsAgentSocketClient.mSendTerm) {
+            if (currentDate - prevSendDate <= mSendTerm) {
 
                 SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
+              
                 //1503
-                throw new SystemBusyException("메시지 처리 수용 한계 초과");
+                smsAgentCustomException.setCode("1503");
+                smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
+                throw smsAgentCustomException;
             }
 
             try {
@@ -104,25 +109,30 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
                 } else {
 
-                    SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                    sGatewayQueue.offer(smsGateway);
                     //1500
-                    throw new SystemErrorException("시스템 장애");
+                    smsAgentCustomException.setCode("1500");
+                    smsAgentCustomException.setMessage("시스템 장애");
+                    throw smsAgentCustomException;
                 }
             } catch (IOException e) {
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                sGatewayQueue.offer(smsGateway);
                 //9999
-                throw new SmsAgentEtcException("기타 오류");
+                smsAgentCustomException.setCode("9999");
+                smsAgentCustomException.setMessage("기타 오류");
+                throw smsAgentCustomException;
             }
 
-            SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+            sGatewayQueue.offer(smsGateway);
 
         } else {
             //1503
-            throw new SystemBusyException("메시지 처리 수용 한계 초과");
+            smsAgentCustomException.setCode("1503");
+            smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
+            throw smsAgentCustomException;
         }
 
-        if (null != asyncResult) return asyncResult.get();
-        else throw new SmsAgentEtcException("기타 오류");
+        return asyncResult.get();
     }
 
     private int calculateTerm() {
