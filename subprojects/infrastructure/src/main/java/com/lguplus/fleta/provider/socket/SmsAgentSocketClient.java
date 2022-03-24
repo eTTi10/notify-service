@@ -17,8 +17,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 @Slf4j
 @Component
@@ -84,7 +83,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
         if (!SmsAgentSocketClient.sGatewayQueue.isEmpty()) {
 
-            SmsGateway smsGateway = SmsAgentSocketClient.sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
+            SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
             smsGateway.clearResult();
             long prevSendDate = smsGateway.getLastSendDate().getTime();
@@ -93,7 +92,7 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
             if (currentDate - prevSendDate <= mSendTerm) {
 
                 SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
-
+              
                 //1503
                 smsAgentCustomException.setCode("1503");
                 smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
@@ -110,21 +109,21 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
                 } else {
 
-                    SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                    sGatewayQueue.offer(smsGateway);
                     //1500
                     smsAgentCustomException.setCode("1500");
                     smsAgentCustomException.setMessage("시스템 장애");
                     throw smsAgentCustomException;
                 }
             } catch (IOException e) {
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+                sGatewayQueue.offer(smsGateway);
                 //9999
                 smsAgentCustomException.setCode("9999");
                 smsAgentCustomException.setMessage("기타 오류");
                 throw smsAgentCustomException;
             }
 
-            SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);
+            sGatewayQueue.offer(smsGateway);
 
         } else {
             //1503

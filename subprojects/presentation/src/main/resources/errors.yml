@@ -34,6 +34,7 @@ error:
             ParameterContainsNonAlphanumericException: "5014"
             ParameterLengthTooShortException: "5017"
             ParameterPhoneNumberErrorException: "1502"
+            ParameterDatabaseException: "8999"
             ExtRuntimeException: "9999"
             openapi:
               AccessKeyNotPermittedException: "1300"
