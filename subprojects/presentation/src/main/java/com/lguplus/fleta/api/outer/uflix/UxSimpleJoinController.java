@@ -1,7 +1,8 @@
 package com.lguplus.fleta.api.outer.uflix;
 
 import com.lguplus.fleta.data.dto.request.outer.UxSimpleJoinSmsRequestDto;
-import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
+import com.lguplus.fleta.data.dto.response.SendSmsResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.mapper.UxSimpleJoinSmsMapper;
 import com.lguplus.fleta.data.vo.UxSimpleJoinSmsRequestVo;
 import com.lguplus.fleta.service.uflix.UxSimpleJoinService;
@@ -15,8 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
-
 @Api(tags = "tvG 유플릭스 간편 가입 안내 SMS 요청")
 @Slf4j
 @RestController
@@ -26,6 +25,12 @@ public class UxSimpleJoinController {
     private final UxSimpleJoinService uxSimpleJoinService;
 
     private final UxSimpleJoinSmsMapper uxSimpleJoinSmsMapper;
+
+    private static final String CTN_EMPTY_CODE = "5000";
+    private static final String CTN_EMPTY_MSG = "필수 요청정보 누락 오류";
+    private static final String CTN_WRONG_CODE = "5001";
+    private static final String CTN_WRONG_MSG = "잘못된 요청정보 타입 전달";
+    private static final String SEPARATOR = "!^";
 
     /**
      * tvG 유플릭스 간편 가입 안내 SMS 요청
@@ -47,17 +52,27 @@ public class UxSimpleJoinController {
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="nw_info",      value="순번: 10<br>자리수: <br>설명: 통합 통계용 접속 네트워크 정보<br>ex) 3G, 4G, 5G, WIFI, WIRE, ETC", example="WIRE"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="dev_model",    value="순번: 11<br>자리수: <br>설명: 통합 통계용 단말 모델명<br>ex) LE-E250", example="S60UPI"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="carrier_type", value="순번: 12<br>자리수: <br>설명: 통합 통계용 통신사 구분<br>ex) L:LGU+, K:KT, S:SKT, E:etc", example="L")})
-    @GetMapping("/smartux/UXSimpleJoin")
-    public SuccessResponseDto requestUxSimpleJoinSms(@ApiIgnore @Valid UxSimpleJoinSmsRequestVo uxSimpleJoinSmsRequestVo) {
+    @GetMapping(value = "/smartux/gw/UXSimpleJoin")
+    public String requestUxSimpleJoinSms(@ApiIgnore UxSimpleJoinSmsRequestVo uxSimpleJoinSmsRequestVo) {
         log.debug("==================requestUxSimpleJoinSms BEGIN======================");
+
+        // as_is 일관성을 위해 수동으로 유효성을 체크한다.
+        String ctn = uxSimpleJoinSmsRequestVo.getCtn();
+
+        // 전화번호 누락
+        if (ctn == null) {
+            return SendSmsResponseDto.builder().flag(CTN_EMPTY_CODE).message(CTN_EMPTY_MSG).build().toPlainText();
+
+        // 잘못된 전화번호
+        } else if (!ctn.matches("^\\d+$")) {
+            return SendSmsResponseDto.builder().flag(CTN_WRONG_CODE).message(CTN_WRONG_MSG).build().toPlainText();
+        }
 
         UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto = uxSimpleJoinSmsMapper.toDto(uxSimpleJoinSmsRequestVo);
 
-        uxSimpleJoinService.requestUxSimpleJoinSms(uxSimpleJoinSmsRequestDto);
+        SmsGatewayResponseDto smsGatewayResponseDto = uxSimpleJoinService.requestUxSimpleJoinSms(uxSimpleJoinSmsRequestDto);
 
-        log.debug("==================requestUxSimpleJoinSms END======================");
-
-        return SuccessResponseDto.builder().build();
+        return smsGatewayResponseDto.getFlag() + SEPARATOR + smsGatewayResponseDto.getMessage();
     }
 
 }

@@ -2,6 +2,8 @@ package com.lguplus.fleta.service.uflix;
 
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.UxSimpleJoinSmsRequestDto;
+import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -26,7 +28,7 @@ public class UxSimpleJoinService {
      */
 
     @SneakyThrows
-    public void requestUxSimpleJoinSms(UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto) {
+    public SmsGatewayResponseDto requestUxSimpleJoinSms(UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto) {
         log.debug("smsMessage ::::::::::::::::::::: {}", smsMessage);
 
         SendSmsRequestDto sendSmsRequestDto = SendSmsRequestDto.builder()
@@ -35,7 +37,12 @@ public class UxSimpleJoinService {
                 .msg(smsMessage).build();
 
         // SMS 전송
-        smsAgentDomainService.sendSms(sendSmsRequestDto);
+        try {
+            return smsAgentDomainService.sendSms(sendSmsRequestDto);
+
+        } catch (SmsAgentCustomException ex) {
+            return SmsGatewayResponseDto.builder().flag(ex.getCode()).message(ex.getMessage()).build();
+        }
     }
 
 }
