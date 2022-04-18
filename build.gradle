@@ -5,6 +5,9 @@ plugins {
     id 'com.adarshr.test-logger' version '3.0.0'
 }
 
+bootJar { enabled = false }
+
+
 allprojects {
     repositories {
         mavenCentral()
@@ -168,8 +171,7 @@ project(':boot') {
         implementation project(':domain')
         implementation project(':infrastructure')
     }
-    bootJar { enabled = true }
-    jar { enabled = true }
+
 
     test {
         exclude '**/*'
