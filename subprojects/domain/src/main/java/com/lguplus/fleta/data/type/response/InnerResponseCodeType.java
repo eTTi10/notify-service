@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.EnumSet;
+import java.util.Locale;
 
 /**
  * HTTP API 표준 응답 코드
@@ -22,17 +23,15 @@ public enum InnerResponseCodeType {
     FORBIDDEN,
     NOT_FOUND,
     METHOD_NOT_ALLOWED,
-    INTERNAL_SERVER_ERROR;
+    INTERNAL_SERVER_ERROR,
+    HTTP_PUSH_SERVER_ERROR,
+    PUSH_SERVER_ERROR,
+    SMS_SERVER_ERROR,
+    MMS_SERVER_ERROR;
 
     private String code;
     private String message;
     private HttpStatus httpStatus;
-
-    private void setProperties(String code, String message, String httpStatus) {
-        this.code = code;
-        this.message = message;
-        this.httpStatus = HttpStatus.valueOf(Integer.parseInt(httpStatus));
-    }
 
     public String code() {
         return code;
@@ -54,10 +53,10 @@ public enum InnerResponseCodeType {
     @Slf4j
     @RequiredArgsConstructor
     @Component
-    private static class ResponseCodeTypePropertySetter {
+    static class ResponseCodeTypePropertySetter {
 
-        private final static String MESSAGE_CODE_PREFIX = "responseCodeType";
-        private final static String DEFAULT_HTTP_STATUS = "500";
+        private static final String MESSAGE_CODE_PREFIX = "responseCodeType";
+        private static final String DEFAULT_HTTP_STATUS = "500";
 
         private final MessageSource messageSource;
 
@@ -69,14 +68,20 @@ public enum InnerResponseCodeType {
                 String httpStatus = getMessage("httpStatus", type.name());
                 log.trace("===> MessageSource : {}.{} : {}, {}, {}",
                     MESSAGE_CODE_PREFIX, type.name(), code, message, httpStatus);
-                type.setProperties(code, message, httpStatus);
+                setProperties(type, code, message, httpStatus);
             }
+        }
+
+        private void setProperties(InnerResponseCodeType type, String code, String message, String httpStatus) {
+            type.code = code;
+            type.message = message;
+            type.httpStatus = HttpStatus.valueOf(Integer.parseInt(httpStatus));
         }
 
         private String getMessage(String propName, String name) {
             String msgCode = MESSAGE_CODE_PREFIX + "." + name + "." + propName;
             String defaultMsg = propName.equals("httpStatus") ? DEFAULT_HTTP_STATUS : name;
-            return messageSource.getMessage(msgCode, null, defaultMsg, null);
+            return messageSource.getMessage(msgCode, null, defaultMsg, Locale.getDefault());
         }
     }
 }

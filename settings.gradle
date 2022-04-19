@@ -1,11 +1,10 @@
-rootProject.name = 'msa-boilerplate'
+rootProject.name = 'notify-service'
 
 include 'boot'
 include 'presentation'
 include 'application'
 include 'domain'
 include 'infrastructure'
-include 'infrastructure-di'
 
 def subProjectDir = "subprojects";
 for (project in rootProject.children) {

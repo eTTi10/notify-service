@@ -1,0 +1,139 @@
+## Push 통신 관련 ##
+push-comm:
+
+  ####################Announcement(공통)########################
+  announce:
+    server:
+      header: application/json
+      timeout: '2000'
+      encoding: UTF-8
+      url: /pushhttp.uplus.co.kr/deviceInfo?service=upush
+      port: '9200'
+      ip: 106.103.208.88
+      protocol: http
+
+  ####################GCM/APNS 개별########################
+  push:
+    delay:
+      time: '1'
+      cacheName: pushDelayCnt
+      reqCnt: '100' # '100'
+    socket:
+      max: '100' # 20
+      close_secend: '170'
+      min: '20'
+      channelID: PsAgt # PsAgt
+      timeout: '2000' # 2000
+      channelNum: '0000'
+      initCnt: '20'
+    #Multi Push 호출 시 TPS 값 설정
+    multi:
+      socket:
+        tps: '400'
+    #Push 발송 제외 가번 지정 - 구분자 '|'
+    reject:
+      regList: M20110725000|U01080800201|U01080800202|U01080800203
+    #LGUPUSH 구버전에서 사용하는 push_app_id, noti_type
+    old:
+      lgupush:
+        notiType: POS
+        pushAppId: smartux0001
+    cp:
+      destination_ip: 222.231.13.85
+    call:
+      retryCnt: '2'
+    server:
+      ip: 106.103.255.225
+      port: '9600'
+  retry:
+    exclud:
+      codeList: 202|400|401|403|404|410|412|5102 #1112|1104|1105|1106|1107|1113|1108|1103
+
+  ####################LGPUSH 개별########################
+  lgpush:
+    #개별Push중 IPTVPush로 나가야 하는 대상 service_id
+    service_id: '20002'
+    server:
+      ip: 106.103.255.225
+      port: '8100'
+    socket:
+      max: '50'
+      min: '10'
+      close_secend: '90'
+      initCnt: '10'
+      channelNum: '0000'
+      timeout: '2000'
+      channelID: PsAgt
+    call:
+      retryCnt: '2'
+    cp:
+      destination_ip: 222.231.13.85
+
+#Push G/W에서 발급 받은 service_key 리스트
+########################
+#연동 타입
+#기본(미지정 시) : 연동정의서 1.2.1(service_key)
+#LGUPUSH_OLD : LGUPUSH 초기버전 연동
+########################
+push-service:push-service:
+  key1:
+    push:
+      service_id: '20014'
+      service_pwd: hdtv_GCM01
+  key2:
+    push:
+      service_id: '20015'
+      service_pwd: ucine_GCM1
+  key3:
+    push:
+      service_id: '20002'
+      service_pwd: smartux
+      linkage_type: LGUPUSH_OLD
+  key4:
+    push:
+      service_id: '20019'
+      service_pwd: 2ndtv_GCM1
+  key5:
+    push:
+      service_id: '30005'
+      service_pwd: hdtv_APNS1
+  key6:
+    push:
+      service_id: '30006'
+      service_pwd: uflix_APNS
+  key13:
+    push:
+      service_id: '20056'
+      service_pwd: liveU_GCM1
+  key14:
+    push:
+      service_id: '30034'
+      service_pwd: liveU_APNS1
+  key15:
+    push:
+      service_id: '20057'
+      service_pwd: Ugolf_GCM1
+  key16:
+    push:
+      service_id: '30035'
+      service_pwd: Ugolf_APNS1
+  key17:
+    push:
+      service_id: '20063'
+      service_pwd: uVR_GCM1
+  key18:
+    push:
+      service_id: '30125'
+      service_pwd: lguplus_game_live
+  key19:
+    push:
+      service_id: '21006'
+      service_pwd: UTVseamless_FCM1
+  key20:
+    push:
+      service_id: '21009'
+      service_pwd: baseball_FCM1
+  key21:
+    push:
+      service_id: '30043'
+      service_pwd: baseball_APNS1

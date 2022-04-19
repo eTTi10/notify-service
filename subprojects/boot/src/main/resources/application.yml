@@ -1,15 +1,31 @@
 ############################################
 ####  Spring
 spring:
+  application:
+    name: notify
+    name-abbr: NY
   profiles:
     active: local
-    #  - local
-#  main:
-#    allow-bean-definition-overriding: false
 
   messages:
     basename: messages/response
     encoding: utf-8
+
+  #### Data Source
+  datasource:
+    hikari:
+      connection-timeout: 5000
+      validation-timeout: 20000
+      leak-detection-threshold: 10000
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+
+  #### JPA
+  jpa:
+    open-in-view: false
 
 
 
@@ -20,3 +36,12 @@ logging:
     root: info
   pattern:
     level: "%5p [%X{traceId}]"
+
+
+
+############################################
+## Actuator
+management:
+  endpoint:
+    health:
+      enabled: true

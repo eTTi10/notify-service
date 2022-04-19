@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.adarshr.test-logger' version '3.0.0'
+    id "org.sonarqube" version "3.3"
 }
 
 bootJar { enabled = false }
@@ -13,6 +14,21 @@ allprojects {
         mavenCentral()
     }
 }
+
+sonarqube{
+    properties {
+        property 'sonar.host.url', 'http://a3b3246d677004387a382e258f515715-86a3a782fd055d12.elb.ap-northeast-2.amazonaws.com'
+        property 'sonar.login','411e89fdfa7f856077b41c03ff6bfcefcff1239a'
+        property 'sonar.projectKey','notify'
+        property 'sonar.sources', 'src'
+        property 'sonar.language', 'java'
+        property 'sonar.coverage.exclusions', 'subprojects/boot/**, **/data/**, **/config/**, **/filter/**, **/interceptor/**, **/advice/**, **/exception/**'
+        property 'sonar.exclusions', '**/test/**,  **/*Doc*.java, **/resources/**'
+
+    }
+}
+
+bootJar { enabled = false }
 
 subprojects {
     apply plugin: 'java'
@@ -32,16 +48,34 @@ subprojects {
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
-        implementation 'org.apache.commons:commons-lang3:3.11'
+        implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.5'
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+        implementation "io.springfox:springfox-swagger2:2.9.2"
+        implementation "io.springfox:springfox-swagger-ui:2.9.2"
+        implementation 'org.apache.commons:commons-lang3:3.11'
 
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
-        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.6'
-
+        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        //MapStruct
+        compileOnly 'org.mapstruct:mapstruct:1.4.2.Final'
+        annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
+
+        //####################### MMS 모듈관련 #########################
+        // https://mvnrepository.com/artifact/org.jdom/jdom
+        // 관련) import org.jdom2.*, Format
+        implementation group: 'org.jdom', name: 'jdom', version: '2.0.2'
+
+        // https://mvnrepository.com/artifact/org.jvnet.mimepull/mimepull
+        // 관련) MIMEConfig, import org.jvnet.mimepull.*
+        implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
+
     }
 
     jacoco {
@@ -57,7 +91,7 @@ subprojects {
         reports {
             // 리포트 활성화
             html.enabled true
-            xml.enabled false
+            xml.enabled true
             csv.enabled false
 
             // 리포트 저장 경로 설정
@@ -112,6 +146,8 @@ subprojects {
                         'com.lguplus.fleta.exception.*',
                         'com.lguplus.fleta.filter.*',
                         'com.lguplus.fleta.interceptor.*',
+                        'com.lguplus.fleta.exhandler.*',
+                        'com.lguplus.fleta.validation.*',
                 ]
             }
         }
@@ -172,7 +208,6 @@ project(':boot') {
         implementation project(':infrastructure')
     }
 
-
     test {
         exclude '**/*'
         useJUnitPlatform()
@@ -183,19 +218,15 @@ project(':presentation') {
     dependencies {
         implementation project(':application')
         implementation project(':domain')
-        //implementation project(':infrastructure-di')
     }
     bootJar { enabled = false }
-    jar { enabled = true }
 }
 
 project(':application') {
     dependencies {
         implementation project(':domain')
-        //implementation project(':infrastructure-di')
     }
     bootJar { enabled = false }
-    jar { enabled = true }
 }
 
 project(':domain') {
@@ -203,23 +234,14 @@ project(':domain') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
-    jar { enabled = true }
 }
 
 project(':infrastructure') {
     dependencies {
         implementation project(':domain')
-        implementation project(':infrastructure-di')
+        testImplementation project(':boot')
     }
     bootJar { enabled = false }
-    jar { enabled = true }
-}
-
-project(':infrastructure-di') {
-    dependencies {
-    }
-    bootJar { enabled = false }
-    jar { enabled = true }
 }
 
 task printVersion {

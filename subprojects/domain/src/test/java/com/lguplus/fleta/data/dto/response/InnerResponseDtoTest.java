@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.BootConfig;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseErrorDto;
+import com.lguplus.fleta.data.dto.response.inner.InnerResponseResultDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
 import lombok.AccessLevel;
@@ -52,12 +55,12 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).doesNotContain("result");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .doesNotContain("result")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -77,13 +80,13 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).contains("result");
-        assertThat(json).contains("SINGLE");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .contains("result")
+                .contains("SINGLE")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -103,13 +106,13 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("code");
-        assertThat(json).contains("0204");
-        assertThat(json).contains("message");
-        assertThat(json).contains("조회 데이터 없음");
-        assertThat(json).contains("result");
-        assertThat(json).contains("LIST");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).contains("code")
+                .contains("0204")
+                .contains("message")
+                .contains("조회 데이터 없음")
+                .contains("result")
+                .contains("LIST")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -128,19 +131,18 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("OK");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("200");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).doesNotContain("result");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("OK")
+                .contains("statusCodeValue")
+                .contains("200")
+                .contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .doesNotContain("result")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -160,20 +162,19 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("OK");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("200");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).contains("result");
-        assertThat(json).contains("SINGLE");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("OK")
+                .contains("statusCodeValue")
+                .contains("200")
+                .contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .contains("result")
+                .contains("SINGLE")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -196,22 +197,20 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).isNotNull();
-
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("OK");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("200");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).contains("result");
-        assertThat(json).contains("LIST");
-        assertThat(json).doesNotContain("errors");
+        assertThat(json).isNotNull()
+                .contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("OK")
+                .contains("statusCodeValue")
+                .contains("200")
+                .contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .contains("result")
+                .contains("LIST")
+                .doesNotContain("errors");
     }
 
     @Test
@@ -261,19 +260,18 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("BAD_REQUEST");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("400");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0400");
-        assertThat(json).contains("message");
-        assertThat(json).contains("요청 파라미터 오류");
-        assertThat(json).doesNotContain("result");
-        assertThat(json).contains("errors");
+        assertThat(json).contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("BAD_REQUEST")
+                .contains("statusCodeValue")
+                .contains("400")
+                .contains("code")
+                .contains("0400")
+                .contains("message")
+                .contains("요청 파라미터 오류")
+                .doesNotContain("result")
+                .contains("errors");
 
         assertThat(hasResponseError).isTrue();
     }
@@ -325,19 +323,18 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("INTERNAL_SERVER_ERROR");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("500");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0500");
-        assertThat(json).contains("message");
-        assertThat(json).contains("내부 서버 오류");
-        assertThat(json).doesNotContain("result");
-        assertThat(json).contains("errors");
+        assertThat(json).contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("INTERNAL_SERVER_ERROR")
+                .contains("statusCodeValue")
+                .contains("500")
+                .contains("code")
+                .contains("0500")
+                .contains("message")
+                .contains("내부 서버 오류")
+                .doesNotContain("result")
+                .contains("errors");
     }
 
     @Test
@@ -365,25 +362,23 @@ class InnerResponseDtoTest {
 
         //then
         System.out.println("===> json = " + json);
-        assertThat(json).contains("headers");
-        assertThat(json).contains("body");
-        assertThat(json).contains("statusCode");
-        assertThat(json).contains("OK");
-        assertThat(json).contains("statusCodeValue");
-        assertThat(json).contains("200");
-
-        assertThat(json).contains("code");
-        assertThat(json).contains("0000");
-        assertThat(json).contains("message");
-        assertThat(json).contains("정상");
-        assertThat(json).contains("result");
-        assertThat(json).contains("LIST");
-        assertThat(json).doesNotContain("errors");
-
-        assertThat(json).contains("dataPage");
-        assertThat(json).contains("page");
-        assertThat(json).contains("rowSize");
-        assertThat(json).contains("pageCount");
+        assertThat(json).contains("headers")
+                .contains("body")
+                .contains("statusCode")
+                .contains("OK")
+                .contains("statusCodeValue")
+                .contains("200")
+                .contains("code")
+                .contains("0000")
+                .contains("message")
+                .contains("정상")
+                .contains("result")
+                .contains("LIST")
+                .doesNotContain("errors")
+                .contains("dataPage")
+                .contains("page")
+                .contains("rowSize")
+                .contains("pageCount");
     }
 
     @Test

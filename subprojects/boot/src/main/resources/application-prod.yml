@@ -13,10 +13,19 @@ server:
 ####  Spring
 spring:
   datasource:
-    hikari:
-      jdbc-url: jdbc:postgresql://<<postgres.msa-template.write.host>>:<<postgres.msa-template.write.port>>/<<postgres.msa-template.write.db.mylgdb>>
-      username: <<postgres.msa-template.write.username>>
-      password: <<postgres.msa-template.write.password>>
+    writer:
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.read.username>>
+      password: <<postgres.notify.read.password>>
+      minimum-idle: 25
+      maximum-pool-size: 25
+    reader:
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=preferSecondary&loadBalanceHosts=true&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.read.username>>
+      password: <<postgres.notify.read.password>>
+      minimum-idle: 25
+      maximum-pool-size: 25
+
   jpa:
     database: postgresql
     hibernate:
@@ -34,14 +43,16 @@ spring:
             non_contextual_creation: true
     show-sql: false
 
-  ## Cache - Redis
+  #### Cache - Redis
   cache:
     type: redis
   redis:
-    database: 0
-    host: <<redis.host>>
-    port: <<redis.port>>
-    password:
+    cluster:
+      nodes: [<<redis.cluster.nodes>>]
+
+  #### Message Stream - Kafka
+  kafka:
+    bootstrap-servers: <<kafka.dbsync.plaintext.bootstrapservers>>
 
 
 
@@ -58,7 +69,37 @@ logging:
 ############################################
 #### Other Domain Application Service
 service:
-  vodlookup:
-    url: http://vodlookup:8080
   programming:
     url: http://programming:8080
+  searchword:
+    url: http://searchword:8080
+  settings:
+    url: http://settings:8080
+  vodlookup:
+    url: http://vodlookup:8080
+  channel:
+    url: http://channel:8080
+  personalization:
+    url: http://personalization:8080
+  subscriber:
+    url: http://subscriber:8080
+
+
+
+############################################
+#### Feign Client 설정
+feign:
+  client:
+    config:
+      default:    # 전역 이름
+        connectTimeout: 1000
+        readTimeout: 1000
+      pushannounce: # Push Announce
+        connectTimeout: 2000
+        #readTimeout: 2000
+        loggerLevel: full # NONE, BASIC, HEADERS, FULL
+        #defaultRequestHeaders:
+        #  header1: header1Value
+        requestInterceptors:
+          - com.lguplus.fleta.config.PushFeignInterceptor
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder
