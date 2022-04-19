@@ -1,11 +1,11 @@
 ############################################
 ####  Spring
 spring:
+  application:
+    name: notify
+    name-abbr: NY
   profiles:
     active: local
-    #  - local
-#  main:
-#    allow-bean-definition-overriding: false
 
   messages:
     basename: messages/response
@@ -36,3 +36,12 @@ logging:
     root: info
   pattern:
     level: "%5p [%X{traceId}]"
+
+
+
+############################################
+## Actuator
+management:
+  endpoint:
+    health:
+      enabled: true

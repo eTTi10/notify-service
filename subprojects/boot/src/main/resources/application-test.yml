@@ -14,15 +14,15 @@ server:
 spring:
   datasource:
     writer:
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      username: postgres
-      password: devadmin!
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.read.username>>
+      password: <<postgres.notify.read.password>>
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      username: postgres
-      password: devadmin!
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=preferSecondary&loadBalanceHosts=true&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.read.username>>
+      password: <<postgres.notify.read.password>>
       minimum-idle: 5
       maximum-pool-size: 5
 
@@ -45,14 +45,11 @@ spring:
 
   #### Cache - Redis
   cache:
-    type: redis
-  redis:
-    cluster:
-      nodes: ["redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379"]
+    type: none
 
   #### Message Stream - Kafka
   kafka:
-    bootstrap-servers: b-1.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-2.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-3.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-5.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092
+    bootstrap-servers: <<kafka.dbsync.plaintext.bootstrapservers>>
 
 
 
@@ -63,8 +60,6 @@ logging:
     com.lguplus.fleta: DEBUG
     org.hibernate:
       SQL: DEBUG
-#      type: DEBUG
-#      type.descriptor.sql: DEBUG
 
 
 
