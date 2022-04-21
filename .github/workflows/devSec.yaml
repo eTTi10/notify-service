@@ -25,7 +25,7 @@ jobs:
           LIST=$(cat ${{ env.PROFILE_PATH }} | grep -o '<<.[^>]*>>' || true)
           for KEY in $LIST
           do
-            echo [INFO] changing: $KEY
+            echo "[INFO] changing: $KEY"
             
             KEY=${KEY#<<}
             KEY=${KEY%>>}
@@ -34,7 +34,7 @@ jobs:
                 -e "s/<<$KEY>>/$VALUE/g" \
                 ${{ env.PROFILE_PATH }}
             
-            echo [INFO] changed: <<$KEY>>
+            echo "[INFO] changed: <<$KEY>>"
           done
           
       - name: Run test & JaCoCo
