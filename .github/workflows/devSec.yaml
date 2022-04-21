@@ -1,0 +1,42 @@
+name: devSec
+
+on:
+  pull_request:
+    branches: [ develop ]
+    
+env:
+  PROFILE_PATH: subprojects/boot/src/main/resources/application-test.yml
+    
+jobs:
+  JaCoCo:
+    runs-on: test-runner
+    steps:
+      - run: sudo rm -rf *
+
+      - uses: actions/checkout@v3
+
+      - name: aws secrets manager
+        run: |        
+          SECRET=$(aws secretsmanager get-secret-value \
+                      --secret-id dev \
+                      --output json \
+                      | jq -r '.SecretString')
+          
+          LIST=$(cat ${{ env.PROFILE_PATH }} | grep -o '<<.[^>]*>>' || true)
+          for KEY in $LIST
+          do
+            echo [INFO] changing: $KEY
+            
+            KEY=${KEY#<<}
+            KEY=${KEY%>>}
+            VALUE=$(echo $SECRET | jq -r ".$KEY")
+            sed -i \
+                -e "s/<<$KEY>>/$VALUE/g" \
+                ${{ env.PROFILE_PATH }}
+            
+            echo [INFO] changed: <<$KEY>>
+          done
+          
+      - name: Run test & JaCoCo
+        run: | 
+          ./gradlew test jacocoTestReport jacocoTestCoverageVerification -Dspring.profiles.active=test
