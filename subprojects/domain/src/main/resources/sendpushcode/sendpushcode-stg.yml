@@ -1,0 +1,115 @@
+#FCM POS추가발송대상
+fcm:
+  extra:
+    send: Y
+    target: '21006'
+    serviceid: '20002'
+    appid: smartuxapp
+pushinfo:
+  sendcodes:
+    ######U+tv -> 모바일tv 페어링 요청 푸시######
+    - sendcode: "P001"
+      gcm.payload.body: '"result":{"noti_type":"PA_TM", "address":"[+address]", "unumber":"[+unumber]","req_date":"[+req_date]","ctn":"[+ctn]","trans_id":"[+trans_id]"}'
+      apns.payload.body: '"body":"U+tv에서 연결을 요청했습니다"'
+      apns.payload.item: 'cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]'
+      param.list: 'address|unumber|req_date|ctn|trans_id'
+      pos.send: 'Y'
+    ######U+tv -> 모바일tv VOD 이어보기 정보 알림######
+    - sendcode: "P002"
+      gcm.payload.body: '"result":{"noti_type":"MFUP", "cont_type":"VOD", "album_id":"[+album_id]", "link_flag":"[+link_flag]", "name":"[+name]", "reqtime":"[+reqtime]", "playtime":"[+playtime]", "intent":"[+intent_url]"}'
+      apns.payload.body: '"body":"U+tv에서 보던 영상을 휴대폰으로 이어보세요"'
+      apns.payload.item: 'cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]'
+      param.list: 'album_id|link_flag|name|reqtime|playtime|intent_url'
+      pos.send: 'N'
+    ######모바일앱으로 실시간 이어보기######
+    - sendcode: "P003"
+      gcm.payload.body: '"result":{"noti_type":"MFUP", "cont_type":"REAL", "svc_id":"[+svc_id]", "name":"[+name]", "intent":"[+intent_url]"}'
+      apns.payload.body: '"body":"U+tv에서 보던 실시간 채널을 휴대폰으로 이어보세요"'
+      apns.payload.item: 'cm!^MFUP|REAL|[+svc_id]|[+name]|[+intent_url]'
+      param.list: 'svc_id|name|intent_url'
+      pos.send: ''
+    ######요청 앱으로 페어링 연결 완료 푸시 발송 ######
+    - sendcode: "C001"
+      gcm.payload.body: '"result":{"noti_type":"PA_COMPL","service_type":"[+service_type]"}'
+      apns.payload.body: '"body":"U+tv와 연결했습니다"'
+      apns.payload.item: 'cm!^PA_COMPL|[+service_type]'
+      param.list: 'service_type|'
+      pos.send: ''
+    ######요청 앱으로 페어링 연결 해제 푸시 발송  ######
+    - sendcode: "C002"
+      gcm.payload.body: '"result":{"noti_type":"PA_CLEAR","service_type":"[+service_type]"}'
+      apns.payload.body: '"body":"U+tv와 연결을 해제했습니다"'
+      apns.payload.item: 'cm!^PA_CLEAR|[+service_type]'
+      param.list: 'service_type|'
+      pos.send: ''
+    ######U+tv로 페어링 알림(FCM)######
+    - sendcode: "C003"
+      gcm.payload.body: '"result":{"noti_type":"PA_CANCEL","service_type":"[+service_type]"}'
+      apns.payload.body: ''
+      apns.payload.item: ''
+      param.list: 'service_type|'
+      pos.send: 'N'
+    ######U+tv로 페어링 알림(FCM)######
+    - sendcode: "T001"
+      gcm.payload.body: '"result":{"noti_type":"PAIR","service_type":"[+service_type]","ctn":"[+ctn]","pin":"[+pin]"}'
+      apns.payload.body: ''
+      apns.payload.item: ''
+      param.list: 'service_type|ctn|pin'
+      pos.send: ''
+    ######U+tv로 VOD 이어보기 정보 알림(FCM)######
+    - sendcode: "T002"
+      gcm.payload.body: '"result":{"noti_type":"FUP","cont_type":"VOD","album_id":"[+album_id]","album_series":"[+album_series]","cate_series":"[+cate_series]","name":"[+name]","duration":"[+duration]","playtime":"[+playtime]","service_type":"[+service_type]","ctn":"[+ctn]","data":{"LINK_FLAG":"[+link_flag]", "intent_url":"[+intent_url]"}}'
+      apns.payload.body: ''
+      apns.payload.item: ''
+      param.list: 'album_id|album_series|cate_series|name|duration|playtime|service_type|ctn|intent_url|link_flag'
+      pos.send: ''
+    ######U+tv로 VOD 이어보기 정보 알림(FCM)######
+    - sendcode: "T003"
+      gcm.payload.body: '"result":{"noti_type":"FUP","cont_type":"REAL","svc_id":"[+svc_id]","name":"[+name]","service_type":"[+service_type]","ctn":"[+ctn]","data":{"LINK_FLAG":"[+link_flag]", "intent_url":"[+intent_url]"}}'
+      apns.payload.body: ''
+      apns.payload.item: ''
+      param.list: 'svc_id|name|service_type|ctn|intent_url|link_flag'
+      pos.send: ''
+
+  serviceTargets:
+    #모바일tv(디폴트)
+    - serviceTarget: default
+      gcm.appid:  hdtv_GCM01
+      gcm.serviceid: 20014
+      apns.appid: hdtv_APNS1
+      apns.serviceid: 30005
+    #프로야구
+    - serviceTarget: B
+      gcm.appid:  lguplus_base_fcm
+      gcm.serviceid: 30133
+      apns.appid: lguplus_base_apns
+      apns.serviceid: 30134
+    #아이들나라
+    - serviceTarget: K
+      gcm.appid:  lguplus_mobilekids_fcm
+      gcm.serviceid: 30135
+      apns.appid: lguplus_mobilekids_apns
+      apns.serviceid: 30136
+    #골프
+    - serviceTarget: O
+      gcm.appid:  ugolf_GCM
+      gcm.serviceid: 30105
+      apns.appid: ugolf_APNS
+      apns.serviceid: 30106
+    #아이돌Live
+    - serviceTarget: C
+      gcm.appid:  musicshow_gcm
+      gcm.serviceid: 30104
+      apns.appid: musicshow_apns
+      apns.serviceid: 30107
+      pos.appid: smartuxapp
+      pos.serviceid: 30015
+    #FCM푸시
+    - serviceTarget: TV
+      gcm.appid:  smart_uxapp_fcm
+      gcm.serviceid: 30128
+      apns.appid: smart_uxapp_fcm
+      apns.serviceid: 30128
+
+
+
