@@ -17,31 +17,10 @@ spring:
       jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
       username: <<postgres.notify.read.username>>
       password: <<postgres.notify.read.password>>
-      minimum-idle: 25
-      maximum-pool-size: 25
     reader:
       jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=preferSecondary&loadBalanceHosts=true&ApplicationName=${spring.application.name}
       username: <<postgres.notify.read.username>>
       password: <<postgres.notify.read.password>>
-      minimum-idle: 25
-      maximum-pool-size: 25
-
-  jpa:
-    database: postgresql
-    hibernate:
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: true
 
   #### Cache - Redis
   cache:
@@ -84,20 +63,13 @@ service:
   subscriber:
     url: http://subscriber:8080
 
-
-
 ############################################
 #### Feign Client 설정
 feign:
   client:
     config:
-      default:    # 전역 이름
-        connectTimeout: 1000
-        readTimeout: 1000
       pushannounce: # Push Announce
-        connectTimeout: 2000
-        #readTimeout: 2000
-        loggerLevel: full # NONE, BASIC, HEADERS, FULL
+        loggerLevel: BASIC # NONE, BASIC, HEADERS, FULL
         #defaultRequestHeaders:
         #  header1: header1Value
         requestInterceptors:
