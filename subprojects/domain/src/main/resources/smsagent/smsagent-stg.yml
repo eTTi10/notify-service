@@ -29,6 +29,12 @@ sms:
 check:
   https: '0'
 
+error:
+  smsagent:
+    etc:
+      flag: '9999'
+      message: '기타 오류'
+
 # agent.no.send.use 전송 예외 사용 여부 (1 : 사용 / 0 : 미사용)
 # agent.no.sendtime 전송 예외 시간(시작시간|종료시간)
 agent:
