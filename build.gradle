@@ -37,7 +37,7 @@ subprojects {
     apply plugin: 'jacoco'
 
     group = 'com.lguplus.fleta'
-    version = '0.1.0'
+    version = '1.1.0'
     sourceCompatibility = '11'
 
     configurations {
