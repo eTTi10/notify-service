@@ -26,23 +26,6 @@ spring:
       minimum-idle: 5
       maximum-pool-size: 5
 
-  jpa:
-    database: postgresql
-    hibernate:
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: true
-
   #### Cache - Redis
   cache:
     type: none
@@ -81,20 +64,13 @@ service:
   subscriber:
     url: http://subscriber.fleta.com
 
-
-
 ############################################
 #### Feign Client 설정
 feign:
   client:
     config:
-      default:    # 전역 이름
-        connectTimeout: 1000
-        readTimeout: 1000
       pushannounce: # Push Announce
-        connectTimeout: 2000
-        #readTimeout: 2000
-        loggerLevel: full # NONE, BASIC, HEADERS, FULL
+        loggerLevel: NONE # NONE, BASIC, HEADERS, FULL
         #defaultRequestHeaders:
         #  header1: header1Value
         requestInterceptors:
