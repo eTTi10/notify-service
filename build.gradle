@@ -173,7 +173,7 @@ subprojects {
             systemProperty "spring.profiles.active", activeProfile
         }
         useJUnitPlatform()
-        ignoreFailures = true
+        ignoreFailures = false
         finalizedBy 'jacocoTestReport'
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
