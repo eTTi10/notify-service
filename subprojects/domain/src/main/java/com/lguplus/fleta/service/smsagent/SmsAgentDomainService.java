@@ -33,13 +33,13 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 public class SmsAgentDomainService {
 
-    @Value("${agent.no.send.use}")
+    @Value("${sms.agent.ignore.use}")
     private boolean agentNoSendUse;
 
-    @Value("${agent.no.sendtime.from}")
+    @Value("${sms.agent.ignore.time.from}")
     private int agentNoSendTimeFrom;
 
-    @Value("${agent.no.sendtime.to}")
+    @Value("${sms.agent.ignore.time.to}")
     private int agentNoSendTimeTo;
 
     @Value("${sms.send.retry}")
@@ -51,7 +51,7 @@ public class SmsAgentDomainService {
     @Value("${sms.sender.retry.sleep.ms}")
     private long smsSleepTime;
 
-    @Value("${sms.sender.no}")
+    @Value("${sms.sender.number}")
     private String smsSenderNo;
 
     @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemBusyException}")
@@ -60,10 +60,10 @@ public class SmsAgentDomainService {
     @Value("${error.flag.com.lguplus.fleta.exception.smsagent.SystemErrorException}")
     private String codeSystemErrorException;
 
-    @Value("${error.smsagent.etc.flag}")
+    @Value("${sms.error.etc.flag}")
     private String codeEtcException;
 
-    @Value("${error.smsagent.etc.message}")
+    @Value("${sms.error.etc.message}")
     private String messageEtcException;
 
     private final SettingDomainClient apiClient;

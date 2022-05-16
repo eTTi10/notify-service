@@ -12,7 +12,7 @@ import java.util.Optional;
 @Component
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "agent")
+@ConfigurationProperties(prefix = "sms.agent")
 public class SmsAgentProps {
 
     /** smsagent agent servers */

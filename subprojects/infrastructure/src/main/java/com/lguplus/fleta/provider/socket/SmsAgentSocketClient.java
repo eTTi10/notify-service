@@ -24,7 +24,7 @@ import java.util.concurrent.*;
 @RequiredArgsConstructor
 public class SmsAgentSocketClient implements SmsAgentClient {
 
-    @Value("${agent.tps}")
+    @Value("${sms.agent.tps}")
     private int agentTps;
 
     private final SmsAgentProps smsAgentProps;
