@@ -1,13 +1,6 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,10 +8,20 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 @Slf4j
 public class SmsGateway {
@@ -34,7 +37,7 @@ public class SmsGateway {
     private static final int DELIVER_ACK = 3;
     private static final int REPORT = 4;
     private static final int REPORT_ACK = 5;
-    private static final int LINK_SEND  = 6;
+    private static final int LINK_SEND = 6;
     private static final int LINK_RECV = 7;
 
     private static final int TIMER_RECONNECT = 0;
@@ -42,7 +45,7 @@ public class SmsGateway {
     private static final int TIMER_LINK_RESULT = 2;
     private static final int TIMER_TIME_OUT = 3;
 
-    private static final int TIME_OUT = 5000;				        // 타임아웃(5초)
+    private static final int TIME_OUT = 5000;                        // 타임아웃(5초)
     private static final int RECONNECT_TERM = Integer.sum(1000 * 60 * 3, 0);        // 재접속 시간(3분)
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
     private static final int LINK_CHECK_TERM = Integer.sum(1000 * 50, 0);           // 링크 체크 주기(50초)
@@ -77,10 +80,8 @@ public class SmsGateway {
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
 
-        String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
         mFileLog = LogFactory.getLog("SmsGateway");
         mStatusLog = LogFactory.getLog("SmsStatus");
-        mStatusLog.info("SmsGateway" + index);
 
         mIpAddress = ip;
         mPort = Integer.parseInt(port);
@@ -146,7 +147,7 @@ public class SmsGateway {
             bindGateway();
         } catch (IOException e) {
             mStatusLog.error("connectGateway Error");
-            //reConnectGateway(); <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
+            reConnectGateway(); // <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
         }
 
     }
@@ -312,14 +313,14 @@ public class SmsGateway {
 
         if (mResult.equals(CODE_SUCCESS)) {  // 0000
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(mResult)
-                    .message(MESSAGE_SUCCESS)
-                    .build();
+                .flag(mResult)
+                .message(MESSAGE_SUCCESS)
+                .build();
         } else if (mResult.equals(CODE_SYSTEM_ERROR)) {   // 1500
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                    .flag(mResult)
-                    .message(MESSAGE_SYSTEM_ERROR)
-                    .build();
+                .flag(mResult)
+                .message(MESSAGE_SYSTEM_ERROR)
+                .build();
         }
 
         /* 서버 연동 안될 때 이 곳에 성공 smsGatewayResponseDto 강제 리턴 */
@@ -345,7 +346,7 @@ public class SmsGateway {
 
                 result = readBufferToInt(4);
 
-                mStatusLog.info("readHeader() BIND_ACK result:"+result);
+                mStatusLog.info("readHeader() BIND_ACK result:" + result);
 
                 isBind = 0 == result;
 
@@ -366,7 +367,7 @@ public class SmsGateway {
             case DELIVER_ACK:
                 result = readBufferToInt(4);
 
-                mStatusLog.info("readHeader() DELIVER_ACK result:"+result);
+                mStatusLog.info("readHeader() DELIVER_ACK result:" + result);
 
                 switch (result) {
                     case 0:
@@ -412,22 +413,8 @@ public class SmsGateway {
 
     }
 
-    //게이트웨이에 접속성공 할 때까지 게이트웨이 접속을 무제한으로 시도함
-    private class SmsGatewayTask implements Runnable {
-        @Override
-        public void run() {
-            while (isBind) {
-                try {
-                    readHeader();
-                } catch (IOException ignored) {
-                    mStatusLog.error("readHeader Error");
-                    reConnectGateway();
-                }
-            }
-        }
-    }
-
     public static class BindTimerTask extends TimerTask {
+
         private SmsGateway smsGateway;
 
         public BindTimerTask(SmsGateway gw) {
@@ -445,6 +432,7 @@ public class SmsGateway {
     }
 
     public static class LinkTimerTask extends TimerTask {
+
         private SmsGateway smsGateway;
 
         public LinkTimerTask(SmsGateway gw) {
@@ -464,6 +452,7 @@ public class SmsGateway {
     }
 
     public static class ErrorTimerTask extends TimerTask {
+
         private SmsGateway smsGateway;
 
         public ErrorTimerTask(SmsGateway gw) {
@@ -475,6 +464,22 @@ public class SmsGateway {
             if (smsGateway.mResult.isEmpty()) {
                 log.debug("mResult.isEmpty() then 1500");
                 smsGateway.mResult = CODE_SYSTEM_ERROR;
+            }
+        }
+    }
+
+    //게이트웨이에 접속성공 할 때까지 게이트웨이 접속을 무제한으로 시도함
+    private class SmsGatewayTask implements Runnable {
+
+        @Override
+        public void run() {
+            while (isBind) {
+                try {
+                    readHeader();
+                } catch (IOException ignored) {
+                    mStatusLog.error("readHeader Error");
+                    reConnectGateway();
+                }
             }
         }
     }

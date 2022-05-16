@@ -1,133 +1,350 @@
 ## Push 통신 관련 ##
-push-comm:
+push:
+  openapi:
+    common:
+      server:
+        contenttype: application/json; charset=utf-8
+        accept: application/json
+        encoding: utf-8
 
-  #################### Announcement(공통) ########################
-  announce:
-    server:
+    # SINGLEPUSH PUSH SERVER SETTING (PORT1:HTTP, PORT2:HTTPS)
+    single:
+      server:
+        ip: 211.115.75.227
+        port1: 5556
+        port2: 6556
+        protocol: http
+        url: /restapi/push/single/servicekey
+        auth: auth=0000002640;C8ACEEC7A62254021B14
+
+    # ANNOUNCE PUSH SERVER SETTING (PORT1:HTTP, PORT2:HTTPS)
+    announce:
+      server:
+        ip: 211.115.75.227
+        port1: 5555
+        port2: 6555
+        protocol: http
+        url: /restapi/push/announce
+        auth: auth=0000002640;C4170CB54D1114224B9A
+
+    # MULTIPUSH SETTING (SINGLEPUSH USE)
+    multi:
+      synchronized: true
+      count: 5000
+      tps: 400
+      retry:
+        code: 408, 500, 502, 503
+        count: 1
+
+    # POOL SETTING
+    pool:
+      maxTotal: 400
+      maxRoute: 400
+      requestTimeout: 3000
+      connectionTimeout: 3000
+      socketTimeout: 5000
+
+  gateway:
+    # LGUPUSH 구버전에서 사용하는 push_app_id, noti_type
+    notiType: POS
+    appId: smartux0001
+    serviceId: "00007"
+
+    #################### Announcement(공통) ########################
+    announce:
+      server:
+        ip: 211.115.75.227
+        port: 9200
+        protocol: http
+        url: /pushhttp.uplus.co.kr/deviceInfo?service=upush
+        header: application/json
+        encoding: UTF-8
+        timeout: 2000
+
+    #################### GCM/APNS 개별 ########################
+    default:
       ip: 211.115.75.227
-      port: 9200
-      protocol: http
-      url: /pushhttp.uplus.co.kr/deviceInfo?service=upush
-      header: application/json
-      encoding: UTF-8
-      timeout: 2000
+      port: 9600
+      socket:
+        init: 20
+        min: 5
+        max: 30
+        channelId: PsAgt
+        channelNumber: "0000"
+        timeout: 2000
+        closeSecond: 150
+      destination: 222.231.13.85
+      retry: 2
 
-  #################### GCM/APNS 개별 ########################
-  push:
+    #################### LGPUSH 개별 ########################
+    lgupush:
+      ip: 211.115.75.227
+      port: 8100
+      socket:
+        init: 10
+        min: 5
+        max: 10
+        channelId: PsAgt
+        channelNumber: "0000"
+        timeout: 2000
+        closeSecond: 150
+      destination: 222.231.13.85
+      retry: 2
+
     delay:
       time: 1
       cacheName: pushDelayCnt
-      reqCnt: 100
-    socket:
-      initCnt: 20
-      min: 5
-      max: 30
-      channelID: PsAgt
-      channelNum: 0000
-      timeout: 2000
-      close_secend: 150
+      request: 100
+
+    retry:
+      count: 2
+      exclude: 202, 400, 401, 403, 404, 410, 412, 5102
+
     # Multi Push 호출 시 TPS 값 설정
-    multi:
-      socket:
-        tps: 400
-    # Push 발송 제외 가번 지정 - 구분자 '|'
-    reject:
-      regList: M20110725000|U01080800201|U01080800202|U01080800203
-    # LGUPUSH 구버전에서 사용하는 push_app_id, noti_type
-    old:
-      lgupush:
-        notiType: POS
-        pushAppId: smartux0001
-    cp:
-      destination_ip: 222.231.13.85
-    call:
-      retryCnt: 2
-    server:
-      ip: 211.115.75.227
-      port: 9600
-  retry:
-    exclude:
-      codeList: 202|400|401|403|404|410|412|5102
+    tps: 400
 
-  #################### LGPUSH 개별 ########################
-  lgpush:
-    # 개별Push중 IPTVPush로 나가야 하는 대상 service_id
-    service_id: 00007
-    server:
-      ip: 211.115.75.227
-      port: 8100
-    socket:
-      initCnt: 10
-      min: 5
-      max: 10
-      channelID: PsAgt
-      channelNum: 0000
-      timeout: 2000
-      close_secend: 150
-    call:
-      retryCnt: 2
-    cp:
-      destination_ip: 222.231.13.85
+  # Push 발송 제외 가번 지정
+  reject: M20110725000, U01080800201, U01080800202, U01080800203
 
-# Push G/W에서 발급 받은 service_key 리스트
-########################
-# 연동 타입
-# 기본(미지정 시) : 연동정의서 1.2.1(service_key)
-# LGUPUSH_OLD : LGUPUSH 초기버전 연동
-########################
-push-service:
-  - id: 00007
-    name: MIMS(IPTV)
-    type: LGUPUSH_OLD
-    password: smartux
-  - id: 30022
-    name: 세컨드TV
-    password: lguplussecondtv
-  - id: 30011
-    name: HDTV Android
-    password: lguplushdtvgcm
-  - id: 30021
-    name: HDTV iOS
-    password: lguplushdtvapns
-  - id: 30015
-    name: UFLIX Android
-    password: lguplusuflix
-  - id: 30024
-    name: UFLIX iOS
-    password: lguplusuflixapns
-  - id: 21009
-    name: 프로야구 Android
-    password: baseball_FCM1
-  - id: 30043
-    name: 프로야구 IOS
-    password: baseball_APNS1
-  - id: 30105
-    name: GOLF Android
-    password: ugolf_GCM
-  - id: 30106
-    name: GOLF iOS
-    password: ugolf_APNS
-  - id: 30104
-    name: 뮤직공연 Android
-    password: musicshow_gcm
-  - id: 30107
-    name: 뮤직공연 iOS
-    password: musicshow_apns
-  - id: 30112
-    name: VR Android
-    password: uvrapp_gcm
-  - id: 30125
-    name: GAME Android
-    password: lguplus_game_live
-  - id: 21006
-    name: Push Module work_2020.03.04
-    password: UTVseamless_FCM1
-  - id: 21011
-    name: 아이들나라 Android
-    password: mobilekids_FCM1
-  - id: 30044
-    name: 아이들나라 IOS
-    password: mobilekids_APNS1
-  - id: 30128
-    name: FCM
-    password: smart_uxapp_fcm
+  # Push G/W에서 발급 받은 service_key 리스트
+  ########################
+  # 연동 타입
+  # 기본(미지정 시) : 연동정의서 1.2.1(service_key)
+  # LGUPUSH_OLD : LGUPUSH 초기버전 연동
+  ########################
+  service:
+    - id: "00007"
+      name: MIMS(IPTV)
+      type: LGUPUSH_OLD
+      password: smartux
+    - id: "30022"
+      name: 세컨드TV
+      password: lguplussecondtv
+    - id: "30011"
+      name: HDTV Android
+      password: lguplushdtvgcm
+    - id: "30021"
+      name: HDTV iOS
+      password: lguplushdtvapns
+    - id: "30015"
+      name: UFLIX Android
+      password: lguplusuflix
+    - id: "30024"
+      name: UFLIX iOS
+      password: lguplusuflixapns
+    - id: "21009"
+      name: 프로야구 Android
+      password: baseball_FCM1
+    - id: "30043"
+      name: 프로야구 IOS
+      password: baseball_APNS1
+    - id: "30105"
+      name: GOLF Android
+      password: ugolf_GCM
+    - id: "30106"
+      name: GOLF iOS
+      password: ugolf_APNS
+    - id: "30104"
+      name: 뮤직공연 Android
+      password: musicshow_gcm
+    - id: "30107"
+      name: 뮤직공연 iOS
+      password: musicshow_apns
+    - id: "30112"
+      name: VR Android
+      password: uvrapp_gcm
+    - id: "30125"
+      name: GAME Android
+      password: lguplus_game_live
+    - id: "21006"
+      name: Push Module work_2020.03.04
+      password: UTVseamless_FCM1
+    - id: "21011"
+      name: 아이들나라 Android
+      password: mobilekids_FCM1
+    - id: "30044"
+      name: 아이들나라 IOS
+      password: mobilekids_APNS1
+    - id: "30128"
+      name: FCM
+      password: smart_uxapp_fcm
+
+  # FCM POS추가발송대상
+  fcm:
+    extra:
+      send: Y
+      target: "21006"
+      serviceid: "20002"
+      appid: smartuxapp
+
+  sendcodes:
+    ###### U+tv -> 모바일tv 페어링 요청 푸시 ######
+    - sendcode: P001
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"[+address]\", \"unumber\":\"[+unumber]\",\"req_date\":\"[+req_date]\",\"ctn\":\"[+ctn]\",\"trans_id\":\"[+trans_id]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"U+tv에서 연결을 요청했습니다\""
+          item: "cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]"
+      param:
+        list: "address|unumber|req_date|ctn|trans_id"
+      pos:
+        send: Y
+    ###### U+tv -> 모바일tv VOD 이어보기 정보 알림 ######
+    - sendcode: P002
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"MFUP\", \"cont_type\":\"VOD\", \"album_id\":\"[+album_id]\", \"link_flag\":\"[+link_flag]\", \"name\":\"[+name]\", \"reqtime\":\"[+reqtime]\", \"playtime\":\"[+playtime]\", \"intent\":\"[+intent_url]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"U+tv에서 보던 영상을 휴대폰으로 이어보세요\""
+          item: "cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]"
+      param:
+        list: "album_id|link_flag|name|reqtime|playtime|intent_url"
+      pos:
+        send: N
+    ###### 모바일앱으로 실시간 이어보기 ######
+    - sendcode: P003
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"MFUP\", \"cont_type\":\"REAL\", \"svc_id\":\"[+svc_id]\", \"name\":\"[+name]\", \"intent\":\"[+intent_url]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"U+tv에서 보던 실시간 채널을 휴대폰으로 이어보세요\""
+          item: "cm!^MFUP|REAL|[+svc_id]|[+name]|[+intent_url]"
+      param:
+        list: "svc_id|name|intent_url"
+      pos:
+        send: N
+    ###### 요청 앱으로 페어링 연결 완료 푸시 발송 ######
+    - sendcode: C001
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"PA_COMPL\",\"service_type\":\"[+service_type]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"U+tv와 연결했습니다\""
+          item: "cm!^PA_COMPL|[+service_type]"
+      param:
+        list: "service_type|"
+      pos:
+        send: N
+    ###### 요청 앱으로 페어링 연결 해제 푸시 발송 ######
+    - sendcode: C002
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"PA_CLEAR\",\"service_type\":\"[+service_type]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"U+tv와 연결을 해제했습니다\""
+          item: "cm!^PA_CLEAR|[+service_type]"
+      param:
+        list: "service_type|"
+      pos:
+        send: N
+    ###### U+tv로 페어링 알림(FCM) ######
+    - sendcode: C003
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"PA_CANCEL\",\"service_type\":\"[+service_type]\"}"
+      apns:
+        payload:
+          body: ""
+          item: ""
+      param:
+        list: "service_type|"
+      pos:
+        send: N
+    ###### U+tv로 페어링 알림(FCM) ######
+    - sendcode: T001
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"PAIR\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"pin\":\"[+pin]\"}"
+      apns:
+        payload:
+          body: ""
+          item: ""
+      param:
+        list: "service_type|ctn|pin"
+      pos:
+        send: N
+    ###### U+tv로 VOD 이어보기 정보 알림(FCM) ######
+    - sendcode: T002
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"FUP\",\"cont_type\":\"VOD\",\"album_id\":\"[+album_id]\",\"album_series\":\"[+album_series]\",\"cate_series\":\"[+cate_series]\",\"name\":\"[+name]\",\"duration\":\"[+duration]\",\"playtime\":\"[+playtime]\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"data\":{\"LINK_FLAG\":\"[+link_flag]\", \"intent_url\":\"[+intent_url]\"}}"
+      apns:
+        payload:
+          body: ""
+          item: ""
+      param:
+        list: "album_id|album_series|cate_series|name|duration|playtime|service_type|ctn|intent_url|link_flag"
+      pos:
+        send: N
+    ###### U+tv로 VOD 이어보기 정보 알림(FCM) ######
+    - sendcode: T003
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"FUP\",\"cont_type\":\"REAL\",\"svc_id\":\"[+svc_id]\",\"name\":\"[+name]\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"data\":{\"LINK_FLAG\":\"[+link_flag]\", \"intent_url\":\"[+intent_url]\"}}"
+      apns:
+        payload:
+          body: ""
+          item: ""
+      param:
+        list: "svc_id|name|service_type|ctn|intent_url|link_flag"
+      pos:
+        send: N
+
+  serviceTargets:
+    # 모바일tv(디폴트)
+    - serviceTarget: default
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"
+    # 프로야구
+    - serviceTarget: B
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"
+    # 아이들나라
+    - serviceTarget: K
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"
+    # 골프
+    - serviceTarget: O
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"
+    # 아이돌Live
+    - serviceTarget: C
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"
+      pos:
+        appid: smartuxapp
+        serviceid: "30107"
+    # FCM푸시
+    - serviceTarget: TV
+      gcm:
+        appid: lguplushdtvgcm
+        serviceid: "30011"
+      apns:
+        appid: musicshow_apns
+        serviceid: "30107"

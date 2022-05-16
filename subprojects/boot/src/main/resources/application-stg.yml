@@ -74,4 +74,4 @@ feign:
         #  header1: header1Value
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
-        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder
