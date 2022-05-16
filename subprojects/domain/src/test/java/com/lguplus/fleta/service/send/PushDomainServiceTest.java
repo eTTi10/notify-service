@@ -17,7 +17,6 @@ import com.lguplus.fleta.exception.push.PushEtcException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -74,9 +74,9 @@ class PushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(pushDomainService, "fcmExtraSend", "N");
-        JunitTestUtils.setValue(pushDomainService, "extraServiceId", "30015");
-        JunitTestUtils.setValue(pushDomainService, "extraApplicationId", "smartuxapp");
+        ReflectionTestUtils.setField(pushDomainService, "fcmExtraSend", "N");
+        ReflectionTestUtils.setField(pushDomainService, "extraServiceId", "30015");
+        ReflectionTestUtils.setField(pushDomainService, "extraApplicationId", "smartuxapp");
 
         //response given
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()

@@ -215,8 +215,6 @@ push:
           item: "cm!^MFUP|REAL|[+svc_id]|[+name]|[+intent_url]"
       param:
         list: "svc_id|name|intent_url"
-      pos:
-        send: N
     ###### 요청 앱으로 페어링 연결 완료 푸시 발송 ######
     - sendcode: C001
       gcm:
@@ -227,9 +225,7 @@ push:
           body: "\"body\":\"U+tv와 연결했습니다\""
           item: "cm!^PA_COMPL|[+service_type]"
       param:
-        list: "service_type|"
-      pos:
-        send: N
+        list: "service_type"
     ###### 요청 앱으로 페어링 연결 해제 푸시 발송 ######
     - sendcode: C002
       gcm:
@@ -240,9 +236,7 @@ push:
           body: "\"body\":\"U+tv와 연결을 해제했습니다\""
           item: "cm!^PA_CLEAR|[+service_type]"
       param:
-        list: "service_type|"
-      pos:
-        send: N
+        list: "service_type"
     ###### U+tv로 페어링 알림(FCM) ######
     - sendcode: C003
       gcm:
@@ -253,7 +247,7 @@ push:
           body: ""
           item: ""
       param:
-        list: "service_type|"
+        list: "service_type"
       pos:
         send: N
     ###### U+tv로 페어링 알림(FCM) ######
@@ -267,8 +261,6 @@ push:
           item: ""
       param:
         list: "service_type|ctn|pin"
-      pos:
-        send: N
     ###### U+tv로 VOD 이어보기 정보 알림(FCM) ######
     - sendcode: T002
       gcm:
@@ -280,8 +272,6 @@ push:
           item: ""
       param:
         list: "album_id|album_series|cate_series|name|duration|playtime|service_type|ctn|intent_url|link_flag"
-      pos:
-        send: N
     ###### U+tv로 VOD 이어보기 정보 알림(FCM) ######
     - sendcode: T003
       gcm:
@@ -293,8 +283,6 @@ push:
           item: ""
       param:
         list: "svc_id|name|service_type|ctn|intent_url|link_flag"
-      pos:
-        send: N
 
   serviceTargets:
     # 모바일tv(디폴트)

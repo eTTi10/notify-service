@@ -7,7 +7,6 @@ import com.lguplus.fleta.exception.smsagent.*;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServer;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.*;
@@ -82,12 +81,12 @@ class SmsAgentSocketClientTest {
         serverMap.put("id","test");
         serverMap.put("password","test");
 
-        JunitTestUtils.setValue(smsAgentProps, "servers", List.of(serverMap));
-//        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
+        ReflectionTestUtils.setField(smsAgentProps, "servers", List.of(serverMap));
+//        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
 
-        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "100");
+        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "100");
         smsAgentSocketClient.initGateway();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1500)); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
@@ -200,7 +199,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("11 calculateTerm_Exception 테스트")
     void calculateTerm_Exception()  {
 
-        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", null);
+        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
         assertDoesNotThrow(smsAgentSocketClient::initGateway);
     }
 }

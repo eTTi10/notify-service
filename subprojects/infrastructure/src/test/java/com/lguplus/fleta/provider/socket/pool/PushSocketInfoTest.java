@@ -3,7 +3,6 @@ package com.lguplus.fleta.provider.socket.pool;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.FailException;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
-import fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -66,15 +65,15 @@ class PushSocketInfoTest {
         Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "socket");
         assertTrue(!pushSocketInfo.isInValid());
 
-        JunitTestUtils.setValue(pushSocketInfo, "socket", normalSocket);
+        ReflectionTestUtils.setField(pushSocketInfo, "socket", normalSocket);
 
-        JunitTestUtils.setValue(pushSocketInfo, "isOpened", false);
+        ReflectionTestUtils.setField(pushSocketInfo, "isOpened", false);
         assertTrue(pushSocketInfo.isInValid());
-        JunitTestUtils.setValue(pushSocketInfo, "isOpened", true);
+        ReflectionTestUtils.setField(pushSocketInfo, "isOpened", true);
 
-        JunitTestUtils.setValue(pushSocketInfo, "isFailure", true);
+        ReflectionTestUtils.setField(pushSocketInfo, "isFailure", true);
         assertTrue(pushSocketInfo.isInValid());
-        JunitTestUtils.setValue(pushSocketInfo, "isFailure", false);
+        ReflectionTestUtils.setField(pushSocketInfo, "isFailure", false);
 
         pushSocketInfo.closeSocket();
     }
@@ -86,7 +85,7 @@ class PushSocketInfoTest {
         Socket socket = new Socket();
         assertTrue(!socket.isConnected());
 
-        JunitTestUtils.setValue(pushSocketInfo, "socket", socket);
+        ReflectionTestUtils.setField(pushSocketInfo, "socket", socket);
         assertTrue(pushSocketInfo.isInValid());
         socket.close();
     }
@@ -233,7 +232,7 @@ class PushSocketInfoTest {
         pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"6", testDestIp);
 
         int testValue = 999;
-        JunitTestUtils.setValue(pushSocketInfo, "mInputStream"
+        ReflectionTestUtils.setField(pushSocketInfo, "mInputStream"
                 , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(testValue).putInt(testValue).array())));
         byte[] recvBytes = ReflectionTestUtils.invokeMethod(pushSocketInfo, "readByteBuffer", 4);
         ByteBuffer recvBuff = ByteBuffer.wrap(recvBytes, 0, 4);
@@ -243,7 +242,7 @@ class PushSocketInfoTest {
         recvBuff = ByteBuffer.wrap(recvBytes, 0, 4);
 
         //length == -1
-        JunitTestUtils.setValue(pushSocketInfo, "mInputStream"
+        ReflectionTestUtils.setField(pushSocketInfo, "mInputStream"
                 , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(0).array())));
         recvBytes = ReflectionTestUtils.invokeMethod(pushSocketInfo, "readByteBuffer", 4);
 

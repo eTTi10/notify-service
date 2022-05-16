@@ -11,7 +11,6 @@ import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
 import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +23,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -73,7 +73,7 @@ class PushServiceControllerTest {
     @BeforeEach
     void setUp() {
         pushServiceController1 = new PushServiceController(pushAnnouncementService, pushSingleService, pushMultiService, pushRequestMapper);
-        JunitTestUtils.setValue(pushServiceController1, "pushRejectRegList", "REJECT_USER1|REJECT_USER2");
+        ReflectionTestUtils.setField(pushServiceController1, "pushRejectRegList", "REJECT_USER1|REJECT_USER2");
         this.mvc = MockMvcBuilders.standaloneSetup(pushServiceController1).build();
 
         // Mock Dto

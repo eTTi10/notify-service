@@ -10,7 +10,6 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
-import fleta.util.JunitTestUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -206,7 +205,7 @@ class NettyTcpClientTest implements PushMultiClient {
     void test_02_messageHandler() {
 
         Test01Client test01 = new Test01Client();
-        JunitTestUtils.setValue(messageHandler, "pushMultiClient", test01);
+        ReflectionTestUtils.setField(messageHandler, "pushMultiClient", test01);
 
         int COMMAND_REQUEST_ACK = 16;
         int UNKNOWN = 200;

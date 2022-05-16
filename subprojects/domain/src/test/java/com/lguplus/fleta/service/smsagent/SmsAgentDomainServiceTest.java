@@ -9,7 +9,6 @@ import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.*;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.time.LocalTime;
@@ -58,17 +58,15 @@ class SmsAgentDomainServiceTest {
                 .build();
 
 
-        JunitTestUtils.setValue(smsAgentDomainService, "smsSenderNo", "01011112222");
+        ReflectionTestUtils.setField(smsAgentDomainService, "smsSenderNo", "01011112222");
 
-        JunitTestUtils.setValue(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
-        JunitTestUtils.setValue(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
-        JunitTestUtils.setValue(smsAgentDomainService, "codeSystemBusyException", "1503");
-        JunitTestUtils.setValue(smsAgentDomainService, "codeSystemErrorException", "1500");
+        ReflectionTestUtils.setField(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
+        ReflectionTestUtils.setField(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
+        ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemBusyException", "1503");
+        ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemErrorException", "1500");
 
-        JunitTestUtils.setValue(smsAgentDomainService, "codeEtcException", "9999");
-        JunitTestUtils.setValue(smsAgentDomainService, "messageEtcException", "기타 오류");
-
-        smsAgentDomainService.init();
+        ReflectionTestUtils.setField(smsAgentDomainService, "codeEtcException", "9999");
+        ReflectionTestUtils.setField(smsAgentDomainService, "messageEtcException", "기타 오류");
     }
 
     @Test
@@ -90,25 +88,25 @@ class SmsAgentDomainServiceTest {
         assertThat(exception.getClass()).isEqualTo(SmsAgentCustomException.class);
 
         /* 정상리턴 */
-        JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendUse", "0");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", "0");
         given(smsAgentClient.send(anyString(), anyString(), anyString())).willReturn(smsGatewayResponseDto);
         SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSms(request);
         assertThat(responseDto.getFlag()).isEqualTo(smsGatewayResponseDto.getFlag());
 
 
         /* agentNoSendTime 빈값일때 ServerSettingInfoException */
-        JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendUse", "1");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", "1");
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
         assertThat(exception.getCode()).isEqualTo("5200");
 
         /* startTime이 endTime 보다 크거나 같을 때 */
-        JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", "23|06");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", "23|06");
         assertDoesNotThrow(() -> smsAgentDomainService.sendSms(request));
 
         /* 전송할 수 있는 시간이 아닐 때 NotSendTimeException */
-        JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", "03|23");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", "03|23");
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
@@ -120,7 +118,7 @@ class SmsAgentDomainServiceTest {
         String startHour = now.format(formatter);  //현재 시간 -2
         String endHour = now.plusHours(1).format(formatter); //현재 시간 -1
 
-        JunitTestUtils.setValue(smsAgentDomainService, "agentNoSendTime", startHour+"|"+endHour);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", startHour+"|"+endHour);
         assertDoesNotThrow(() -> smsAgentDomainService.sendSms(request));
     }
 

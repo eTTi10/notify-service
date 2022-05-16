@@ -10,7 +10,7 @@ import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
-import fleta.util.JunitTestUtils;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.Bootstrap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -263,7 +263,7 @@ class PushMultiSocketClientImplTest {
             pushMultiSocketClient.checkClientInvalid();
         });
 
-        JunitTestUtils.setValue(pushMultiSocketClient, "channelID", "01234567890ABCD"); //test channel Id
+        ReflectionTestUtils.setField(pushMultiSocketClient, "channelID", "01234567890ABCD"); //test channel Id
         assertThrows(SocketException.class, () -> {
             pushMultiSocketClient.checkClientInvalid();
         });
@@ -285,7 +285,7 @@ class PushMultiSocketClientImplTest {
     void testServer09_waitTPS() throws Exception {
         //connect
         long lastTime = System.currentTimeMillis() - 3000;
-        JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(lastTime)); //test channel Id
+        ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(lastTime)); //test channel Id
         pushMultiSocketClient.waitTPS();
         AtomicLong time2 = (AtomicLong) ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");
         assertTrue(time2.get() > lastTime);
@@ -295,7 +295,7 @@ class PushMultiSocketClientImplTest {
             public void run() {
                 while (true) {
                     //setTime = ;
-                    JunitTestUtils.setValue(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
+                    ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
                     pushMultiSocketClient.waitTPS();
                 }
             }

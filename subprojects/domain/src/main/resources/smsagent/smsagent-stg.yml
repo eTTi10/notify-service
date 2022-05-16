@@ -1,8 +1,8 @@
-#SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
+# SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
 
 sms:
   sender:
-    no: 101
+    number: 101
     retry:
       sleep:
         ms: 1000
@@ -53,4 +53,3 @@ sms:
         port: 8556
         id: hdtv
         password: uflix6
-

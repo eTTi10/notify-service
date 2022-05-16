@@ -9,10 +9,8 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.exception.database.DatabaseException;
-import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.repository.latest.LatestRepository;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -69,7 +68,7 @@ class LatestDomainServiceTest {
         GET_UUID = getUUID();
 
         latestDomainService = new LatestDomainService(latestMapper, latestRepository);
-        JunitTestUtils.setValue(latestDomainService, "maxCnt", 5);
+        ReflectionTestUtils.setField(latestDomainService, "maxCnt", 5);
 
     }
 

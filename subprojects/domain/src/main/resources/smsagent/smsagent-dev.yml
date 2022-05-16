@@ -1,8 +1,8 @@
-#SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
+# SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
 
 sms:
   sender:
-    no: 101
+    number: 101
     retry:
       sleep:
         ms: 1000
@@ -14,12 +14,11 @@ sms:
     simplejoin:
       sms_message: "[영화월정액ID만들기]\nhttps://uflix.co.kr/ums/initTvg\n비디오포털 회원가입 이동"
 
-#https 예외 사용 여부 (1 : 사용 / 0 : 미사용)
-check:
-  https: 0
+  # https 예외 사용 여부 (1 : 사용 / 0 : 미사용)
+  check:
+    https: 0
 
-error:
-  smsagent:
+  error:
     etc:
       flag: 9999
       message: "기타 오류"
@@ -54,4 +53,3 @@ error:
         port: 8556
         id: hdtv
         password: uflix6
-

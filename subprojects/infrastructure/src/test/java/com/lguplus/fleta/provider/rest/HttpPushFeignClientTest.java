@@ -1,7 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
-import fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -33,8 +33,8 @@ class HttpPushFeignClientTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "http");
-        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "http");
+        ReflectionTestUtils.setField(httpPushClient, "protocolSingle", "http");
+        ReflectionTestUtils.setField(httpPushClient, "protocolAnnounce", "http");
     }
 
     @Test
@@ -85,14 +85,14 @@ class HttpPushFeignClientTest {
     void testGetBaseUrl() throws Exception {
         HttpPushClientImpl httpPushClient = new HttpPushClientImpl(httpPushFeignClient);
 
-        JunitTestUtils.setValue(httpPushClient, "hostSingle", "211.115.75.227");
-        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "http");
-        JunitTestUtils.setValue(httpPushClient, "httpPortSingle", "5556");
-        JunitTestUtils.setValue(httpPushClient, "httpsPortSingle", "6556");
-        JunitTestUtils.setValue(httpPushClient, "hostAnnounce", "211.115.75.227");
-        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "http");
-        JunitTestUtils.setValue(httpPushClient, "httpPortAnnounce", "5555");
-        JunitTestUtils.setValue(httpPushClient, "httpsPortAnnounce", "6555");
+        ReflectionTestUtils.setField(httpPushClient, "hostSingle", "211.115.75.227");
+        ReflectionTestUtils.setField(httpPushClient, "protocolSingle", "http");
+        ReflectionTestUtils.setField(httpPushClient, "httpPortSingle", "5556");
+        ReflectionTestUtils.setField(httpPushClient, "httpsPortSingle", "6556");
+        ReflectionTestUtils.setField(httpPushClient, "hostAnnounce", "211.115.75.227");
+        ReflectionTestUtils.setField(httpPushClient, "protocolAnnounce", "http");
+        ReflectionTestUtils.setField(httpPushClient, "httpPortAnnounce", "5555");
+        ReflectionTestUtils.setField(httpPushClient, "httpsPortAnnounce", "6555");
 
         Method method = httpPushClient.getClass().getDeclaredMethod("getBaseUrl", String.class);
         method.setAccessible(true);
@@ -103,8 +103,8 @@ class HttpPushFeignClientTest {
         String announcementPushUrl = (String) method.invoke(httpPushClient, "A");
         assertThat(announcementPushUrl).contains("5555");
 
-        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "https");
-        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "https");
+        ReflectionTestUtils.setField(httpPushClient, "protocolSingle", "https");
+        ReflectionTestUtils.setField(httpPushClient, "protocolAnnounce", "https");
 
         singlePushUrl = (String) method.invoke(httpPushClient, "S");
         assertThat(singlePushUrl).contains("6556");

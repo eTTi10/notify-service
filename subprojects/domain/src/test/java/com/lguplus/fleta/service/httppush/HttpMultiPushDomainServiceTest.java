@@ -7,7 +7,6 @@ import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.exception.httppush.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
-import com.lguplus.fleta.util.JunitTestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -56,8 +56,8 @@ class HttpMultiPushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpMultiPushDomainService, "maxMultiCount", "400");
-        JunitTestUtils.setValue(httpMultiPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        ReflectionTestUtils.setField(httpMultiPushDomainService, "maxMultiCount", "400");
+        ReflectionTestUtils.setField(httpMultiPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
     }
 
     @Test

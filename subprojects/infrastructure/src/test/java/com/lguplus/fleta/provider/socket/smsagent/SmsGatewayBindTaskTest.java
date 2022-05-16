@@ -2,7 +2,6 @@ package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
-import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,12 +50,12 @@ class SmsGatewayBindTaskTest {
     @Test
     void test_02() throws IOException {
 
-        JunitTestUtils.setValue(smsGateway, "isLinked", true);
+        ReflectionTestUtils.setField(smsGateway, "isLinked", true);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
         assertDoesNotThrow(linkTimerTask::run);
 
         doNothing().when(smsGateway).connectGateway();
-        JunitTestUtils.setValue(smsGateway, "isLinked", false);
+        ReflectionTestUtils.setField(smsGateway, "isLinked", false);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
         assertDoesNotThrow(linkTimerTask::run);
 
@@ -65,11 +64,11 @@ class SmsGatewayBindTaskTest {
     @Test
     void test_03() throws IOException {
 
-        JunitTestUtils.setValue(smsGateway, "mResult", "");
+        ReflectionTestUtils.setField(smsGateway, "mResult", "");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
         assertDoesNotThrow(bindTimerTask::run);
 
-        JunitTestUtils.setValue(smsGateway, "mResult", "0000");
+        ReflectionTestUtils.setField(smsGateway, "mResult", "0000");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
         assertDoesNotThrow(bindTimerTask::run);
 
