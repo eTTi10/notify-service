@@ -1,0 +1,75 @@
+name: devSec
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+env:
+  PROFILE_PATH: subprojects/boot/src/main/resources/application-test.yml
+
+jobs:
+  JaCoCo:
+    runs-on: test-runner
+    steps:
+      - run: sudo rm -rf *
+
+      - uses: actions/checkout@v3
+
+      - name: aws secrets manager
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value \
+                      --secret-id dev \
+                      --output json \
+                      | jq -r '.SecretString')
+          
+          LIST=$(cat ${{ env.PROFILE_PATH }} | grep -o '<<.[^>]*>>' || true)
+          for KEY in $LIST
+          do
+            KEY=${KEY#<<}
+            KEY=${KEY%>>}
+            VALUE=$(echo $SECRET | jq -r ".$KEY")
+            sed -i \
+                -e "s/<<$KEY>>/$VALUE/g" \
+                ${{ env.PROFILE_PATH }}
+          
+            echo "[INFO] changed: <<$KEY>>"
+          done
+
+      - name: Run test & JaCoCo
+        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification -Dspring.profiles.active=test
+    
+      - name: zip reports
+        if: always()
+        run: |
+          for SUBPROJECT in `ls subprojects`; do
+          
+              JACOCO_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/jacoco
+              TEST_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/tests
+
+              if [ -d $JACOCO_REPORTS_DIR ]; then
+                  mkdir -p jacoco/$SUBPROJECT
+                  mv $JACOCO_REPORTS_DIR/test/html/ jacoco/$SUBPROJECT
+              fi
+
+              if [ -d $TEST_REPORTS_DIR ]; then
+                  mkdir -p test/$SUBPROJECT
+                  mv $TEST_REPORTS_DIR/test/ test/$SUBPROJECT
+              fi
+          done
+          
+          zip -r jacoco.zip ./jacoco
+          zip -r test.zip ./test
+
+      - name: Upload JaCoCo reports
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: JaCoCo reports
+          path: jacoco.zip
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: test reports
+          path: test.zip

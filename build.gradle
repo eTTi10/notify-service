@@ -6,6 +6,9 @@ plugins {
     id "org.sonarqube" version "3.3"
 }
 
+bootJar { enabled = false }
+
+
 allprojects {
     repositories {
         mavenCentral()
@@ -34,7 +37,7 @@ subprojects {
     apply plugin: 'jacoco'
 
     group = 'com.lguplus.fleta'
-    version = '0.1.0'
+    version = '1.1.0'
     sourceCompatibility = '11'
 
     configurations {
@@ -47,9 +50,9 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
         implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.5'
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
         implementation "io.springfox:springfox-swagger2:2.9.2"
-        
         implementation "io.springfox:springfox-swagger-ui:2.9.2"
         implementation 'org.apache.commons:commons-lang3:3.11'
 
@@ -172,7 +175,7 @@ subprojects {
             systemProperty "spring.profiles.active", activeProfile
         }
         useJUnitPlatform()
-        ignoreFailures = true
+        ignoreFailures = false
         finalizedBy 'jacocoTestReport'
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
@@ -206,6 +209,7 @@ project(':boot') {
         implementation project(':domain')
         implementation project(':infrastructure')
     }
+
     test {
         exclude '**/*'
         useJUnitPlatform()

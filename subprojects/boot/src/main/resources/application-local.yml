@@ -21,11 +21,12 @@ spring:
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
       username: postgres
       password: devadmin!
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      minimum-idle: 10
-      maximum-pool-size: 10
+      minimum-idle: 5
+      maximum-pool-size: 5
+
   jpa:
     database: postgresql
     hibernate:
@@ -37,41 +38,20 @@ spring:
       hibernate:
         temp:
           use_jdbc_metadata_defaults: false
-        format_sql: "false"
+        format_sql: true
         jdbc:
           lob:
             non_contextual_creation: true
-    show-sql: false
+    show-sql: true
 
-## Cache - Redis
-#  cache:
-#    type: redis
-#  redis:
-#    database: 0
-#    host: 132.145.90.37
-#    port: 6379
-#    password: votmdnjem@1
-#    timeout: 3000
-#    redisson:
-#      config: |
-#        singleServerConfig:
-#          address: redis://${spring.redis.host}:${spring.redis.port}
-#          password: ${spring.redis.password}
-#          database: ${spring.redis.database}
-#          connectTimeout: ${spring.redis.timeout}
-  ## Cache - Redis
-
-## Cache - Redis
+  #### Cache - Redis
   cache:
     type: redis
   redis:
     cluster:
       nodes: ["redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379"]
 
-
-
-
-  # Message Stream - Kafka
+  #### Message Stream - Kafka
   kafka:
     bootstrap-servers: b-1.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-2.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-3.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-5.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092
 
@@ -90,16 +70,6 @@ logging:
 
 
 ############################################
-####  Management
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-
-
-
-############################################
 #### Other Domain Application Service
 service:
   programming:
@@ -107,7 +77,7 @@ service:
   searchword:
     url: http://searchword.fleta.com
   settings:
-    url: http://localhost:8082
+    url: http://settings.fleta.com
   vodlookup:
     url: http://vodlookup.fleta.com
   channel:
@@ -116,6 +86,8 @@ service:
     url: http://personalization.fleta.com
   subscriber:
     url: http://subscriber.fleta.com
+
+
 
 ############################################
 #### Feign Client 설정
@@ -133,4 +105,4 @@ feign:
         #  header1: header1Value
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
-        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder

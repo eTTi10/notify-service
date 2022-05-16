@@ -18,11 +18,11 @@ public class CustomRoutingDataSource extends AbstractRoutingDataSource {
     protected Object determineCurrentLookupKey() {
 
         if (TransactionSynchronizationManager.isCurrentTransactionReadOnly()) {
-            log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> reader");
+            log.debug(">>> reader");
             return "reader";
         }
         else {
-            log.debug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> writer");
+            log.debug(">>> writer");
             return "writer";
         }
     }

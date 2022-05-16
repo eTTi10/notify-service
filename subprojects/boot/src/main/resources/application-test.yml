@@ -17,17 +17,18 @@ spring:
       jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
       username: <<postgres.notify.read.username>>
       password: <<postgres.notify.read.password>>
+      minimum-idle: 5
+      maximum-pool-size: 5
     reader:
       jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=preferSecondary&loadBalanceHosts=true&ApplicationName=${spring.application.name}
       username: <<postgres.notify.read.username>>
       password: <<postgres.notify.read.password>>
+      minimum-idle: 5
+      maximum-pool-size: 5
 
   #### Cache - Redis
   cache:
-    type: redis
-  redis:
-    cluster:
-      nodes: [<<redis.cluster.nodes>>]
+    type: none
 
   #### Message Stream - Kafka
   kafka:
@@ -49,21 +50,19 @@ logging:
 #### Other Domain Application Service
 service:
   programming:
-    url: http://programming:8080
+    url: http://programming.fleta.com
   searchword:
-    url: http://searchword:8080
+    url: http://searchword.fleta.com
   settings:
-    url: http://settings:8080
+    url: http://settings.fleta.com
   vodlookup:
-    url: http://vodlookup:8080
+    url: http://vodlookup.fleta.com
   channel:
-    url: http://channel:8080
+    url: http://channel.fleta.com
   personalization:
-    url: http://personalization:8080
+    url: http://personalization.fleta.com
   subscriber:
-    url: http://subscriber:8080
-
-
+    url: http://subscriber.fleta.com
 
 ############################################
 #### Feign Client 설정
@@ -71,7 +70,7 @@ feign:
   client:
     config:
       pushannounce: # Push Announce
-        loggerLevel: BASIC # NONE, BASIC, HEADERS, FULL
+        loggerLevel: NONE # NONE, BASIC, HEADERS, FULL
         #defaultRequestHeaders:
         #  header1: header1Value
         requestInterceptors:
