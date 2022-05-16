@@ -24,9 +24,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-@Api(tags = "Push", description = "Push Message 전송 서비스")
+@Api(tags = "Push Message 전송 서비스")
 @Slf4j
 @RestController
 @Validated
@@ -41,8 +42,8 @@ public class PushServiceController {
 
     private final PushRequestMapper pushRequestMapper;
 
-    @Value("${push-comm.push.reject.regList}")
-    private String pushRejectRegList;
+    @Value("${push.reject}")
+    private Set<String> pushRejectRegList;
 
 
     /**
@@ -108,7 +109,7 @@ public class PushServiceController {
     }
 
     private boolean isValidRegId(String regId) {
-        return !("|" + this.pushRejectRegList + "|").contains("|" + regId + "|");
+        return pushRejectRegList.contains(regId);
     }
 
 }

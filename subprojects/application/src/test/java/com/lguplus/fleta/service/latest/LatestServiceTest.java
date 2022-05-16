@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -75,7 +76,7 @@ class LatestServiceTest {
 
         String resultFlag = latestService.getLatestList(latestRequestDto).getFlag();
         log.info(latestService.getLatestList(latestRequestDto).getMessage());
-        Assertions.assertTrue("0000".equals(resultFlag));
+        Assertions.assertEquals("0000", resultFlag);
         log.info("LatestServiceTest.getLatestList End");
     }
     //####################### End 알림조회 ######################
@@ -96,7 +97,7 @@ class LatestServiceTest {
 
         int resultCnt = latestService.deleteLatest(latestRequestDto);
         log.info("삭제테스트-resultCnt:"+resultCnt);
-        Assertions.assertTrue(1 == resultCnt);
+        Assertions.assertEquals(1, resultCnt);
         log.info("LatestServiceTest.deleteLatest End");
     }
     //####################### End 알림삭제 ######################
@@ -121,7 +122,7 @@ class LatestServiceTest {
                 .rDate("2014-10-27 16:19:38.000")
                 .categoryGb("").build();
 
-        latestService.insertLatest(latestRequestDto);
+        assertDoesNotThrow(() -> latestService.insertLatest(latestRequestDto));
 
         log.info("LatestServiceTest.insertLatest End");
 

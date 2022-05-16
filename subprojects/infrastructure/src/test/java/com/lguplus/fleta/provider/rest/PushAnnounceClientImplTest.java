@@ -25,10 +25,10 @@ import static org.mockito.BDDMockito.given;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class PushAnnounceDomainClientImplTest {
+class PushAnnounceClientImplTest {
 
     @InjectMocks
-    private PushAnnounceDomainClientImpl pushAnnounceDomainClientImpl;
+    private PushAnnounceClientImpl pushAnnounceClient;
 
     @Mock
     private PushAnnounceFeignClient pushAnnounceFeignClient;
@@ -46,7 +46,7 @@ class PushAnnounceDomainClientImplTest {
 
     @BeforeEach
     void setUp() {
-        pushAnnounceDomainClientImpl = new PushAnnounceDomainClientImpl(pushAnnounceFeignClient, pushConfig, pushMapper);
+        pushAnnounceClient = new PushAnnounceClientImpl(pushAnnounceFeignClient, pushConfig, pushMapper);
 
         List<String> items = new ArrayList<>();
         items.add("badge!^1");
@@ -92,7 +92,7 @@ class PushAnnounceDomainClientImplTest {
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willReturn(retMap);
         given( pushMapper.toResponseDto(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
-        PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceClient.requestAnnouncement(paramMap);
         Assertions.assertEquals("200", responseDto.getStatusCode());
 
         //test2
@@ -100,7 +100,7 @@ class PushAnnounceDomainClientImplTest {
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willReturn(retMap);
         given( pushMapper.toResponseDto(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
-        responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+        responseDto = pushAnnounceClient.requestAnnouncement(paramMap);
         Assertions.assertEquals("200", responseDto.getStatusCode());
     }
 
@@ -108,7 +108,7 @@ class PushAnnounceDomainClientImplTest {
     void requestAnnouncement_ex1()  {
         FeignException ex = new FeignExceptionEx(("<" + jsonNormal).getBytes(StandardCharsets.UTF_8));
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
-        PushResponseDto responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+        PushResponseDto responseDto = pushAnnounceClient.requestAnnouncement(paramMap);
         Assertions.assertEquals("5103", responseDto.getStatusCode());
     }
 
@@ -120,7 +120,7 @@ class PushAnnounceDomainClientImplTest {
         PushResponseDto mockDto = PushResponseDto.builder().statusCode("201").build();
         given(pushMapper.toResponseDto(anyMap())).willReturn(mockDto);
 
-        PushResponseDto  responseDto = pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+        PushResponseDto  responseDto = pushAnnounceClient.requestAnnouncement(paramMap);
         Assertions.assertEquals("201", responseDto.getStatusCode());
     }
 
@@ -133,7 +133,7 @@ class PushAnnounceDomainClientImplTest {
         given( pushAnnounceFeignClient.requestAnnouncement(any(URI.class), anyMap()) ).willThrow(ex);
 
         Exception thrown = assertThrows(SocketTimeException.class, () -> {
-            pushAnnounceDomainClientImpl.requestAnnouncement(paramMap);
+            pushAnnounceClient.requestAnnouncement(paramMap);
         });
 
         Assertions.assertTrue(thrown instanceof SocketTimeException);
@@ -153,30 +153,43 @@ class PushAnnounceDomainClientImplTest {
 
     @Test
     void testServerException() {
-        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
-        assertThrows(InternalErrorException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(500)); });
-        assertThrows(ExceptionOccursException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(502)); });
-        assertThrows(ServiceUnavailableException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(503)); });
-        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(504)); });
+        PushAnnounceClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceClientImpl.PushErrorDecoder();
+        final Response response500 = getHttpResponse(500);
+        assertThrows(InternalErrorException.class, () -> {throw pushErrorDecoder.decode("", response500); });
+        final Response response502 = getHttpResponse(502);
+        assertThrows(ExceptionOccursException.class, () -> {throw pushErrorDecoder.decode("", response502); });
+        final Response response503 = getHttpResponse(503);
+        assertThrows(ServiceUnavailableException.class, () -> {throw pushErrorDecoder.decode("", response503); });
+        final Response response504 = getHttpResponse(504);
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", response504); });
     }
 
     @Test
     void testClientException() {
-        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
-        assertThrows(BadRequestException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(400)); });
-        assertThrows(UnAuthorizedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(401)); });
-        assertThrows(ForbiddenException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(403)); });
-        assertThrows(NotFoundException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(404)); });
-        assertThrows(NotExistRegistIdException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(410)); });
-        assertThrows(PreConditionFailedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(412)); });
-        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(422)); });
+        PushAnnounceClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceClientImpl.PushErrorDecoder();
+        final Response response400 = getHttpResponse(400);
+        assertThrows(BadRequestException.class, () -> {throw pushErrorDecoder.decode("", response400); });
+        final Response response401 = getHttpResponse(401);
+        assertThrows(UnAuthorizedException.class, () -> {throw pushErrorDecoder.decode("", response401); });
+        final Response response403 = getHttpResponse(403);
+        assertThrows(ForbiddenException.class, () -> {throw pushErrorDecoder.decode("", response403); });
+        final Response response404 = getHttpResponse(404);
+        assertThrows(NotFoundException.class, () -> {throw pushErrorDecoder.decode("", response404); });
+        final Response response410 = getHttpResponse(410);
+        assertThrows(NotExistRegistIdException.class, () -> {throw pushErrorDecoder.decode("", response410); });
+        final Response response412 = getHttpResponse(412);
+        assertThrows(PreConditionFailedException.class, () -> {throw pushErrorDecoder.decode("", response412); });
+        final Response response422 = getHttpResponse(422);
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", response422); });
     }
 
     @Test
     void testFeignException() {
-        PushAnnounceDomainClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceDomainClientImpl.PushErrorDecoder();
-        assertThrows(AcceptedException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(202)); });
-        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", getHttpResponse(205)); });
+        PushAnnounceClientImpl.PushErrorDecoder pushErrorDecoder = new PushAnnounceClientImpl.PushErrorDecoder();
+        final Response response202 = getHttpResponse(202);
+        assertThrows(AcceptedException.class, () -> {throw pushErrorDecoder.decode("", response202); });
+        final Response response205 = getHttpResponse(205);
+        assertThrows(PushEtcException.class, () -> {throw pushErrorDecoder.decode("", response205); });
     }
 
     Response getHttpResponse(int status) {

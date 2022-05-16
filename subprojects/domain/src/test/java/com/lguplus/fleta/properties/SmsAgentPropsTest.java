@@ -29,6 +29,6 @@ class SmsAgentPropsTest {
 
         JunitTestUtils.setValue(smsAgentProps, "servers", List.of(serverMap));
         Map<String, String> serverInfoMap = smsAgentProps.findMapByIndex("1").get();
-        assertThat(serverInfoMap.get("id").equals(serverMap.get("id")));
+        assertThat(serverInfoMap).containsEntry("id", serverMap.get("id"));
     }
 }

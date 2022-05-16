@@ -107,7 +107,7 @@ service:
   searchword:
     url: http://searchword.fleta.com
   settings:
-    url: http://settings.fleta.com
+    url: http://localhost:8082
   vodlookup:
     url: http://vodlookup.fleta.com
   channel:
@@ -133,4 +133,4 @@ feign:
         #  header1: header1Value
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
-        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder

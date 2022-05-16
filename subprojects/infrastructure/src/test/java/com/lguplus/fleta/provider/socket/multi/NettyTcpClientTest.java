@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.mockito.Mockito.*;
 
@@ -48,7 +49,7 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class NettyTcpClientTest implements PushMultiClient {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
@@ -67,11 +68,11 @@ class NettyTcpClientTest implements PushMultiClient {
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll

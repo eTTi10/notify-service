@@ -79,8 +79,8 @@ class PushSingleDomainServiceTest {
                 .retryCount(0)
                 .build();
 
-        ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", "100");
-        ReflectionTestUtils.setField(pushSingleDomainService, "pushCallRetryCnt", "2");
+        ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", 100);
+        ReflectionTestUtils.setField(pushSingleDomainService, "pushCallRetryCnt", 2);
         ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "400|401|403");
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushAppId", "smartux0001");
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushNotiType", "POS");
@@ -103,7 +103,7 @@ class PushSingleDomainServiceTest {
         //map.put("error.flag.com.lguplus.fleta.exception.ParameterTypeMismatchException", "5008");
         map.put("push-comm.push.delay.reqCnt", "100");
         map.put("push-comm.push.call.retryCnt", "2");
-        map.put("push-comm.retry.exclud.codeList", "202|400|401|403|404|410|412|5102");
+        map.put("push-comm.retry.exclude.codeList", "202|400|401|403|404|410|412|5102");
 
         map.put("push-comm.push.old.lgupush.notiType", "POS");
         map.put("push-comm.push.old.lgupush.pushAppId", "smartux0001");

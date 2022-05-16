@@ -9,22 +9,27 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.exception.push.*;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import fleta.util.JunitTestUtils;
 import io.netty.bootstrap.Bootstrap;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.util.ReflectionUtils;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 class PushMultiSocketClientImplTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
@@ -50,11 +55,11 @@ class PushMultiSocketClientImplTest {
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll
@@ -63,12 +68,17 @@ class PushMultiSocketClientImplTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         nettyTcpClient = getNettyClient();
         pushMultiSocketClient = new PushMultiSocketClientImpl(nettyTcpClient);
         ReflectionTestUtils.setField(pushMultiSocketClient, "destinationIp", "222.231.13.85");
         ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", "5");
-        ReflectionTestUtils.setField(pushMultiSocketClient, "FLUSH_COUNT", 2);
+        Field pushCountField = pushMultiSocketClient.getClass().getDeclaredField("FLUSH_COUNT");
+        pushCountField.setAccessible(true);
+        Field modifiers = Field.class.getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(pushCountField, pushCountField.getModifiers() & ~Modifier.FINAL);
+        pushCountField.setInt(null, 2);
         ReflectionTestUtils.setField(pushMultiSocketClient, "transactionMsgId", new AtomicInteger((int) (Math.pow(16, 4)) - 3));
 
         for (int i = 0; i < 10; i++) {
@@ -293,7 +303,7 @@ class PushMultiSocketClientImplTest {
 
         TestThread thread = new TestThread();//.run();
         thread.start();
-        Thread.sleep(2000);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(2000));
         thread.interrupt();
 
         AtomicLong time3 = (AtomicLong) ReflectionTestUtils.getField(pushMultiSocketClient, "lastSendMills");

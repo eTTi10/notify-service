@@ -19,15 +19,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-class SubscriberDomainFeinClientTest {
+class SubscriberDomainFeignClientTest {
 
     private static final String SA_ID = "500223046118";
 
     @Mock
-    SubscriberFeinClient subscriberFeinClient;
+    SubscriberFeignClient subscriberFeignClient;
 
     @InjectMocks
-    SubscriberDomainFeinClient subscriberDomainFeinClient;
+    SubscriberDomainFeignClient subscriberDomainFeignClient;
 
     @Test
     @DisplayName("정상적으로 regId를 조회하는지 확인")
@@ -40,16 +40,16 @@ class SubscriberDomainFeinClientTest {
 
         InnerResponseDto<List<SaIdDto>> regIdDtoInnerResponseDto = new InnerResponseDto<List<SaIdDto>>(InnerResponseCodeType.OK, saIdDtos);
 
-        given(subscriberFeinClient.getRegistrationIDbyCtn(any())).willReturn(regIdDtoInnerResponseDto);
+        given(subscriberFeignClient.getRegistrationIDbyCtn(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("ctnNo", "001039752719");
 
         //when
-        List<SaIdDto> responseDto = subscriberDomainFeinClient.getRegistrationIDbyCtn(paramMap);
+        List<SaIdDto> responseDto = subscriberDomainFeignClient.getRegistrationIDbyCtn(paramMap);
 
         //then
-        assertThat(responseDto.get(0).getSaId().equals(SA_ID));
+        assertThat(responseDto.get(0).getSaId()).isEqualTo(SA_ID);
 
     }
 }

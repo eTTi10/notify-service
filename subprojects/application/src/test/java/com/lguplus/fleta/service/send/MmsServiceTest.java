@@ -17,7 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-public class MmsServiceTest {
+class MmsServiceTest {
 
     private static final String SUCCESS_CDE = "0000";
 

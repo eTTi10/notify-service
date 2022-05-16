@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
@@ -14,7 +14,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,17 +27,17 @@ import static org.mockito.Mockito.spy;
 @ExtendWith({ MockitoExtension.class})
 class PushSocketConnFactoryTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll

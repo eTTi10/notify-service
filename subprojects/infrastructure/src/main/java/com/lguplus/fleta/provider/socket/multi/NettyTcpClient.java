@@ -38,26 +38,26 @@ import static java.lang.Thread.sleep;
 @RequiredArgsConstructor
 public class NettyTcpClient {
 
-	@Value("${push-comm.push.server.ip}")
+	@Value("${push.gateway.default.ip}")
 	private String host;
 
-	@Value("${push-comm.push.server.port}")
-	private String port;
+	@Value("${push.gateway.default.port}")
+	private int port;
 
-	@Value("${push-comm.push.socket.timeout}")
-	private String timeout;
+	@Value("${push.gateway.default.socket.timeout}")
+	private int timeout;
 
-	@Value("${push-comm.push.cp.destination_ip}")
+	@Value("${push.gateway.default.destination}")
 	private String destinationIp;
 
 	@Value("${server.port}")
-	private String wasPort;
+	private int wasPort;
 
-	@Value("${push-comm.push.socket.channelID}")
+	@Value("${push.gateway.default.socket.channelId}")
 	private String defaultSocketChannelId;
 
-	@Value("${push-comm.push.call.retryCnt}")
-	private String callRetryCount;
+	@Value("${push.gateway.default.retry}")
+	private int callRetryCount;
 
 	private static final int CONN_TIMEOUT = 1000;
 	public static final String ATTACHED_DATA_ID = "MessageInfo.state";
@@ -88,10 +88,10 @@ public class NettyTcpClient {
 		bootstrap = new Bootstrap()
 				.group(new NioEventLoopGroup(threadCount))
 				.channel(NioSocketChannel.class)
-				.remoteAddress(host, Integer.parseInt(port))
+				.remoteAddress(host, port)
 				.option(ChannelOption.TCP_NODELAY, true)
 				.option(ChannelOption.SO_KEEPALIVE, true)
-				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Integer.parseInt(timeout))
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, timeout)
 				.handler(new ChannelInitializer<SocketChannel>() {
 					public void initChannel(SocketChannel ch) {
 						ChannelPipeline p = ch.pipeline();
@@ -187,7 +187,7 @@ public class NettyTcpClient {
 	public Optional<PushMessageInfoDto> writeSync(PushMessageInfoDto message) {
 		PushMessageInfoDto response = null;
 
-		int retryCount = Integer.parseInt(callRetryCount);
+		int retryCount = callRetryCount;
 
 		//Clear
 		setAttachment(message.getMessageId());

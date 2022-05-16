@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * 단건, 멀티(단건 사용), 공지 푸시등록
  */
-public interface HttpPushDomainClient {
+public interface HttpPushClient {
 
     /**
      * 단건 푸시

@@ -25,9 +25,9 @@ import java.util.Map;
 @PropertySource(name = "push_config", value = "classpath:push/push-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
 public class PushConfig {
 
-    private static final String PUSH_COMM_PROPERTY_PREFIX = "push-comm.";
-    private static final String PUSH_SERVICE_PROPERTY_PREFIX = "push-service.";
-    public static final String PUSH_SERVICE_ID = ".service_id";
+    private static final String PUSH_COMM_PROPERTY_PREFIX = "push.gateway.";
+    private static final String PUSH_SERVICE_PROPERTY_PREFIX = "push.service[";
+    public static final String PUSH_SERVICE_ID = ".id";
 
     private final Map<String, String> propertiesPushComm = new HashMap<>();
     private final Map<String, String> propertiesPushService = new HashMap<>();
@@ -49,11 +49,11 @@ public class PushConfig {
                     } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(PUSH_SERVICE_ID)) {
                         //String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "")
                         String serviceId = String.valueOf(propertyValue);
-                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".service_pwd")));
+                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".password")));
                         propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
 
                         if(propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".linkage_type"))) {
-                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".linkage_type")));
+                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".type")));
                             propertiesPushServiceLinkType.put(serviceId, linkType);
                         }
                     }

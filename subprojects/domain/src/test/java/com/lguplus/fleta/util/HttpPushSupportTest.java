@@ -137,7 +137,7 @@ class HttpPushSupportTest {
 
     @Test
     void testSingleTransactionIdNum() {
-        JunitTestUtils.setValue(httpServiceProps, "singleTransactionIdNum", new AtomicInteger(10000));
+        HttpServiceProps.singleTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
         keyMap.put("service_id", "30015");
@@ -153,7 +153,7 @@ class HttpPushSupportTest {
 
     @Test
     void testAnnounceTransactionIdNum() {
-        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+        HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
         keyMap.put("service_id", "30015");
@@ -169,7 +169,7 @@ class HttpPushSupportTest {
 
     @Test
     void testAnnounceTransactionIdNum2() {
-        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+        HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
         keyMap.put("service_id", "30015");
@@ -185,7 +185,7 @@ class HttpPushSupportTest {
 
     @Test
     void testAnnounceTransactionIdNum3() {
-        JunitTestUtils.setValue(httpServiceProps, "announceTransactionIdNum", new AtomicInteger(10000));
+        HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
         keyMap.put("service_id", "30015");

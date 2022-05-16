@@ -21,9 +21,11 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 @Slf4j
 @ExtendWith(SpringExtension.class)
-class LatestJpaJpaRepositoryTest {
+class LatestJpaRepositoryTest {
     @Mock
     private EntityManager em;
 
@@ -73,7 +75,7 @@ class LatestJpaJpaRepositoryTest {
                 .catName("놀라운 대회 스타킹")
                 .categoryGb(CATEGORY_GB)
                 .build();
-        latestRepositoryImpl.insertLatest(latestRequestDto);
+        assertDoesNotThrow(() -> latestRepositoryImpl.insertLatest(latestRequestDto));
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList End");
     }
@@ -94,7 +96,7 @@ class LatestJpaJpaRepositoryTest {
                 .build();
         List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto);
         // 결과값은 0건 또는 1건
-        assertThat(responseList.size() < 2);
+        assertThat(responseList.size()).isLessThan(2).isNotNegative();
 
         log.info("LatestJpaJpaRepositoryTest.getLatestList End");
     }
@@ -111,7 +113,7 @@ class LatestJpaJpaRepositoryTest {
                 .build();
         List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
-        assertThat(responseList.size() >= 0);
+        assertThat(responseList.size()).isNotNegative();
 
         log.info("LatestJpaJpaRepositoryTest.getLatestList_catIdNull End");
     }
@@ -130,7 +132,7 @@ class LatestJpaJpaRepositoryTest {
                 .build();
         List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto);
         // 결과값은 0건 또는 1건
-        assertThat(responseList.size() == 0);
+        assertThat(responseList.size()).isLessThan(2).isNotNegative();
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList End");
     }
@@ -146,7 +148,7 @@ class LatestJpaJpaRepositoryTest {
                 .build();
         List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
-        assertThat(responseList.size() >= 0);
+        assertThat(responseList.size()).isNotNegative();
 
         log.info("LatestJpaJpaRepositoryTest.getLatestCheckList_catIdNull End");
     }
@@ -168,7 +170,7 @@ class LatestJpaJpaRepositoryTest {
                 .build();
         int resultCnt = latestRepositoryImpl.deleteLatest(latestRequestDto);
         // 결과값은 0건 또는 1건
-        assertThat(resultCnt == 1);
+        assertThat(resultCnt).isLessThan(2).isNotNegative();
 
         log.info("LatestJpaJpaRepositoryTest.deleteLatest End");
     }

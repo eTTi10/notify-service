@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
@@ -80,6 +81,9 @@ class PushMultiDomainServiceTest {
 
     @Test
     void requestMultiPush_case_password_null() {
+
+        assertThat(PushMultiClient.MsgType.values()).isNotEmpty();
+
         PushRequestMultiDto testDto = PushRequestMultiDto.builder()
                 .serviceId("XXXXX") //unknown service id
                 .pushType("G")
@@ -137,7 +141,7 @@ class PushMultiDomainServiceTest {
         //map.put("error.flag.com.lguplus.fleta.exception.ParameterTypeMismatchException", "5008");
         map.put("push-comm.push.delay.reqCnt", "100");
         map.put("push-comm.push.call.retryCnt", "2");
-        map.put("push-comm.retry.exclud.codeList", "202|400|401|403|404|410|412|5102");
+        map.put("push-comm.retry.exclude.codeList", "202|400|401|403|404|410|412|5102");
 
         map.put("push-comm.push.old.lgupush.notiType", "POS");
         map.put("push-comm.push.old.lgupush.pushAppId", "smartux0001");

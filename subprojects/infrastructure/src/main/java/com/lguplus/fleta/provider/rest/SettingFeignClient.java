@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 
 
-@FeignClient(name = "mms-agent-rest-message", url = "${mmsroot.mms.setting.rest_url}")
-public interface MmsCallSettingFeignClient {
+@FeignClient(name = "settings", url = "${service.settings.url}")
+public interface SettingFeignClient {
     /**
      *
      * @return
      */
-    @GetMapping(value = "${mmsroot.mms.setting.rest_path}", produces = "application/json")
+    @GetMapping(value = "/settings/configuration", produces = "application/json")
     CallSettingResultMapDto callSettingApi(@RequestParam Map<String, String> prm);
 
 

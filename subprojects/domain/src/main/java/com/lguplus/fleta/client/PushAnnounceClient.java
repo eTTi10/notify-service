@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * 공지 푸시등록
  */
-public interface PushAnnounceDomainClient {
+public interface PushAnnounceClient {
 
     /**
      * Push Announcement

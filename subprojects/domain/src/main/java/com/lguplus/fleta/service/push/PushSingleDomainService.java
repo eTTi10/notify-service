@@ -30,32 +30,30 @@ public class PushSingleDomainService {
     private final PushConfig pushConfig;
     private final PushSingleClient pushSingleClient;
 
-    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    @Value("${push.gateway.appId}")
     private String oldLgPushAppId;
 
-    @Value("${push-comm.push.old.lgupush.notiType}")
+    @Value("${push.gateway.notiType}")
     private String oldLgPushNotiType;
 
-    @Value("${push-comm.lgpush.service_id}")
+    @Value("${push.gateway.serviceId}")
     private String lgPushServceId;
 
-    @Value("${push-comm.push.delay.reqCnt}")
-    private String pushDelayReqCnt;
-    private Long lPushDelayReqCnt;
+    @Value("${push.gateway.delay.request}")
+    private long pushDelayReqCnt;
 
-    @Value("${push-comm.push.call.retryCnt}")
-    private String pushCallRetryCnt;
-    private int iPushCallRetryCnt;
+    @Value("${push.gateway.retry.count}")
+    private int pushCallRetryCnt;
 
-    @Value("${push-comm.retry.exclud.codeList}")
-    private String retryExcludeCodeList;
+    @Value("${push.gateway.retry.exclude}")
+    private Set<String> retryExcludeCodeList;
 
     private final AtomicInteger tranactionMsgId1 = new AtomicInteger(0);
     private final AtomicInteger tranactionMsgId2 = new AtomicInteger(0);
 
     private Map<String,Object> requestLock;
     private Map<String,Object> progressLock;
-    private final List<ProcessCounter> pushProgressCnt = new ArrayList<>();
+    private final List<ProcessCounter> pushProgressCnt = Collections.synchronizedList(new ArrayList<>());
 
     private static final String DATE_FOMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_NOTI";
@@ -64,9 +62,6 @@ public class PushSingleDomainService {
 
     @PostConstruct
     public void initialize(){
-
-        lPushDelayReqCnt = Long.parseLong(pushDelayReqCnt);
-        iPushCallRetryCnt = Integer.parseInt(pushCallRetryCnt);
 
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
@@ -95,7 +90,7 @@ public class PushSingleDomainService {
         //1. Make Message
         Map<String, String> paramMap = getMessage(dto, servicePwd);
 
-        int retryCount = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : iPushCallRetryCnt;
+        int retryCount = Optional.ofNullable(dto.getRetryCount()).orElse(0) > 1 ? dto.getRetryCount() : pushCallRetryCnt;
 
         //2. Send Push
         AtomicBoolean isFutureSuccess = new AtomicBoolean(false);
@@ -155,12 +150,12 @@ public class PushSingleDomainService {
         //long pushWaitTime = requstInfo.getRight() //Mili Seconds
 
         // 처리량 초과
-        if (pushCnt > lPushDelayReqCnt) {
+        if (pushCnt > pushDelayReqCnt) {
             //log.debug("max-count-over : service:{} pushCnt:{}/{} wait:{}", dto.getServiceId(), pushCnt, lPushDelayReqCnt, 1000 - pushWaitTime)
 
             // 현재 Push 진행 중인 갯수가 최대 허용 횟수의 2배이상 된다면 G/W가 죽었거나 뭔가 문제가 있는 것
             // (retry설정 등에 의해) 이럴땐 일단 다시 받아들이기 시작하자.
-            if (lPushDelayReqCnt * 2 < pushCnt) {
+            if (pushDelayReqCnt * 2 < pushCnt) {
                 resetPushProgressCnt(serviceId);
             }
             throw new MaxRequestOverException();
@@ -201,7 +196,7 @@ public class PushSingleDomainService {
     }
 
     private boolean isRetryExcludeCode(String code) {
-        return ("|"+retryExcludeCodeList+"|").contains("|" + code+"|");
+        return retryExcludeCodeList.contains(code);
     }
 
     private boolean isLgPushServiceId(String serviceId) {

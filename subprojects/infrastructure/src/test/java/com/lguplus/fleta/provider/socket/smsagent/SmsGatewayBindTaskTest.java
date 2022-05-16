@@ -42,10 +42,10 @@ class SmsGatewayBindTaskTest {
         doNothing().when(smsGateway).checkLink();
 
         bindTimerTask = new SmsGateway.BindTimerTask(smsGateway);
-        bindTimerTask.run();
+        assertDoesNotThrow(bindTimerTask::run);
 
         doThrow(IOException.class).when(smsGateway).checkLink();
-        bindTimerTask.run();
+        assertDoesNotThrow(bindTimerTask::run);
     }
 
     @Test
@@ -53,12 +53,12 @@ class SmsGatewayBindTaskTest {
 
         JunitTestUtils.setValue(smsGateway, "isLinked", true);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
-        linkTimerTask.run();
+        assertDoesNotThrow(linkTimerTask::run);
 
         doNothing().when(smsGateway).connectGateway();
         JunitTestUtils.setValue(smsGateway, "isLinked", false);
         linkTimerTask = new SmsGateway.LinkTimerTask(smsGateway);
-        linkTimerTask.run();
+        assertDoesNotThrow(linkTimerTask::run);
 
     }
 
@@ -67,11 +67,11 @@ class SmsGatewayBindTaskTest {
 
         JunitTestUtils.setValue(smsGateway, "mResult", "");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
-        errorTimerTask.run();
+        assertDoesNotThrow(bindTimerTask::run);
 
         JunitTestUtils.setValue(smsGateway, "mResult", "0000");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
-        errorTimerTask.run();
+        assertDoesNotThrow(bindTimerTask::run);
 
     }
 }

@@ -4,7 +4,7 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -21,13 +21,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSingleSocketClientImplTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
@@ -42,11 +44,11 @@ class PushSingleSocketClientImplTest {
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll

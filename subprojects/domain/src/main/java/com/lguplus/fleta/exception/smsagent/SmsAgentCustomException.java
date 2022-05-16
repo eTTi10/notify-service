@@ -14,24 +14,24 @@ public class SmsAgentCustomException extends NotifyRuntimeException {
         return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 
-    private String code;
-
-    private String message;
+    private final String code;
     /**
      *
      */
-    public SmsAgentCustomException() {
+    public SmsAgentCustomException(final String code) {
 
         super();
+        this.code = code;
     }
 
     /**
      *
      * @param message
      */
-    public SmsAgentCustomException(final String message) {
+    public SmsAgentCustomException(final String code, final String message) {
 
         super(message);
+        this.code = code;
     }
 
     /**
@@ -39,17 +39,19 @@ public class SmsAgentCustomException extends NotifyRuntimeException {
      * @param message
      * @param cause
      */
-    public SmsAgentCustomException(final String message, final Throwable cause) {
+    public SmsAgentCustomException(final String code, final String message, final Throwable cause) {
 
         super(message, cause);
+        this.code = code;
     }
 
     /**
      *
      * @param cause
      */
-    public SmsAgentCustomException(final Throwable cause) {
+    public SmsAgentCustomException(final String code, final Throwable cause) {
 
         super(cause);
+        this.code = code;
     }
 }

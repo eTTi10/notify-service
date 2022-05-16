@@ -74,6 +74,6 @@ class PushServiceTest {
 
         //then
         SendPushResponseDto responseDto = pushService.sendPushCode(sendPushCodeRequestDto);
-        assertThat(responseDto.getMessage().equals(sendPushResponseDto.getMessage()));
+        assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
     }
 }

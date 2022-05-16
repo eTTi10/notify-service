@@ -9,18 +9,8 @@ mmsroot:
         namespace: http://www.3gpp.org/ftp/Specs/archive/23_series/23.140/schema/REL-5-MM7-1-2
         prefix: mm7
         readtimeout: 5000
-        sender: "01057404003"
-        server_url: "http://61.101.246.151:8887"
-        setting:
-            request_method: GET
-            timeout: 5000
-            url: http://localhost:8082/settings/configuration
-            rest_url: "http://localhost:8082"
-            rest_path: "/settings/configuration"
-            rest_sa_id: mms
-            rest_stb_mac: mms
-            rest_code_id:
-            rest_svc_type: E
+        sender: 01057404003
+        server_url: http://222.231.12.68:8887
         vasid: MMSTVMOBILE
         vaspid: MMSTVMOBILE
         version: 5.3.0

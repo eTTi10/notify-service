@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap;
 
-import com.lguplus.fleta.client.MmsAgentDomainClient;
+import com.lguplus.fleta.client.MmsAgentClient;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.*;
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.content.BasicContent;
@@ -18,7 +18,7 @@ import java.util.Random;
 @Slf4j
 @Component
 
-public class MmsAgentSoapClient implements MmsAgentDomainClient {
+public class MmsAgentSoapClient implements MmsAgentClient {
    private Random random = new Random();
     @Override
     public String sendMMS(Map<String, ?> mmsConfig, MmsRequestDto mmsDto){

@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.client.PushAnnounceDomainClient;
+import com.lguplus.fleta.client.PushAnnounceClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
@@ -26,21 +26,21 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
+public class PushAnnounceClientImpl implements PushAnnounceClient {
 
     private final PushAnnounceFeignClient pushAnnounceFeignClient;
     private final PushConfig pushConfig;
     //private final ObjectMapper objectMapper
     private final PushMapper pushMapper;
 
-    @Value("${push-comm.announce.server.ip}")
+    @Value("${push.gateway.announce.server.ip}")
     private String host;
 
-    @Value("${push-comm.announce.server.protocol}")
+    @Value("${push.gateway.announce.server.protocol}")
     private String protocol;
 
-    @Value("${push-comm.announce.server.port}")
-    private String port;
+    @Value("${push.gateway.announce.server.port}")
+    private int port;
 
     /**
      * Push Announcement 푸시
@@ -90,7 +90,7 @@ public class PushAnnounceDomainClientImpl implements PushAnnounceDomainClient {
     public static class PushErrorDecoder implements ErrorDecoder {
 
         @Override
-        public Exception decode(String methodKey, Response response) {
+        public RuntimeException decode(String methodKey, Response response) {
             FeignException ex = FeignException.errorStatus(methodKey, response);
 
             if(ex instanceof FeignException.FeignServerException) {

@@ -1,4 +1,4 @@
-package com.lguplus.fleta.provider.socket.smsagent;
+package com.lguplus.fleta.provider.socket.multi;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
@@ -14,10 +14,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
-public class NettySmsAgentServerTest {
-
+public class NettyTcpJunitServer {
     public String responseCode = "200";
     public int responseCount = 0;
     public String responseTestMode = "normal";
@@ -56,9 +57,9 @@ public class NettySmsAgentServerTest {
     }
 
     static class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
-        NettySmsAgentServerTest nettyTcpServer;
+        NettyTcpJunitServer nettyTcpServer;
 
-        public ChannelInitializerTest(NettySmsAgentServerTest server) {
+        public ChannelInitializerTest(NettyTcpJunitServer server) {
             this.nettyTcpServer = server;
         }
 
@@ -66,9 +67,9 @@ public class NettySmsAgentServerTest {
         protected void initChannel(SocketChannel socketChannel) throws Exception {
             ChannelPipeline pipeline = socketChannel.pipeline();
             // 핸들러 설정
-            pipeline.addLast("decoder", new NettySmsAgentServerTest.MessageDecoderTest());
-            pipeline.addLast("encoder", new NettySmsAgentServerTest.MessageEncoderTest());
-            pipeline.addLast("handler", new NettySmsAgentServerTest.MessageHandlerTest(nettyTcpServer));
+            pipeline.addLast("decoder", new MessageDecoderTest());
+            pipeline.addLast("encoder", new MessageEncoderTest());
+            pipeline.addLast("handler", new MessageHandlerTest(nettyTcpServer));
         }
     }
 
@@ -232,9 +233,9 @@ public class NettySmsAgentServerTest {
         final int COMMAND_REQUEST = 15;
         final int SLEEP_MILLS = 10;
 
-        NettySmsAgentServerTest nettyTcpServer;
+        NettyTcpJunitServer nettyTcpServer;
 
-        public MessageHandlerTest(NettySmsAgentServerTest server) {
+        public MessageHandlerTest(NettyTcpJunitServer server) {
             this.nettyTcpServer = server;
         }
 
@@ -245,7 +246,7 @@ public class NettySmsAgentServerTest {
                 // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
                 log.debug(":: MessageHandlerTest channelRead : PROCESS_STATE_REQUEST");
 
-                Thread.sleep(SLEEP_MILLS);
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 if (nettyTcpServer.responseProcessFlag.length() > 0) {
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
@@ -261,7 +262,7 @@ public class NettySmsAgentServerTest {
                 // 메시지 전송을 Sync 방식으로 작동하게 하기 위함.
                 log.debug(":: MessageHandlerTest channelRead : CHANNEL_CONNECTION_REQUEST");
 
-                Thread.sleep(SLEEP_MILLS);
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 ctx.writeAndFlush(PushMessageInfoDto.builder()
                         .messageId(CHANNEL_CONNECTION_REQUEST + 1)
@@ -275,7 +276,7 @@ public class NettySmsAgentServerTest {
                 // Push 전송인 경우 response 결과를 임시 Map에 저장함.
                 log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST normal {}", message);
 
-                Thread.sleep(SLEEP_MILLS);
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 String data = "SC{\n" +
                         "\"response\" : {\n" +
@@ -300,7 +301,7 @@ public class NettySmsAgentServerTest {
                 // Push 전송인 경우 response 결과를 임시 Map에 저장함.
                 log.debug(":: MessageHandlerTest channelRead : COMMAND_REQUEST abnormal {}", message);
 
-                Thread.sleep(SLEEP_MILLS);
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 String data = "SC{\n" +
                         "\"response\" : {\n" +
@@ -331,7 +332,7 @@ public class NettySmsAgentServerTest {
                     // not response
                 } else if (nettyTcpServer.responseCount % modeValue == 3) {
                     // delay time
-                    Thread.sleep(500);
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
                             .messageId(COMMAND_REQUEST + 1)
                             .channelId(message.getChannelId())

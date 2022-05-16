@@ -18,15 +18,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-class PersonalizationDomainFeinClientTest {
+class PersonalizationDomainFeignClientTest {
 
     private static final String REG_ID = "0kjk7HCvk64QtUd+3Gfw0cdiE53ID/5XstD2so0MCgk=";
 
     @Mock
-    PersonalizationFeinClient personalizationFeinClient;
+    PersonalizationFeignClient personalizationFeignClient;
 
     @InjectMocks
-    PersonalizationDomainFeinClient personalizationDomainFeinClient;
+    PersonalizationDomainFeignClient personalizationDomainFeignClient;
 
     @Test
     @DisplayName("정상적으로 regId를 조회하는지 확인")
@@ -38,14 +38,14 @@ class PersonalizationDomainFeinClientTest {
                 .build();
 
         InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
-        given(personalizationFeinClient.getRegistrationID(any())).willReturn(regIdDtoInnerResponseDto);
+        given(personalizationFeignClient.getRegistrationID(any())).willReturn(regIdDtoInnerResponseDto);
 
         Map<String, String> paramMap = new HashMap<>();
         paramMap.put("saId", "500223046118");
         paramMap.put("stbMac", "f83b.1d31.6c36");
 
         //when
-        RegIdDto responseDto = personalizationDomainFeinClient.getRegistrationID(paramMap);
+        RegIdDto responseDto = personalizationDomainFeignClient.getRegistrationID(paramMap);
 
         //then
         assertThat(responseDto.getRegistrationId()).isEqualTo(REG_ID);

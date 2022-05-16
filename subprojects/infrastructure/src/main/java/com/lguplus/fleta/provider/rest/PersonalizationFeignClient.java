@@ -9,10 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-//@FeignClient(name="personalization", url="${service.personalization.url}")
-@FeignClient(name="personalization", url="http://localhost:8083")
-
-public interface PersonalizationFeinClient {
+@FeignClient(name="personalization", url="${service.personalization.url}")
+public interface PersonalizationFeignClient {
 
     @GetMapping(value="/personalization/registrationid/info", produces = "application/json", consumes = "application/json")
     InnerResponseDto<RegIdDto> getRegistrationID(@RequestParam Map<String, String> conditions);

@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Http SinglePush Component
@@ -25,12 +26,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HttpSinglePushDomainService {
 
-    private final HttpPushDomainClient httpPushDomainClient;
+    private final HttpPushClient httpPushClient;
 
     private final HttpPushSupport httpPushSupport;
 
-    @Value("${multi.push.reject.regList}")
-    private String rejectReg;
+    @Value("${push.reject}")
+    private Set<String> rejectReg;
 
 
     /**
@@ -44,17 +45,11 @@ public class HttpSinglePushDomainService {
 
         // 발송 제외 가번 확인
         log.debug("rejectReg :::::::::::::::::::: {}", rejectReg);
-        String[] rejectRegIds = rejectReg.split("\\|");
         String regId = httpPushSingleRequestDto.getUsers().get(0);
 
-        if (Arrays.asList(rejectRegIds).contains(regId.strip())) {
+        if (rejectReg.contains(regId.strip())) {
             Pair<String, String> cdMsgMap = httpPushSupport.getHttpServiceProps().getExceptionCodeMessage("ExclusionNumberException");
-
-            HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-            httpPushCustomException.setCode(cdMsgMap.getLeft());
-            httpPushCustomException.setMessage(cdMsgMap.getRight());
-
-            throw httpPushCustomException;   // 9998 발송제한번호
+            throw new HttpPushCustomException(null, cdMsgMap.getLeft(), cdMsgMap.getRight());   // 9998 발송제한번호
         }
 
         String applicationId = httpPushSingleRequestDto.getApplicationId();
@@ -65,7 +60,7 @@ public class HttpSinglePushDomainService {
 
         Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
 
-        httpPushDomainClient.requestHttpPushSingle(paramMap);
+        httpPushClient.requestHttpPushSingle(paramMap);
 
         // 성공
         return HttpPushResponseDto.builder().build();

@@ -20,7 +20,7 @@ sonarqube{
         property 'sonar.sources', 'src'
         property 'sonar.language', 'java'
         property 'sonar.coverage.exclusions', 'subprojects/boot/**, **/data/**, **/config/**, **/filter/**, **/interceptor/**, **/advice/**, **/exception/**'
-        property 'sonar.exclusions', '**/test/**,  **/*Doc*.java, **/resources/**'
+        property 'sonar.exclusions', '**/test/**,  **/*Doc*.java, **/resources/**, **/external/**'
 
     }
 }
@@ -105,6 +105,7 @@ subprojects {
                         "com/lguplus/fleta/exception/*",
                         "com/lguplus/fleta/filter/*",
                         "com/lguplus/fleta/interceptor/*",
+                        "com/lguplus/fleta/provider/external/*"
                 ])
             }))
         }
@@ -145,6 +146,7 @@ subprojects {
                         'com.lguplus.fleta.interceptor.*',
                         'com.lguplus.fleta.exhandler.*',
                         'com.lguplus.fleta.validation.*',
+                        "com.lguplus.fleta.provider.external.*",
                 ]
             }
         }

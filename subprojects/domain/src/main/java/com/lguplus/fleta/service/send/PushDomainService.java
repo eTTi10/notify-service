@@ -37,13 +37,13 @@ public class PushDomainService {
     private final SubscriberDomainClient subscriberDomainClient;
     private final SendPushCodeProps sendPushCodeProps;
 
-    @Value("${fcm.extra.send}")
+    @Value("${push.fcm.extra.send}")
     private String fcmExtraSend;
 
-    @Value("${fcm.extra.serviceid}")
+    @Value("${push.fcm.extra.serviceid}")
     private String extraServiceId;
 
-    @Value("${fcm.extra.appid}")
+    @Value("${push.fcm.extra.appid}")
     private String extraApplicationId;
 
     private static final String KEY_GCM_SERVICEID = "gcm.serviceid";
@@ -58,9 +58,9 @@ public class PushDomainService {
 
     private static final String MESSAGE_1001 = "Push GW Precondition Failed or Not Exist RegistID";
 
-    private Boolean successCheckFlag = false;
-    private Boolean check1001Flag = false;
-    private Boolean resultFlag = true;
+    private boolean successCheckFlag = false;
+    private boolean check1001Flag = false;
+    private boolean resultFlag = true;
 
     private String sType = "";
     private String sFlag;
@@ -146,6 +146,11 @@ public class PushDomainService {
                     log.debug("code :::::::::::: {}\tmessage :::::::::::::::: {}", ex.getCode(), ex.getMessage());
                     failCode = ex.getCode();
                     failMessage = ex.getMessage();
+                }
+
+                if (httpPushResponseDto != null && !"성공".equals(httpPushResponseDto.getMessage())) {
+                    failCode = httpPushResponseDto.getCode();
+                    failMessage = httpPushResponseDto.getMessage();
                 }
 
                 //추가 발송 (소켓)
@@ -314,7 +319,7 @@ public class PushDomainService {
 
         List<SaIdDto> saIdDtos = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
         log.debug("subscriberDomainClient.getRegistrationIDbyCtn() saIdDtos:{}", saIdDtos);
-        if (saIdDtos.size() > 0) {
+        if (!saIdDtos.isEmpty()) {
             return StringUtils.defaultIfEmpty(saIdDtos.get(0).getSaId(), "");
         }
         else return "";
@@ -370,7 +375,7 @@ public class PushDomainService {
         log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
 
         //reserve에 들어갈 내용을
-        params = pushInfoMap.get(KEY_PARAM_LIST);;
+        params = pushInfoMap.get(KEY_PARAM_LIST);
         pushParams = params.split("\\|");
         paramSize = pushParams.length;
 
@@ -448,7 +453,7 @@ public class PushDomainService {
         }
 
         //reserve에 들어갈 내용을
-        String paramList = pushInfoMap.get(KEY_PARAM_LIST);;
+        String paramList = pushInfoMap.get(KEY_PARAM_LIST);
         String[] pushParamList = paramList.split("\\|");
         int paramSize = pushParamList.length;
 
@@ -551,7 +556,7 @@ public class PushDomainService {
         log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, applicationId, payload);
 
         //reserve에 들어갈 내용을
-        paramList = pushInfoMap.get(KEY_PARAM_LIST);;
+        paramList = pushInfoMap.get(KEY_PARAM_LIST);
         pushParams = paramList.split("\\|");
         paramSize = pushParams.length;
 

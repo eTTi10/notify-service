@@ -21,20 +21,20 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
-class HttpPushDomainFeignClientTest {
+class HttpPushFeignClientTest {
 
     private static final String SUCCESS_CODE = "200";
 
     @InjectMocks
-    HttpPushDomainClientImpl httpPushDomainFeignClient;
+    HttpPushClientImpl httpPushClient;
 
     @Mock
     HttpPushFeignClient httpPushFeignClient;
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpPushDomainFeignClient, "protocolSingle", "http");
-        JunitTestUtils.setValue(httpPushDomainFeignClient, "protocolAnnounce", "http");
+        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "http");
+        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "http");
     }
 
     @Test
@@ -53,7 +53,7 @@ class HttpPushDomainFeignClientTest {
         paramMap.put("msg", "\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"");
 
         // when
-        OpenApiPushResponseDto responseDto = httpPushDomainFeignClient.requestHttpPushSingle(paramMap);
+        OpenApiPushResponseDto responseDto = httpPushClient.requestHttpPushSingle(paramMap);
 
         // then
         assertThat(responseDto.getReturnCode()).isEqualTo(SUCCESS_CODE);    // 성공 코드가 있는지 확인
@@ -75,7 +75,7 @@ class HttpPushDomainFeignClientTest {
         paramMap.put("items", List.of("gcm_multi_count!^100"));
 
         // when
-        OpenApiPushResponseDto responseDto = httpPushDomainFeignClient.requestHttpPushAnnouncement(paramMap);
+        OpenApiPushResponseDto responseDto = httpPushClient.requestHttpPushAnnouncement(paramMap);
 
         // then
         assertThat(responseDto.getReturnCode()).isEqualTo(SUCCESS_CODE);    // 성공 코드가 있는지 확인
@@ -83,33 +83,33 @@ class HttpPushDomainFeignClientTest {
 
     @Test
     void testGetBaseUrl() throws Exception {
-        HttpPushDomainClientImpl httpPushDomainClientImpl = new HttpPushDomainClientImpl(httpPushFeignClient);
+        HttpPushClientImpl httpPushClient = new HttpPushClientImpl(httpPushFeignClient);
 
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "hostSingle", "211.115.75.227");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "protocolSingle", "http");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "httpPortSingle", "5556");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "httpsPortSingle", "6556");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "hostAnnounce", "211.115.75.227");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "protocolAnnounce", "http");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "httpPortAnnounce", "5555");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "httpsPortAnnounce", "6555");
+        JunitTestUtils.setValue(httpPushClient, "hostSingle", "211.115.75.227");
+        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "http");
+        JunitTestUtils.setValue(httpPushClient, "httpPortSingle", "5556");
+        JunitTestUtils.setValue(httpPushClient, "httpsPortSingle", "6556");
+        JunitTestUtils.setValue(httpPushClient, "hostAnnounce", "211.115.75.227");
+        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "http");
+        JunitTestUtils.setValue(httpPushClient, "httpPortAnnounce", "5555");
+        JunitTestUtils.setValue(httpPushClient, "httpsPortAnnounce", "6555");
 
-        Method method = httpPushDomainClientImpl.getClass().getDeclaredMethod("getBaseUrl", String.class);
+        Method method = httpPushClient.getClass().getDeclaredMethod("getBaseUrl", String.class);
         method.setAccessible(true);
 
-        String singlePushUrl = (String) method.invoke(httpPushDomainClientImpl, "S");
+        String singlePushUrl = (String) method.invoke(httpPushClient, "S");
         assertThat(singlePushUrl).contains("5556");
 
-        String announcementPushUrl = (String) method.invoke(httpPushDomainClientImpl, "A");
+        String announcementPushUrl = (String) method.invoke(httpPushClient, "A");
         assertThat(announcementPushUrl).contains("5555");
 
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "protocolSingle", "https");
-        JunitTestUtils.setValue(httpPushDomainClientImpl, "protocolAnnounce", "https");
+        JunitTestUtils.setValue(httpPushClient, "protocolSingle", "https");
+        JunitTestUtils.setValue(httpPushClient, "protocolAnnounce", "https");
 
-        singlePushUrl = (String) method.invoke(httpPushDomainClientImpl, "S");
+        singlePushUrl = (String) method.invoke(httpPushClient, "S");
         assertThat(singlePushUrl).contains("6556");
 
-        announcementPushUrl = (String) method.invoke(httpPushDomainClientImpl, "A");
+        announcementPushUrl = (String) method.invoke(httpPushClient, "A");
         assertThat(announcementPushUrl).contains("6555");
     }
 

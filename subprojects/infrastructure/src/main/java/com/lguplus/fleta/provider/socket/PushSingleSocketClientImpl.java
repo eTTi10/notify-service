@@ -37,54 +37,54 @@ import java.util.Map;
 public class PushSingleSocketClientImpl implements PushSingleClient {
 
     //Pool Config
-    @Value("${push-comm.push.socket.max}")
-    private String socketMax;
-    @Value("${push-comm.push.socket.min}")
-    private String socketMin;
-    @Value("${push-comm.lgpush.socket.max}")
-    private String lgSocketMax;
-    @Value("${push-comm.lgpush.socket.min}")
-    private String lgSocketMin;
+    @Value("${push.gateway.default.socket.max}")
+    private int socketMax;
+    @Value("${push.gateway.default.socket.min}")
+    private int socketMin;
+    @Value("${push.gateway.lgupush.socket.max}")
+    private int lgSocketMax;
+    @Value("${push.gateway.lgupush.socket.min}")
+    private int lgSocketMin;
 
     //HDTV
-    @Value("${push-comm.push.server.ip}")
+    @Value("${push.gateway.default.ip}")
     private String host;
-    @Value("${push-comm.push.server.port}")
-    private String port;
-    @Value("${push-comm.push.socket.timeout}")
-    private String timeout;
+    @Value("${push.gateway.default.port}")
+    private int port;
+    @Value("${push.gateway.default.socket.timeout}")
+    private int timeout;
     @Value("${server.port}")
-    private String wasPort;
-    @Value("${push-comm.push.socket.channelID}")
+    private int wasPort;
+    @Value("${push.gateway.default.socket.channelId}")
     private String defaultChannelHost;
-    @Value("${push-comm.push.cp.destination_ip}")
+    @Value("${push.gateway.default.destination}")
     private String destinationIp;
-    @Value("${push-comm.push.socket.close_secend}")
-    private String closeSecond;
-    @Value("${push-comm.push.socket.initCnt}")
-    private String pushSocketInitCnt;
+    @Value("${push.gateway.default.socket.closeSecond}")
+    private int closeSecond;
+    @Value("${push.gateway.default.socket.init}")
+    private int pushSocketInitCnt;
 
     //LG Push
-    @Value("${push-comm.lgpush.server.ip}")
+    @Value("${push.gateway.lgupush.ip}")
     private String lgHost;
-    @Value("${push-comm.lgpush.server.port}")
-    private String lgPort;
-    @Value("${push-comm.lgpush.socket.timeout}")
-    private String lgTimeout;
-    @Value("${push-comm.lgpush.socket.channelID}")
+    @Value("${push.gateway.lgupush.port}")
+    private int lgPort;
+    @Value("${push.gateway.lgupush.socket.timeout}")
+    private int lgTimeout;
+    @Value("${push.gateway.lgupush.socket.channelId}")
     private String lgDefaultChannelHost;
-    @Value("${push-comm.lgpush.cp.destination_ip}")
+    @Value("${push.gateway.lgupush.destination}")
     private String lgDestinationIp;
-    @Value("${push-comm.lgpush.socket.close_secend}")
-    private String lgCloseSecond;
-    @Value("${push-comm.lgpush.socket.initCnt}")
-    private String lgPushSocketInitCnt;
+    @Value("${push.gateway.lgupush.socket.closeSecond}")
+    private int lgCloseSecond;
+    @Value("${push.gateway.lgupush.socket.init}")
+    private int lgPushSocketInitCnt;
 
     //LG Push Service ID
-    @Value("${push-comm.lgpush.service_id}")
+    @Value("${push.gateway.serviceId}")
     private String lgPushServiceId;
 
-    @Value("${push-comm.push.delay.time}")
+    @Value("${push.gateway.delay.time}")
     private String pushIntervalTime;
     private long measureIntervalMillis;
 
@@ -131,13 +131,13 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private void initialize() {
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(host).port(Integer.parseInt(port)).timeout(Integer.parseInt(timeout)).channelPort(Integer.parseInt(wasPort))
-                .defaultChannelHost(defaultChannelHost).closeSecond(Integer.parseInt(closeSecond)).destinationIp(destinationIp)
+                .host(host).port(port).timeout(timeout).channelPort(wasPort)
+                .defaultChannelHost(defaultChannelHost).closeSecond(closeSecond).destinationIp(destinationIp)
                 .isLgPush(false).build();
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVoLg = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(lgHost).port(Integer.parseInt(lgPort)).timeout(Integer.parseInt(lgTimeout)).channelPort(Integer.parseInt(wasPort))
-                .defaultChannelHost(lgDefaultChannelHost).closeSecond(Integer.parseInt(lgCloseSecond)).destinationIp(lgDestinationIp)
+                .host(lgHost).port(lgPort).timeout(lgTimeout).channelPort(wasPort)
+                .defaultChannelHost(lgDefaultChannelHost).closeSecond(lgCloseSecond).destinationIp(lgDestinationIp)
                 .isLgPush(true).build();
 
         socketPools = new ArrayList<>();
@@ -149,11 +149,11 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
 
         socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVo)
-                , getPoolConfig(Integer.parseInt(socketMax), Integer.parseInt(socketMin) ), abandonedConfig));
+                , getPoolConfig(socketMax, socketMin), abandonedConfig));
 
         socketPools.add(new GenericObjectPool<>(
                 new PushSocketConnFactory(pushServerInfoVoLg)
-                , getPoolConfig(Integer.parseInt(lgSocketMax), Integer.parseInt(lgSocketMin)), abandonedConfig));
+                , getPoolConfig(lgSocketMax, lgSocketMin), abandonedConfig));
 
         measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
 

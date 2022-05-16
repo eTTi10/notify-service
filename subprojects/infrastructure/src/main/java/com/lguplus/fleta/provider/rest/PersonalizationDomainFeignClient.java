@@ -9,13 +9,13 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
-public class PersonalizationDomainFeinClient extends CommonDomainFeinClient implements PersonalizationDomainClient {
+public class PersonalizationDomainFeignClient extends CommonDomainFeignClient implements PersonalizationDomainClient {
 
-    private final PersonalizationFeinClient personalizationFeinClient;
+    private final PersonalizationFeignClient personalizationFeignClient;
 
     @Override
     public RegIdDto getRegistrationID(Map<String, String> sendPushInput) {
 
-        return getResult(personalizationFeinClient.getRegistrationID(sendPushInput));
+        return getResult(personalizationFeignClient.getRegistrationID(sendPushInput));
     }
 }

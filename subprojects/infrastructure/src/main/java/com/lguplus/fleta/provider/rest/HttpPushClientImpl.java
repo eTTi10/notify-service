@@ -1,6 +1,6 @@
 package com.lguplus.fleta.provider.rest;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,33 +18,33 @@ import java.util.Map;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class HttpPushDomainClientImpl implements HttpPushDomainClient {
+public class HttpPushClientImpl implements HttpPushClient {
 
     private final HttpPushFeignClient httpPushFeignClient;
 
-    @Value("${singlepush.server.ip}")
+    @Value("${push.openapi.single.server.ip}")
     private String hostSingle;
 
-    @Value("${singlepush.server.protocol}")
+    @Value("${push.openapi.single.server.protocol}")
     private String protocolSingle;
 
-    @Value("${singlepush.server.port1}")
-    private String httpPortSingle;
+    @Value("${push.openapi.single.server.port1}")
+    private int httpPortSingle;
 
-    @Value("${singlepush.server.port2}")
-    private String httpsPortSingle;
+    @Value("${push.openapi.single.server.port2}")
+    private int httpsPortSingle;
 
-    @Value("${announce.server.ip}")
+    @Value("${push.openapi.announce.server.ip}")
     private String hostAnnounce;
 
-    @Value("${announce.server.protocol}")
+    @Value("${push.openapi.announce.server.protocol}")
     private String protocolAnnounce;
 
-    @Value("${announce.server.port1}")
-    private String httpPortAnnounce;
+    @Value("${push.openapi.announce.server.port1}")
+    private int httpPortAnnounce;
 
-    @Value("${announce.server.port2}")
-    private String httpsPortAnnounce;
+    @Value("${push.openapi.announce.server.port2}")
+    private int httpsPortAnnounce;
 
 
     /**

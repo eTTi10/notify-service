@@ -29,7 +29,7 @@ class SendPushCodePropsTest {
         JunitTestUtils.setValue(sendPushCodeProps, "sendCodes", List.of(sendCodeMap));
 
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode("P001").get();
-        assertThat(pushInfoMap.get("pos.send").equals("Y"));
+        assertThat(pushInfoMap).containsEntry("pos.send", "Y");
     }
 
     @Test
@@ -42,7 +42,7 @@ class SendPushCodePropsTest {
         JunitTestUtils.setValue(sendPushCodeProps, "serviceTargets", List.of(serviceTargetMap));
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType("C").get();
 
-        assertThat(appInfoMap.get("gcm.appid").equals("musicshow_gcm"));
+        assertThat(appInfoMap).containsEntry("gcm.appid", "musicshow_gcm");
 
     }
 
