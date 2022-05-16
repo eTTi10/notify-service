@@ -9,7 +9,7 @@ mmsroot:
         namespace: http://www.3gpp.org/ftp/Specs/archive/23_series/23.140/schema/REL-5-MM7-1-2
         prefix: mm7
         readtimeout: 5000
-        sender: 01057404003
+        sender: "01057404003"
         server_url: http://222.231.12.68:8887
         vasid: MMSTVMOBILE
         vaspid: MMSTVMOBILE
