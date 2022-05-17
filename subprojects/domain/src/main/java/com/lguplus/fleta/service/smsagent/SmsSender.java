@@ -63,6 +63,9 @@ public class SmsSender {
 
         this.messageEtcException = smsAgentDomainService.getMessageEtcException();
 
+        retry = smsRetry;
+        busyRetry = smsBusyRetry;
+        sleepTime = smsSleepTime;
     }
 
     /**
@@ -89,13 +92,6 @@ public class SmsSender {
     /**
      * @Value로 가져온 프로퍼티 초기화를 위해
      */
-    @PostConstruct
-    public void init() {
-
-        retry = smsRetry;
-        busyRetry = smsBusyRetry;
-        sleepTime = smsSleepTime;
-    }
 
     /**
      * 문자발송(코드로발송)에서 재시도가 가능하게 하는 재귀함수
