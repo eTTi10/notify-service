@@ -86,7 +86,7 @@ class SmsAgentSocketClientTest {
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
 
-        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "100");
+        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", 100);
         smsAgentSocketClient.initGateway();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1500)); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
@@ -172,6 +172,7 @@ class SmsAgentSocketClientTest {
 
         SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
+            Thread.sleep(2000);
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
         assertThat(exception.getCode()).isEqualTo("1500");
@@ -195,11 +196,11 @@ class SmsAgentSocketClientTest {
         assertThat(exception.getCode()).isEqualTo("9999");
     }
 
-    @Test
-    @DisplayName("11 calculateTerm_Exception 테스트")
-    void calculateTerm_Exception()  {
-
-        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
-        assertDoesNotThrow(smsAgentSocketClient::initGateway);
-    }
+//    @Test
+//    @DisplayName("11 calculateTerm_Exception 테스트")
+//    void calculateTerm_Exception()  {
+//
+//        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
+//        assertDoesNotThrow(smsAgentSocketClient::initGateway);
+//    }
 }

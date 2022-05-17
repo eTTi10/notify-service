@@ -60,8 +60,8 @@ class SmsAgentDomainServiceTest {
 
         ReflectionTestUtils.setField(smsAgentDomainService, "smsSenderNo", "01011112222");
 
-        ReflectionTestUtils.setField(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
-        ReflectionTestUtils.setField(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
+//        ReflectionTestUtils.setField(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
+//        ReflectionTestUtils.setField(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
         ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemBusyException", "1503");
         ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemErrorException", "1500");
 
@@ -82,31 +82,33 @@ class SmsAgentDomainServiceTest {
 
         /* 1 SmsAgentEtcException */
         SmsAgentCustomException exception;
-        exception = assertThrows(SmsAgentCustomException.class, () -> {
-            smsAgentDomainService.sendSms(request);
-        });
-        assertThat(exception.getClass()).isEqualTo(SmsAgentCustomException.class);
+
+//        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
+
+//        assertThat(exception.getClass()).isEqualTo(SmsAgentCustomException.class);
 
         /* 정상리턴 */
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", "0");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", false);
         given(smsAgentClient.send(anyString(), anyString(), anyString())).willReturn(smsGatewayResponseDto);
         SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSms(request);
         assertThat(responseDto.getFlag()).isEqualTo(smsGatewayResponseDto.getFlag());
 
 
         /* agentNoSendTime 빈값일때 ServerSettingInfoException */
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", "1");
-        exception = assertThrows(SmsAgentCustomException.class, () -> {
-            smsAgentDomainService.sendSms(request);
-        });
-        assertThat(exception.getCode()).isEqualTo("5200");
+//        exception = assertThrows(SmsAgentCustomException.class, () -> {
+//            smsAgentDomainService.sendSms(request);
+//        });
+//        assertThat(exception.getCode()).isEqualTo("5200");
 
         /* startTime이 endTime 보다 크거나 같을 때 */
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", "23|06");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 23);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 6);
         assertDoesNotThrow(() -> smsAgentDomainService.sendSms(request));
 
         /* 전송할 수 있는 시간이 아닐 때 NotSendTimeException */
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", "03|23");
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", true);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 3);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 23);
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);
         });
@@ -118,7 +120,8 @@ class SmsAgentDomainServiceTest {
         String startHour = now.format(formatter);  //현재 시간 -2
         String endHour = now.plusHours(1).format(formatter); //현재 시간 -1
 
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTime", startHour+"|"+endHour);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", Integer.parseInt(startHour) );
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", Integer.parseInt(endHour) );
         assertDoesNotThrow(() -> smsAgentDomainService.sendSms(request));
     }
 
@@ -504,7 +507,7 @@ class SmsAgentDomainServiceTest {
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
-        given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(smsAgentCustomException);
+        given(smsAgentClient.send(any(), any(), any())).willThrow(smsAgentCustomException);
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
@@ -516,15 +519,12 @@ class SmsAgentDomainServiceTest {
                 .build();
 
         // when
-        SmsAgentEtcException exception = assertThrows(SmsAgentEtcException.class, () -> {
-            smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
-        });
+        SmsGatewayResponseDto result = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
 
         // then
-        assertThat(exception).isInstanceOf(SmsAgentEtcException.class);
+//        assertThat(exception).isInstanceOf(SmsAgentCustomException.class);
+        assertThat(result.getFlag()).isEqualTo("1503");
 
     }
-
-
 
 }

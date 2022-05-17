@@ -17,7 +17,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -50,27 +49,20 @@ public class SmsGateway {
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
     private static final int LINK_CHECK_TERM = Integer.sum(1000 * 50, 0);           // 링크 체크 주기(50초)
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
-
+    private final String mIpAddress;
+    private final String mID;
+    private final String mPassword;
+    private final int mPort;
+    private final Log mFileLog;
+    private final Log mStatusLog;
+    private final Map<Integer, Timer> mTimerMap = new HashMap<>();
     private boolean isLinked = false;
     private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
-
-    private String mIpAddress;
     private String mResult = "";
-    private String mID;
-    private String mPassword;
-    private int mPort;
-
     private Date mLastSendDate;
-
     private InputStream mInputStream;
     private OutputStream mOutputStream;
-
-    private Log mFileLog;
-    private Log mStatusLog;
-
     private Socket mSocket;
-
-    private Map<Integer, Timer> mTimerMap = new HashMap<>();
 
 
     public SmsGateway(String ip, String port, String id, String password) {

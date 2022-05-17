@@ -37,8 +37,8 @@ class HttpPushSupportTest {
     @Test
     void testMakePushParameters() {
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -64,7 +64,7 @@ class HttpPushSupportTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
 
         Map<String, String> serviceMap = new HashMap<>();
-        serviceMap.put("service_pwd", null);
+        serviceMap.put("password", null);
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(serviceMap));
 
@@ -78,8 +78,8 @@ class HttpPushSupportTest {
     @Test
     void testApnPayload() {
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -92,8 +92,8 @@ class HttpPushSupportTest {
     @Test
     void testApnPayload2() {
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -140,8 +140,8 @@ class HttpPushSupportTest {
         HttpServiceProps.singleTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -156,8 +156,8 @@ class HttpPushSupportTest {
         HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "testservicepwd");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "testservicepwd");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -172,8 +172,8 @@ class HttpPushSupportTest {
         HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -188,8 +188,8 @@ class HttpPushSupportTest {
         HttpServiceProps.announceTransactionIdNum.set(10000);
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));
@@ -202,8 +202,8 @@ class HttpPushSupportTest {
     @Test
     void testNegativeApnPayload() {
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
         given(httpServiceProps.findMapByServiceId(anyString())).willReturn(Optional.of(keyMap));
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1115", "서비스ID 확인 불가"));

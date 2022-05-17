@@ -85,7 +85,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private String lgPushServiceId;
 
     @Value("${push.gateway.delay.time}")
-    private String pushIntervalTime;
+    private int pushIntervalTime;
     private long measureIntervalMillis;
 
     //Pool
@@ -155,7 +155,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
                 new PushSocketConnFactory(pushServerInfoVoLg)
                 , getPoolConfig(lgSocketMax, lgSocketMin), abandonedConfig));
 
-        measureIntervalMillis = Integer.parseInt(pushIntervalTime) * 1000L;
+        measureIntervalMillis = pushIntervalTime * 1000L;
 
     }
 

@@ -18,14 +18,14 @@ class HttpServicePropsTest {
         HttpServiceProps httpServiceProps = new HttpServiceProps(new HttpPushConfig.HttpPushExceptionCode(), new HttpPushConfig.HttpPushExceptionMessage());
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
-        ReflectionTestUtils.setField(httpServiceProps, "keys", List.of(keyMap));
+        ReflectionTestUtils.setField(httpServiceProps, "service", List.of(keyMap));
 
         Map<String, String> rstMap = httpServiceProps.findMapByServiceId("30015").get();
 
-        assertThat(rstMap).containsEntry("service_pwd", "lguplusuflix");
+        assertThat(rstMap).containsEntry("password", "lguplusuflix");
     }
 
     @Test

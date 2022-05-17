@@ -36,6 +36,7 @@ class SmsGatewayBindTaskTest {
     SmsGateway.ErrorTimerTask errorTimerTask;
 
     @Test
+    @DisplayName("BindTimerTask 테스트")
     void test_01() throws IOException {
 
         doNothing().when(smsGateway).checkLink();
@@ -48,6 +49,7 @@ class SmsGatewayBindTaskTest {
     }
 
     @Test
+    @DisplayName("LinkTimerTask 테스트")
     void test_02() throws IOException {
 
         ReflectionTestUtils.setField(smsGateway, "isLinked", true);
@@ -62,15 +64,16 @@ class SmsGatewayBindTaskTest {
     }
 
     @Test
+    @DisplayName("ErrorTimerTask 테스트")
     void test_03() throws IOException {
 
         ReflectionTestUtils.setField(smsGateway, "mResult", "");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
-        assertDoesNotThrow(bindTimerTask::run);
+        assertDoesNotThrow(errorTimerTask::run);
 
         ReflectionTestUtils.setField(smsGateway, "mResult", "0000");
         errorTimerTask = new SmsGateway.ErrorTimerTask(smsGateway);
-        assertDoesNotThrow(bindTimerTask::run);
+        assertDoesNotThrow(errorTimerTask::run);
 
     }
 }

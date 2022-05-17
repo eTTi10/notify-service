@@ -87,12 +87,12 @@ class HttpPushFeignClientTest {
 
         ReflectionTestUtils.setField(httpPushClient, "hostSingle", "211.115.75.227");
         ReflectionTestUtils.setField(httpPushClient, "protocolSingle", "http");
-        ReflectionTestUtils.setField(httpPushClient, "httpPortSingle", "5556");
-        ReflectionTestUtils.setField(httpPushClient, "httpsPortSingle", "6556");
+        ReflectionTestUtils.setField(httpPushClient, "httpPortSingle", 5556);
+        ReflectionTestUtils.setField(httpPushClient, "httpsPortSingle", 6556);
         ReflectionTestUtils.setField(httpPushClient, "hostAnnounce", "211.115.75.227");
         ReflectionTestUtils.setField(httpPushClient, "protocolAnnounce", "http");
-        ReflectionTestUtils.setField(httpPushClient, "httpPortAnnounce", "5555");
-        ReflectionTestUtils.setField(httpPushClient, "httpsPortAnnounce", "6555");
+        ReflectionTestUtils.setField(httpPushClient, "httpPortAnnounce", 5555);
+        ReflectionTestUtils.setField(httpPushClient, "httpsPortAnnounce", 6555);
 
         Method method = httpPushClient.getClass().getDeclaredMethod("getBaseUrl", String.class);
         method.setAccessible(true);

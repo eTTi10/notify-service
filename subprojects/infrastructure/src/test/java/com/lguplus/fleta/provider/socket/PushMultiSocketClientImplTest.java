@@ -72,7 +72,7 @@ class PushMultiSocketClientImplTest {
         nettyTcpClient = getNettyClient();
         pushMultiSocketClient = new PushMultiSocketClientImpl(nettyTcpClient);
         ReflectionTestUtils.setField(pushMultiSocketClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", "5");
+        ReflectionTestUtils.setField(pushMultiSocketClient, "maxLimitPush", 5);
         Field pushCountField = pushMultiSocketClient.getClass().getDeclaredField("FLUSH_COUNT");
         pushCountField.setAccessible(true);
         Field modifiers = Field.class.getDeclaredField("modifiers");
@@ -100,12 +100,12 @@ class PushMultiSocketClientImplTest {
         NettyTcpClient nettyTcpClient = new NettyTcpClient();
 
         ReflectionTestUtils.setField(nettyTcpClient, "host", SERVER_IP);
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
+        ReflectionTestUtils.setField(nettyTcpClient, "port", SERVER_PORT);
+        ReflectionTestUtils.setField(nettyTcpClient, "timeout", 2000);
+        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", 8080);
         ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
         ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
+        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", 2);
 
         ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
 
@@ -258,7 +258,7 @@ class PushMultiSocketClientImplTest {
     @Test
     void testServer07_checkGateWayServer() throws Exception {
 
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); //unknown port
+        ReflectionTestUtils.setField(nettyTcpClient, "port", 10000+SERVER_PORT); //unknown port
         assertThrows(SocketException.class, () -> {
             pushMultiSocketClient.checkClientInvalid();
         });
@@ -269,7 +269,7 @@ class PushMultiSocketClientImplTest {
         });
 
         //normal
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
+        ReflectionTestUtils.setField(nettyTcpClient, "port", SERVER_PORT);
         Bootstrap bootstrap = (Bootstrap)ReflectionTestUtils.getField(nettyTcpClient, "bootstrap");
         bootstrap.remoteAddress(SERVER_IP, SERVER_PORT);
         nettyTcpClient.disconnect();

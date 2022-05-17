@@ -11,6 +11,7 @@ import com.lguplus.fleta.data.mapper.PushRequestMapper;
 import com.lguplus.fleta.service.push.PushAnnouncementService;
 import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +74,8 @@ class PushServiceControllerTest {
     @BeforeEach
     void setUp() {
         pushServiceController1 = new PushServiceController(pushAnnouncementService, pushSingleService, pushMultiService, pushRequestMapper);
-        ReflectionTestUtils.setField(pushServiceController1, "pushRejectRegList", "REJECT_USER1|REJECT_USER2");
+        ReflectionTestUtils.setField(pushServiceController1, "pushRejectRegList", Set.of("REJECT_USER1"));
+        ReflectionTestUtils.setField(pushServiceController1, "pushRejectRegList", Set.of("REJECT_USER2"));
         this.mvc = MockMvcBuilders.standaloneSetup(pushServiceController1).build();
 
         // Mock Dto

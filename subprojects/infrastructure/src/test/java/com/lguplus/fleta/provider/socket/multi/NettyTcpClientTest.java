@@ -142,12 +142,12 @@ class NettyTcpClientTest implements PushMultiClient {
         NettyTcpClient nettyTcpClient = new NettyTcpClient();
 
         ReflectionTestUtils.setField(nettyTcpClient, "host", SERVER_IP);
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
+        ReflectionTestUtils.setField(nettyTcpClient, "port", SERVER_PORT);
+        ReflectionTestUtils.setField(nettyTcpClient, "timeout", 2000);
+        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", 8080);
         ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
         ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
+        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", 2);
 
         ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
 
@@ -157,7 +157,7 @@ class NettyTcpClientTest implements PushMultiClient {
     private NettyTcpClient getNettyClientInvalid() {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); // invalid port
+        ReflectionTestUtils.setField(nettyTcpClient, "port", 10000 + SERVER_PORT); // invalid port
 
         return nettyTcpClient;
     }
