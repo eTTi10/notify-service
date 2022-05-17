@@ -22,7 +22,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @Component
-@PropertySource(name = "push_config", value = "classpath:push/push-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
+@PropertySource(name = "push", value = "classpath:push/push-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
 public class PushConfig {
 
     private static final String PUSH_COMM_PROPERTY_PREFIX = "push.gateway.";
@@ -36,7 +36,7 @@ public class PushConfig {
     public PushConfig(final StandardEnvironment environment) {
 
         final PropertiesPropertySource propertySource = (PropertiesPropertySource)
-                environment.getPropertySources().get("push_config");
+                environment.getPropertySources().get("push");
         if (propertySource == null) {
             throw new IllegalStateException("Error properties file not found.");
         }
@@ -52,7 +52,7 @@ public class PushConfig {
                         String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".password")));
                         propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
 
-                        if(propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".linkage_type"))) {
+                        if(propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".type"))) {
                             String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".type")));
                             propertiesPushServiceLinkType.put(serviceId, linkType);
                         }

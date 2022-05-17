@@ -81,7 +81,7 @@ class PushSingleDomainServiceTest {
 
         ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", 100);
         ReflectionTestUtils.setField(pushSingleDomainService, "pushCallRetryCnt", 2);
-        ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "400|401|403");
+        ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", Set.of("400", "401", "403"));
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushAppId", "smartux0001");
         ReflectionTestUtils.setField(pushSingleDomainService, "oldLgPushNotiType", "POS");
         ReflectionTestUtils.setField(pushSingleDomainService, "lgPushServceId", "00007");
@@ -101,23 +101,29 @@ class PushSingleDomainServiceTest {
 
         Map<String, Object> map = new HashMap<>();
         //map.put("error.flag.com.lguplus.fleta.exception.ParameterTypeMismatchException", "5008");
-        map.put("push-comm.push.delay.reqCnt", "100");
-        map.put("push-comm.push.call.retryCnt", "2");
-        map.put("push-comm.retry.exclude.codeList", "202|400|401|403|404|410|412|5102");
+        map.put("push.gateway.delay.request", "100");
+        map.put("push.gateway.retry.count", "2");
+        map.put("push.gateway.retry.exclude[0]", "202");
+        map.put("push.gateway.retry.exclude[1]", "400");
+        map.put("push.gateway.retry.exclude[2]", "401");
+        map.put("push.gateway.retry.exclude[3]", "403");
+        map.put("push.gateway.retry.exclude[4]", "404");
+        map.put("push.gateway.retry.exclude[5]", "410");
+        map.put("push.gateway.retry.exclude[6]", "412");
+        map.put("push.gateway.retry.exclude[7]", "5102");
 
-        map.put("push-comm.push.old.lgupush.notiType", "POS");
-        map.put("push-comm.push.old.lgupush.pushAppId", "smartux0001");
+        map.put("push.gateway.notiType", "POS");
+        map.put("push.gateway.appId", "smartux0001");
 
-        map.put("push-service.key7.push.service_id", "30011");
-        map.put("push-service.key7.push.service_pwd", "lguplushdtvgcm");
-        map.put("push-service.key8.push.service_id", "30015");
-        map.put("push-service.key8.push.service_pwd", "lguplusuflix");
-        map.put("push-service.key9.push.service_id", "30021");
-        map.put("push-service.key9.push.service_pwd", "lguplushdtvapns");
-
-        map.put("push-service.key12.push.service_id", "00007");
-        map.put("push-service.key12.push.service_pwd", "smartux");
-        map.put("push-service.key12.push.linkage_type", "LGUPUSH_OLD");
+        map.put("push.service[0].id", "30011");
+        map.put("push.service[0].password", "lguplushdtvgcm");
+        map.put("push.service[1].id", "30015");
+        map.put("push.service[1].password", "lguplusuflix");
+        map.put("push.service[2].id", "30021");
+        map.put("push.service[2].password", "lguplushdtvapns");
+        map.put("push.service[3].id", "00007");
+        map.put("push.service[3].password", "smartux");
+        map.put("push.service[3].type", "LGUPUSH_OLD");
         map.put("error.message.9999", "기타 에러");
         map.put("error.message.5000", "필수 요청 정보 누락");
         given(propertySource.getSource()).willReturn(map);
