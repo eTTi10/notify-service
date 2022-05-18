@@ -14,9 +14,10 @@ server:
 spring:
   datasource:
     writer:
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      #DEV
       username: postgres
       password: devadmin!
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
@@ -104,4 +105,4 @@ feign:
         #  header1: header1Value
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
-        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceDomainClientImpl.PushErrorDecoder
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder

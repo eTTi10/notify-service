@@ -1,7 +1,6 @@
 package com.lguplus.fleta.data.dto.request;
 
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 /**
  * MmsAgentDomainService.sendMmsCode에서

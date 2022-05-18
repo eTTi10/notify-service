@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.client.PushAnnounceDomainClient;
+import com.lguplus.fleta.client.PushAnnounceClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
@@ -37,13 +37,13 @@ class PushAnnounceDomainServiceTest {
     private PushConfig pushConfig;
 
     @Mock
-    private PushAnnounceDomainClient pushAnnounceDomainClient;
+    private PushAnnounceClient pushAnnounceClient;
 
     private PushRequestAnnounceDto  pushRequestAnnounceDto;
 
     @BeforeEach
     void setUp() {
-        pushAnnounceDomainService = new PushAnnounceDomainService(pushConfig, pushAnnounceDomainClient);
+        pushAnnounceDomainService = new PushAnnounceDomainService(pushConfig, pushAnnounceClient);
 
         List<PushRequestItemDto> addItems = new ArrayList<>();
         addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
@@ -63,7 +63,7 @@ class PushAnnounceDomainServiceTest {
     void requestAnnouncement() {
         //normal case
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
-        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given( pushAnnounceClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         Assertions.assertEquals("200", responseDto.getCode());
@@ -82,7 +82,7 @@ class PushAnnounceDomainServiceTest {
         //normal case lgpush
         given( pushConfig.getServicePassword(anyString()) ).willReturn("--password--");
         given( pushConfig.getServiceLinkType(anyString()) ).willReturn("LGUPUSH_OLD");
-        given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given( pushAnnounceClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         ReflectionTestUtils.setField(pushAnnounceDomainService, "tranactionMsgId", new AtomicInteger(9999));
 
@@ -98,7 +98,7 @@ class PushAnnounceDomainServiceTest {
         List<String> codeList = Arrays.asList(new String[]{"202", "400", "401","403", "404", "410","412", "500", "502","503", "5102"});//, "-"});
 
         for(String code : codeList) {
-            given( pushAnnounceDomainClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
+            given( pushAnnounceClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
             assertThrows(NotifyRuntimeException.class, () -> pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto));
         }
     }

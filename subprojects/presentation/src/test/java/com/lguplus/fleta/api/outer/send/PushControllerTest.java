@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.NestedServletException;
 
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,13 +88,13 @@ class PushControllerTest {
         //when
 
         MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE)
-                        .queryParam("sa_id","")
-                        .queryParam("stb_mac","")
-                        .queryParam("reg_id","")
-                        .queryParam("send_code","")
-                        .queryParam("push_type","")
-                        .queryParam("reg_type","")
-                        .queryParam("service_type","")
+                        .queryParam("sa_id","500058151453")
+                        .queryParam("stb_mac","001c.627e.039c")
+                        .queryParam("reg_id","M00020200205")
+                        .queryParam("send_code","P001")
+                        .queryParam("push_type","A")
+                        .queryParam("reg_type","1")
+                        .queryParam("service_type","TV")
                         .content(body)
                         .contentType(MediaType.APPLICATION_XML)
                         .accept(MediaType.APPLICATION_JSON))
@@ -101,14 +102,12 @@ class PushControllerTest {
                 .andDo(print())
                 .andReturn();
 
-        String response = mvcResult.getResponse().getContentAsString();
-
         MockHttpServletResponse mockHttpServletResponse = mvcResult.getResponse();
-        String responseString = mockHttpServletResponse.getContentAsString();
+        String responseString = mockHttpServletResponse.getContentAsString(Charset.forName("UTF-8"));
 
 
         //then
-        Assertions.assertThat(responseString.contains(SUCCESS_MESSAGE)); // 성공 플래그가 있는지 확인
+        Assertions.assertThat(responseString).contains(SUCCESS_MESSAGE); // 성공 플래그가 있는지 확인
 
     }
 
@@ -132,24 +131,20 @@ class PushControllerTest {
 
         //when
 
-        Exception exception = assertThrows(NestedServletException.class, () -> {
-
-            MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE)
-                            .queryParam("sa_id","")
-                            .queryParam("stb_mac","")
-                            .queryParam("reg_id","")
-                            .queryParam("send_code","")
-                            .queryParam("push_type","")
-                            .queryParam("reg_type","")
-                            .queryParam("service_type","")
-                            .content(body)
-                            .contentType(MediaType.APPLICATION_XML)
-                            .accept(MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk())
-                    .andDo(print())
-                    .andReturn();
-
-        });
+        MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE)
+                        .queryParam("sa_id","500058151453")
+                        .queryParam("stb_mac","001c.627e.039c")
+                        .queryParam("reg_id","M00020200205")
+                        .queryParam("send_code","P001")
+                        .queryParam("push_type","A")
+                        .queryParam("reg_type","1")
+                        .queryParam("service_type","TV")
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_XML)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print())
+                .andReturn();
 
     }
 

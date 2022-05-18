@@ -1,9 +1,9 @@
 package com.lguplus.fleta.properties;
 
 import com.lguplus.fleta.config.HttpPushConfig;
-import com.lguplus.fleta.util.JunitTestUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +18,14 @@ class HttpServicePropsTest {
         HttpServiceProps httpServiceProps = new HttpServiceProps(new HttpPushConfig.HttpPushExceptionCode(), new HttpPushConfig.HttpPushExceptionMessage());
 
         Map<String, String> keyMap = new HashMap<>();
-        keyMap.put("service_id", "30015");
-        keyMap.put("service_pwd", "lguplusuflix");
+        keyMap.put("id", "30015");
+        keyMap.put("password", "lguplusuflix");
 
-        JunitTestUtils.setValue(httpServiceProps, "keys", List.of(keyMap));
+        ReflectionTestUtils.setField(httpServiceProps, "service", List.of(keyMap));
 
         Map<String, String> rstMap = httpServiceProps.findMapByServiceId("30015").get();
 
-        assertThat(rstMap).containsEntry("service_pwd", "lguplusuflix");
+        assertThat(rstMap).containsEntry("password", "lguplusuflix");
     }
 
     @Test
@@ -34,13 +34,13 @@ class HttpServicePropsTest {
         Map<String, String> codeMap = new HashMap<>();
         codeMap.put("ServiceIdNotFoundException", "1115");
 
-        JunitTestUtils.setValue(httpPushExceptionCode, "httpPush", codeMap);
+        ReflectionTestUtils.setField(httpPushExceptionCode, "httpPush", codeMap);
 
         HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage = new HttpPushConfig.HttpPushExceptionMessage();
         Map<String, String> messageMap = new HashMap<>();
         codeMap.put("1115", "서비스ID 확인 불가");
 
-        JunitTestUtils.setValue(httpPushExceptionMessage, "message", messageMap);
+        ReflectionTestUtils.setField(httpPushExceptionMessage, "message", messageMap);
 
         HttpServiceProps httpServiceProps = new HttpServiceProps(httpPushExceptionCode, httpPushExceptionMessage);
 

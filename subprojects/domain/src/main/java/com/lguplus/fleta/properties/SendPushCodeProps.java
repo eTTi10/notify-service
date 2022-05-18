@@ -12,7 +12,7 @@ import java.util.Optional;
 @Component
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "pushinfo")
+@ConfigurationProperties(prefix = "push")
 public class SendPushCodeProps {
 
     /** send_code에 해당하는 push info */

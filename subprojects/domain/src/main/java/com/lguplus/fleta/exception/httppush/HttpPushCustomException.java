@@ -3,7 +3,6 @@ package com.lguplus.fleta.exception.httppush;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  *
@@ -12,7 +11,6 @@ import lombok.Setter;
  * @since 1.0
  */
 @Getter
-@Setter
 public class HttpPushCustomException extends NotifyRuntimeException {
 
     public InnerResponseCodeType getInnerResponseCodeType()
@@ -20,27 +18,29 @@ public class HttpPushCustomException extends NotifyRuntimeException {
         return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
     }
 
-    private Integer statusCode;
+    private final Integer statusCode;
 
-    private String code;
-
-    private String message;
+    private final String code;
 
     /**
      *
      */
-    public HttpPushCustomException() {
+    public HttpPushCustomException(final Integer statusCode, final String code) {
 
         super();
+        this.statusCode = statusCode;
+        this.code = code;
     }
 
     /**
      *
      * @param message
      */
-    public HttpPushCustomException(final String message) {
+    public HttpPushCustomException(final Integer statusCode, final String code, final String message) {
 
         super(message);
+        this.statusCode = statusCode;
+        this.code = code;
     }
 
     /**
@@ -48,17 +48,21 @@ public class HttpPushCustomException extends NotifyRuntimeException {
      * @param message
      * @param cause
      */
-    public HttpPushCustomException(final String message, final Throwable cause) {
+    public HttpPushCustomException(final Integer statusCode, final String code, final String message, final Throwable cause) {
 
         super(message, cause);
+        this.statusCode = statusCode;
+        this.code = code;
     }
 
     /**
      *
      * @param cause
      */
-    public HttpPushCustomException(final Throwable cause) {
+    public HttpPushCustomException(final Integer statusCode, final String code, final Throwable cause) {
 
         super(cause);
+        this.statusCode = statusCode;
+        this.code = code;
     }
 }

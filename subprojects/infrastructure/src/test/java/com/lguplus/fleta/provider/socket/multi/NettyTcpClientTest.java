@@ -10,7 +10,6 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
-import fleta.util.JunitTestUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
@@ -39,6 +38,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.mockito.Mockito.*;
 
@@ -48,7 +48,7 @@ import static org.mockito.Mockito.*;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class NettyTcpClientTest implements PushMultiClient {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
@@ -67,11 +67,11 @@ class NettyTcpClientTest implements PushMultiClient {
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll
@@ -142,12 +142,12 @@ class NettyTcpClientTest implements PushMultiClient {
         NettyTcpClient nettyTcpClient = new NettyTcpClient();
 
         ReflectionTestUtils.setField(nettyTcpClient, "host", SERVER_IP);
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "" + SERVER_PORT);
-        ReflectionTestUtils.setField(nettyTcpClient, "timeout", "2000");
-        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", "8080");
+        ReflectionTestUtils.setField(nettyTcpClient, "port", SERVER_PORT);
+        ReflectionTestUtils.setField(nettyTcpClient, "timeout", 2000);
+        ReflectionTestUtils.setField(nettyTcpClient, "wasPort", 8080);
         ReflectionTestUtils.setField(nettyTcpClient, "defaultSocketChannelId", "PsAGT");
         ReflectionTestUtils.setField(nettyTcpClient, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", "2");
+        ReflectionTestUtils.setField(nettyTcpClient, "callRetryCount", 2);
 
         ReflectionTestUtils.setField(nettyTcpClient, "commChannelNum", new AtomicInteger(++testCnt));
 
@@ -157,7 +157,7 @@ class NettyTcpClientTest implements PushMultiClient {
     private NettyTcpClient getNettyClientInvalid() {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
-        ReflectionTestUtils.setField(nettyTcpClient, "port", "1" + SERVER_PORT); // invalid port
+        ReflectionTestUtils.setField(nettyTcpClient, "port", 10000 + SERVER_PORT); // invalid port
 
         return nettyTcpClient;
     }
@@ -205,7 +205,7 @@ class NettyTcpClientTest implements PushMultiClient {
     void test_02_messageHandler() {
 
         Test01Client test01 = new Test01Client();
-        JunitTestUtils.setValue(messageHandler, "pushMultiClient", test01);
+        ReflectionTestUtils.setField(messageHandler, "pushMultiClient", test01);
 
         int COMMAND_REQUEST_ACK = 16;
         int UNKNOWN = 200;

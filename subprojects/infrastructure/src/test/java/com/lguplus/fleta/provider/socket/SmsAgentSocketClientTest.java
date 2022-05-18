@@ -5,10 +5,8 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.*;
 
 import com.lguplus.fleta.properties.SmsAgentProps;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
-import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServerTest;
+import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServer;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.*;
@@ -17,19 +15,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -47,7 +48,7 @@ class SmsAgentSocketClientTest {
     String rCtn = "01011112222";
     String message = "테스트메시지";
 
-    static NettySmsAgentServerTest server;
+    static NettySmsAgentServer server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 8888;
@@ -57,11 +58,12 @@ class SmsAgentSocketClientTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettySmsAgentServerTest();
+        server = new NettySmsAgentServer();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
         thread.start();
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
     }
 
     @AfterAll
@@ -79,13 +81,14 @@ class SmsAgentSocketClientTest {
         serverMap.put("id","test");
         serverMap.put("password","test");
 
-        JunitTestUtils.setValue(smsAgentProps, "servers", List.of(serverMap));
-//        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", "1");
+        ReflectionTestUtils.setField(smsAgentProps, "servers", List.of(serverMap));
+//        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
 
+        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", 100);
         smsAgentSocketClient.initGateway();
-        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1500)); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
 
     @Test
@@ -93,36 +96,40 @@ class SmsAgentSocketClientTest {
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
-        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
-        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
+        LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
+        sGatewayQueue.offer(sGateway);
         SmsGatewayResponseDto responseDto = smsAgentSocketClient.send(sCtn, rCtn, message);
-        assertThat(responseDto.getFlag().equals(S_FLAG));
+        assertThat(responseDto.getFlag()).isEqualTo(S_FLAG);
     }
 
     @Test
     @DisplayName("02 PhoneNumberErrorException 테스트")
     void send_PhoneNumberErrorException() {
 
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, "1101111", message);
         });
+        assertThat(exception.getCode()).isEqualTo("1502");
 
         exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, "0110111", message);
         });
-
+        assertThat(exception.getCode()).isEqualTo("1502");
     }
 
     @Test
     @DisplayName("03 MsgTypeErrorException 테스트")
     void send_MsgTypeErrorException() {
 
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, "가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하가나다라마바사아자차카타파하");
         });
+        assertThat(exception.getCode()).isEqualTo("1501");
     }
 
     @Test
@@ -130,12 +137,14 @@ class SmsAgentSocketClientTest {
     void send_SystemBusyException2() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
-        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
+        LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.offer(sGateway);
 
-        smsAgentSocketClient.mSendTerm = 10000;
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        ReflectionTestUtils.setField(smsAgentSocketClient, "mSendTerm", 10000);
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
+        assertThat(exception.getCode()).isEqualTo("1503");
     }
 
     @Test
@@ -143,51 +152,55 @@ class SmsAgentSocketClientTest {
     void send_SystemBusyException() throws InterruptedException {
 
 //        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-        SmsAgentSocketClient.sGatewayQueue.clear();
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
+        assertThat(exception.getCode()).isEqualTo("1503");
     }
 
     @Test
     @DisplayName("07 SmsAgentEtcException 테스트")
     void isBind() throws IOException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
-        SmsAgentSocketClient.sGatewayQueue.offer(sGateway);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "1", id, password);
+        LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
+        sGatewayQueue.offer(sGateway);
 
-        server.stopServer();
-        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
+            Thread.sleep(2000);
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
+        assertThat(exception.getCode()).isEqualTo("1500");
     }
 
     @Test
     @DisplayName("09 SystemErrorException 테스트")
     void send_SystemErrorException() throws IOException, InterruptedException {
 
-        SmsAgentSocketClient.sGatewayQueue.clear();
-        SmsGateway fakeGateway = new SmsGateway(SERVER_IP, "1", id, password);
-        SmsAgentSocketClient.sGatewayQueue.offer(fakeGateway);
-        Thread.sleep(1500); // mSendTerm 과 비교하는 분기를 통과하기 위해
-        Exception exception = assertThrows(SmsAgentCustomException.class, () -> {
+        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, "8888", id, password));
+        doThrow(new IOException()).when(fakeGateway).sendMessage(anyString(), anyString(), anyString(), anyString(), anyInt());
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
+        LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
+        sGatewayQueue.offer(fakeGateway);
+
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
 
             smsAgentSocketClient.send(sCtn, rCtn, message);
         });
+        assertThat(exception.getCode()).isEqualTo("9999");
     }
 
-    @Test
-    @DisplayName("11 calculateTerm_Exception 테스트")
-    void calculateTerm_Exception()  {
-
-        smsAgentSocketClient.initGateway();
-        JunitTestUtils.setValue(smsAgentSocketClient, "agentTps", null);
-        smsAgentSocketClient.initGateway();
-
-    }
-
-
+//    @Test
+//    @DisplayName("11 calculateTerm_Exception 테스트")
+//    void calculateTerm_Exception()  {
+//
+//        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
+//        assertDoesNotThrow(smsAgentSocketClient::initGateway);
+//    }
 }

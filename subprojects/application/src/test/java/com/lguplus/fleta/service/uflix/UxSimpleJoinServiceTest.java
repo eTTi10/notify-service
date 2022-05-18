@@ -50,8 +50,7 @@ class UxSimpleJoinServiceTest {
     @DisplayName("잘못된 전화번호 오류확인")
     void whenRequestUxSimpleJoinSms_withWrongCtn_thenReturnFailure() throws Exception {
         // given
-        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
-        smsAgentCustomException.setCode("1502");
+        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1502");
 
         given(smsAgentDomainService.sendSms(any())).willThrow(smsAgentCustomException);
 
