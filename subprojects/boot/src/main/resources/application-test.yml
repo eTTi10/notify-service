@@ -15,8 +15,8 @@ spring:
   datasource:
     writer:
       jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
-      username: <<postgres.notify.read.username>>
-      password: <<postgres.notify.read.password>>
+      username: <<postgres.notify.write.username>>
+      password: <<postgres.notify.write.password>>
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
