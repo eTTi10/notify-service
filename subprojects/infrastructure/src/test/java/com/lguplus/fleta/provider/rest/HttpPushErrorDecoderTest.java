@@ -7,9 +7,9 @@ import feign.Request;
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
-import fleta.util.JunitTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
 
@@ -40,7 +40,7 @@ class HttpPushErrorDecoderTest {
         codeMap.put("ExceptionOccursException", "1114");
         codeMap.put("ServiceUnavailableException", "1110");
 
-        JunitTestUtils.setValue(httpPushExceptionCode, "httpPush", codeMap);
+        ReflectionTestUtils.setField(httpPushExceptionCode, "httpPush", codeMap);
 
         Map<String, String> messageMap = new HashMap<>();
         messageMap.put("9998", "발송제한번호");
@@ -56,7 +56,7 @@ class HttpPushErrorDecoderTest {
         messageMap.put("1114", "Exception Occurs");
         messageMap.put("1110", "Push GW Service Unavailable");
 
-        JunitTestUtils.setValue(httpPushExceptionMessage, "message", messageMap);
+        ReflectionTestUtils.setField(httpPushExceptionMessage, "message", messageMap);
 
         errorDecoder = new HttpPushErrorDecoder(new HttpServiceProps(httpPushExceptionCode, httpPushExceptionMessage));
     }

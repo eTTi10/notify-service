@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.mmsagent;
 
-import com.lguplus.fleta.client.MmsAgentDomainClient;
-import com.lguplus.fleta.client.MmsCallSettingDomainClient;
+import com.lguplus.fleta.client.MmsAgentClient;
+import com.lguplus.fleta.client.SettingDomainClient;
 import com.lguplus.fleta.config.MmsAgentConfig;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 @Slf4j
@@ -23,13 +24,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 
 public class MmsAgentDomainService {
-    private final MmsCallSettingDomainClient apiClient;
+    private final SettingDomainClient apiClient;
     private final MmsAgentConfig config;
-    private final MmsAgentDomainClient mmsSoap;
+    private final MmsAgentClient mmsSoap;
 
     private Map<String, ?> mmsConfig;//yml파일 mms
-    private Map<String, Object> settingConfig;//yml파일 setting
 
+    @PostConstruct
+    private void initialized() {
+        //yml설정파일 객체생성
+        mmsConfig = config.getMms();//1레벨 객체
+    }
 
     /**
      * 전송메세지를 취득후 MM7모듈함수를 실행
@@ -37,17 +42,13 @@ public class MmsAgentDomainService {
      * @return
      */
     public SuccessResponseDto sendMmsCode(SendMmsRequestDto sendMmsRequestDto) {
-        //yml설정파일 객체생성
-        mmsConfig = config.getMms();//1레벨 객체
-        settingConfig = (Map<String, Object>)config.getMms().get("setting");//2레벨 객체
-
         //setting API 호출관련 파라메타 셋팅
         CallSettingRequestDto prm = CallSettingRequestDto.builder()
                 .code(sendMmsRequestDto.getMmsCd())//ex) M011
-                .svcType((String)settingConfig.get("rest_svc_type"))//ex) MMS:E SMS:I
+                .svcType("E")//ex) MMS:E SMS:I
                 .build();
 
-        CallSettingResultMapDto callSettingApi = apiClient.mmsCallSettingApi(prm);
+        CallSettingResultMapDto callSettingApi = apiClient.callSettingApi(prm);
         CallSettingDto settingApi =  callSettingApi.getResult().getData();
 
         if(settingApi == null){

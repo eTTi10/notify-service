@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushAnnounceRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
@@ -22,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HttpAnnouncementPushDomainService {
 
-    private final HttpPushDomainClient httpPushDomainClient;
+    private final HttpPushClient httpPushClient;
 
     private final HttpPushSupport httpPushSupport;
 
@@ -44,7 +44,7 @@ public class HttpAnnouncementPushDomainService {
 
         Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, items);
 
-        OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushAnnouncement(paramMap);
+        OpenApiPushResponseDto openApiPushResponseDto = httpPushClient.requestHttpPushAnnouncement(paramMap);
         log.debug("openApiPushResponseDto ::::::::::::::: {}", openApiPushResponseDto);
 
         // 성공

@@ -12,19 +12,19 @@ import org.springframework.http.HttpHeaders;
 
 public class HttpPushFeignConfig {
 
-    @Value("${singlepush.server.contenttype}")
-    private String contentTypeSingle;
+    @Value("${push.openapi.common.server.contenttype}")
+    private String contentType;
 
-    @Value("${singlepush.server.accept}")
-    private String acceptSingle;
+    @Value("${push.openapi.common..server.accept}")
+    private String accept;
 
-    @Value("${singlepush.server.encoding}")
-    private String encodingSingle;
+    @Value("${push.openapi.common..server.encoding}")
+    private String encoding;
 
-    @Value("${singlepush.server.auth}")
+    @Value("${push.openapi.single..server.auth}")
     private String authorizationSingle;
 
-    @Value("${announce.server.auth}")
+    @Value("${push.openapi.announce.server.auth}")
     private String authorizationAnnounce;
 
     @Bean
@@ -35,10 +35,10 @@ public class HttpPushFeignConfig {
     @Bean
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {
-            requestTemplate.header(HttpHeaders.ACCEPT, acceptSingle);
-            requestTemplate.header(HttpHeaders.ACCEPT_CHARSET, encodingSingle);
-            requestTemplate.header(HttpHeaders.CONTENT_TYPE, contentTypeSingle);
-            requestTemplate.header(HttpHeaders.CONTENT_ENCODING, encodingSingle);
+            requestTemplate.header(HttpHeaders.ACCEPT, accept);
+            requestTemplate.header(HttpHeaders.ACCEPT_CHARSET, encoding);
+            requestTemplate.header(HttpHeaders.CONTENT_TYPE, contentType);
+            requestTemplate.header(HttpHeaders.CONTENT_ENCODING, encoding);
 
             if (requestTemplate.url().endsWith("servicekey")) {
                 requestTemplate.header(HttpHeaders.AUTHORIZATION, authorizationSingle);

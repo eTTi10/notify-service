@@ -5,6 +5,7 @@ import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.net.URI;
 import java.util.Map;
@@ -14,7 +15,7 @@ import java.util.Map;
  *
  * 단건, 멀티(단건 사용), 공지 푸시등록
  */
-@FeignClient(name = "httppush", url = "${singlepush.server.ip}", configuration = HttpPushFeignConfig.class)
+@FeignClient(name = "httppush", url = "${push.openapi.single.server.ip}", configuration = HttpPushFeignConfig.class)
 public interface HttpPushFeignClient {
 
     /**
@@ -24,7 +25,6 @@ public interface HttpPushFeignClient {
      * @param paramMap 단건 푸시 정보
      * @return 단건 푸시 결과
      */
-//    @PostMapping(value = "/settings/restapi/push/single/servicekey")
     @PostMapping(value = "/restapi/push/single/servicekey")
     OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestBody Map<String, Object> paramMap);
 
@@ -35,7 +35,6 @@ public interface HttpPushFeignClient {
      * @param paramMap 공지 푸시 정보
      * @return 공지 푸시 결과
      */
-//    @PostMapping(value = "/settings/restapi/push/announce")
     @PostMapping(value = "/restapi/push/announce")
     OpenApiPushResponseDto requestHttpPushAnnouncement(URI baseUri, @RequestBody Map<String, Object> paramMap);
 

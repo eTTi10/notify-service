@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PushFeignInterceptor implements RequestInterceptor {
 
-    @Value("${push-comm.announce.server.header}")
+    @Value("${push.gateway.announce.server.header}")
     private String contentType;
 
-    @Value("${push-comm.announce.server.encoding}")
+    @Value("${push.gateway.announce.server.encoding}")
     private String contentEncoding;
 
     @Override

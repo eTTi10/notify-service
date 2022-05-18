@@ -4,8 +4,6 @@ import com.lguplus.fleta.data.dto.request.inner.CallSettingRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
-import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
-import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,15 +11,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import javax.swing.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
@@ -29,10 +20,10 @@ import static org.mockito.BDDMockito.given;
 class SmsCallSettingDomainFeignClientTest {
 
     @Mock
-    SmsCallSettingFeignClient smsCallSettingFeignClient;
+    SettingFeignClient settingFeignClient;
 
     @InjectMocks
-    SmsCallSettingDomainFeignClient smsCallSettingDomainFeignClient;
+    SettingDomainFeignClient smsCallSettingDomainFeignClient;
 
     @Test
     void smsCallSettingApi() {
@@ -57,13 +48,13 @@ class SmsCallSettingDomainFeignClientTest {
                 .build();
 
         //given
-        given(smsCallSettingFeignClient.callSettingApi(any())).willReturn(resultMapDto);
+        given(settingFeignClient.callSettingApi(any())).willReturn(resultMapDto);
 
         //when
-        CallSettingResultMapDto callSettingResultMapDto = smsCallSettingDomainFeignClient.smsCallSettingApi(callSettingRequestDto);
+        CallSettingResultMapDto callSettingResultMapDto = smsCallSettingDomainFeignClient.callSettingApi(callSettingRequestDto);
 
         //then
-        assertThat(callSettingResultMapDto.getCode().equals("S001"));
+        assertThat(callSettingResultMapDto.getCode()).isEqualTo("0000");
 
     }
 }

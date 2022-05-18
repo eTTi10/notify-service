@@ -27,10 +27,10 @@ public class PushMultiDomainService {
     private final PushMultiClient pushMultiClient;
     private final PushMapper pushMapper;
 
-    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    @Value("${push.gateway.appId}")
     private String oldLgPushAppId;
 
-    @Value("${push-comm.push.old.lgupush.notiType}")
+    @Value("${push.gateway.notiType}")
     private String oldLgPushNotiType;
 
     private final ObjectMapper objectMapper = new ObjectMapper();

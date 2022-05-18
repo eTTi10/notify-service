@@ -9,10 +9,8 @@ import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
 import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.exception.database.DatabaseException;
-import com.lguplus.fleta.exception.database.DuplicateKeyException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.repository.latest.LatestRepository;
-import com.lguplus.fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -32,8 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -70,7 +68,7 @@ class LatestDomainServiceTest {
         GET_UUID = getUUID();
 
         latestDomainService = new LatestDomainService(latestMapper, latestRepository);
-        JunitTestUtils.setValue(latestDomainService, "maxCnt", 5);
+        ReflectionTestUtils.setField(latestDomainService, "maxCnt", 5);
 
     }
 
@@ -90,7 +88,7 @@ class LatestDomainServiceTest {
                 .categoryGb(CATEGORY_GB)
                 .build();
 
-        latestDomainService.insertLatest(latestRequestDto);
+        assertDoesNotThrow(() -> latestDomainService.insertLatest(latestRequestDto));
         //assertEquals(resultCode, GET_UUID); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
         log.info("인서트 정상실행");
@@ -98,7 +96,7 @@ class LatestDomainServiceTest {
 
     @Test
     @DisplayName("인서트 DatabaseException 에러 확인")
-    public void insertLatest_DatabaseException() {
+    void insertLatest_DatabaseException() {
         // Mock Object
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
                 .saId(GET_UUID)
@@ -114,14 +112,14 @@ class LatestDomainServiceTest {
         Exception thrown = assertThrows(DatabaseException.class, () -> {
             latestDomainService.insertLatest(latestRequestDto);
         });
-        assertEquals(thrown instanceof DatabaseException, true);
+        assertEquals(true, thrown instanceof DatabaseException);
         log.info("인서트 DatabaseException 에러 확인");
     }
 
 
     @Test
     @DisplayName("인서트 JpaSocketException 에러 확인")
-    public void insertLatest_RuntimeException() {
+    void insertLatest_RuntimeException() {
         // Mock Object
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
                 .saId(GET_UUID)
@@ -136,7 +134,7 @@ class LatestDomainServiceTest {
         Exception thrown = assertThrows(ExtRuntimeException.class, () -> {
             latestDomainService.insertLatest(latestRequestDto);
         });
-        assertEquals(thrown instanceof RuntimeException, true);
+        assertEquals(true, thrown instanceof RuntimeException);
         log.info("인서트 JpaSocketException 에러 확인");
     }
 
@@ -172,7 +170,7 @@ class LatestDomainServiceTest {
                 .catId("T3021").build();
 
         List<LatestDto> responseList = latestDomainService.getLatestList(latestRequestDto);
-        assertThat(responseList.size()==1); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
+        assertThat(responseList.size()).isEqualTo(1); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
         log.info("조회 정상적으로 리스트 데이터를 수신하는지 확인");
     }
@@ -196,7 +194,7 @@ class LatestDomainServiceTest {
                 .ctn("01055805424")
                 .catId("T3021").build();
         LatestCheckDto responseList = latestDomainService.getLatestCheckList(latestRequestDto);
-        assertThat(responseList.getCode().equals(LatestCheckDto.SUCCESS_CODE)); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
+        assertThat(responseList.getCode()).isEqualTo(LatestCheckDto.SUCCESS_CODE); // mock 의 결과 size 와 메소드 실행 결과 사이즈가 같은지 확인
 
         log.info("정상적으로 체크리스트 데이터를 수신하는지 확인");
     }
@@ -234,7 +232,7 @@ class LatestDomainServiceTest {
             LatestCheckDto responseDto = latestDomainService.getLatestCheckList(latestRequestDto);
         });
 
-        assertEquals(thrown instanceof DuplicateKeyException, true);
+        assertEquals(true, thrown instanceof DataAlreadyExistsException);
         log.info("중복체크 조건이 잘 실행되는지 확인");
     }
 
@@ -305,7 +303,7 @@ class LatestDomainServiceTest {
             LatestCheckDto responseDto = latestDomainService.getLatestCheckList(latestRequestDto);
         });
 
-        assertEquals(thrown instanceof ExceedMaxRequestException, true);
+        assertEquals(true, thrown instanceof ExceedMaxRequestException);
         log.info("리스트 최대등록개수 체크가 동작하는지 확인");
     }
 
@@ -326,7 +324,7 @@ class LatestDomainServiceTest {
                 .catId("M0241").build();
 
         int deleteCnt = latestDomainService.deleteLatest(latestRequestDto);
-        Assertions.assertTrue(1 == deleteCnt);
+        Assertions.assertEquals(1, deleteCnt);
 
         log.info("정상적으로 리스트 데이터를 삭제하는지 확인");
     }
@@ -338,9 +336,9 @@ class LatestDomainServiceTest {
         given(latestRepository.deleteLatest(any())).willReturn(0);
 
         Exception thrown = assertThrows(DeleteNotFoundException.class, () -> {
-            latestDomainService.deleteLatest(any());
+            latestDomainService.deleteLatest(null);
         });
-        assertEquals(thrown instanceof DeleteNotFoundException, true);
+        assertEquals(true, thrown instanceof DeleteNotFoundException);
 
         log.info("LatestServiceTest.deleteLatestDeleteNotFoundException End");
     }

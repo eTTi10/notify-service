@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,15 +30,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequiredArgsConstructor
 public class HttpMultiPushDomainService {
 
-    private final HttpPushDomainClient httpPushDomainClient;
+    private final HttpPushClient httpPushClient;
 
     private final HttpPushSupport httpPushSupport;
 
-    @Value("${multi.push.max.tps}")
-    private String maxMultiCount;
+    @Value("${push.openapi.multi.tps}")
+    private int maxMultiCount;
 
-    @Value("${multi.push.reject.regList}")
-    private String rejectReg;
+    @Value("${push.reject}")
+    private Set<String> rejectReg;
 
 
     /**
@@ -81,7 +78,7 @@ public class HttpMultiPushDomainService {
      * @return 구해진 초당 최대 Push 전송 허용 갯수
      */
     private int setMaxLimitPush(Integer multiCount) {
-        int maxLimitPush = Integer.parseInt(maxMultiCount);
+        int maxLimitPush = maxMultiCount;
 
         log.debug("before maxMultiCount :::::::::::: {}", maxLimitPush);
 
@@ -111,7 +108,6 @@ public class HttpMultiPushDomainService {
 
         int count = 1;
         long timestamp = System.currentTimeMillis();
-        String[] rejectRegIds = rejectReg.split("\\|");
 
         // Push 메시지 전송
         String applicationId = httpPushMultiRequestDto.getApplicationId();
@@ -124,7 +120,7 @@ public class HttpMultiPushDomainService {
 
         for (String regId : users) {
             // 사용자별 필수 값 체크 & 발송 제외 가번 확인
-            if (Arrays.asList(rejectRegIds).contains(regId.strip())) {
+            if (rejectReg.contains(regId.strip())) {
                 continue;
             }
 
@@ -132,7 +128,7 @@ public class HttpMultiPushDomainService {
                         try {
                             Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
 
-                            OpenApiPushResponseDto openApiPushResponseDto = httpPushDomainClient.requestHttpPushSingle(paramMap);
+                            OpenApiPushResponseDto openApiPushResponseDto = httpPushClient.requestHttpPushSingle(paramMap);
 
                             return regId + "|" + openApiPushResponseDto.getError().get("CODE");
 

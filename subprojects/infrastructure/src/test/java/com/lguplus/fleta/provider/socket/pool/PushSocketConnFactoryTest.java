@@ -1,7 +1,6 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
-import fleta.util.JunitTestUtils;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -12,9 +11,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,17 +27,17 @@ import static org.mockito.Mockito.spy;
 @ExtendWith({ MockitoExtension.class})
 class PushSocketConnFactoryTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll
@@ -53,7 +55,7 @@ class PushSocketConnFactoryTest {
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
-        JunitTestUtils.setValue(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
+        ReflectionTestUtils.setField(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
 
         GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1) );
 
@@ -73,7 +75,7 @@ class PushSocketConnFactoryTest {
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
-        JunitTestUtils.setValue(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
+        ReflectionTestUtils.setField(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
 
         GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1) );
 
@@ -125,8 +127,8 @@ class PushSocketConnFactoryTest {
 
         assertTrue(socketInfo.isOpened());
 
-        JunitTestUtils.setValue(socketInfo, "isOpened", false);
-        JunitTestUtils.setValue(socketInfo, "isFailure", true);
+        ReflectionTestUtils.setField(socketInfo, "isOpened", false);
+        ReflectionTestUtils.setField(socketInfo, "isFailure", true);
         pool.returnObject(socketInfo);
 
         PushSocketInfo socketInfoRtn = pool.borrowObject();
@@ -160,7 +162,7 @@ class PushSocketConnFactoryTest {
 
         assertTrue(socketInfo.isOpened());
 
-        JunitTestUtils.setValue(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-200);
+        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-200);
         pool.returnObject(socketInfo);
 
         pool.setConfig(getPoolConfig(1,1));
@@ -190,7 +192,7 @@ class PushSocketConnFactoryTest {
 
         assertTrue(socketInfo.isOpened());
 
-        JunitTestUtils.setValue(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-400);
+        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-400);
         pool.returnObject(socketInfo);
 
         pool.setConfig(getPoolConfig(1,1));
@@ -249,7 +251,7 @@ class PushSocketConnFactoryTest {
         PushSocketConnFactory spyFactory = spy(pushSocketConnFactory);
 
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        JunitTestUtils.setValue(pushSocketInfo, "isOpened", false);
+        ReflectionTestUtils.setField(pushSocketInfo, "isOpened", false);
         doReturn(pushSocketInfo).when(spyFactory).createNewSocketInfo();
 
         PushSocketInfo testSocketInfo = spyFactory.create();

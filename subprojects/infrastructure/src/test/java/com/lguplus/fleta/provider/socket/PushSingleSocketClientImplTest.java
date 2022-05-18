@@ -4,7 +4,7 @@ import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
+import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -21,13 +21,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 @Slf4j
 @ExtendWith({ MockitoExtension.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSingleSocketClientImplTest {
 
-    static NettyTcpJunitServerTest server;
+    static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
 
@@ -42,11 +44,11 @@ class PushSingleSocketClientImplTest {
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
-        server = new NettyTcpJunitServerTest();
+        server = new NettyTcpJunitServer();
         new Thread(() -> {
             server.runServer(SERVER_PORT);
         }).start();
-        Thread.sleep(200);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(200));
     }
 
     @AfterAll
@@ -126,30 +128,30 @@ class PushSingleSocketClientImplTest {
 
         dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMax", "2");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMin", "1");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMax", "2");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMin", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMax", 2);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "socketMin", 1);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMax", 2);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgSocketMin", 1);
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "host", SERVER_IP);
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "port", "" + SERVER_PORT);
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "timeout", "2000");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "wasPort", "8080");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "port", SERVER_PORT);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "timeout", 2000);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "wasPort", 8080);
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "defaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "destinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "closeSecond", "170");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushSocketInitCnt", "5");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "closeSecond", 170);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushSocketInitCnt", 5);
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgHost", SERVER_IP);
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPort", "" + SERVER_PORT);
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgTimeout", "2000");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPort", SERVER_PORT);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgTimeout", 2000);
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDefaultChannelHost", "PsAgt");
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgDestinationIp", "222.231.13.85");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgCloseSecond", "170");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPushSocketInitCnt", "5");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgCloseSecond", 170);
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPushSocketInitCnt", 5);
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "lgPushServiceId", "00007");
-        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushIntervalTime", "1");
+        ReflectionTestUtils.setField(pushSingleSocketClientImpl, "pushIntervalTime", 1);
 
         ReflectionTestUtils.setField(pushSingleSocketClientImpl, "measureIntervalMillis", 1000);
 

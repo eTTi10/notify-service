@@ -17,6 +17,7 @@ import java.util.Properties;
  */
 public class YamlPropertySourceFactory implements PropertySourceFactory {
 
+	final String a = "\"result\":{\"noti_type\":\"FUP\",\"cont_type\":\"REAL\",\"svc_id\":\"[+svc_id]\",\"name\":\"[+name]\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"data\":{\"LINK_FLAG\":\"[+link_flag]\", \"intent_url\":\"[+intent_url]\"}}";
 	/**
 	 * 
 	 */

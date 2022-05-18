@@ -1,8 +1,6 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServerTest;
-import fleta.util.JunitTestUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.*;
@@ -12,10 +10,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.spy;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class SmsGatewayTest {
 
-    static NettySmsAgentServerTest server;
+    static NettySmsAgentServer server;
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 8999;
@@ -35,11 +36,12 @@ class SmsGatewayTest {
 
     @BeforeAll
     static void setUpAll() {
-        server = new NettySmsAgentServerTest();
+        server = new NettySmsAgentServer();
         thread = new Thread(() -> {
             server.runServer(SERVER_PORT);
         });
         thread.start();
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
     }
 
     @AfterAll
@@ -60,24 +62,33 @@ class SmsGatewayTest {
     }
 
     @Test
-    void test_01() throws IOException {
+    void test_01() throws Exception {
         SmsGateway gateway = getSmsGateWay();
 
         int port = gateway.getPort();
         assertEquals(SERVER_PORT, port);
 
         SmsGateway spy_gw = spy(gateway);
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         assertTrue(spy_gw.isBind());
 
         spy_gw.sendMessage("01041112222", "01041113333", "callback", "test", 1);
 
         //reconnect
-        JunitTestUtils.setValue(gateway, "RECONNECT_TERM", 3000);
+        Field reconnectTermField = gateway.getClass().getDeclaredField("RECONNECT_TERM");
+        reconnectTermField.setAccessible(true);
+        Field modifiers = Field.class.getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(reconnectTermField, reconnectTermField.getModifiers() & ~Modifier.FINAL);
+        reconnectTermField.setInt(null, 3000);
         ReflectionTestUtils.invokeMethod(spy_gw, "connectGateway");
         assertTrue(spy_gw.isBind());
 
         //checkLink
-        JunitTestUtils.setValue(gateway, "LINK_CHECK_TERM", 1000);
+        Field linkCheckTermField = gateway.getClass().getDeclaredField("LINK_CHECK_TERM");
+        linkCheckTermField.setAccessible(true);
+        modifiers.setInt(linkCheckTermField, linkCheckTermField.getModifiers() & ~Modifier.FINAL);
+        linkCheckTermField.setInt(null, 1000);
         ReflectionTestUtils.invokeMethod(spy_gw, "checkLink");
 
         //sendReport
@@ -98,13 +109,13 @@ class SmsGatewayTest {
         ByteArrayInputStream b1 = new ByteArrayInputStream(ByteBuffer.allocate(4).putInt(testValue).array());
 
         SmsGateway gateway = getSmsGateWay();
-        JunitTestUtils.setValue(gateway, "mInputStream", b1);
+        ReflectionTestUtils.setField(gateway, "mInputStream", b1);
         int result = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
 //        assertEquals(testValue, result);
 
         // length == 0
         ByteArrayInputStream b0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", b0);
+        ReflectionTestUtils.setField(gateway, "mInputStream", b0);
         int result0 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
         assertEquals(-1, result0);
 
@@ -117,13 +128,13 @@ class SmsGatewayTest {
         SmsGateway gateway = getSmsGateWay();
         //String
         ByteArrayInputStream bss = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", bss);
+        ReflectionTestUtils.setField(gateway, "mInputStream", bss);
         String result1 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
 //        assertEquals("CDEF", result1);
 
         // length == 0
         ByteArrayInputStream bs0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
-        JunitTestUtils.setValue(gateway, "mInputStream", bs0);
+        ReflectionTestUtils.setField(gateway, "mInputStream", bs0);
         String result2 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
         assertEquals("", result2);
     }
@@ -140,52 +151,54 @@ class SmsGatewayTest {
         int result = 0;
 
         SmsGateway gateway = getSmsGateWay();
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         assertTrue(gateway.isBind());
 
         //BIND_ACK
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(result).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         assertFalse(gateway.isBind());
 
-        thread.sleep(4000); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
+        LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000)); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
 
         //DELIVER_ACK
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(DELIVER_ACK).putInt(result).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         String mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("0000", mResult);
 
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(DELIVER_ACK).putInt(1).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("1500", mResult);
 
         gateway.clearResult();
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(DELIVER_ACK).putInt(2).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(2).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("", mResult);
 
         //LINK_RECV
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(4).putInt(LINK_RECV).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(LINK_RECV).putInt(0).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
         //Report
         String str32 = "01234567890123456789012345678901";
         String str20 = "01234567890123456789";
         String str12 = "012345678901";
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(4+4+32+32+4+20+12)
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(4+4+4+32+32+4+20+12)
                         .putInt(REPORT)
+                        .putInt(4+32+32+4+20+12)
                         .putInt(result)
                         .put(str32.getBytes())
                         .put(str32.getBytes())
@@ -206,8 +219,8 @@ class SmsGatewayTest {
         SmsGateway gateway = getInvaildSmsGateWay();
 
         //BIND_ACK
-        JunitTestUtils.setValue(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(BIND_ACK).putInt(1).array()));
+        ReflectionTestUtils.setField(gateway, "mInputStream"
+                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         assertFalse(gateway.isBind());
     }
@@ -220,7 +233,7 @@ class SmsGatewayTest {
         assertTrue(gateway.isBind());
 
         gateway.clearResult();
-        JunitTestUtils.setValue(gateway, "mResult", "0000");
+        ReflectionTestUtils.setField(gateway, "mResult", "0000");
         Future<SmsGatewayResponseDto> dto =  gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto = dto.get();
         assertEquals("0000", smsGatewayResponseDto.getFlag());
@@ -228,13 +241,13 @@ class SmsGatewayTest {
 
 
         gateway.clearResult();
-        JunitTestUtils.setValue(gateway, "mResult", "1500");
+        ReflectionTestUtils.setField(gateway, "mResult", "1500");
         Future<SmsGatewayResponseDto> dto1 =  gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto1 = dto1.get();
         assertEquals("시스템 장애", smsGatewayResponseDto1.getMessage());
 
         gateway.clearResult();
-        JunitTestUtils.setValue(gateway, "mResult", "1101");
+        ReflectionTestUtils.setField(gateway, "mResult", "1101");
         Future<SmsGatewayResponseDto> dto2 =  gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto2 = dto2.get();
 

@@ -98,14 +98,12 @@ public class HttpPushSupport {
      */
     private String getEncryptedServicePassword(String serviceId) {
         //서비스 KEY
-        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
         Pair<String, String> cdMsgPair = httpServiceProps.getExceptionCodeMessage("ServiceIdNotFoundException");
-        httpPushCustomException.setCode(cdMsgPair.getLeft());
-        httpPushCustomException.setMessage(cdMsgPair.getRight());
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException(null, cdMsgPair.getLeft(), cdMsgPair.getRight());
 
         Map<String, String> serviceMap = httpServiceProps.findMapByServiceId(serviceId).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
 
-        String servicePwd = Optional.ofNullable(serviceMap.get("service_pwd")).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
+        String servicePwd = Optional.ofNullable(serviceMap.get("password")).orElseThrow(() -> httpPushCustomException);    // 1115 서비스ID 확인 불가
 
         log.debug("service_id ::::::::::::::: {}\tservice_pwd ::::::::::::: {}", serviceId, servicePwd);
 

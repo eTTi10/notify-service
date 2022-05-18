@@ -1,13 +1,13 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
-import com.lguplus.fleta.util.JunitTestUtils;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ class HttpSinglePushDomainServiceTest {
     HttpSinglePushDomainService httpSinglePushDomainService;
 
     @Mock
-    HttpPushDomainClient httpPushDomainClient;
+    HttpPushClient httpPushClient;
 
     @Mock
     HttpPushSupport httpPushSupport;
@@ -44,7 +45,7 @@ class HttpSinglePushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpSinglePushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        ReflectionTestUtils.setField(httpSinglePushDomainService, "rejectReg", Set.of("M20110725000","U01080800201","U01080800202","U01080800203"));
     }
 
     @Test
@@ -53,7 +54,7 @@ class HttpSinglePushDomainServiceTest {
         // given
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
