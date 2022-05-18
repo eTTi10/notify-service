@@ -39,7 +39,7 @@ import static org.mockito.BDDMockito.given;
 @Slf4j
 class LatestDomainServiceTest {
 
-    private static String GET_UUID;
+    private static String GET_UUID = getUUID();
     private static final String MAC = "JUNIT_TEST_MAC";
     private static final String CTN = "01012341234";
     private static final String CAT_ID = "T0070";
@@ -63,14 +63,14 @@ class LatestDomainServiceTest {
         return (returnValue);
     }
 
-    @BeforeEach
-    void setUp() {
-        GET_UUID = getUUID();
-
-        latestDomainService = new LatestDomainService(latestMapper, latestRepository);
-        ReflectionTestUtils.setField(latestDomainService, "maxCnt", 5);
-
-    }
+//    @BeforeEach
+//    void setUp() {
+//        GET_UUID = getUUID();
+//
+//        latestDomainService = new LatestDomainService(latestMapper, latestRepository);
+//        ReflectionTestUtils.setField(latestDomainService, "maxCnt", 5);
+//
+//    }
 
     //####################### Start 알림등록 ######################
 
