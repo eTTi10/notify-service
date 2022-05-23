@@ -111,7 +111,7 @@ public class MM7Message implements JDOMSupport {
 
 		// Instantiate a correct message class
 		try {
-			Class<?> clazz = Class.forName("com.dmi.mmsagent.agent.module." + message);
+			Class<?> clazz = Class.forName("com.lguplus.fleta.provider.external.mmsagent.soap.module." + message);
 			MM7Message mm7 = (MM7Message) clazz.newInstance();
 
 			// Load response
