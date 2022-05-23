@@ -25,10 +25,10 @@ public class PushAnnounceDomainService {
     private final PushConfig pushConfig;
     private final PushAnnounceClient pushAnnounceClient;
 
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATA_FORMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_ANNOUNCEMENT";
     private static final int TRANSACTION_MAX_SEQ_NO = 10000;
-    private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
+    private final AtomicInteger transactionMsgId = new AtomicInteger(0);
 
     @Value("${push.gateway.appId}")
     private String oldLgPushAppId;
@@ -79,7 +79,7 @@ public class PushAnnounceDomainService {
     }
 
     private String getTransactionId() {
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
+        return DateFormatUtils.format(new Date(), DATA_FORMAT) + String.format("%04d", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
     }
 
 }

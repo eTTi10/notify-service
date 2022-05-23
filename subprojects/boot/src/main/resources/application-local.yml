@@ -53,7 +53,7 @@ spring:
 
   #### Message Stream - Kafka
   kafka:
-    bootstrap-servers: b-1.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-2.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-3.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-5.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092
+    bootstrap-servers: b-2.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092
 
 
 
