@@ -1,5 +1,6 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
+import com.lguplus.fleta.config.KafkaConfig;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +20,8 @@ import java.util.concurrent.locks.LockSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -64,9 +67,10 @@ public class SmsGateway {
     private OutputStream mOutputStream;
     private Socket mSocket;
 
+    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+    private MessageListenerContainer smsListenerContainer;
 
-    public SmsGateway(String ip, String port, String id, String password) {
-
+    public SmsGateway(String ip, String port, String id, String password, KafkaListenerEndpointRegistry registry) {
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
@@ -83,12 +87,27 @@ public class SmsGateway {
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
+        kafkaListenerEndpointRegistry = registry;
 
+        smsListenerContainer = kafkaListenerEndpointRegistry.getListenerContainer(KafkaConfig.SMS_TOPIC_ID);
         connectGateway();
+
     }
 
-    public boolean isBind() {
+    public boolean getBindState() {
         return isBind;
+    }
+
+    public void setBindState(boolean bind) {
+        if (bind) {
+            this.isBind = true;
+            log.info("Sms kafka listener start");
+            smsListenerContainer.start();
+        } else {
+            this.isBind = false;
+            log.info("Sms kafka listener stop");
+            smsListenerContainer.stop();
+        }
     }
 
     public Date getLastSendDate() {
@@ -127,7 +146,7 @@ public class SmsGateway {
             mInputStream = mSocket.getInputStream();
             mOutputStream = mSocket.getOutputStream();
 
-            isBind = true;
+            setBindState(true);
 
             mStatusLog.info("Connect Success[" + mPort + "]");
             mStatusLog.info("Socket Open[" + mPort + "]");
@@ -148,8 +167,7 @@ public class SmsGateway {
 
         mStatusLog.info("ReConnect Try[" + mPort + "]");
 
-        isBind = false;
-
+        setBindState(false);
         mTimerMap.get(TIMER_RECONNECT).cancel();
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         TimerTask timerTask = new TimerTask() {
@@ -340,7 +358,7 @@ public class SmsGateway {
 
                 mStatusLog.info("readHeader() BIND_ACK result:" + result);
 
-                isBind = 0 == result;
+                setBindState(0 == result);
 
                 if (isBind) {
                     mTimerMap.get(TIMER_LINK_CHECK).cancel();
@@ -437,7 +455,7 @@ public class SmsGateway {
                 smsGateway.isLinked = false;
             } else {
                 log.info("Link Fail[" + smsGateway.mPort + "]");
-                smsGateway.isBind = false;
+                smsGateway.setBindState(false);
                 smsGateway.connectGateway();
             }
         }

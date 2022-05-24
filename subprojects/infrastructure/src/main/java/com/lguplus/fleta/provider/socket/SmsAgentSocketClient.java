@@ -2,38 +2,42 @@ package com.lguplus.fleta.provider.socket;
 
 import com.lguplus.fleta.client.SmsAgentClient;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.*;
+import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.properties.SmsAgentProps;
+import com.lguplus.fleta.provider.kafka.SmsKafkaListener;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import javax.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class SmsAgentSocketClient implements SmsAgentClient {
 
+    private final SmsAgentProps smsAgentProps;
+    private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
     @Value("${sms.agent.tps}")
     private int agentTps;
-
-    private final SmsAgentProps smsAgentProps;
-
     private int mSendTerm;
-  
+
     private LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
 
-    @PostConstruct
+    @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {
 
         log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
@@ -46,13 +50,13 @@ public class SmsAgentSocketClient implements SmsAgentClient {
         String[] idList = mapServers.get("id").split("\\|");
         String[] pwList = mapServers.get("password").split("\\|");
 
-        log.debug("mapServers:"+ mapServers);
-        log.debug("mapServers.get(ip):"+ mapServers.get("ip"));
+        log.debug("mapServers:" + mapServers);
+        log.debug("mapServers.get(ip):" + mapServers.get("ip"));
 
         int length = idList.length;
 
         for (int i = 0; i < length; i++) {
-            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]);
+            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i], kafkaListenerEndpointRegistry);
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
@@ -85,14 +89,14 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             if (currentDate - prevSendDate <= mSendTerm) {
 
                 sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
-              
+
                 //1503
                 throw new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
             }
 
             try {
                 //게이트웨이 서버에 소켓접속이 완료된 경우
-                if (smsGateway.isBind()) {
+                if (smsGateway.getBindState()) {
 
                     log.debug("smsGateway.sendMessage( {}, {}, {}, {}, {})", sCtn, rCtn, sCtn, message, smsGateway.getPort());
                     smsGateway.sendMessage(sCtn, rCtn, sCtn, message, smsGateway.getPort());

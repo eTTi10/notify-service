@@ -28,4 +28,8 @@ public class SmsAgentProps {
        return servers.stream().filter(m -> m.get("index").equals(index)).findFirst();
    }
 
+   public int getCount(){
+       return servers.size();
+   }
+
 }
