@@ -1,6 +1,7 @@
 # SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
 
 sms:
+  gateway_index : 1
   sender:
     number: 101
     retry:

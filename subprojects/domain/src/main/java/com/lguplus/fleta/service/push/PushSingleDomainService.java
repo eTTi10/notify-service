@@ -55,7 +55,7 @@ public class PushSingleDomainService {
     private Map<String,Object> progressLock;
     private final List<ProcessCounter> pushProgressCnt = Collections.synchronizedList(new ArrayList<>());
 
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATE_FORMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_NOTI";
     private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
     private static final int TRANSACTION_MAX_SEQ_NO = 10000;
@@ -205,10 +205,10 @@ public class PushSingleDomainService {
 
     private String getTransactionId(String serviceId) {
         if(!isLgPushServiceId(serviceId)) {
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
+            return DateFormatUtils.format(new Date(), DATE_FORMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
         else {
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
+            return DateFormatUtils.format(new Date(), DATE_FORMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
         }
     }
 
