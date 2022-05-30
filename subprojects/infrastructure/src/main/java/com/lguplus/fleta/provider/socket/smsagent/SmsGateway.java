@@ -67,10 +67,7 @@ public class SmsGateway {
     private OutputStream mOutputStream;
     private Socket mSocket;
 
-    private KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
-    private MessageListenerContainer smsListenerContainer;
-
-    public SmsGateway(String ip, String port, String id, String password, KafkaListenerEndpointRegistry registry) {
+    public SmsGateway(String ip, String port, String id, String password) {
         mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
@@ -87,9 +84,7 @@ public class SmsGateway {
 
         mStatusLog.info("ip:" + ip);
         mStatusLog.info("port:" + port);
-        kafkaListenerEndpointRegistry = registry;
 
-        smsListenerContainer = kafkaListenerEndpointRegistry.getListenerContainer(KafkaConfig.SMS_TOPIC_ID);
         connectGateway();
 
     }
@@ -101,12 +96,8 @@ public class SmsGateway {
     public void setBindState(boolean bind) {
         if (bind) {
             this.isBind = true;
-            log.info("Sms kafka listener start");
-            smsListenerContainer.start();
         } else {
             this.isBind = false;
-            log.info("Sms kafka listener stop");
-            smsListenerContainer.stop();
         }
     }
 

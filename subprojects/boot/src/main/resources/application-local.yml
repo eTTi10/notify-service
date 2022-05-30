@@ -49,7 +49,7 @@ spring:
     type: redis
   redis:
     cluster:
-      nodes: ["redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379"]
+      nodes: [ "redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379" ]
 
   #### Message Stream - Kafka
   kafka:

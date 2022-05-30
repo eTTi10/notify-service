@@ -4,7 +4,6 @@ import com.lguplus.fleta.client.SmsAgentClient;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.properties.SmsAgentProps;
-import com.lguplus.fleta.provider.kafka.SmsKafkaListener;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -14,14 +13,11 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -30,9 +26,11 @@ import org.springframework.stereotype.Component;
 public class SmsAgentSocketClient implements SmsAgentClient {
 
     private final SmsAgentProps smsAgentProps;
-    private final KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
     @Value("${sms.agent.tps}")
     private int agentTps;
+    @Value("${sms.gateway_index}")
+    private String gatewayIndex;
+
     private int mSendTerm;
 
     private LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
@@ -40,11 +38,13 @@ public class SmsAgentSocketClient implements SmsAgentClient {
     @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {
 
-        log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
-        String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
-        log.debug("index:" + index);
+        if (gatewayIndex.equals("0")) {
+            log.info("SmsGateway Index is 0 ");
+            return;
+        }
 
-        Map<String, String> mapServers = smsAgentProps.findMapByIndex(index).orElseThrow();
+        Map<String, String> mapServers = smsAgentProps.findMapByIndex(gatewayIndex).orElseThrow();
+
         String[] ipList = mapServers.get("ip").split("\\|");
         String[] portList = mapServers.get("port").split("\\|");
         String[] idList = mapServers.get("id").split("\\|");
@@ -56,7 +56,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
         int length = idList.length;
 
         for (int i = 0; i < length; i++) {
-            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i], kafkaListenerEndpointRegistry);
+            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]);
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();

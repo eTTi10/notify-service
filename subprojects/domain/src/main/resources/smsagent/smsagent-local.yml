@@ -1,6 +1,7 @@
 # SMS발송 메시지 정보를 가져오기 위해 셋팅정보를 조회한다.
 
 sms:
+  gateway_index : 1
   sender:
     number: 101
     retry:
@@ -34,10 +35,10 @@ sms:
     tps: 1
     servers:
       - index: 1
-        ip: 106.103.189.115|106.103.189.115
-        port: 8129|8130
-        id: test|test
-        password: test|test
+        ip: 106.103.189.115
+        port: 8129
+        id: test
+        password: test
       - index: 2
         ip: 106.103.189.115
         port: 8130

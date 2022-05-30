@@ -67,11 +67,11 @@ class SmsGatewayTest {
     }
 
     SmsGateway getSmsGateWay() {
-        return new SmsGateway(SERVER_IP, SERVER_PORT + "", id, password, kafkaListenerEndpointRegistry);
+        return new SmsGateway(SERVER_IP, SERVER_PORT + "", id, password);
     }
 
     SmsGateway getInvaildSmsGateWay() {
-        return new SmsGateway(SERVER_IP, "1" + SERVER_PORT, id, password, kafkaListenerEndpointRegistry);
+        return new SmsGateway(SERVER_IP, "1" + SERVER_PORT, id, password);
     }
 
     @Test

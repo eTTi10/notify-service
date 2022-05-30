@@ -84,7 +84,7 @@ class PushAnnounceDomainServiceTest {
         given( pushConfig.getServiceLinkType(anyString()) ).willReturn("LGUPUSH_OLD");
         given( pushAnnounceClient.requestAnnouncement(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
 
-        ReflectionTestUtils.setField(pushAnnounceDomainService, "tranactionMsgId", new AtomicInteger(9999));
+        ReflectionTestUtils.setField(pushAnnounceDomainService, "transactionMsgId", new AtomicInteger(9999));
 
         PushClientResponseDto responseDto = pushAnnounceDomainService.requestAnnouncement(pushRequestAnnounceDto);
         Assertions.assertEquals("200", responseDto.getCode());

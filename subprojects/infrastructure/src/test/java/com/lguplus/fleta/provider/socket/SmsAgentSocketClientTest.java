@@ -5,7 +5,6 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.*;
 
 import com.lguplus.fleta.properties.SmsAgentProps;
-import com.lguplus.fleta.provider.kafka.SmsKafkaListener;
 import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServer;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import lombok.extern.slf4j.Slf4j;
@@ -41,9 +40,6 @@ class SmsAgentSocketClientTest {
 
     @Mock
     SmsAgentProps smsAgentProps;
-
-    @Mock
-    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
 
     @InjectMocks
     SmsAgentSocketClient smsAgentSocketClient;
@@ -90,8 +86,9 @@ class SmsAgentSocketClientTest {
 //        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
-
         ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", 100);
+
+        ReflectionTestUtils.setField(smsAgentSocketClient, "gatewayIndex", "1");
         smsAgentSocketClient.initGateway();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1500)); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }
@@ -100,7 +97,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("04 SMS전송 테스트")
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password, kafkaListenerEndpointRegistry);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
@@ -141,7 +138,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("10 SystemBusyException 테스트")
     void send_SystemBusyException2() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password, kafkaListenerEndpointRegistry);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.offer(sGateway);
 
@@ -170,7 +167,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("07 SmsAgentEtcException 테스트")
     void isBind() throws IOException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "1", id, password, kafkaListenerEndpointRegistry);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, "1", id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
@@ -187,7 +184,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("09 SystemErrorException 테스트")
     void send_SystemErrorException() throws IOException, InterruptedException {
 
-        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, "8888", id, password, kafkaListenerEndpointRegistry));
+        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, "8888", id, password));
         doThrow(new IOException()).when(fakeGateway).sendMessage(anyString(), anyString(), anyString(), anyString(), anyInt());
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>)ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
