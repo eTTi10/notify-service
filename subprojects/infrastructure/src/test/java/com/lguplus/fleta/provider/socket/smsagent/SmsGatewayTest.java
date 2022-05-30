@@ -1,13 +1,6 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import lombok.extern.slf4j.Slf4j;
-
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -17,9 +10,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-
-import static org.junit.jupiter.api.Assertions.*;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import static org.mockito.Mockito.spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
+import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Slf4j
 @ExtendWith({MockitoExtension.class})
@@ -30,6 +37,12 @@ class SmsGatewayTest {
     static Thread thread;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 8999;
+
+    @Mock
+    KafkaListenerEndpointRegistry kafkaListenerEndpointRegistry;
+
+    @Mock
+    MessageListenerContainer smsListenerContainer;
 
     String id = "@id";
     String password = "@password";
@@ -70,7 +83,7 @@ class SmsGatewayTest {
 
         SmsGateway spy_gw = spy(gateway);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
-        assertTrue(spy_gw.isBind());
+        assertTrue(spy_gw.getBindState());
 
         spy_gw.sendMessage("01041112222", "01041113333", "callback", "test", 1);
 
@@ -82,7 +95,7 @@ class SmsGatewayTest {
         modifiers.setInt(reconnectTermField, reconnectTermField.getModifiers() & ~Modifier.FINAL);
         reconnectTermField.setInt(null, 3000);
         ReflectionTestUtils.invokeMethod(spy_gw, "connectGateway");
-        assertTrue(spy_gw.isBind());
+        assertTrue(spy_gw.getBindState());
 
         //checkLink
         Field linkCheckTermField = gateway.getClass().getDeclaredField("LINK_CHECK_TERM");
@@ -99,7 +112,7 @@ class SmsGatewayTest {
     @Test
     void test_08() {
         SmsGateway gateway = getInvaildSmsGateWay();
-        assertFalse(gateway.isBind());
+        assertFalse(gateway.getBindState());
     }
 
     //readBufferToString
@@ -111,7 +124,7 @@ class SmsGatewayTest {
         SmsGateway gateway = getSmsGateWay();
         ReflectionTestUtils.setField(gateway, "mInputStream", b1);
         int result = ReflectionTestUtils.invokeMethod(gateway, "readBufferToInt", 4);
-//        assertEquals(testValue, result);
+        //        assertEquals(testValue, result);
 
         // length == 0
         ByteArrayInputStream b0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
@@ -130,7 +143,7 @@ class SmsGatewayTest {
         ByteArrayInputStream bss = new ByteArrayInputStream(ByteBuffer.allocate(4).put("CDEF".getBytes()).array());
         ReflectionTestUtils.setField(gateway, "mInputStream", bss);
         String result1 = ReflectionTestUtils.invokeMethod(gateway, "readBufferToString", 4);
-//        assertEquals("CDEF", result1);
+        //        assertEquals("CDEF", result1);
 
         // length == 0
         ByteArrayInputStream bs0 = new ByteArrayInputStream(ByteBuffer.allocate(0).array());
@@ -152,43 +165,43 @@ class SmsGatewayTest {
 
         SmsGateway gateway = getSmsGateWay();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
-        assertTrue(gateway.isBind());
+        assertTrue(gateway.getBindState());
 
         //BIND_ACK
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(result).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
-        assertFalse(gateway.isBind());
+        assertFalse(gateway.getBindState());
 
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000)); //connectGateway()가 실행되는 시간을 벌기 위해 RECONNECT_TERM 만큼 지연
 
         //DELIVER_ACK
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(result).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(result).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         String mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("0000", mResult);
 
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(1).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("1500", mResult);
 
         gateway.clearResult();
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(2).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(80).putInt(DELIVER_ACK).putInt(72).putInt(2).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
         mResult = (String) ReflectionTestUtils.getField(gateway, "mResult");
         assertEquals("", mResult);
 
         //LINK_RECV
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(LINK_RECV).putInt(0).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(LINK_RECV).putInt(0).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
 
         //Report
@@ -196,16 +209,16 @@ class SmsGatewayTest {
         String str20 = "01234567890123456789";
         String str12 = "012345678901";
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(4+4+4+32+32+4+20+12)
-                        .putInt(REPORT)
-                        .putInt(4+32+32+4+20+12)
-                        .putInt(result)
-                        .put(str32.getBytes())
-                        .put(str32.getBytes())
-                        .putInt(0)
-                        .put(str20.getBytes())
-                        .put(str12.getBytes())
-                        .array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(4 + 4 + 4 + 32 + 32 + 4 + 20 + 12)
+                .putInt(REPORT)
+                .putInt(4 + 32 + 32 + 4 + 20 + 12)
+                .putInt(result)
+                .put(str32.getBytes())
+                .put(str32.getBytes())
+                .putInt(0)
+                .put(str20.getBytes())
+                .put(str12.getBytes())
+                .array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
     }
 
@@ -215,14 +228,13 @@ class SmsGatewayTest {
 
         int BIND_ACK = 1;
 
-
         SmsGateway gateway = getInvaildSmsGateWay();
 
         //BIND_ACK
         ReflectionTestUtils.setField(gateway, "mInputStream"
-                , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
+            , new ByteArrayInputStream(ByteBuffer.allocate(28).putInt(BIND_ACK).putInt(20).putInt(1).array()));
         ReflectionTestUtils.invokeMethod(gateway, "readHeader");
-        assertFalse(gateway.isBind());
+        assertFalse(gateway.getBindState());
     }
 
     @Test
@@ -230,25 +242,24 @@ class SmsGatewayTest {
 
         SmsGateway gateway = getSmsGateWay();
         SmsGateway spy_gw = spy(gateway);
-        assertTrue(gateway.isBind());
+        assertTrue(gateway.getBindState());
 
         gateway.clearResult();
         ReflectionTestUtils.setField(gateway, "mResult", "0000");
-        Future<SmsGatewayResponseDto> dto =  gateway.getResult();
+        Future<SmsGatewayResponseDto> dto = gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto = dto.get();
         assertEquals("0000", smsGatewayResponseDto.getFlag());
         spy_gw.sendMessage("01041112222", "01041113333", "callback", "test", 1);
 
-
         gateway.clearResult();
         ReflectionTestUtils.setField(gateway, "mResult", "1500");
-        Future<SmsGatewayResponseDto> dto1 =  gateway.getResult();
+        Future<SmsGatewayResponseDto> dto1 = gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto1 = dto1.get();
         assertEquals("시스템 장애", smsGatewayResponseDto1.getMessage());
 
         gateway.clearResult();
         ReflectionTestUtils.setField(gateway, "mResult", "1101");
-        Future<SmsGatewayResponseDto> dto2 =  gateway.getResult();
+        Future<SmsGatewayResponseDto> dto2 = gateway.getResult();
         SmsGatewayResponseDto smsGatewayResponseDto2 = dto2.get();
 
     }

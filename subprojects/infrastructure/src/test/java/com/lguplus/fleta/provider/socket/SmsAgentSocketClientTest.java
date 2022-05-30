@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -85,8 +86,9 @@ class SmsAgentSocketClientTest {
 //        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", "1");
 
         given(smsAgentProps.findMapByIndex(anyString())).willReturn(Optional.of(serverMap));
-
         ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", 100);
+
+        ReflectionTestUtils.setField(smsAgentSocketClient, "gatewayIndex", "1");
         smsAgentSocketClient.initGateway();
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1500)); // mSendTerm 과 비교하는 분기를 통과하기 위해
     }

@@ -103,7 +103,7 @@ public class MM7Error extends Exception implements JDOMSupport {
 			String message = detail.getName();
 			// Instantiate correct status type
 
-			Class<?> clazz = Class.forName("com.dmi.mmsagent.agent.module." + message);
+			Class<?> clazz = Class.forName("com.lguplus.fleta.provider.external.mmsagent.soap.module." + message);
 			this.response = (MM7Response) clazz.newInstance();
 			this.response.load(element);
 		} catch (Throwable t) {

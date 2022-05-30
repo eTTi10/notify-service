@@ -40,7 +40,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     @Value("${push.gateway.tps}")
     private int maxLimitPush; //400/1sec
 
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATA_FORMAT = "yyyyMMdd";
     private static final int TRANSACTION_MAX_SEQ_NO = (int)(Math.pow(16, 4));// 65536
     private static final long SECOND = 1000L;
     private static final String SUCCESS = "SC";
@@ -288,7 +288,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     }
 
     private String getTransactionId() {
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
+        return DateFormatUtils.format(new Date(), DATA_FORMAT) + String.format("%04x", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
     }
 
 

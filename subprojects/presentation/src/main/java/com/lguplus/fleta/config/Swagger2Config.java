@@ -2,6 +2,7 @@ package com.lguplus.fleta.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -42,14 +43,14 @@ public class Swagger2Config {
         Set<String> consumes = new HashSet<>();
         consumes.add("application/json;charset=UTF-8");
         consumes.add("application/xml;charset=UTF-8");
-        consumes.add("application/x-www-form-urlencoded");
+        consumes.add(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
         return consumes;
     }
 
     private Set<String> getProduceContentTypes() {
         Set<String> produces = new HashSet<>();
-        produces.add("application/json");
-        produces.add("application/xml");
+        produces.add(MediaType.APPLICATION_JSON_VALUE);
+        produces.add(MediaType.APPLICATION_XML_VALUE);
         return produces;
     }
 

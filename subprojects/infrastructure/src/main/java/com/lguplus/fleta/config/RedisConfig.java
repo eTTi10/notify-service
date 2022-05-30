@@ -1,25 +1,30 @@
 package com.lguplus.fleta.config;
 
-import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-
-import java.time.Duration;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
+@Slf4j
 public class RedisConfig {
 
+    /**
+     * 레디스 RedisTemplate 방식
+     */
     @Bean
-    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        return builder -> builder
-                .cacheDefaults( RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofHours(24)) // Default TTL 값은 24시간
-                        .disableCachingNullValues()
-                        .prefixCacheNameWith("NY::")
-                        //.serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())))
-                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new JdkSerializationRedisSerializer())));
+    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
+
+        return redisTemplate;
     }
+
 }
