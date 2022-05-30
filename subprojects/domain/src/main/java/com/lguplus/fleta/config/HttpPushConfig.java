@@ -13,8 +13,7 @@ import java.util.Map;
  * HttpPush 설정 파일
  */
 @Configuration
-@PropertySource(value = "classpath:httppush/httppush-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
-@PropertySource(value = "classpath:httppush/httpservice-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
+@PropertySource(value = "classpath:push/push-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
 public class HttpPushConfig {
 
     @Bean

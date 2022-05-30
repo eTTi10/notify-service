@@ -1,59 +1,62 @@
 package com.lguplus.fleta.provider.socket;
 
-import com.lguplus.fleta.client.SmsAgentDomainClient;
+import com.lguplus.fleta.client.SmsAgentClient;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.*;
+import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class SmsAgentSocketClient implements SmsAgentDomainClient {
-
-    @Value("${agent.tps}")
-    private String agentTps;
+public class SmsAgentSocketClient implements SmsAgentClient {
 
     private final SmsAgentProps smsAgentProps;
+    @Value("${sms.agent.tps}")
+    private int agentTps;
+    @Value("${sms.gateway_index}")
+    private String gatewayIndex;
 
-    public int mSendTerm;
-  
-    public static LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
+    private int mSendTerm;
 
-    @PostConstruct
+    private LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
+
+    @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {
 
-        log.debug("System.getProperty(server.index):" + System.getProperty("server.index"));
-        String index = StringUtils.defaultIfEmpty(System.getProperty("server.index"), "1");
-        log.debug("index:" + index);
+        if (gatewayIndex.equals("0")) {
+            log.info("SmsGateway Index is 0 ");
+            return;
+        }
 
-        Map<String, String> mapServers = smsAgentProps.findMapByIndex(index).orElseThrow();
+        Map<String, String> mapServers = smsAgentProps.findMapByIndex(gatewayIndex).orElseThrow();
+
         String[] ipList = mapServers.get("ip").split("\\|");
         String[] portList = mapServers.get("port").split("\\|");
         String[] idList = mapServers.get("id").split("\\|");
         String[] pwList = mapServers.get("password").split("\\|");
 
-        log.debug("mapServers:"+ mapServers);
-        log.debug("mapServers.get(ip):"+ mapServers.get("ip"));
+        log.debug("mapServers:" + mapServers);
+        log.debug("mapServers.get(ip):" + mapServers.get("ip"));
 
         int length = idList.length;
 
         for (int i = 0; i < length; i++) {
-            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]) {
-            };
+            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]);
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
@@ -63,25 +66,19 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
         Future<SmsGatewayResponseDto> asyncResult;
 
-        SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException();
-
         if (!rCtn.startsWith("01") || 7 >= rCtn.length()) {
 
             //1502
-            smsAgentCustomException.setCode("1502");
-            smsAgentCustomException.setMessage("전화번호 형식 오류");
-            throw smsAgentCustomException;
+            throw new SmsAgentCustomException("1502", "전화번호 형식 오류");
         }
 
         if (80 < message.getBytes("KSC5601").length) {
 
             //1501
-            smsAgentCustomException.setCode("1501");
-            smsAgentCustomException.setMessage("메시지 형식 오류");
-            throw smsAgentCustomException;
+            throw new SmsAgentCustomException("1501", "메시지 형식 오류");
         }
 
-        if (!SmsAgentSocketClient.sGatewayQueue.isEmpty()) {
+        if (!sGatewayQueue.isEmpty()) {
 
             SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
@@ -91,17 +88,15 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
             if (currentDate - prevSendDate <= mSendTerm) {
 
-                SmsAgentSocketClient.sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
-              
+                sGatewayQueue.offer(smsGateway);   //큐의 마지막 요소로 삽입
+
                 //1503
-                smsAgentCustomException.setCode("1503");
-                smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
-                throw smsAgentCustomException;
+                throw new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
             }
 
             try {
                 //게이트웨이 서버에 소켓접속이 완료된 경우
-                if (smsGateway.isBind()) {
+                if (smsGateway.getBindState()) {
 
                     log.debug("smsGateway.sendMessage( {}, {}, {}, {}, {})", sCtn, rCtn, sCtn, message, smsGateway.getPort());
                     smsGateway.sendMessage(sCtn, rCtn, sCtn, message, smsGateway.getPort());
@@ -111,25 +106,19 @@ public class SmsAgentSocketClient implements SmsAgentDomainClient {
 
                     sGatewayQueue.offer(smsGateway);
                     //1500
-                    smsAgentCustomException.setCode("1500");
-                    smsAgentCustomException.setMessage("시스템 장애");
-                    throw smsAgentCustomException;
+                    throw new SmsAgentCustomException("1500", "시스템 장애");
                 }
             } catch (IOException e) {
                 sGatewayQueue.offer(smsGateway);
                 //9999
-                smsAgentCustomException.setCode("9999");
-                smsAgentCustomException.setMessage("기타 오류");
-                throw smsAgentCustomException;
+                throw new SmsAgentCustomException("9999", "기타 오류");
             }
 
             sGatewayQueue.offer(smsGateway);
 
         } else {
             //1503
-            smsAgentCustomException.setCode("1503");
-            smsAgentCustomException.setMessage("메시지 처리 수용 한계 초과");
-            throw smsAgentCustomException;
+            throw new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
         }
 
         return asyncResult.get();

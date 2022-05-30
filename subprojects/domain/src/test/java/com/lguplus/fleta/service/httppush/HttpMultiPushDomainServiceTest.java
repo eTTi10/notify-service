@@ -1,13 +1,13 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.exception.httppush.*;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
-import com.lguplus.fleta.util.JunitTestUtils;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,7 +44,7 @@ class HttpMultiPushDomainServiceTest {
     HttpMultiPushDomainService httpMultiPushDomainService;
 
     @Mock
-    HttpPushDomainClient httpPushDomainClient;
+    HttpPushClient httpPushClient;
 
     @Mock
     HttpPushSupport httpPushSupport;
@@ -56,8 +57,8 @@ class HttpMultiPushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        JunitTestUtils.setValue(httpMultiPushDomainService, "maxMultiCount", "400");
-        JunitTestUtils.setValue(httpMultiPushDomainService, "rejectReg", "M20110725000|U01080800201|U01080800202|U01080800203");
+        ReflectionTestUtils.setField(httpMultiPushDomainService, "maxMultiCount", 400);
+        ReflectionTestUtils.setField(httpMultiPushDomainService, "rejectReg", Set.of("M20110725000", "U01080800201", "U01080800202", "U01080800203"))                                                                                                            ;
     }
 
     @Test
@@ -68,7 +69,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "200");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -93,7 +94,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "202");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("202").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -120,7 +121,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "400");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("400").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -147,7 +148,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "401");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("401").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -174,7 +175,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "403");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("403").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -201,7 +202,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "404");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("404").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -228,7 +229,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "410");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("410").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -253,7 +254,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "200");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -279,7 +280,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "200");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("appId")
@@ -305,7 +306,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "200");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -331,7 +332,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "200");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
@@ -353,12 +354,9 @@ class HttpMultiPushDomainServiceTest {
     @DisplayName("500 이상 에러 확인")
     void whenRequestMultiPush_thenAckInternalErrorException() {
         // given
-        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-        httpPushCustomException.setStatusCode(500);
-        httpPushCustomException.setCode("1109");
-        httpPushCustomException.setMessage("Push GW Internal Error");
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException(500, "1109", "Push GW Internal Error");
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willThrow(httpPushCustomException);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willThrow(httpPushCustomException);
 
         given(httpPushSupport.getHttpServiceProps()).willReturn(httpServiceProps);
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
@@ -383,12 +381,9 @@ class HttpMultiPushDomainServiceTest {
     @DisplayName("500 미만 에러 확인")
     void whenRequestMultiPush_thenAckNotFoundException() {
         // given
-        HttpPushCustomException httpPushCustomException = new HttpPushCustomException();
-        httpPushCustomException.setStatusCode(499);
-        httpPushCustomException.setCode("1107");
-        httpPushCustomException.setMessage("Push GW Not Found");
+        HttpPushCustomException httpPushCustomException = new HttpPushCustomException(499, "1107", "Push GW Not Found");
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willThrow(httpPushCustomException);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willThrow(httpPushCustomException);
 
         given(httpPushSupport.getHttpServiceProps()).willReturn(httpServiceProps);
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
@@ -413,7 +408,7 @@ class HttpMultiPushDomainServiceTest {
     @DisplayName("Exception 확인")
     void whenRequestMultiPush_thenAckException() {
         // given
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willThrow(new AcceptedException());
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willThrow(new AcceptedException());
 
         given(httpPushSupport.getHttpServiceProps()).willReturn(httpServiceProps);
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
@@ -442,7 +437,7 @@ class HttpMultiPushDomainServiceTest {
         errorMap.put("CODE", "900");
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").error(errorMap).build();
 
-        given(httpPushDomainClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         given(httpPushSupport.getHttpServiceProps()).willReturn(httpServiceProps);
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));

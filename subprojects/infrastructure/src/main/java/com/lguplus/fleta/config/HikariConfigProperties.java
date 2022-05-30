@@ -1,6 +1,7 @@
 package com.lguplus.fleta.config;
 
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.Properties;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
@@ -8,8 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.stereotype.Component;
-
-import java.util.Properties;
 
 @Setter
 @ToString
@@ -46,10 +45,10 @@ public class HikariConfigProperties {
 
     private HikariDataSource getHikariDataSource(String username, String password) {
         HikariDataSource hds = DataSourceBuilder.create()
-                .type(HikariDataSource.class)
-                .username(username)
-                .password(password)
-                .build();
+            .type(HikariDataSource.class)
+            .username(username)
+            .password(password)
+            .build();
 
         hds.setConnectionTimeout(this.connectionTimeout);
         hds.setValidationTimeout(this.validationTimeout);

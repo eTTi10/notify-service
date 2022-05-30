@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.push;
 
-import com.lguplus.fleta.client.PushAnnounceDomainClient;
+import com.lguplus.fleta.client.PushAnnounceClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestAnnounceDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
@@ -23,17 +23,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class PushAnnounceDomainService {
 
     private final PushConfig pushConfig;
-    private final PushAnnounceDomainClient pushAnnounceDomainClient;
+    private final PushAnnounceClient pushAnnounceClient;
 
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATA_FORMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_ANNOUNCEMENT";
     private static final int TRANSACTION_MAX_SEQ_NO = 10000;
-    private final AtomicInteger tranactionMsgId = new AtomicInteger(0);
+    private final AtomicInteger transactionMsgId = new AtomicInteger(0);
 
-    @Value("${push-comm.push.old.lgupush.pushAppId}")
+    @Value("${push.gateway.appId}")
     private String oldLgPushAppId;
 
-    @Value("${push-comm.push.old.lgupush.notiType}")
+    @Value("${push.gateway.notiType}")
     private String oldLgPushNotiType;
 
     /**
@@ -67,7 +67,7 @@ public class PushAnnounceDomainService {
         dto.getItems().forEach(e -> paramMap.put(e.getItemKey(), e.getItemValue()));
 
         //2. Send Announcement Push
-        PushResponseDto pushResponseDto = pushAnnounceDomainClient.requestAnnouncement(paramMap);
+        PushResponseDto pushResponseDto = pushAnnounceClient.requestAnnouncement(paramMap);
 
         //3. Send Result
         String statusCode = pushResponseDto.getStatusCode();
@@ -79,7 +79,7 @@ public class PushAnnounceDomainService {
     }
 
     private String getTransactionId() {
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
+        return DateFormatUtils.format(new Date(), DATA_FORMAT) + String.format("%04d", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
     }
 
 }

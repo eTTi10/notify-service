@@ -91,12 +91,12 @@ public abstract class MMSCBase implements MMSC {
 			}
 
 			//##################################### Log
-			String logStr = "\n #################  [ MMSCBase 실제전송커넥션 ] ################### \n";
-			logStr += "\n ping 61.101.246.151:8887 \n";
-			logStr += "\n ping 222.231.12.68:8887 \n";
-			logStr += "\n 해당 커넥션 아이피가 막혀있고 테스트를 위한 적절한 ip를 제공받지 못했음 \n";
-			logStr += "\n 커넥션 set담기 가능 get불러오기 실패 \n";
-			log.info(logStr);
+//			String logStr = "\n #################  [ MMSCBase 실제전송커넥션 ] ################### \n";
+//			logStr += "\n ping 61.101.246.151:8887 \n";
+//			logStr += "\n ping 222.231.12.68:8887 \n";
+//			logStr += "\n 해당 커넥션 아이피가 막혀있고 테스트를 위한 적절한 ip를 제공받지 못했음 \n";
+//			logStr += "\n 커넥션 set담기 가능 get불러오기 실패 \n";
+//			log.info(logStr);
 			//#####################################
 
 			final OutputStream out = conn.getOutputStream();

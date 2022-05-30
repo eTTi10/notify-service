@@ -27,18 +27,20 @@ public class OuterControllerAdvice {
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
 
     static {
+        final String builderName = "errorResponseBuilder";
+
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, "errorResponseBuilder"));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
     }
 
     /**
@@ -113,7 +115,7 @@ public class OuterControllerAdvice {
         }
         try {
             return converter.convert(response);
-        } catch (final Throwable e) {
+        } catch (final Exception e) {
             log.warn(e.getMessage(), e);
             return response;
         }

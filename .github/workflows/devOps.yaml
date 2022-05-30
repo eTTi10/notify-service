@@ -1,0 +1,257 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop, release/*, main ]
+    paths-ignore:
+      - '.github/**'
+  workflow_dispatch:
+    
+env:
+  TOKEN: ${{ secrets.GHP_TOKEN_SJH }}
+  HELM_REPO_NAME: LGUPLUS-IPTV-MSA/helm-charts
+  HELM_REF: develop
+  CHART_PATH: helm-charts
+  JAR_PATH: subprojects/boot/build/libs
+
+jobs:
+  runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set dev runner
+        if: ${{ github.ref_name == 'develop' }}
+        run: |
+          RUNNER_NAME=ec2-runner-dev
+          echo "RUNNER_NAME=${RUNNER_NAME}" >> $GITHUB_ENV
+
+      - name: Set stg runner
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        run: |
+          RUNNER_NAME=ec2-runner-stg
+          echo "RUNNER_NAME=${RUNNER_NAME}" >> $GITHUB_ENV
+
+      - name: Set prd runner
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          RUNNER_NAME=ec2-runner-shd
+          echo "RUNNER_NAME=${RUNNER_NAME}" >> $GITHUB_ENV
+
+      - name: Set runner
+        id: share
+        run: echo "::set-output name=runner_name::${{ env.RUNNER_NAME }}"
+
+    outputs: 
+      runner_name: ${{ steps.share.outputs.runner_name }}
+
+  build:
+    needs: runner
+    runs-on: ${{ needs.runner.outputs.runner_name }}
+    steps:
+      - run: sudo rm -rf *
+      
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          path: microservice
+
+      - name: Set dev env
+        if: ${{ github.ref_name == 'develop' }}
+        run: |
+            echo "AWS_ID=${{ secrets.DEV_AWS_ID }}" >> $GITHUB_ENV       
+            echo "SLACK_WEB_HOOK=${{ secrets.SLACK_DEV_WEBHOOK }}" >> $GITHUB_ENV   
+
+      - name: Set stg env
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        run: |
+            echo "AWS_ID=${{ secrets.STG_AWS_ID }}" >> $GITHUB_ENV       
+            echo "SLACK_WEB_HOOK=${{ secrets.SLACK_STG_WEBHOOK }}" >> $GITHUB_ENV   
+
+      - name: Set prd env
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+            echo "AWS_ID=${{ secrets.PROD_AWS_ID }}" >> $GITHUB_ENV       
+            echo "SLACK_WEB_HOOK=${{ secrets.SLACK_PROD_WEBHOOK }}" >> $GITHUB_ENV   
+
+      - name: Set env
+        working-directory: microservice
+        run: |
+          SERVICE_NAME=$(basename ${{ github.repository }} | cut -d '-' -f1)
+        
+          IMAGE_NAME=$AWS_ID.dkr.ecr.ap-northeast-2.amazonaws.com/$SERVICE_NAME
+          COMMIT_ID=`echo ${GITHUB_SHA} | cut -c1-8`
+          VERSION=$(./gradlew -q printVersion)
+          RANDOM_HEX=$(openssl rand -hex 2)
+          TAG=$VERSION-$COMMIT_ID-$RANDOM_HEX
+          
+          echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_ENV
+          echo "COMMIT_ID=${COMMIT_ID}" >> $GITHUB_ENV
+          echo "TAG=${TAG}" >> $GITHUB_ENV
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+                   
+          echo "SERVICE_NAME=${SERVICE_NAME}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "SLACK_WEB_HOOK=${SLACK_WEB_HOOK}" >> $GITHUB_ENV
+
+
+# ============================================================================
+#                                 Build jar
+# ============================================================================
+      # 삭제 예정        
+      - name: Apply AWS Secrets Manager
+        working-directory: microservice/subprojects/boot/src/main/resources
+        run: |
+          if [ $BRANCH_NAME = "main" ]; then
+              PROFILES=("prod" "shd")  
+          elif [[ $BRANCH_NAME = release/* ]]; then
+              PROFILES=("stg")
+          elif [ $BRANCH_NAME = "develop" ]; then
+              PROFILES=("dev" "devstp")
+          fi
+          
+          for PROFILE in ${PROFILES[@]}
+          do
+              echo [INFO] start job: application-${PROFILE}.yml
+                      
+              SECRET=$(aws secretsmanager get-secret-value \
+                          --secret-id $PROFILE \
+                          --output json \
+                          | jq -r '.SecretString')
+              LIST=$(cat application-$PROFILE.yml | grep -o '<<.[^>]*>>' || true)
+              
+              for KEY in $LIST
+              do
+                  echo [INFO] changing: $KEY
+                  KEY=${KEY#<<}
+                  KEY=${KEY%>>}
+                  VALUE=$(echo $SECRET | jq -r ".$KEY")
+                  sed -i \
+                      -e "s/<<$KEY>>/$VALUE/g" application-$PROFILE.yml
+                  echo [INFO] changed: "<<$KEY>>"
+              done
+          echo [INFO] job done: application-$PROFILE.yaml
+          echo ''
+          done
+
+
+      - name: Build with Gradle
+        working-directory: ./microservice
+        run: ./gradlew -x test build
+
+
+      - name: Copy war to workspace
+        run: cp -v microservice/${{ env.JAR_PATH}}/*${{ env.VERSION }}.jar ./microservice/Docker/
+
+          
+# ============================================================================
+#                         Push docker image on ecr
+# ============================================================================
+
+      - name: Docker login
+        run: |          
+          aws ecr get-login-password --region ap-northeast-2 | \
+          docker login \
+            --username AWS \
+            --password-stdin $AWS_ID.dkr.ecr.ap-northeast-2.amazonaws.com
+            
+      - name: docker build
+        working-directory: ./microservice/Docker
+        run: |
+          docker build \
+            --tag $IMAGE_NAME:$TAG \
+            --tag $IMAGE_NAME:latest \
+            .
+      
+      - name: docker push
+        run: |
+          docker push $IMAGE_NAME:$TAG
+          docker push $IMAGE_NAME:latest
+          
+      - name: docker rmi
+        run: |
+          docker rmi $IMAGE_NAME:$TAG
+          docker rmi $IMAGE_NAME:latest
+
+
+# ============================================================================
+#                          Deploy on eks via helm
+# ============================================================================
+      
+      - name: checkout helm
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.HELM_REF }}
+          repository: ${{ env.HELM_REPO_NAME }}
+          token: ${{ env.TOKEN }}
+          path: helm
+
+      - name: Set git configuration
+        working-directory: ./helm
+        run: |
+          echo "COMMIT_URI=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}" >> $GITHUB_ENV
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Update dev values
+        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
+        if: ${{ github.ref_name == 'develop' }}
+        run: |
+          yq eval -i '.image.version = "${{ env.TAG }}"' dev-values.yaml
+          yq eval -i '.image.version = "${{ env.TAG }}"' devstp-values.yaml 
+
+      - name: Update stg values
+        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        run: yq eval -i '.image.version = "${{ env.TAG }}"' stg-values.yaml
+
+      - name: Update prd values
+        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          yq eval -i '.image.version = "${{ env.TAG }}"' shd-values.yaml
+          yq eval -i '.image.version = "${{ env.TAG }}"' prd-values.yaml 
+
+      - name: Push helm (develop branch)
+        working-directory: ./helm
+        run: |
+          git pull origin ${{ env.HELM_REF }}
+          git add .
+          git commit -m "Update from ${{ env.COMMIT_URI }}"
+          git push
+
+      - name: Push helm (staging branch)
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        working-directory: ./helm
+        run: |
+          git fetch origin staging
+          git checkout staging
+          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/stg-values.yaml << EOF
+          a
+          EOF
+          git commit -m "Update from ${{ env.COMMIT_URI }}"
+
+          git push
+
+      - name: Push helm (main branch)
+        if: ${{ github.ref_name == 'main' }}
+        working-directory: ./helm
+        run: |
+          git fetch origin main
+          git checkout main
+          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/shd-values.yaml << EOF
+          a
+          EOF
+          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/prd-values.yaml << EOF
+          a
+          EOF
+          git commit -m "Update from ${{ env.COMMIT_URI }}"
+
+          git push
+
+      - name: slack message
+        if: always()
+        uses: nooose/custom-slack-message@master
+        with:
+          type: build
+          slack_webhook: ${{ env.SLACK_WEB_HOOK }}
+          token: ${{ env.TOKEN }} 
+          slack_color: ${{ job.status }}

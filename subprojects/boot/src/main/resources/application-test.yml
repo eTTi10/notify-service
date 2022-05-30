@@ -1,0 +1,78 @@
+############################################
+#### Server
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+
+
+############################################
+####  Spring
+spring:
+  datasource:
+    writer:
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=primary&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.write.username>>
+      password: <<postgres.notify.write.password>>
+      minimum-idle: 5
+      maximum-pool-size: 5
+    reader:
+      jdbc-url: jdbc:postgresql://<<postgres.notify.write.host>>:<<postgres.notify.write.port>>,<<postgres.notify.read.host>>:<<postgres.notify.read.port>>/<<postgres.notify.read.db.mylgdb>>?targetServerType=preferSecondary&loadBalanceHosts=true&ApplicationName=${spring.application.name}
+      username: <<postgres.notify.read.username>>
+      password: <<postgres.notify.read.password>>
+      minimum-idle: 5
+      maximum-pool-size: 5
+
+  #### Cache - Redis
+  cache:
+    type: none
+
+  #### Message Stream - Kafka
+  kafka:
+    bootstrap-servers: <<kafka.dbsync.plaintext.bootstrapservers>>
+
+
+
+############################################
+####  Logging
+logging:
+  level:
+    com.lguplus.fleta: DEBUG
+    org.hibernate:
+      SQL: DEBUG
+
+
+
+############################################
+#### Other Domain Application Service
+service:
+  programming:
+    url: http://programming.fleta.com
+  searchword:
+    url: http://searchword.fleta.com
+  settings:
+    url: http://settings.fleta.com
+  vodlookup:
+    url: http://vodlookup.fleta.com
+  channel:
+    url: http://channel.fleta.com
+  personalization:
+    url: http://personalization.fleta.com
+  subscriber:
+    url: http://subscriber.fleta.com
+
+############################################
+#### Feign Client 설정
+feign:
+  client:
+    config:
+      pushannounce: # Push Announce
+        loggerLevel: NONE # NONE, BASIC, HEADERS, FULL
+        #defaultRequestHeaders:
+        #  header1: header1Value
+        requestInterceptors:
+          - com.lguplus.fleta.config.PushFeignInterceptor
+        errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder

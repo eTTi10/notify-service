@@ -3,7 +3,6 @@ package com.lguplus.fleta.data.dto.request.inner;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 
 @Getter

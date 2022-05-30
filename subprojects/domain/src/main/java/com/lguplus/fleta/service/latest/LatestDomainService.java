@@ -27,8 +27,8 @@ public class LatestDomainService {
     private final LatestMapper latestMapper;
     private final LatestRepository latestRepository;
 
-    @Value("${latestroot.latest.maxCount}")
-    private int maxCnt;
+
+    private static final int MAX_COUNT = 5;
 
     /**
      * 최신회 정보조회
@@ -57,7 +57,7 @@ public class LatestDomainService {
 
         if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
-        }else if(maxCnt < checks.size()) {
+        }else if(MAX_COUNT < checks.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
         }
         return resultLatestCheckDto;

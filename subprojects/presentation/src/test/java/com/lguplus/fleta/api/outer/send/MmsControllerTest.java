@@ -82,6 +82,6 @@ class MmsControllerTest {
         MockHttpServletResponse mockHttpServletResponse = mvcResult.getResponse();
         int status = mockHttpServletResponse.getStatus();
         String responseString = mockHttpServletResponse.getContentAsString();
-        Assertions.assertThat(responseString.contains("0000")); // 성공 플래그가 있는지 확인
+        Assertions.assertThat(responseString).contains("0000"); // 성공 플래그가 있는지 확인
     }
 }

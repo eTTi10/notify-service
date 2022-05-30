@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 @RequiredArgsConstructor
-@ConfigurationProperties(prefix = "http.service")
+@ConfigurationProperties(prefix = "push")
 public class HttpServiceProps {
 
     private final HttpPushConfig.HttpPushExceptionCode httpPushExceptionCode;
@@ -27,10 +27,10 @@ public class HttpServiceProps {
     private final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage;
 
     /** 트랜잭션 ID 관리용(단건, 멀티) */
-    public static AtomicInteger singleTransactionIdNum = new AtomicInteger(0);
+    public static final AtomicInteger singleTransactionIdNum = new AtomicInteger(0);
 
     /** 트랜잭션 ID 관리용(공지) */
-    public static AtomicInteger announceTransactionIdNum = new AtomicInteger(0);
+    public static final AtomicInteger announceTransactionIdNum = new AtomicInteger(0);
 
     /** Push 요청 서버 타입 (단건, 멀티에서 사용) */
     public static final String PUSH_REQUEST_PART = "SP";
@@ -45,7 +45,7 @@ public class HttpServiceProps {
 
 
     /** http push service-keys */
-    private List<Map<String, String>> keys = null;
+    private List<Map<String, String>> service = null;
 
 
     /**
@@ -55,7 +55,7 @@ public class HttpServiceProps {
      * @return serviceId 에 해당하는 객체
      */
     public Optional<Map<String, String>> findMapByServiceId(String serviceId) {
-        return keys.stream().filter(m -> m.get("service_id").equals(serviceId)).findFirst();
+        return service.stream().filter(m -> m.get("id").equals(serviceId)).findFirst();
     }
 
     /**

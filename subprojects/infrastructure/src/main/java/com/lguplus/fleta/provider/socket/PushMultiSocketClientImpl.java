@@ -16,8 +16,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 
 /**
@@ -32,19 +34,19 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
 
     private final NettyTcpClient nettyTcpClient;
 
-    @Value("${push-comm.push.cp.destination_ip}")
+    @Value("${push.gateway.default.destination}")
     private String destinationIp;
 
-    @Value("${push-comm.push.multi.socket.tps}")
-    private String maxLimitPush; //400/1sec
+    @Value("${push.gateway.tps}")
+    private int maxLimitPush; //400/1sec
 
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATA_FORMAT = "yyyyMMdd";
     private static final int TRANSACTION_MAX_SEQ_NO = (int)(Math.pow(16, 4));// 65536
     private static final long SECOND = 1000L;
     private static final String SUCCESS = "SC";
     private static final int PROCESS_STATE_REQUEST = 13;
     private static final int COMMAND_REQUEST = 15;
-    private int FLUSH_COUNT = 100;
+    private static final int FLUSH_COUNT = Integer.sum(100, 0);
 
     private final AtomicInteger transactionMsgId = new AtomicInteger(0);
     private final AtomicLong sendMsgCount = new AtomicLong(0);
@@ -139,7 +141,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     private List<PushMultiResponseDto> sendAsyncMessage(PushRequestMultiSendDto multiSendDto) {
 
         List<PushMultiResponseDto> sendUsers = new ArrayList<>();
-        int maxPushLimitPerSec = Integer.parseInt(maxLimitPush);
+        int maxPushLimitPerSec = maxLimitPush;
 
         long timeMillis = System.currentTimeMillis() - lastSendMills.get();
         if(timeMillis >= SECOND) {
@@ -201,16 +203,12 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
                 }
             }
 
-            try {
-                if(notReceivedMessages.isEmpty() || waitTime+2 > SECOND * 2) {
-                    break;
-                }
-
-                waitTime += 2;
-                Thread.sleep(2L);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+            if(notReceivedMessages.isEmpty() || waitTime+2 > SECOND * 2) {
+                break;
             }
+
+            waitTime += 2;
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(2L));
         }
 
         final Map<String, PushMessageInfoDto> processedMap = receivedMessages.stream().collect(Collectors.toMap(PushMessageInfoDto::getTransactionId, o -> o));
@@ -290,7 +288,7 @@ public class PushMultiSocketClientImpl implements PushMultiClient {
     }
 
     private String getTransactionId() {
-        return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04x", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
+        return DateFormatUtils.format(new Date(), DATA_FORMAT) + String.format("%04x", transactionMsgId.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0) & 0xFFFF);
     }
 
 

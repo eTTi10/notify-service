@@ -1,6 +1,6 @@
 package com.lguplus.fleta.service.httppush;
 
-import com.lguplus.fleta.client.HttpPushDomainClient;
+import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushAnnounceRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
@@ -25,7 +25,7 @@ class HttpAnnouncementPushDomainServiceTest {
     HttpAnnouncementPushDomainService httpAnnouncementPushDomainService;
 
     @Mock
-    HttpPushDomainClient httpPushDomainClient;
+    HttpPushClient httpPushClient;
 
     @Mock
     HttpPushSupport httpPushSupport;
@@ -36,7 +36,7 @@ class HttpAnnouncementPushDomainServiceTest {
         // given
         OpenApiPushResponseDto openApiPushResponseDto = OpenApiPushResponseDto.builder().returnCode("200").build();
 
-        given(httpPushDomainClient.requestHttpPushAnnouncement(anyMap())).willReturn(openApiPushResponseDto);
+        given(httpPushClient.requestHttpPushAnnouncement(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushAnnounceRequestDto httpPushAnnounceRequestDto = HttpPushAnnounceRequestDto.builder()
                 .applicationId("lguplushdtvgcm")
