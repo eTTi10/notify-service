@@ -2,7 +2,6 @@ package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.validation.AlphabetAndNumberOrEmptyPattern;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import lombok.Getter;
@@ -26,7 +25,6 @@ public class DeviceInfoPostRequestVo {
     @Pattern(regexp = "[GA]", message = "허용되지 않은 agent_type 값입니다.")
     private String agentType;
 
-    @NotBlank
     @Pattern(regexp = "[ASN]", message = "허용되지 않은 noti_type 값입니다.")
     @ParamAlias("noti_type")
     private String notiType;

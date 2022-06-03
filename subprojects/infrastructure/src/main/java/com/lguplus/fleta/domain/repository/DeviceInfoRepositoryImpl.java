@@ -14,10 +14,6 @@ import org.springframework.stereotype.Repository;
 public class DeviceInfoRepositoryImpl implements DeviceInfoRepository {
 
     private final DeviceInfoJpaRepository deviceInfoJpaRepository;
-    @Override
-    public long countBySaIdAndAgentTypeAndServiceType(String saId, String AgentType, String serviceType) {
-        return deviceInfoJpaRepository.countBySaIdAndAgentTypeAndServiceType(saId, AgentType, serviceType);
-    }
 
     @Override
     public DeviceInfoEntity save(DeviceInfoRequestDto deviceInfoRequestDto) {
