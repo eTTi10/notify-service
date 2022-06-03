@@ -1,10 +1,8 @@
 package com.lguplus.fleta.data.vo;
 
-
 import com.lguplus.fleta.data.annotation.ParamAlias;
-import com.lguplus.fleta.exception.ParameterDatabaseException;
+import com.lguplus.fleta.validation.AlphabetAndNumberOrEmptyPattern;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import lombok.Getter;
@@ -14,26 +12,22 @@ import lombok.ToString;
 @ToString
 public class DeviceInfoPostRequestVo {
     @ParamAlias("sa_id")
-    @NotNull
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9]*$", message = "입력은 A-Z,a-z,0-9 범위 입니다", payload = ParameterDatabaseException.class)
-    @Size(max=12, message = "DB 에러", payload = ParameterDatabaseException.class)
+    @AlphabetAndNumberOrEmptyPattern
+    @Size(max=12, message = "sa_id는 12자리 이하 입니다.")
     private String saId;
 
     @ParamAlias("service_type")
-    @NotNull
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9]*$", message = "입력은 A-Z,a-z,0-9 범위 입니다", payload = ParameterDatabaseException.class)
-    @Size(max=12, message = "DB 에러", payload = ParameterDatabaseException.class)
+    @AlphabetAndNumberOrEmptyPattern
+    @Pattern(regexp = "[HUCRGDB]", message = "허용되지 않은 service_type 값입니다.")
     private String serviceType;
 
     @ParamAlias("agent_type")
-    @NotNull
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9]*$", message = "입력은 A-Z,a-z,0-9 범위 입니다", payload = ParameterDatabaseException.class)
-    @Size(max=12, message = "DB 에러", payload = ParameterDatabaseException.class)
+    @AlphabetAndNumberOrEmptyPattern
+    @Pattern(regexp = "[GA]", message = "허용되지 않은 agent_type 값입니다.")
     private String agentType;
 
+    @NotBlank
+    @Pattern(regexp = "[ASN]", message = "허용되지 않은 noti_type 값입니다.")
     @ParamAlias("noti_type")
     private String notiType;
 

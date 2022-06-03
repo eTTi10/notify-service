@@ -20,7 +20,6 @@ public @interface NetworkTypePattern {
     Class<? extends Payload>[] payload() default {};
 
     class Validator implements ConstraintValidator<NetworkTypePattern, String> {
-
         @Override
         public boolean isValid(String value, ConstraintValidatorContext context) {
             if (value != null) {

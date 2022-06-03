@@ -21,22 +21,6 @@ public class DeviceInfoDomainService {
     }
 
     public void createDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
-        if (!checkNotiType(deviceInfoRequestDto)) {
-            throw new BadRequestException("유효하지 않은 noti_type입니다.");
-        }
         deviceInfoRepository.save(deviceInfoRequestDto);
-    }
-
-//  A: 전체받기, S: 구독만 받기, N: 푸시 안받기
-    public boolean checkNotiType(DeviceInfoRequestDto deviceInfoRequestDto){
-        if (deviceInfoRequestDto.getNotiType() == null) return false;
-        else if (deviceInfoRequestDto.getNotiType().equals(NotiType.A.name())) return true;
-        else if (deviceInfoRequestDto.getNotiType().equals(NotiType.N.name())) return true;
-        else if (deviceInfoRequestDto.getNotiType().equals(NotiType.S.name())) return true;
-        else return false;
-    }
-
-    public enum NotiType{
-       A , N , S;
     }
 }

@@ -24,7 +24,7 @@ public class DeviceInfoController {
     private final DeviceInfoPostRequestMapper deviceInfoPostRequestMapper;
     private final DeviceInfoService deviceInfoService;
 
-    @PostMapping(value = "/notify/push/deviceinfo")
+    @PostMapping(value = "/v1/push/deviceinfo")
     public SuccessResponseDto postDeviceInfo(
         @Valid DeviceInfoPostRequestVo deviceInfoPostRequestVo){
         DeviceInfoRequestDto deviceInfoRequestDto = deviceInfoPostRequestMapper.toDto(deviceInfoPostRequestVo);
