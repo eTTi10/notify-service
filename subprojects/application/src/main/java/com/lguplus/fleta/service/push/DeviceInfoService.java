@@ -17,4 +17,12 @@ public class DeviceInfoService {
     public void createDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
          deviceInfoDomainService.createDeviceInfo(deviceInfoRequestDto);
     }
+    @Transactional
+    public void deleteDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
+        deviceInfoDomainService.deleteDeviceInfo(deviceInfoRequestDto);
+    }
+    @Transactional
+    public void updateDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
+        deviceInfoDomainService.updateDeviceInfo(deviceInfoRequestDto);
+    }
 }

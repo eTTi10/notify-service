@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class DeviceInfoPostRequestVo {
+public class DeviceInfoRequestVo {
     @ParamAlias("sa_id")
     @AlphabetAndNumberOrEmptyPattern
     @Size(max=12, message = "sa_id는 12자리 이하 입니다.")

@@ -25,4 +25,21 @@ public class DeviceInfoRepositoryImpl implements DeviceInfoRepository {
             .build());
     }
 
+    @Override
+    public void  delete(DeviceInfoRequestDto deviceInfoRequestDto){
+        deviceInfoJpaRepository.delete(DeviceInfoEntity.builder()
+           .saId(deviceInfoRequestDto.getSaId())
+           .agentType(deviceInfoRequestDto.getAgentType())
+           .serviceType(deviceInfoRequestDto.getServiceType())
+           .build());
+   }
+
+    @Override
+    public boolean exist(DeviceInfoRequestDto deviceInfoRequestDto) {
+        return deviceInfoJpaRepository.existsBySaIdAndAgentTypeAndServiceType(
+            deviceInfoRequestDto.getSaId(),
+            deviceInfoRequestDto.getAgentType(),
+            deviceInfoRequestDto.getServiceType()
+        );
+    }
 }
