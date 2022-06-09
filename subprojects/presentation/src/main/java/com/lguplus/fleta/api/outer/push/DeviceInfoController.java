@@ -5,6 +5,8 @@ import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.mapper.DeviceInfoPostRequestMapper;
 import com.lguplus.fleta.data.vo.DeviceInfoRequestVo;
 import com.lguplus.fleta.service.push.DeviceInfoService;
+import com.lguplus.fleta.validation.Groups;
+import com.lguplus.fleta.validation.Groups.C1;
 import io.swagger.annotations.Api;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "PUSH 발송을위한단말정보등록")
 @Slf4j
 @RestController
-@Validated
 @RequiredArgsConstructor
 @RequestMapping(value = "/v1/push/deviceinfo")
 public class DeviceInfoController {
@@ -29,7 +30,7 @@ public class DeviceInfoController {
 
     @PostMapping
     public SuccessResponseDto postDeviceInfo(
-        @Valid DeviceInfoRequestVo deviceInfoRequestVo){
+        @Validated(Groups.C1.class) DeviceInfoRequestVo deviceInfoRequestVo){
         DeviceInfoRequestDto deviceInfoRequestDto = deviceInfoPostRequestMapper.toDto(deviceInfoRequestVo);
         deviceInfoService.createDeviceInfo(deviceInfoRequestDto);
         return SuccessResponseDto.builder().build();
@@ -37,7 +38,7 @@ public class DeviceInfoController {
 
     @PutMapping
     public SuccessResponseDto putDeviceInfo(
-        @Valid DeviceInfoRequestVo deviceInfoRequestVo){
+        @Validated(Groups.C1.class) DeviceInfoRequestVo deviceInfoRequestVo){
         DeviceInfoRequestDto deviceInfoRequestDto = deviceInfoPostRequestMapper.toDto(deviceInfoRequestVo);
         deviceInfoService.updateDeviceInfo(deviceInfoRequestDto);
         return SuccessResponseDto.builder().build();
@@ -45,7 +46,7 @@ public class DeviceInfoController {
 
     @DeleteMapping
     public SuccessResponseDto deleteDeviceInfo(
-        @Valid DeviceInfoRequestVo deviceInfoRequestVo){
+        @Validated(Groups.C2.class) DeviceInfoRequestVo deviceInfoRequestVo){
         DeviceInfoRequestDto deviceInfoRequestDto = deviceInfoPostRequestMapper.toDto(deviceInfoRequestVo);
         deviceInfoService.deleteDeviceInfo(deviceInfoRequestDto);
         return SuccessResponseDto.builder().build();
