@@ -20,14 +20,14 @@ public class DeviceInfoDomainService {
 
     public void deleteDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-            throw new DeleteNotFoundException("삭제대상 없음");
+            throw new DeleteNotFoundException("DeviceInfoDomainService delete 대상 없음");
         }
         deviceInfoRepository.delete(deviceInfoRequestDto);
     }
 
     public void updateDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-            throw new NotFoundException("갱신 대상 없음");
+            throw new NotFoundException("DeviceInfoDomainService update 대상 없음");
         }
         deviceInfoRepository.save(deviceInfoRequestDto);
     }
