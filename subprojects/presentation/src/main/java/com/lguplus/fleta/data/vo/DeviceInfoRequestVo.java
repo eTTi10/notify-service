@@ -4,6 +4,7 @@ import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.validation.AlphabetAndNumberOrEmptyPattern;
 import com.lguplus.fleta.validation.Groups;
 import com.lguplus.fleta.validation.Groups.C1;
+import io.swagger.annotations.ApiModel;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
@@ -13,6 +14,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
+@ApiModel(value = "단말 정보 요청 VO", description = "단말 정보 요청 VO")
 public class DeviceInfoRequestVo {
 
     @ParamAlias("sa_id")
