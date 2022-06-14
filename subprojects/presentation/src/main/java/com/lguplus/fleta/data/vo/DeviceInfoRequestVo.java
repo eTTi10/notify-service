@@ -37,6 +37,7 @@ public class DeviceInfoRequestVo {
     @NotBlank(groups = {Groups.C1.class})
     @Pattern(regexp = "[ASN]", message = "허용되지 않은 noti_type 값입니다.",groups = {Groups.C1.class})
     private String notiType;
+
     private String accessKey;
     private String cpId;
     private String stbMac;
