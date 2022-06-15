@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = {SmsController.class
                         , ArgumentResolverConfig.class
                         , MessageConverterConfig.class})
-class SmsControllerTest {
+class ddSmsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
