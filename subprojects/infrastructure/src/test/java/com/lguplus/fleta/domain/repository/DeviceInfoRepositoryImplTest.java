@@ -3,7 +3,6 @@ package com.lguplus.fleta.domain.repository;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.lguplus.fleta.data.dto.request.outer.DeviceInfoRequestDto;
-import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.provider.jpa.DeviceInfoJpaRepository;
 import com.lguplus.fleta.repository.push.DeviceInfoRepository;
 import org.junit.jupiter.api.Test;
