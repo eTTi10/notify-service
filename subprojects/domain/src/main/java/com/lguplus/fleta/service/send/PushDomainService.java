@@ -610,7 +610,7 @@ public class PushDomainService {
      */
     public void checkInvalidSendPushCode(Map<String, String> pushInfoMap) {
 
-        if (pushInfoMap.get(KEY_GCM_PAYLOAD_BODY).equals("")) {
+        if (!pushInfoMap.containsKey(KEY_GCM_PAYLOAD_BODY) || pushInfoMap.get(KEY_GCM_PAYLOAD_BODY).equals("")) {
             throw new InvalidSendPushCodeException("send code 미지원");
         }
     }

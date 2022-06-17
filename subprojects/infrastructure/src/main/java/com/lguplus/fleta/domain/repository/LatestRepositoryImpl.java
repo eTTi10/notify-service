@@ -6,10 +6,8 @@ import com.lguplus.fleta.provider.jpa.LatestJpaRepository;
 import com.lguplus.fleta.repository.latest.LatestRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.List;
 
@@ -41,8 +39,6 @@ public class LatestRepositoryImpl implements LatestRepository {
     }
 
     @Override
-    @Modifying
-    @Transactional
     public int deleteLatest(LatestRequestDto latestRequestDto) {
         return latestJpaRepository.deleteBySaIdAndMacAndCtnAndCatId(
                 latestRequestDto.getSaId(),

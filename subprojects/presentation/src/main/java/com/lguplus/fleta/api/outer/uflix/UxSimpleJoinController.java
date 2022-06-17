@@ -52,7 +52,7 @@ public class UxSimpleJoinController {
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="nw_info",      value="순번: 10<br>자리수: <br>설명: 통합 통계용 접속 네트워크 정보<br>ex) 3G, 4G, 5G, WIFI, WIRE, ETC", example="WIRE"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="dev_model",    value="순번: 11<br>자리수: <br>설명: 통합 통계용 단말 모델명<br>ex) LE-E250", example="S60UPI"),
             @ApiImplicitParam(paramType="query", dataType="string", required=false, name="carrier_type", value="순번: 12<br>자리수: <br>설명: 통합 통계용 통신사 구분<br>ex) L:LGU+, K:KT, S:SKT, E:etc", example="L")})
-    @GetMapping(value = "/smartux/gw/UXSimpleJoin")
+    @GetMapping(value = "/smartux/gw/UXSimpleJoin.php")
     public String requestUxSimpleJoinSms(@ApiIgnore UxSimpleJoinSmsRequestVo uxSimpleJoinSmsRequestVo) {
         log.debug("==================requestUxSimpleJoinSms BEGIN======================");
 

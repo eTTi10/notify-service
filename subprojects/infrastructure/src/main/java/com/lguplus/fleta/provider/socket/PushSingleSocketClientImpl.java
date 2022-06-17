@@ -3,6 +3,7 @@ package com.lguplus.fleta.provider.socket;
 import com.lguplus.fleta.client.PushSingleClient;
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
+import com.lguplus.fleta.data.type.CacheName;
 import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
 import lombok.ToString;
@@ -189,7 +190,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     }
 
     @Override
-    @Cacheable(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
+    @Cacheable(value=CacheName.PUSH_STATISTICS, key="#serviceId")
     public PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
         log.debug("getPushStatus: init : " + System.currentTimeMillis());
 
@@ -202,7 +203,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     }
 
     @Override
-    @CachePut(value="PUSH_CACHE", key="'statistics1.'+#serviceId")
+    @CachePut(value=CacheName.PUSH_STATISTICS, key="#serviceId")
     public PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
 
         return PushStatDto.builder()

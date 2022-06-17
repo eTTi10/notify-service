@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.outer")
@@ -25,6 +27,7 @@ public class OuterControllerAdvice {
      *
      */
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
+    private static final Map<String, List<String>> UNCONVERTIBLE_ERROR_CODE_PATTERNS = new HashMap<>();
 
     static {
         final String builderName = "errorResponseBuilder";
@@ -33,7 +36,7 @@ public class OuterControllerAdvice {
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin.php",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/comm/latest",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
@@ -41,6 +44,8 @@ public class OuterControllerAdvice {
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+
+        UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
 
     /**
@@ -83,8 +88,8 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
-
-                                                final Throwable th) {
+                                                           final Throwable th) {
+        log.error(th.getMessage(), th);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
@@ -109,6 +114,11 @@ public class OuterControllerAdvice {
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
                                                           final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
+        if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
+                .anyMatch(regexp -> response.getFlag().matches(regexp))) {
+            return response;
+        }
+
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {
             return response;

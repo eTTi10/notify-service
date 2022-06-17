@@ -33,7 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         , MessageConverterConfig.class})
 class UxSimpleJoinControllerTest {
 
-    private static final String URL_TEMPLATE = "/smartux/gw/UXSimpleJoin";
+    private static final String URL_TEMPLATE = "/smartux/gw/UXSimpleJoin.php";
     private static final String SUCCESS_CODE = "0000";
     private static final String CTN_EMPTY_CODE = "5000";
     private static final String CTN_WRONG_CODE = "5001";

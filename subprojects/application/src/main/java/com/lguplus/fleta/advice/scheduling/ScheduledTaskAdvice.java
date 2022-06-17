@@ -1,6 +1,7 @@
 package com.lguplus.fleta.advice.scheduling;
 
 import com.lguplus.fleta.data.annotation.SynchronousScheduled;
+import com.lguplus.fleta.service.ManipulationDataDispatcher;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -29,12 +30,12 @@ public class ScheduledTaskAdvice {
     public Object proceed(final ProceedingJoinPoint joinPoint) throws Throwable {
 
         final SynchronousScheduled annotation = getAnnotation(joinPoint.getSignature());
-        if (annotation == null) {
-            return joinPoint.proceed();
+        if (annotation == null || ManipulationDataDispatcher.WORKER_NAME.equals(Thread.currentThread().getName())) {
+            return proceedInternal(joinPoint);
         }
 
         final RPermitExpirableSemaphore semaphore =
-                redissonClient.getPermitExpirableSemaphore("SEMAPHORE_CACHE::" + annotation.semaphore());
+                redissonClient.getPermitExpirableSemaphore("CN::SEMAPHORE::" + annotation.semaphore());
         if (!semaphore.isExists() && !semaphore.trySetPermits(1)) {
             return null;
         }
@@ -46,7 +47,7 @@ public class ScheduledTaskAdvice {
 
         semaphore.updateLeaseTime(permitId, annotation.autoReleaseSeconds(), TimeUnit.SECONDS);
         try {
-            return joinPoint.proceed();
+            return proceedInternal(joinPoint);
         } finally {
             semaphore.release(permitId);
         }
@@ -67,5 +68,15 @@ public class ScheduledTaskAdvice {
         }
 
         return method.getAnnotation(SynchronousScheduled.class);
+    }
+
+    private Object proceedInternal(final ProceedingJoinPoint joinPoint) throws Throwable {
+
+        try {
+            return joinPoint.proceed();
+        } catch (final Throwable e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }
