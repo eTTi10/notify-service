@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,7 +51,7 @@ public class PushSender {
     private static final String KEY_GCM_APPID = "gcm.appid";
     private static final String KEY_GCM_PAYLOAD_BODY = "gcm.payload.body";
     private static final String KEY_PARAM_LIST = "param.list";
-    
+
     private static final String KEY_APNS_SERVICEID = "apns.serviceid";
     private static final String KEY_APNS_APPID = "apns.appid";
     private static final String KEY_APNS_PAYLOAD_BODY = "apns.payload.body";
@@ -79,109 +78,41 @@ public class PushSender {
 
     /**
      * code를 이용한 push발송
+     *
      * @param sendPushCodeRequestDto
      * @return
      */
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
 
         String pushType = sendPushCodeRequestDto.getPushType();
-        String sendCode = sendPushCodeRequestDto.getSendCode();
-        String serviceType = sendPushCodeRequestDto.getServiceType();
 
-        HttpPushResponseDto httpPushResponseDto = null;
-        pushServiceResultDtoArrayList.clear();
+        String[] pushTypes = getServiceTypes(pushType, "\\|");
+        String[] serviceTypes = getServiceTypes(sendPushCodeRequestDto.getServiceType(), "\\|");
 
-        String[] pushTypes;
-        String[] serviceTypes;
-        String serviceTarget;
-
-        resultFlag = true;
-        chk1001 = 0;
-        failCount = 0;
-        failCode = "";
-        failMessage ="";
-
-        firstFailCode ="";
-        firstFailMessage ="";
+        initPushCodeValues();
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-        Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+
+        Map<String, String> sendCodeMap = getSendCodeMap(sendPushCodeRequestDto.getSendCode());
 
         //invalid sendCode 체크해서 Exception
-        checkInvalidSendPushCode(pushInfoMap);
+        checkGCMBody(sendCodeMap);
 
         /*FCM POS 추가발송 설정값 체크*/
-        String extraSendYn = StringUtils.defaultIfEmpty(pushInfoMap.get("pos.send"), fcmExtraSend);
-        log.debug("pushInfoMap.getpos.send props:" + pushInfoMap.get("pos.send"));
+        String extraSendYn = StringUtils.defaultIfEmpty(sendCodeMap.get("pos.send"), fcmExtraSend);
+        log.debug("pushInfoMap.getpos.send props:" + sendCodeMap.get("pos.send"));
         log.debug("fcmExtraSend props:" + fcmExtraSend);
 
-        pushTypes = pushType.split("\\|");
-        serviceTypes = serviceType.split("\\|");
-
-        for(int k=0; k<serviceTypes.length; k++) {
-
-            String sType = "";
-            sFlag = "";
-            sMessage = "";
-
-            chk1001 = 0;
-            failCount = 0;
-
-            failCode = "";
-            failMessage ="";
-
-            serviceTarget = serviceTypes[k];
-
-            for(int i=0; i<pushTypes.length; i++) {
-
-                HttpPushSingleRequestDto httpPushSingleRequestDto = setHttpPushRequestDto(sendPushCodeRequestDto, serviceTarget, pushTypes[i]);
-
+        for (String serviceType : serviceTypes) {
+            initPushValues();
+            for (String type : pushTypes) {
+                HttpPushSingleRequestDto httpPushSingleRequestDto = setHttpPushRequestDto(sendPushCodeRequestDto, serviceType, type);
                 log.debug("httpPushSingleRequestDto:{}", httpPushSingleRequestDto);
-
-                try {
-
-                    //HTTP PUSH 호출
-                    httpPushResponseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
-
-                } catch (HttpPushCustomException ex) {
-                    log.debug("code :::::::::::: {}\tmessage :::::::::::::::: {}", ex.getCode(), ex.getMessage());
-                    failCode = ex.getCode();
-                    failMessage = ex.getMessage();
-                }
-
-                if (httpPushResponseDto != null && !"성공".equals(httpPushResponseDto.getMessage())) {
-                    failCode = httpPushResponseDto.getCode();
-                    failMessage = httpPushResponseDto.getMessage();
-                }
-
-                //추가 발송 (소켓)
+                setPushResult(requestHttpSinglePush(httpPushSingleRequestDto));
                 //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우
-                if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) {
-
-                    PushRequestSingleDto pushRequestSingleDto = getExtraPushRequestDto(sendPushCodeRequestDto, serviceTarget, pushType);
-
-                    log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
-
-                    try {
-
-                        //소켓 PUSH 호출
-                        PushClientResponseDto pushClientResponseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-
-                        log.debug("pushClientResponseDto:" + pushClientResponseDto);
-
-                    } catch (NotifyRuntimeException ne) {
-                        log.debug("NotifyPushRuntimeException:{} {}", ne.toString(), ne.getInnerResponseCodeType());
-                    }
-
-                }
-
-                // chk1001, resultFlag, failCount 기록
-                setPushResult(httpPushResponseDto);
-
+                sendExtraPush(sendPushCodeRequestDto, pushType, serviceType, extraSendYn);
             } // pushType for end
-
-            sType = StringUtils.defaultIfEmpty(serviceTarget, "H");
-
+            String sType = StringUtils.defaultIfEmpty(serviceType, "H");
             //serviceType별 성공실패 기록
             setServiceResult(pushTypes.length);
 
@@ -189,21 +120,91 @@ public class PushSender {
             firstFailMessage = StringUtils.defaultIfEmpty(firstFailMessage, failMessage);
 
             PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                    .type(sType)
-                    .flag(sFlag)
-                    .message(sMessage)
-                    .build();
-
+                .type(sType)
+                .flag(sFlag)
+                .message(sMessage)
+                .build();
             pushServiceResultDtoArrayList.add(pushServiceResultDto);
-
-        }	// serviceType for end
+        }    // serviceType for end
 
         //response
         return setResponseDto(serviceTypes.length);
     }
 
+    private HttpPushResponseDto requestHttpSinglePush( HttpPushSingleRequestDto httpPushSingleRequestDto) {
+        HttpPushResponseDto httpPushResponseDto = null;
+        try {
+            httpPushResponseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
+        } catch (HttpPushCustomException ex) {
+            log.debug("code :::::::::::: {}\tmessage :::::::::::::::: {}", ex.getCode(), ex.getMessage());
+            failCode = ex.getCode();
+            failMessage = ex.getMessage();
+        }
+        if (httpPushResponseDto != null && !"성공".equals(httpPushResponseDto.getMessage())) {
+            failCode = httpPushResponseDto.getCode();
+            failMessage = httpPushResponseDto.getMessage();
+        }
+        return httpPushResponseDto;
+    }
+
+    private String[] getServiceTypes(String serviceType, String regex) {
+        return serviceType.split(regex);
+    }
+
+    private Map<String, String> getSendCodeMap(String sendCode) {
+        return sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
+    }
+
+    private void sendExtraPush(SendPushCodeRequestDto sendPushCodeRequestDto, String pushType, String serviceTarget, String extraSendYn) {
+        if (serviceTarget.equals("TV") && extraSendYn.equals("Y")) {
+
+            PushRequestSingleDto pushRequestSingleDto = getExtraPushRequestDto(sendPushCodeRequestDto, serviceTarget, pushType);
+
+            log.debug("PushRequestSingleDto:{}", pushRequestSingleDto);
+
+            try {
+
+                //소켓 PUSH 호출
+                PushClientResponseDto pushClientResponseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
+
+                log.debug("pushClientResponseDto:" + pushClientResponseDto);
+
+            } catch (NotifyRuntimeException ne) {
+                log.debug("NotifyPushRuntimeException:{} {}", ne.toString(), ne.getInnerResponseCodeType());
+            }
+
+        }
+    }
+
+    private void initPushCodeValues() {
+        resultFlag = true;
+        chk1001 = 0;
+        failCount = 0;
+        failCode = "";
+        failMessage = "";
+
+        firstFailCode = "";
+        firstFailMessage = "";
+
+        pushServiceResultDtoArrayList.clear();
+
+    }
+
+    private void initPushValues() {
+        String sType = "";
+        sFlag = "";
+        sMessage = "";
+
+        chk1001 = 0;
+        failCount = 0;
+
+        failCode = "";
+        failMessage = "";
+    }
+
     /**
      * pushType별 HTTPPUSH용 requestDto 조립
+     *
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @param pushType
@@ -234,11 +235,12 @@ public class PushSender {
 
     /**
      * pushType별 failCode 기록 로직
+     *
      * @param httpPushResponseDto
      */
     private void setPushResult(HttpPushResponseDto httpPushResponseDto) {
 
-        if (httpPushResponseDto == null || ! httpPushResponseDto.getMessage().equals("성공") ) { // 실패일 경우 처리
+        if (httpPushResponseDto == null || !httpPushResponseDto.getMessage().equals("성공")) { // 실패일 경우 처리
 
             if (failCode.equals("1113") || failCode.equals("1108")) {
                 chk1001++;
@@ -253,34 +255,35 @@ public class PushSender {
 
     /**
      * 성공, 실패코드 response 로직
+     *
      * @param serviceTypeSize
      * @return
      */
     private SendPushResponseDto setResponseDto(int serviceTypeSize) {
 
         //성공일 경우
-        if(successCheckFlag) {
+        if (successCheckFlag) {
 
             return SendPushResponseDto.builder()
-                    .flag("0000")
-                    .message("성공")
+                .flag("0000")
+                .message("성공")
+                .service(pushServiceResultDtoArrayList)
+                .build();
+        } else {
+
+            if (check1001Flag && serviceTypeSize > 1) {
+
+                return SendPushResponseDto.builder()
+                    .flag("1001")
+                    .message(MESSAGE_1001)
                     .service(pushServiceResultDtoArrayList)
                     .build();
-        }else {
-
-            if(check1001Flag && serviceTypeSize > 1){
-
+            } else {
                 return SendPushResponseDto.builder()
-                        .flag("1001")
-                        .message(MESSAGE_1001)
-                        .service(pushServiceResultDtoArrayList)
-                        .build();
-            }else{
-                return SendPushResponseDto.builder()
-                        .flag(firstFailCode)
-                        .message(firstFailMessage)
-                        .service(pushServiceResultDtoArrayList)
-                        .build();
+                    .flag(firstFailCode)
+                    .message(firstFailMessage)
+                    .service(pushServiceResultDtoArrayList)
+                    .build();
             }
         }
 
@@ -288,6 +291,7 @@ public class PushSender {
 
     /**
      * RegId 조회
+     *
      * @param sendPushCodeRequestDto
      * @return
      */
@@ -308,6 +312,7 @@ public class PushSender {
 
     /**
      * ctn을 이용해 registrationId 조회
+     *
      * @param ctn
      * @return
      */
@@ -322,13 +327,15 @@ public class PushSender {
         log.debug("subscriberDomainClient.getRegistrationIDbyCtn() saIdDtos:{}", saIdDtos);
         if (!saIdDtos.isEmpty()) {
             return StringUtils.defaultIfEmpty(saIdDtos.get(0).getSaId(), "");
+        } else {
+            return "";
         }
-        else return "";
 
     }
 
     /**
      * GCM(pushType) or U+tv(serviceType)용 request dto 조립
+     *
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
@@ -347,7 +354,7 @@ public class PushSender {
 
         String params;
         String[] pushParams;
-        int paramSize =0;
+        int paramSize = 0;
 
         //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = getAppDefaultMap();
@@ -356,7 +363,7 @@ public class PushSender {
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
 
-        checkInvalidSendPushCode(pushInfoMap);
+        checkGCMBody(pushInfoMap);
 
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
@@ -365,7 +372,6 @@ public class PushSender {
         String applicationId = appInfoMap.get(KEY_GCM_APPID);
         String payload = pushInfoMap.get(KEY_GCM_PAYLOAD_BODY);
         String payloadItem = pushInfoMap.get(KEY_APNS_PAYLOAD_ITEM);  //APNS전용 추가 item
-
 
         if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
@@ -380,7 +386,6 @@ public class PushSender {
         pushParams = params.split("\\|");
         paramSize = pushParams.length;
 
-
         for (int index = 0; index < paramSize; index++) {
             try {
                 payload = payload.replace("[+" + pushParams[index] + "]", paramMap.get(pushParams[index]));
@@ -391,7 +396,7 @@ public class PushSender {
 
         registrationId = (regType.equals("2")) ? getRegistrationIDbyCtn(registrationId) : registrationId;
 
-        if(pushType.equals("A")) {
+        if (pushType.equals("A")) {
 
             for (int index = 0; index < paramSize; index++) {
                 try {
@@ -408,17 +413,18 @@ public class PushSender {
         log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
 
         return HttpPushSingleRequestDto.builder()
-                .applicationId(applicationId)
-                .serviceId(serviceId)
-                .pushType(pushType)
-                .message(payload)
-                .users(List.of(registrationId))
-                .items(items)
-                .build();
+            .applicationId(applicationId)
+            .serviceId(serviceId)
+            .pushType(pushType)
+            .message(payload)
+            .users(List.of(registrationId))
+            .items(items)
+            .build();
     }
 
     /**
      * APNS용 request dto 조립
+     *
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
@@ -436,7 +442,7 @@ public class PushSender {
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
 
-        checkInvalidSendPushCode(pushInfoMap);
+        checkGCMBody(pushInfoMap);
 
         //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = getAppDefaultMap();
@@ -455,7 +461,7 @@ public class PushSender {
 
         //reserve에 들어갈 내용을
         String paramList = pushInfoMap.get(KEY_PARAM_LIST);
-        String[] pushParamList = paramList.split("\\|");
+        String[] pushParamList = getServiceTypes(paramList, "\\|");
         int paramSize = pushParamList.length;
 
         log.debug("pushinfo.{}.param.list : {}", sendCode, pushParamList);
@@ -476,17 +482,18 @@ public class PushSender {
         items.add(0, payloadItem);
 
         return HttpPushSingleRequestDto.builder()
-                .applicationId(applicationId)
-                .serviceId(serviceId)
-                .pushType(pushType)
-                .message(payload)
-                .users(List.of(registrationId))
-                .items(items)
-                .build();
+            .applicationId(applicationId)
+            .serviceId(serviceId)
+            .pushType(pushType)
+            .message(payload)
+            .users(List.of(registrationId))
+            .items(items)
+            .build();
     }
 
     /**
      * LG푸시용 request dto 조립 ( pushagent_op에서는 push_type이 GCM과 APNS만 사용할 수 있지만 ASIS에 있는 로직이라 개발함
+     *
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
@@ -506,17 +513,18 @@ public class PushSender {
         //reg_id를 기입하지 않았다면 DB에서 RegID를 찾아서 처리한다.
         registrationId = StringUtils.defaultIfEmpty(registrationId, getRegistrationID(sendPushCodeRequestDto));
         return HttpPushSingleRequestDto.builder()
-                .applicationId(applicationId)
-                .serviceId(serviceId)
-                .pushType(pushType)
-                .message(bodyLgPush)
-                .users(List.of(registrationId))
-                .items(items)
-                .build();
+            .applicationId(applicationId)
+            .serviceId(serviceId)
+            .pushType(pushType)
+            .message(bodyLgPush)
+            .users(List.of(registrationId))
+            .items(items)
+            .build();
     }
 
     /**
      * 소켓 푸시 전문 조립
+     *
      * @param sendPushCodeRequestDto
      * @param serviceTarget
      * @return
@@ -530,12 +538,12 @@ public class PushSender {
 
         String paramList;
         String[] pushParams;
-        int paramSize =0;
+        int paramSize = 0;
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
 
-        checkInvalidSendPushCode(pushInfoMap);
+        checkGCMBody(pushInfoMap);
 
         //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         Map<String, String> appInfoDefaultMap = getAppDefaultMap();
@@ -569,7 +577,7 @@ public class PushSender {
             }
         }
 
-        if(pushType.equals("A")) {
+        if (pushType.equals("A")) {
 
             for (int index = 0; index < paramSize; index++) {
                 try {
@@ -586,30 +594,30 @@ public class PushSender {
         //소켓푸시용 items로 변환
         List<PushRequestItemDto> itemsExtra = new ArrayList<>();
         items.forEach(e -> {
-            String[] parseItems = e.split("!\\^");
+            String[] parseItems = getServiceTypes(e, "!\\^");
             if (parseItems.length == 2) {
                 itemsExtra.add(PushRequestItemDto.builder().itemKey(parseItems[0]).itemValue(parseItems[1]).build());
-            }
-            else {
+            } else {
                 log.error(" items error");
             }
         });
 
         return PushRequestSingleDto.builder()
-                .applicationId(extraApplicationId)
-                .serviceId(extraServiceId)
-                .pushType("L")
-                .message(payload)
-                .regId(registrationId)
-                .items(itemsExtra)
-                .build();
+            .applicationId(extraApplicationId)
+            .serviceId(extraServiceId)
+            .pushType("L")
+            .message(payload)
+            .regId(registrationId)
+            .items(itemsExtra)
+            .build();
     }
 
     /**
      * sendCode 체크
+     *
      * @param pushInfoMap
      */
-    public void checkInvalidSendPushCode(Map<String, String> pushInfoMap) {
+    public void checkGCMBody(Map<String, String> pushInfoMap) {
 
         if (!pushInfoMap.containsKey(KEY_GCM_PAYLOAD_BODY) || pushInfoMap.get(KEY_GCM_PAYLOAD_BODY).equals("")) {
             throw new InvalidSendPushCodeException("send code 미지원");
@@ -619,6 +627,7 @@ public class PushSender {
 
     /**
      * default serviceType property값 조회
+     *
      * @return Map
      */
     private Map<String, String> getAppDefaultMap() {
@@ -629,23 +638,24 @@ public class PushSender {
 
     /**
      * serviceType별 성공실패 기록
+     *
      * @param pushTypeSize
      */
     private void setServiceResult(int pushTypeSize) {
 
-        if( failCount < 2 && pushTypeSize > 1){ //푸시타입이 2개 이상인 경우 실패건수가 1건 이하이면 성공으로 간주
+        if (failCount < 2 && pushTypeSize > 1) { //푸시타입이 2개 이상인 경우 실패건수가 1건 이하이면 성공으로 간주
             sFlag = "0000";
             sMessage = "성공";
             successCheckFlag = true;
-        } else if( !resultFlag && pushTypeSize > 1 ) {  // 푸시 타입이 2개 이상이며 1001이 아닌 오류가 났을 경우 해당 오류코드를 반환
+        } else if (!resultFlag && pushTypeSize > 1) {  // 푸시 타입이 2개 이상이며 1001이 아닌 오류가 났을 경우 해당 오류코드를 반환
             sFlag = failCode;
             sMessage = failMessage;
-        }else{
-            if(failCount == 0) {    // 실패건수가 0일 경우 성공 반환
+        } else {
+            if (failCount == 0) {    // 실패건수가 0일 경우 성공 반환
                 sFlag = "0000";
                 sMessage = "성공";
                 successCheckFlag = true;
-            }else if (chk1001 > 0){ // 1001 오류가 1건 이상일 경우 1001 반환
+            } else if (chk1001 > 0) { // 1001 오류가 1건 이상일 경우 1001 반환
                 sFlag = "1001";
                 sMessage = MESSAGE_1001;
                 check1001Flag = true;
