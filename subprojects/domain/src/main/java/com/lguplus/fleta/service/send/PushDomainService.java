@@ -37,6 +37,15 @@ public class PushDomainService {
     private final SubscriberDomainClient subscriberDomainClient;
     private final SendPushCodeProps sendPushCodeProps;
 
+    @Value("${push.fcm.extra.send}")
+    private String fcmExtraSend;
+
+    @Value("${push.fcm.extra.serviceid}")
+    private String extraServiceId;
+
+    @Value("${push.fcm.extra.appid}")
+    private String extraApplicationId;
+
     /**
      * code를 이용한 push발송
      *
@@ -45,7 +54,8 @@ public class PushDomainService {
      */
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
         PushSender pushSender = new PushSender(httpSinglePushDomainService
-            , pushSingleDomainService, personalizationDomainClient, subscriberDomainClient, sendPushCodeProps);
+            , pushSingleDomainService, personalizationDomainClient, subscriberDomainClient
+            , sendPushCodeProps,fcmExtraSend,extraServiceId,extraApplicationId);
         return pushSender.sendPushCode(sendPushCodeRequestDto);
     }
 
