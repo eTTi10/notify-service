@@ -24,18 +24,16 @@ import java.net.URL;
 import java.util.Map;
 
 /**
- * MMSC implementation using standard java {@link HttpURLConnection} to connect
- * to MMSC. Use {@link MM7Context} to configure message
- * serialization/deserialization.
+ * MMSC implementation using standard java {@link HttpURLConnection} to connect to MMSC. Use {@link MM7Context} to configure message serialization/deserialization.
  */
 public class BasicMMSC extends MMSCBase {
 
-	public BasicMMSC(String url, Map<String, ?> mmsConfig) {
-		super(url, mmsConfig);
-	}
+    public BasicMMSC(String url, Map<String, ?> mmsConfig) {
+        super(url, mmsConfig);
+    }
 
-	@Override
-	protected HttpURLConnection getHttpURLConnection(URL u) throws IOException {
-		return (HttpURLConnection) u.openConnection();
-	}
+    @Override
+    protected HttpURLConnection getHttpURLConnection(URL u) throws IOException {
+        return (HttpURLConnection) u.openConnection();
+    }
 }

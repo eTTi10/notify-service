@@ -15,6 +15,9 @@ import com.lguplus.fleta.service.push.PushMultiService;
 import com.lguplus.fleta.service.push.PushSingleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,10 +25,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Api(tags = "Push Message 전송 서비스")
 @Slf4j
@@ -52,10 +51,10 @@ public class PushServiceController {
      * @param pushRequestBodyAnnounceVo Announcement 푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @ApiOperation(value="공지 Push Message 등록", notes="공지 Push Message를 등록한다.")
+    @ApiOperation(value = "공지 Push Message 등록", notes = "공지 Push Message를 등록한다.")
     @PostMapping(value = "/notify/push/announcement")
     public InnerResponseDto<PushClientResponseDto> pushRequestAnnouncement(
-            @RequestBody @Valid PushRequestBodyAnnounceVo pushRequestBodyAnnounceVo) {
+        @RequestBody @Valid PushRequestBodyAnnounceVo pushRequestBodyAnnounceVo) {
 
         log.debug("PushAnnounceController : {}", pushRequestBodyAnnounceVo);
 
@@ -70,10 +69,10 @@ public class PushServiceController {
      * @param pushRequestBodySingleVo 단건푸시등록을 위한 VO
      * @return 단건푸시등록 결과 응답
      */
-    @ApiOperation(value="단건 Push Message 등록", notes="단건 Push Message를 등록한다.")
+    @ApiOperation(value = "단건 Push Message 등록", notes = "단건 Push Message를 등록한다.")
     @PostMapping(value = "/notify/push/single")
     public InnerResponseDto<PushClientResponseDto> pushRequest(
-            @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
+        @RequestBody @Valid PushRequestBodySingleVo pushRequestBodySingleVo) {
 
         //log.debug("PushSingleController : {}", pushRequestBodySingleVo)
         PushRequestSingleDto pushRequestSingleDto = pushRequestMapper.toDtoSingle(pushRequestBodySingleVo);
@@ -94,9 +93,9 @@ public class PushServiceController {
      * @return Multi 푸시등록 결과 응답
      */
     @PostMapping(value = "/notify/push/multi")
-    @ApiOperation(value="Multi Push Message 등록", notes="Multi Push Message를 등록한다.")
+    @ApiOperation(value = "Multi Push Message 등록", notes = "Multi Push Message를 등록한다.")
     public InnerResponseDto<PushClientResponseMultiDto> multiPushRequest(
-            @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
+        @RequestBody @Valid PushRequestBodyMultiVo pushRequestBodyMultiVo) {
 
         //Reject User Filtering
         pushRequestBodyMultiVo.setUsers(pushRequestBodyMultiVo.getUsers().stream().filter(this::isValidRegId).collect(Collectors.toList()));

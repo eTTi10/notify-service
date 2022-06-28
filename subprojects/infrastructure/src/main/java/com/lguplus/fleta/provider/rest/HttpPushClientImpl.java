@@ -2,17 +2,16 @@ package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
+import java.net.URI;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
-import java.util.Map;
-
 /**
  * Http Push Domain FeignClient (Open API 이용)
- *
+ * <p>
  * 단건, 멀티(단건 사용), 공지 푸시등록
  */
 @Slf4j
@@ -79,7 +78,7 @@ public class HttpPushClientImpl implements HttpPushClient {
         if (kind.equals("S")) {
             return protocolSingle + "://" + hostSingle + ":" + (protocolSingle.equals("http") ? httpPortSingle : httpsPortSingle);
 
-        // 공지
+            // 공지
         } else {
             return protocolAnnounce + "://" + hostAnnounce + ":" + (protocolAnnounce.equals("http") ? httpPortAnnounce : httpsPortAnnounce);
         }

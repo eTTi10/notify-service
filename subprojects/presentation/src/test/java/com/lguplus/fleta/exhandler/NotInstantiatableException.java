@@ -1,3 +1,5 @@
 package com.lguplus.fleta.exhandler;
 
-public abstract class NotInstantiatableException extends Exception {}
+public abstract class NotInstantiatableException extends Exception {
+
+}

@@ -5,17 +5,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 public class NotFoundMsgException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.SMS_SERVER_ERROR;
-    }
-
     public NotFoundMsgException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public NotFoundMsgException(final String message) {
@@ -24,7 +18,6 @@ public class NotFoundMsgException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -34,12 +27,15 @@ public class NotFoundMsgException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NotFoundMsgException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 
 }

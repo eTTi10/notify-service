@@ -12,6 +12,8 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,36 +24,29 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest
 @ContextConfiguration(classes = {MmsController.class
-        , ArgumentResolverConfig.class
-        , MessageConverterConfig.class})
+    , ArgumentResolverConfig.class
+    , MessageConverterConfig.class})
 class MmsControllerTest {
 
+    private final ObjectMapper MAPPER = new ObjectMapper()
+        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     @Autowired
     private MockMvc mockMvc;
-
     @MockBean
     private MmsService mmsService;
-
     @MockBean
     private SendMmsRequestMapper sendMmsRequestMapper;
 
-    private final ObjectMapper MAPPER = new ObjectMapper()
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
     @BeforeEach
     void setUp() {
-
 
         // Mock Dto
         SuccessResponseDto successResponseDto = SuccessResponseDto.builder().build();
@@ -71,13 +66,13 @@ class MmsControllerTest {
         queryParams.add("replacement", "영희|컴퓨터");
 
         MvcResult mvcResult = mockMvc.perform(
-                        MockMvcRequestBuilders.post("/mims/sendMms")
-                                .accept(MediaType.APPLICATION_JSON)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .characterEncoding("UTF-8")
-                                .queryParams(queryParams)
-                ).andExpect(status().isOk())
-                .andReturn();
+                MockMvcRequestBuilders.post("/mims/sendMms")
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding("UTF-8")
+                    .queryParams(queryParams)
+            ).andExpect(status().isOk())
+            .andReturn();
 
         MockHttpServletResponse mockHttpServletResponse = mvcResult.getResponse();
         int status = mockHttpServletResponse.getStatus();

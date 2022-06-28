@@ -11,11 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class ServiceIdNotFoundException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -25,7 +20,6 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ServiceIdNotFoundException(final String message) {
@@ -34,7 +28,6 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -44,11 +37,14 @@ public class ServiceIdNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ServiceIdNotFoundException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
     }
 }

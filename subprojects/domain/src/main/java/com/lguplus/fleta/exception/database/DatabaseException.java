@@ -17,7 +17,6 @@ public class DatabaseException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DatabaseException(final String message) {
@@ -26,7 +25,6 @@ public class DatabaseException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DatabaseException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DatabaseException(final Throwable cause) {

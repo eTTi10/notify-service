@@ -27,7 +27,7 @@ spring:
     type: redis
   redis:
     cluster:
-      nodes: [<<redis.cluster.nodes>>]
+      nodes: [ <<redis.cluster.nodes>> ]
 
   #### Message Stream - Kafka
   kafka:

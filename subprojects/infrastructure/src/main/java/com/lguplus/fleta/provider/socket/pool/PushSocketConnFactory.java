@@ -1,23 +1,25 @@
 package com.lguplus.fleta.provider.socket.pool;
 
-import lombok.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicInteger;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicInteger;
-
 @Slf4j
 @Getter
 public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInfo> {
 
-    private final PushServerInfoVo serverInfoVo;
-
-    private final AtomicInteger commChannelNum = new AtomicInteger(0);
     private static final int CHANNEL_MAX_SEQ_NO = 10000;
+    private final PushServerInfoVo serverInfoVo;
+    private final AtomicInteger commChannelNum = new AtomicInteger(0);
 
     public PushSocketConnFactory(PushServerInfoVo pushServerInfoVo) {
         this.serverInfoVo = pushServerInfoVo;
@@ -28,12 +30,11 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         PushSocketInfo socketInfo = createNewSocketInfo();
 
-        if(socketInfo.isInValid()) {
+        if (socketInfo.isInValid()) {
             socketInfo.closeSocket();
             log.error("=== factory create Socket failure: {}", socketInfo);
             return null;
-        }
-        else {
+        } else {
             log.trace("=== factory create Socket : {}", socketInfo);
             return socketInfo;
         }
@@ -52,11 +53,11 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
 
         PushSocketInfo socketInfo = p.getObject();
 
-        if(socketInfo.isInValid()) {
+        if (socketInfo.isInValid()) {
             return false;
         }
 
-        if(socketInfo.isTimeoutStatus(serverInfoVo.getCloseSecond()) && socketInfo.getLastUsedSeconds() < 300) {
+        if (socketInfo.isTimeoutStatus(serverInfoVo.getCloseSecond()) && socketInfo.getLastUsedSeconds() < 300) {
             socketInfo.isServerInValidStatus();
         }
 
@@ -86,9 +87,9 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
         String channelHostNm = (hostname + "00000000").substring(0, 6);
         String channelPortNm = (serverInfoVo.getChannelPort() + "0000").substring(0, 4);
 
-        channelHostNm = "S" +  channelHostNm.substring(1);
+        channelHostNm = "S" + channelHostNm.substring(1);
 
-        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x ->(x+1 < 10000) ? x+1 : 0));
+        return channelHostNm + channelPortNm + String.format("%04d", commChannelNum.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0));
     }
 
     @Getter
@@ -96,6 +97,7 @@ public class PushSocketConnFactory extends BasePooledObjectFactory<PushSocketInf
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
     public static class PushServerInfoVo {
+
         private String host;
         private int port;
         private int timeout;

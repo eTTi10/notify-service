@@ -31,44 +31,35 @@ import org.apache.commons.lang3.StringUtils;
 @RequiredArgsConstructor
 public class PushSender {
 
+    private static final String KEY_GCM_SERVICE_ID = "gcm.serviceid";
+    private static final String KEY_GCM_APPID = "gcm.appid";
+    private static final String KEY_GCM_PAYLOAD_BODY = "gcm.payload.body";
+    private static final String KEY_PARAM_LIST = "param.list";
+    private static final String KEY_APNS_SERVICE_ID = "apns.serviceid";
+    private static final String KEY_APNS_APPID = "apns.appid";
+    private static final String KEY_APNS_PAYLOAD_BODY = "apns.payload.body";
+    private static final String KEY_APNS_PAYLOAD_ITEM = "apns.payload.item";
+    private static final String MESSAGE_1001 = "Push GW Precondition Failed or Not Exist RegistID";
     private final HttpSinglePushDomainService httpSinglePushDomainService;
     private final PushSingleDomainService pushSingleDomainService;
     private final PersonalizationDomainClient personalizationDomainClient;
     private final SubscriberDomainClient subscriberDomainClient;
     private final SendPushCodeProps sendPushCodeProps;
-
     private final String fcmExtraSend;
     private final String extraServiceId;
     private final String extraApplicationId;
-
-    private static final String KEY_GCM_SERVICE_ID = "gcm.serviceid";
-    private static final String KEY_GCM_APPID = "gcm.appid";
-    private static final String KEY_GCM_PAYLOAD_BODY = "gcm.payload.body";
-    private static final String KEY_PARAM_LIST = "param.list";
-
-    private static final String KEY_APNS_SERVICE_ID = "apns.serviceid";
-    private static final String KEY_APNS_APPID = "apns.appid";
-    private static final String KEY_APNS_PAYLOAD_BODY = "apns.payload.body";
-    private static final String KEY_APNS_PAYLOAD_ITEM = "apns.payload.item";
-
-    private static final String MESSAGE_1001 = "Push GW Precondition Failed or Not Exist RegistID";
-
+    private final List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();  //서비스타입별 결과 저장용 List
     private boolean successCheckFlag = false;
     private boolean check1001Flag = false;
     private boolean resultFlag = true;
-
     private String sFlag;
     private String sMessage;
-
     private int chk1001;
     private int failCount;
-
     private String failCode;
     private String failMessage;
     private String firstFailCode;
     private String firstFailMessage;
-
-    private final List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();  //서비스타입별 결과 저장용 List
 
     /**
      * code를 이용한 push발송
@@ -77,10 +68,7 @@ public class PushSender {
      * @return
      */
     public SendPushResponseDto sendPushCode(SendPushCodeRequestDto sendPushCodeRequestDto) {
-
-        String pushType = sendPushCodeRequestDto.getPushType();
-
-        String[] pushTypes = getServiceTypes(pushType, "\\|");
+        String[] pushTypes = getServiceTypes(sendPushCodeRequestDto.getPushType(), "\\|");
         String[] serviceTypes = getServiceTypes(sendPushCodeRequestDto.getServiceType(), "\\|");
 
         initPushCodeValues();
@@ -104,7 +92,7 @@ public class PushSender {
                 log.debug("httpPushSingleRequestDto:{}", httpPushSingleRequestDto);
                 setPushResult(requestHttpSinglePush(httpPushSingleRequestDto));
                 //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우
-                sendExtraPush(sendPushCodeRequestDto, pushType, serviceType, extraSendYn);
+                sendExtraPush(sendPushCodeRequestDto, type, serviceType, extraSendYn);
             } // pushType for end
             String sType = StringUtils.defaultIfEmpty(serviceType, "H");
             //serviceType별 성공실패 기록
@@ -160,9 +148,8 @@ public class PushSender {
                 log.debug("pushClientResponseDto:" + pushClientResponseDto);
 
             } catch (NotifyRuntimeException ne) {
-                log.debug("NotifyPushRuntimeException:{} {}", ne.toString(), ne.getInnerResponseCodeType());
+                log.debug("NotifyPushRuntimeException:{} {}", ne, ne.getInnerResponseCodeType());
             }
-
         }
     }
 
@@ -195,17 +182,17 @@ public class PushSender {
      * pushType별 HTTPPUSH용 requestDto 조립
      *
      * @param sendPushCodeRequestDto
-     * @param serviceTarget
+     * @param serviceType
      * @param pushType
      * @return
      */
-    private HttpPushSingleRequestDto setHttpPushRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget, String pushType) {
-        if (pushType.equalsIgnoreCase("G") || serviceTarget.equalsIgnoreCase("TV")) {   //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
-            return getGcmOrTVRequestDto(sendPushCodeRequestDto, serviceTarget, pushType);
+    private HttpPushSingleRequestDto setHttpPushRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceType, String pushType) {
+        if (isGcmTypeTvTarget(serviceType, pushType)) {   //GCM 이거나 푸시의 대상타입이 U+tv 일 경우
+            return getGcmOrTVRequestDto(sendPushCodeRequestDto, serviceType, pushType);
         } else if (pushType.equalsIgnoreCase("A")) {  //APNS 일경우
-            return getApnsRequestDto(sendPushCodeRequestDto, serviceTarget, pushType);
+            return getApnsRequestDto(sendPushCodeRequestDto, serviceType, pushType);
         } else if (pushType.equalsIgnoreCase("L")) {    // LG 푸시 일 경우
-            return getPosRequestDto(sendPushCodeRequestDto, serviceTarget, pushType);
+            return getPosRequestDto(sendPushCodeRequestDto, serviceType, pushType);
         }
         return null;
     }
@@ -284,10 +271,10 @@ public class PushSender {
         ctn = "0" + ctn;
         inputMap.put("ctnNo", ctn);
 
-        List<SaIdDto> saIdDtos = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
-        log.debug("subscriberDomainClient.getRegistrationIDbyCtn() saIdDtos:{}", saIdDtos);
-        if (!saIdDtos.isEmpty()) {
-            return StringUtils.defaultIfEmpty(saIdDtos.get(0).getSaId(), "");
+        List<SaIdDto> saIdDtoList = Optional.ofNullable(subscriberDomainClient.getRegistrationIDbyCtn(inputMap)).orElseThrow();
+        log.debug("subscriberDomainClient.getRegistrationIDbyCtn() saIdDtoList:{}", saIdDtoList);
+        if (!saIdDtoList.isEmpty()) {
+            return StringUtils.defaultIfEmpty(saIdDtoList.get(0).getSaId(), "");
         } else {
             return "";
         }
@@ -298,10 +285,10 @@ public class PushSender {
      * GCM(pushType) or U+tv(serviceType)용 request dto 조립
      *
      * @param sendPushCodeRequestDto
-     * @param serviceTarget
+     * @param serviceType
      * @return
      */
-    public HttpPushSingleRequestDto getGcmOrTVRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget, String pushType) {
+    public HttpPushSingleRequestDto getGcmOrTVRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceType, String pushType) {
 
         String registrationId = sendPushCodeRequestDto.getRegistrationId();
         String sendCode = sendPushCodeRequestDto.getSendCode();
@@ -312,40 +299,24 @@ public class PushSender {
         log.debug("sendPushCodeRequestDto.getSendCode() : {}", sendPushCodeRequestDto.getSendCode());
         log.debug("sendPushCodeRequestDto.getReserve() : {}", sendPushCodeRequestDto.getReserve());
         log.debug("paramMap : {}", paramMap);
-
-        String params;
-        String[] pushParams;
-        int paramSize = 0;
-
         //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
-        Map<String, String> appInfoDefaultMap = getAppDefaultMap();
 
         log.debug("sendCode : {}", sendCode);
+
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
-
         checkGCMBody(pushInfoMap);
 
-        //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
-
-        String serviceId = appInfoMap.get(KEY_GCM_SERVICE_ID);
-        String applicationId = appInfoMap.get(KEY_GCM_APPID);
         String payload = pushInfoMap.get(KEY_GCM_PAYLOAD_BODY);
         String payloadItem = pushInfoMap.get(KEY_APNS_PAYLOAD_ITEM);  //APNS전용 추가 item
 
-        if (serviceTarget.equals("") || serviceTarget.equals("H")) {
 
-            serviceId = appInfoDefaultMap.get(KEY_GCM_SERVICE_ID);
-            applicationId = appInfoDefaultMap.get(KEY_GCM_APPID);
-        }
-
-        log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
+        log.debug("sendPushCtn  : {}", payload);
 
         //reserve에 들어갈 내용을
-        params = pushInfoMap.get(KEY_PARAM_LIST);
-        pushParams = params.split("\\|");
-        paramSize = pushParams.length;
+        String params = pushInfoMap.get(KEY_PARAM_LIST);
+        String[] pushParams = params.split("\\|");
+        int paramSize = pushParams.length;
 
         payload = replacePayload(paramMap, pushParams, paramSize, payload);
 
@@ -358,19 +329,26 @@ public class PushSender {
             items.add(0, payloadItem);
         }
 
-        log.debug("sendPushCtn  : {} {} {}", serviceId, applicationId, payload);
+        log.debug("sendPushCtn  : {}",payload);
 
-        return HttpPushSingleRequestDto.builder().applicationId(applicationId).serviceId(serviceId).pushType(pushType).message(payload).users(List.of(registrationId)).items(items).build();
+        return HttpPushSingleRequestDto.builder()
+            .applicationId(getApplicationId(serviceType,pushType))
+            .serviceId(getServiceId(serviceType,pushType))
+            .pushType(pushType)
+            .message(payload)
+            .users(List.of(registrationId))
+            .items(items)
+            .build();
     }
 
     /**
      * APNS용 request dto 조립
      *
      * @param sendPushCodeRequestDto
-     * @param serviceTarget
+     * @param serviceType
      * @return
      */
-    public HttpPushSingleRequestDto getApnsRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget, String pushType) {
+    public HttpPushSingleRequestDto getApnsRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceType, String pushType) {
 
         String registrationId = sendPushCodeRequestDto.getRegistrationId();
         String sendCode = sendPushCodeRequestDto.getSendCode();
@@ -385,20 +363,11 @@ public class PushSender {
 
         checkGCMBody(pushInfoMap);
 
-        //serviceType에 따라 다른 appId와 serviceId를 가져오며 serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
-        Map<String, String> appInfoDefaultMap = getAppDefaultMap();
-        //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
-        String serviceId = appInfoMap.get(KEY_APNS_SERVICE_ID);
-        String applicationId = appInfoMap.get(KEY_APNS_APPID);
+        String serviceId = getServiceId(serviceType,pushType);
+        String applicationId = getApplicationId(serviceType,pushType);
         String payload = pushInfoMap.get(KEY_APNS_PAYLOAD_BODY);
         String payloadItem = pushInfoMap.get(KEY_APNS_PAYLOAD_ITEM);  //APNS전용 추가 item
-
-        if (serviceTarget.equals("") || serviceTarget.equals("H")) {
-            serviceId = appInfoDefaultMap.get(KEY_APNS_SERVICE_ID);
-            applicationId = appInfoDefaultMap.get(KEY_APNS_APPID);
-        }
 
         //reserve에 들어갈 내용을
         String paramList = pushInfoMap.get(KEY_PARAM_LIST);
@@ -416,31 +385,80 @@ public class PushSender {
         //APNS 일 경우 items 의 맨 앞에 payloaditem 를 끼워 넣는다.
         items.add(0, payloadItem);
 
-        return HttpPushSingleRequestDto.builder().applicationId(applicationId).serviceId(serviceId).pushType(pushType).message(payload).users(List.of(registrationId)).items(items).build();
+        return HttpPushSingleRequestDto.builder()
+            .applicationId(applicationId)
+            .serviceId(serviceId)
+            .pushType(pushType)
+            .message(payload)
+            .users(List.of(registrationId))
+            .items(items)
+            .build();
     }
 
     /**
      * LG 푸시용 request dto 조립 ( pushAgent_op 에서는 push_type 이 GCM 과 APNS 만 사용할 수 있지만 ASIS 에 있는 로직이라 개발함
      *
      * @param sendPushCodeRequestDto
-     * @param serviceTarget
+     * @param serviceType
      * @return
      */
-    public HttpPushSingleRequestDto getPosRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget, String pushType) {
+    public HttpPushSingleRequestDto getPosRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceType, String pushType) {
 
         String registrationId = sendPushCodeRequestDto.getRegistrationId();
         List<String> items = sendPushCodeRequestDto.getItems();
         String bodyLgPush = sendPushCodeRequestDto.getRequestBodyStr();
 
-        //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
-
-        String serviceId = Optional.ofNullable(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
-        String applicationId = Optional.ofNullable(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+        String serviceId = getServiceId(serviceType,pushType);
+        String applicationId = getApplicationId(serviceType,pushType);
 
         //reg_id를 기입하지 않았다면 DB 에서 RegID를 찾아서 처리한다.
         registrationId = StringUtils.defaultIfEmpty(registrationId, getRegistrationID(sendPushCodeRequestDto));
         return HttpPushSingleRequestDto.builder().applicationId(applicationId).serviceId(serviceId).pushType(pushType).message(bodyLgPush).users(List.of(registrationId)).items(items).build();
+    }
+
+    private String getServiceId(String serviceTarget, String pushType){
+        Map<String, String> appInfoDefaultMap = getAppDefaultMap();
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
+        if (isGcmTypeTvTarget(serviceTarget, pushType)) {
+            return (serviceTarget.equals("") || serviceTarget.equals("H")) ? appInfoDefaultMap.get(KEY_GCM_SERVICE_ID) : appInfoMap.get(KEY_GCM_SERVICE_ID);
+        } else if (pushType.equalsIgnoreCase("A")) {
+            String serviceId = appInfoMap.get(KEY_APNS_SERVICE_ID);
+
+            if (serviceTarget.equals("") || serviceTarget.equals("H")) {
+                serviceId = appInfoDefaultMap.get(KEY_APNS_SERVICE_ID);
+            }
+            return serviceId;
+        } else if (pushType.equalsIgnoreCase("L")) {
+            return Optional.ofNullable(appInfoMap.get("pos.serviceid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+        }
+        return "";
+    }
+
+    private boolean isGcmTypeTvTarget(String serviceTarget, String pushType) {
+        return pushType.equalsIgnoreCase("G") || serviceTarget.equalsIgnoreCase("TV");
+    }
+
+    private String getApplicationId(String serviceTarget, String pushType) {
+        Map<String, String> appInfoDefaultMap = getAppDefaultMap();
+        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
+        if (isGcmTypeTvTarget(serviceTarget, pushType)) {
+            String applicationId = appInfoMap.get(KEY_GCM_APPID);
+            if (serviceTarget.equals("") || serviceTarget.equals("H")) {
+                applicationId = appInfoDefaultMap.get(KEY_GCM_APPID);
+            }
+            return applicationId;
+        } else if (pushType.equalsIgnoreCase("A")) {
+            String applicationId = appInfoMap.get(KEY_APNS_APPID);
+
+            if (serviceTarget.equals("") || serviceTarget.equals("H")) {
+                applicationId = appInfoDefaultMap.get(KEY_APNS_APPID);
+            }
+            return applicationId;
+        } else if (pushType.equalsIgnoreCase("L")) {
+            return Optional.ofNullable(appInfoMap.get("pos.appid")).orElseThrow(() -> new InvalidSendPushCodeException("LG Push 미지원"));
+
+        }
+        return "";
     }
 
     /**
@@ -456,11 +474,6 @@ public class PushSender {
         String sendCode = sendPushCodeRequestDto.getSendCode();
         Map<String, String> paramMap = sendPushCodeRequestDto.getReserve();
         List<String> items = sendPushCodeRequestDto.getItems();
-
-        String paramList;
-        String[] pushParams;
-        int paramSize = 0;
-
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
         Map<String, String> pushInfoMap = sendPushCodeProps.findMapBySendCode(sendCode).orElse(Map.of());
 
@@ -472,23 +485,17 @@ public class PushSender {
         //serviceType에 따라 다른 appId와 serviceId를 가져온다
         Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
 
-        String serviceId = appInfoMap.get(KEY_GCM_SERVICE_ID);
-        String applicationId = appInfoMap.get(KEY_GCM_APPID);
+        String serviceId = getServiceId(serviceTarget,pushType);
+        String applicationId = getApplicationId(serviceTarget,pushType);
         String payload = pushInfoMap.get(KEY_GCM_PAYLOAD_BODY);
         String payloadItem = pushInfoMap.get(KEY_APNS_PAYLOAD_ITEM);  //APNS 전용 추가 item
-
-        if (serviceTarget.equals("") || serviceTarget.equals("H")) {
-
-            serviceId = appInfoDefaultMap.get(KEY_GCM_SERVICE_ID);
-            applicationId = appInfoDefaultMap.get(KEY_GCM_APPID);
-        }
 
         log.debug("sendPushCtn Property Data Check : {} {} {}", serviceId, applicationId, payload);
 
         //reserve에 들어갈 내용을
-        paramList = pushInfoMap.get(KEY_PARAM_LIST);
-        pushParams = paramList.split("\\|");
-        paramSize = pushParams.length;
+        String paramList = pushInfoMap.get(KEY_PARAM_LIST);
+        String[] pushParams = paramList.split("\\|");
+        int paramSize = pushParams.length;
 
         payload = replacePayload(paramMap, pushParams, paramSize, payload);
 
@@ -544,7 +551,7 @@ public class PushSender {
      */
     private Map<String, String> getAppDefaultMap() {
 
-        //serviceType에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
+        //serviceType 에 따라 다른 appId와 serviceId를 가져오는데, serviceType이 빈 값이거나 H 일경우  default 값을 셋팅한다
         return sendPushCodeProps.findMapByServiceType("default").orElseThrow();
     }
 

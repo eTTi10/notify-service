@@ -19,7 +19,6 @@ public class ParameterExceedMaxSizeException extends RuntimeException implements
     }
 
     /**
-     *
      * @param message
      */
     public ParameterExceedMaxSizeException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterExceedMaxSizeException extends RuntimeException implements
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterExceedMaxSizeException extends RuntimeException implements
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterExceedMaxSizeException(final Throwable cause) {

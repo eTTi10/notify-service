@@ -6,6 +6,13 @@ import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.type.CacheName;
 import com.lguplus.fleta.provider.socket.pool.PushSocketConnFactory;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.impl.AbandonedConfig;
@@ -18,14 +25,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Push 단건 Socket Client
  * <p>
@@ -37,6 +36,9 @@ import java.util.Map;
 @EnableScheduling
 public class PushSingleSocketClientImpl implements PushSingleClient {
 
+    private static final int HDTV_PUSH_IDX = 0;
+    private static final int LG_PUSH_IDX = 1;
+    private static final int EXTRA_CONN_COUNT = 50;
     //Pool Config
     @Value("${push.gateway.default.socket.max}")
     private int socketMax;
@@ -46,7 +48,6 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private int lgSocketMax;
     @Value("${push.gateway.lgupush.socket.min}")
     private int lgSocketMin;
-
     //HDTV
     @Value("${push.gateway.default.ip}")
     private String host;
@@ -64,7 +65,6 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private int closeSecond;
     @Value("${push.gateway.default.socket.init}")
     private int pushSocketInitCnt;
-
     //LG Push
     @Value("${push.gateway.lgupush.ip}")
     private String lgHost;
@@ -80,21 +80,14 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private int lgCloseSecond;
     @Value("${push.gateway.lgupush.socket.init}")
     private int lgPushSocketInitCnt;
-
     //LG Push Service ID
     @Value("${push.gateway.serviceId}")
     private String lgPushServiceId;
-
     @Value("${push.gateway.delay.time}")
     private int pushIntervalTime;
     private long measureIntervalMillis;
-
     //Pool
     private List<GenericObjectPool<PushSocketInfo>> socketPools;
-
-    private static final int HDTV_PUSH_IDX = 0;
-    private static final int LG_PUSH_IDX = 1;
-    private static final int EXTRA_CONN_COUNT = 50;
 
     /**
      * Push Single 푸시
@@ -110,8 +103,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
 
         GenericObjectPool<PushSocketInfo> socketPool = socketPools.get(bIsLgPush ? LG_PUSH_IDX : HDTV_PUSH_IDX);
 
-        try
-        {
+        try {
             socketInfo = socketPool.borrowObject();
 
             PushResponseDto retDto = socketInfo.sendPushNotice(paramMap);
@@ -122,8 +114,9 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
             log.error(e.toString());
             return PushResponseDto.builder().statusCode("500").statusMsg("Internal Error").build();
         } finally {
-            if (socketInfo != null)
+            if (socketInfo != null) {
                 socketPool.returnObject(socketInfo);
+            }
         }
 
     }
@@ -132,14 +125,14 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private void initialize() {
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(host).port(port).timeout(timeout).channelPort(wasPort)
-                .defaultChannelHost(defaultChannelHost).closeSecond(closeSecond).destinationIp(destinationIp)
-                .isLgPush(false).build();
+            .host(host).port(port).timeout(timeout).channelPort(wasPort)
+            .defaultChannelHost(defaultChannelHost).closeSecond(closeSecond).destinationIp(destinationIp)
+            .isLgPush(false).build();
 
         PushSocketConnFactory.PushServerInfoVo pushServerInfoVoLg = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(lgHost).port(lgPort).timeout(lgTimeout).channelPort(wasPort)
-                .defaultChannelHost(lgDefaultChannelHost).closeSecond(lgCloseSecond).destinationIp(lgDestinationIp)
-                .isLgPush(true).build();
+            .host(lgHost).port(lgPort).timeout(lgTimeout).channelPort(wasPort)
+            .defaultChannelHost(lgDefaultChannelHost).closeSecond(lgCloseSecond).destinationIp(lgDestinationIp)
+            .isLgPush(true).build();
 
         socketPools = new ArrayList<>();
 
@@ -149,12 +142,12 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
         abandonedConfig.setRemoveAbandonedTimeout(250);
 
         socketPools.add(new GenericObjectPool<>(
-                new PushSocketConnFactory(pushServerInfoVo)
-                , getPoolConfig(socketMax, socketMin), abandonedConfig));
+            new PushSocketConnFactory(pushServerInfoVo)
+            , getPoolConfig(socketMax, socketMin), abandonedConfig));
 
         socketPools.add(new GenericObjectPool<>(
-                new PushSocketConnFactory(pushServerInfoVoLg)
-                , getPoolConfig(lgSocketMax, lgSocketMin), abandonedConfig));
+            new PushSocketConnFactory(pushServerInfoVoLg)
+            , getPoolConfig(lgSocketMax, lgSocketMin), abandonedConfig));
 
         measureIntervalMillis = pushIntervalTime * 1000L;
 
@@ -174,7 +167,7 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     private GenericObjectPoolConfig<PushSocketInfo> getPoolConfig(int maxTotal, int minIdle) {
         GenericObjectPoolConfig<PushSocketInfo> poolConfig = new GenericObjectPoolConfig<>();
         poolConfig.setJmxEnabled(false);
-        poolConfig.setMaxTotal(maxTotal+EXTRA_CONN_COUNT);
+        poolConfig.setMaxTotal(maxTotal + EXTRA_CONN_COUNT);
         poolConfig.setMaxIdle(maxTotal);
         poolConfig.setMinIdle(minIdle);
         poolConfig.setBlockWhenExhausted(true);//풀이 관리하는 커넥션이 모두 사용중인 경우에 커넥션 요청 시, true 이면 대기, false 이면 NoSuchElementException 발생
@@ -190,28 +183,28 @@ public class PushSingleSocketClientImpl implements PushSingleClient {
     }
 
     @Override
-    @Cacheable(value=CacheName.PUSH_STATISTICS, key="#serviceId")
+    @Cacheable(value = CacheName.PUSH_STATISTICS, key = "#serviceId")
     public PushStatDto getPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
         log.debug("getPushStatus: init : " + System.currentTimeMillis());
 
         return PushStatDto.builder()
-                .serviceId(serviceId)
-                .measureIntervalMillis(measureIntervalMillis)
-                .measurePushCount(measurePushCount)
-                .measureStartMillis(measureStartMillis)
-                .build();
+            .serviceId(serviceId)
+            .measureIntervalMillis(measureIntervalMillis)
+            .measurePushCount(measurePushCount)
+            .measureStartMillis(measureStartMillis)
+            .build();
     }
 
     @Override
-    @CachePut(value=CacheName.PUSH_STATISTICS, key="#serviceId")
+    @CachePut(value = CacheName.PUSH_STATISTICS, key = "#serviceId")
     public PushStatDto putPushStatus(String serviceId, long measurePushCount, long measureStartMillis) {
 
         return PushStatDto.builder()
-                .serviceId(serviceId)
-                .measureIntervalMillis(measureIntervalMillis)
-                .measurePushCount(measurePushCount)
-                .measureStartMillis(measureStartMillis)
-                .build();
+            .serviceId(serviceId)
+            .measureIntervalMillis(measureIntervalMillis)
+            .measurePushCount(measurePushCount)
+            .measureStartMillis(measureStartMillis)
+            .build();
     }
 
 }

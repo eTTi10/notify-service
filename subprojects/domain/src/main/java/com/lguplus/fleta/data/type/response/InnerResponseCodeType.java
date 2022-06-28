@@ -1,18 +1,17 @@
 package com.lguplus.fleta.data.type.response;
 
+import java.util.EnumSet;
+import java.util.Locale;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.EnumSet;
-import java.util.Locale;
-
 /**
- * HTTP API 표준 응답 코드
- * (응답 코드, 메시지, HttpStatus는 MessageSource에 정의 : messages/response*.yml)
+ * HTTP API 표준 응답 코드 (응답 코드, 메시지, HttpStatus는 MessageSource에 정의 : messages/response*.yml)
+ *
  * @version 0.1.0
  */
 public enum InnerResponseCodeType {
@@ -47,8 +46,7 @@ public enum InnerResponseCodeType {
 
 
     /**
-     * ResponseCodeType의 프로퍼티 설정
-     * (MessageSource 이용)
+     * ResponseCodeType의 프로퍼티 설정 (MessageSource 이용)
      */
     @Slf4j
     @RequiredArgsConstructor
@@ -62,7 +60,7 @@ public enum InnerResponseCodeType {
 
         @PostConstruct
         void postConstruct() {
-            for (InnerResponseCodeType type: EnumSet.allOf(InnerResponseCodeType.class)) {
+            for (InnerResponseCodeType type : EnumSet.allOf(InnerResponseCodeType.class)) {
                 String code = getMessage("code", type.name());
                 String message = getMessage("message", type.name());
                 String httpStatus = getMessage("httpStatus", type.name());

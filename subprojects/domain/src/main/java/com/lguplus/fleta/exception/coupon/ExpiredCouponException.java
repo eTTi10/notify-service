@@ -17,7 +17,6 @@ public class ExpiredCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExpiredCouponException(final String message) {
@@ -26,7 +25,6 @@ public class ExpiredCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ExpiredCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExpiredCouponException(final Throwable cause) {

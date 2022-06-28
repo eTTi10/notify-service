@@ -17,7 +17,6 @@ public class CouponAlreadyUsedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public CouponAlreadyUsedException(final String message) {
@@ -26,7 +25,6 @@ public class CouponAlreadyUsedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class CouponAlreadyUsedException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public CouponAlreadyUsedException(final Throwable cause) {

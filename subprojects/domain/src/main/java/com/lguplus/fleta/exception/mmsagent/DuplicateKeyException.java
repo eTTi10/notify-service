@@ -8,18 +8,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class DuplicateKeyException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public DuplicateKeyException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public DuplicateKeyException(final String message) {
@@ -28,7 +21,6 @@ public class DuplicateKeyException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,12 +30,16 @@ public class DuplicateKeyException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DuplicateKeyException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 }

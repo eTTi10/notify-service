@@ -17,7 +17,6 @@ public class DuplicatedCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DuplicatedCouponRequestException(final String message) {
@@ -26,7 +25,6 @@ public class DuplicatedCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DuplicatedCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DuplicatedCouponRequestException(final Throwable cause) {

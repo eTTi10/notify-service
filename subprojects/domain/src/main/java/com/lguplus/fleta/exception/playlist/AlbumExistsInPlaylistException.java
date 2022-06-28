@@ -17,7 +17,6 @@ public class AlbumExistsInPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public AlbumExistsInPlaylistException(final String message) {
@@ -26,7 +25,6 @@ public class AlbumExistsInPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class AlbumExistsInPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public AlbumExistsInPlaylistException(final Throwable cause) {

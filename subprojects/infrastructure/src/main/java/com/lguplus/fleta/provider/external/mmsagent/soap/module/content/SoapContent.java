@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -19,38 +19,37 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.content;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.MM7Context;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 public class SoapContent extends BasicContent {
 
-	public SoapContent(InputStream in) throws IOException {
-		setContentType("text/xml; charset=\"euc-kr\"");
-		try {
-			this.doc = new SAXBuilder().build(in);
-		} catch (JDOMException e) {
-			throw new IOException("failed to parse SOAP message", e);
-		}
-	}
+    private Document doc;
 
-	public Document getDoc() {
-		return doc;
-	}
-	
-	public void setDoc(Document doc) {
-		this.doc = doc;
-	}
-	
-	@Override
-	public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
-		new XMLOutputter().output(doc, out);
-	}
+    public SoapContent(InputStream in) throws IOException {
+        setContentType("text/xml; charset=\"euc-kr\"");
+        try {
+            this.doc = new SAXBuilder().build(in);
+        } catch (JDOMException e) {
+            throw new IOException("failed to parse SOAP message", e);
+        }
+    }
 
-	private Document doc;
+    public Document getDoc() {
+        return doc;
+    }
+
+    public void setDoc(Document doc) {
+        this.doc = doc;
+    }
+
+    @Override
+    public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
+        new XMLOutputter().output(doc, out);
+    }
 }

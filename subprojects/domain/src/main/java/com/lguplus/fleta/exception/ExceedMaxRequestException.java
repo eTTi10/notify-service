@@ -17,7 +17,6 @@ public class ExceedMaxRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExceedMaxRequestException(final String message) {
@@ -26,7 +25,6 @@ public class ExceedMaxRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ExceedMaxRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExceedMaxRequestException(final Throwable cause) {

@@ -3,19 +3,13 @@ package com.lguplus.fleta.exception.smsagent;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 
-public class SmsAgentEtcException  extends NotifyRuntimeException {
-
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.SMS_SERVER_ERROR;
-    }
+public class SmsAgentEtcException extends NotifyRuntimeException {
 
     public SmsAgentEtcException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public SmsAgentEtcException(final String message) {
@@ -24,7 +18,6 @@ public class SmsAgentEtcException  extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -34,12 +27,15 @@ public class SmsAgentEtcException  extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SmsAgentEtcException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 
 }

@@ -22,9 +22,9 @@ public class SmsService {
         SmsGatewayResponseDto smsGatewayResponseDto = smsAgentDomainService.sendSmsCode(request);
 
         return SendSmsResponseDto.builder()
-                .flag(smsGatewayResponseDto.getFlag())
-                .message(smsGatewayResponseDto.getMessage())
-                .build();
+            .flag(smsGatewayResponseDto.getFlag())
+            .message(smsGatewayResponseDto.getMessage())
+            .build();
     }
 
 }

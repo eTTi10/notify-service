@@ -94,7 +94,7 @@ service:
 feign:
   client:
     config:
-      default:    # 전역 이름
+      default: # 전역 이름
         connectTimeout: 1000
         readTimeout: 1000
       pushannounce: # Push Announce

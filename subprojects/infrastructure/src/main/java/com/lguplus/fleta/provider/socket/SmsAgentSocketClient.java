@@ -33,7 +33,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
 
     private int mSendTerm;
 
-    private LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
+    private final LinkedList<SmsGateway> sGatewayQueue = new LinkedList<>();
 
     @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {

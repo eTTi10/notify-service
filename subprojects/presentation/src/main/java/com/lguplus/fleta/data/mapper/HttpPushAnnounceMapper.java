@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 
 /**
  * 공지푸시등록 요청 MapStruct Mapper
- *
  */
 @Mapper(config = ObjectMapperConfig.class)
 public interface HttpPushAnnounceMapper {

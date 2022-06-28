@@ -1,13 +1,13 @@
 package com.lguplus.fleta.data.dto.request.outer;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.lguplus.fleta.data.dto.PlainTextibleDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
 import java.io.Serializable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -34,8 +34,8 @@ public class LatestRequestDto implements PlainTextibleDto, Serializable {
     @Override
     public String toPlainText() {
         return String.join(CommonResponseDto.Separator.COLUMN
-                , getSaId(), getMac(), getCtn()
-                , getRegId(), getCatId(), getCatName()
-                , getRDate(), getCategoryGb());
+            , getSaId(), getMac(), getCtn()
+            , getRegId(), getCatId(), getCatName()
+            , getRDate(), getCategoryGb());
     }
 }

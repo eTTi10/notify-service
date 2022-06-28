@@ -2,23 +2,22 @@ package com.lguplus.fleta.provider.jpa;
 
 import com.lguplus.fleta.exception.ServiceException;
 import com.lguplus.fleta.util.DtoConverter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.transform.Transformers;
 import org.springframework.util.ClassUtils;
 
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.persistence.Query;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 /**
- * JpaEmRepository 공통 추상 클래스
- * (EntityManager를 통한 DTO 직접 반환 기능 제공)
+ * JpaEmRepository 공통 추상 클래스 (EntityManager를 통한 DTO 직접 반환 기능 제공)
+ *
  * @version 1.0
  */
 @Slf4j
@@ -28,6 +27,7 @@ public abstract class AbstractJpaEmRepository {
 
     /**
      * 쿼리 결과를 list<T>(없으면 빈 list)로 반환한다.
+     *
      * @param query     EntityManager query
      * @param classType *Dto.class
      * @return List<T>
@@ -47,6 +47,7 @@ public abstract class AbstractJpaEmRepository {
 
     /**
      * 쿼리 결과 단건을 Optional<T>로 반환한다.
+     *
      * @param query     EntityManager query
      * @param classType *Dto.class
      * @return Optional<T>

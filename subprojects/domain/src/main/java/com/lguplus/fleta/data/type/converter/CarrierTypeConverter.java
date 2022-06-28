@@ -5,19 +5,18 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * @author Minwoo Lee
  * @since 1.0
  */
 @Component
 public class CarrierTypeConverter implements Converter<String, CarrierType> {
 
-	/**
-	 * 
-	 */
-	@Override
-	public CarrierType convert(final String source) {
+    /**
+     *
+     */
+    @Override
+    public CarrierType convert(final String source) {
 
-		return CarrierType.asValue(source);
-	}
+        return CarrierType.asValue(source);
+    }
 }

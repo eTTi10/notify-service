@@ -4,35 +4,39 @@ import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
-import com.lguplus.fleta.exception.httppush.*;
+import com.lguplus.fleta.exception.httppush.AcceptedException;
+import com.lguplus.fleta.exception.httppush.BadRequestException;
+import com.lguplus.fleta.exception.httppush.ForbiddenException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
+import com.lguplus.fleta.exception.httppush.NotFoundException;
+import com.lguplus.fleta.exception.httppush.UnAuthorizedException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
-import java.util.Set;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
+import org.apache.commons.lang3.tuple.Pair;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class HttpMultiPushDomainServiceTest {
@@ -58,7 +62,7 @@ class HttpMultiPushDomainServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(httpMultiPushDomainService, "maxMultiCount", 400);
-        ReflectionTestUtils.setField(httpMultiPushDomainService, "rejectReg", Set.of("M20110725000", "U01080800201", "U01080800202", "U01080800203"))                                                                                                            ;
+        ReflectionTestUtils.setField(httpMultiPushDomainService, "rejectReg", Set.of("M20110725000", "U01080800201", "U01080800202", "U01080800203"));
     }
 
     @Test
@@ -72,12 +76,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -97,12 +101,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         AcceptedException exception = assertThrows(AcceptedException.class, () -> {
@@ -124,12 +128,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
@@ -151,12 +155,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         UnAuthorizedException exception = assertThrows(UnAuthorizedException.class, () -> {
@@ -178,12 +182,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         ForbiddenException exception = assertThrows(ForbiddenException.class, () -> {
@@ -205,12 +209,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         NotFoundException exception = assertThrows(NotFoundException.class, () -> {
@@ -232,12 +236,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -257,13 +261,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("AAAAAA", "BBBBBB"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("AAAAAA", "BBBBBB"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -283,13 +287,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("appId")
-                .serviceId("1234")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(500)
-                .build();
+            .applicationId("appId")
+            .serviceId("1234")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(500)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -309,13 +313,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("M20110725000", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(500)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("M20110725000", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(500)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -335,13 +339,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -362,13 +366,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("11111111", "22222222"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("11111111", "22222222"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -389,13 +393,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -414,13 +418,13 @@ class HttpMultiPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -443,12 +447,12 @@ class HttpMultiPushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("1130", "메시지 전송 실패"));
 
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234", "MTIzDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpMultiPushDomainService.requestHttpPushMulti(httpPushMultiRequestDto);
@@ -463,7 +467,7 @@ class HttpMultiPushDomainServiceTest {
         Method method = httpMultiPushDomainService.getClass().getDeclaredMethod("delayTime", Long.TYPE);
         method.setAccessible(true);
 
-        long currentTime = (Long)method.invoke(httpMultiPushDomainService, 1000L);
+        long currentTime = (Long) method.invoke(httpMultiPushDomainService, 1000L);
 
         assertThat(currentTime).isPositive();
     }
@@ -474,7 +478,7 @@ class HttpMultiPushDomainServiceTest {
         Method method = httpMultiPushDomainService.getClass().getDeclaredMethod("delayTime", Long.TYPE);
         method.setAccessible(true);
 
-        long currentTime = (Long)method.invoke(httpMultiPushDomainService, 1000L);
+        long currentTime = (Long) method.invoke(httpMultiPushDomainService, 1000L);
 
         assertThat(currentTime).isPositive();
     }
@@ -484,6 +488,7 @@ class HttpMultiPushDomainServiceTest {
     void whenCallDelayTime_thenThrowInterruptedException() {
         //Define a thread for interrupts
         final class InterruptThread extends Thread {
+
             Thread targetThread = null;
 
             public InterruptThread(Thread thread) {
@@ -503,13 +508,13 @@ class HttpMultiPushDomainServiceTest {
         //Run the code under test
         // given
         HttpPushMultiRequestDto httpPushMultiRequestDto = HttpPushMultiRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .multiCount(3)
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("11111111", "22222222", "33333333", "44444444", "55555555", "66666666"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .multiCount(3)
+            .build();
 
         // when
         HttpPushEtcException exception = assertThrows(HttpPushEtcException.class, () -> {
