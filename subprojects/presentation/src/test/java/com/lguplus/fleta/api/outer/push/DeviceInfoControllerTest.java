@@ -1,6 +1,9 @@
 package com.lguplus.fleta.api.outer.push;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.responseHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -16,22 +19,25 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({RestDocumentationExtension.class,MockitoExtension.class})
 @WebMvcTest
 @ContextConfiguration(classes = {DeviceInfoController.class
     , ArgumentResolverConfig.class
     , MessageConverterConfig.class})
 @Slf4j
+@AutoConfigureRestDocs
 class DeviceInfoControllerTest {
 
     @Autowired
@@ -57,22 +63,11 @@ class DeviceInfoControllerTest {
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
 
-        MvcResult mvcResult = mockMvc.perform(post("/v1/push/deviceinfo")
+        mockMvc.perform(post("/v1/push/deviceinfo")
                 .accept(MediaType.APPLICATION_JSON)
                 .queryParams(params)
             ).andExpect(status().isOk())
-            .andReturn();
-
-        MockHttpServletResponse response = mvcResult.getResponse();
-        int status = response.getStatus();
-        String responseString = response.getContentAsString();
-
-        System.out.println("RESULT >> ["+responseString+"]");
-        assertThat(status).isEqualTo(200);
-        assertThat(responseString).contains("0000");
-
-        log.info("RESULT >> ["+responseString+"]");
-        log.info("DeivceInfoControllerTest.postDeviceInfo End");
+            .andDo(document("push/deviceinfo"));
     }
 
     @DisplayName("postDeviceInfo 잘못된 파라미터")
