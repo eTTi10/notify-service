@@ -1,17 +1,30 @@
 package com.lguplus.fleta.api.outer.musicshow;
 
+import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
+import com.lguplus.fleta.data.dto.GetPushResponseDto;
+import com.lguplus.fleta.data.vo.musicshow.GetPushRequestVo;
+import com.lguplus.fleta.exception.ParameterValidateException;
+import com.lguplus.fleta.service.musicshow.MusicShowService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(tags = "뮤직공연 콘서트 LIVE 알람")
 @RestController
+@RequiredArgsConstructor
 public class MusicshowController {
+
+    private final MusicShowService service;
 
     @ApiOperation(value = "알람 여부 조회")
     @ApiImplicitParams(value = {
@@ -20,8 +33,16 @@ public class MusicshowController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 3<br>자리수: 15<br>설명: 앨범ID", example="")
     })
     @GetMapping("/musicshow/push")
-    public String getPush(){
-        return null;
+    public GetPushResponseDto getPush(@ApiIgnore @Valid GetPushRequestVo requestVo, BindingResult bindingResult, HttpServletRequest request) {
+        if (bindingResult.hasErrors()) {
+            throw new ParameterValidateException(bindingResult.getAllErrors(), "1|REQUEST PARAMETER ERROR||||||||||||||||\f");
+        }
+
+        GetPushRequestDto requestDto = requestVo.makeRefinedRequest();
+
+        GetPushResponseDto responseDto = service.getPush(requestDto);
+
+        return responseDto;
     }
 
     @ApiOperation(value = "알람 여부 등록")
