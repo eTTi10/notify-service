@@ -1,9 +1,7 @@
 ifndef::snippets[]
 :snippets: ./build/generated-snippets
 endif::[]
-== REQUEST
-include::{snippets}/push/deviceinfo/http-request.adoc[]
 
-== RESPONSE
-include::{snippets}/push/deviceinfo/http-response.adoc[]
+:operation-HTTP-request-title:  HTTP request
+operation::push/deviceinfo[snippets='http-request,http-response']
 
