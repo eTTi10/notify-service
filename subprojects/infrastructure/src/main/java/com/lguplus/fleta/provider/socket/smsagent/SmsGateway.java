@@ -53,8 +53,6 @@ public class SmsGateway {
     private final String mID;
     private final String mPassword;
     private final int mPort;
-    private final Log mFileLog;
-    private final Log mStatusLog;
     private final Map<Integer, Timer> mTimerMap = new HashMap<>();
     private boolean isLinked = false;
     private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
@@ -70,17 +68,14 @@ public class SmsGateway {
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
 
-        mFileLog = LogFactory.getLog("SmsGateway");
-        mStatusLog = LogFactory.getLog("SmsStatus");
-
         mIpAddress = ip;
         mPort = Integer.parseInt(port);
         mID = id;
         mPassword = password;
         mLastSendDate = new Date();
 
-        mStatusLog.info("ip:" + ip);
-        mStatusLog.info("port:" + port);
+        log.info("ip:" + ip);
+        log.info("port:" + port);
 
         connectGateway();
 
@@ -90,8 +85,16 @@ public class SmsGateway {
         return isBind;
     }
 
-    public void setBindState(boolean bind) {
+    public synchronized void setBindState(boolean bind) {
         this.isBind = bind;
+    }
+
+    public boolean getLinkState() {
+        return isLinked;
+    }
+
+    public synchronized void setLinkState(boolean link) {
+        this.isLinked = link;
     }
 
     public Date getLastSendDate() {
@@ -108,7 +111,7 @@ public class SmsGateway {
 
     public void connectGateway() {
 
-        mStatusLog.info("Connect Try[" + mPort + "]");
+        log.info("Connect Try[" + mPort + "]");
 
         mTimerMap.get(TIMER_RECONNECT).cancel();
         mTimerMap.get(TIMER_LINK_CHECK).cancel();
@@ -132,8 +135,8 @@ public class SmsGateway {
 
             setBindState(true);
 
-            mStatusLog.info("Connect Success[" + mPort + "]");
-            mStatusLog.info("Socket Open[" + mPort + "]");
+            log.info("Connect Success[" + mPort + "]");
+            log.info("Socket Open[" + mPort + "]");
 
             // 게이트웨이에 접속 시도하는 쓰레드
             Thread thread = new Thread(new SmsGatewayTask());
