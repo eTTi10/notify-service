@@ -39,7 +39,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source-directory: 'docs'
-          target-directory: 'haegol'
+          target-directory: 'notify'
           destination-github-username: 'LGUPLUS-IPTV-MSA'
           destination-repository-name: 'rabbi'
           user-email: etti10@lguplus.co.kr
