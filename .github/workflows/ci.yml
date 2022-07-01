@@ -30,7 +30,7 @@ jobs:
         id: adocbuild
         uses: tonynv/asciidoctor-action@master
         with:
-          program: "asciidoctor --backend=html5 -o index.html index.adoc"
+          program: "asciidoctor --backend=html5 -o api.html api.adoc"
 
       - name: Dependency > Install AWS CLI 2
         run: |
