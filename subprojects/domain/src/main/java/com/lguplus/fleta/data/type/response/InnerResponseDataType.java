@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * HTTP API 표준 응답 Data 형식
+ *
  * @version 0.1.0
  */
 public enum InnerResponseDataType {
@@ -15,7 +16,7 @@ public enum InnerResponseDataType {
     }
 
     public static int sizeOf(Object data) {
-        if(isListType(data)) {
+        if (isListType(data)) {
             return ((List<?>) data).size();
         }
         return data != null ? 1 : 0;

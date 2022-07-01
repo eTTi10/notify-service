@@ -17,7 +17,6 @@ public class ExtRuntimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExtRuntimeException(final String message) {
@@ -26,7 +25,6 @@ public class ExtRuntimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ExtRuntimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExtRuntimeException(final Throwable cause) {

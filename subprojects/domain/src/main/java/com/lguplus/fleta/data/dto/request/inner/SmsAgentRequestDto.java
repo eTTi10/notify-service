@@ -10,25 +10,39 @@ import lombok.ToString;
 @Builder
 public class SmsAgentRequestDto {
 
-    /**  */
+    /**
+     *
+     */
     private Integer ptDay;
 
-    /**  */
+    /**
+     *
+     */
     private Integer rowSeq;
 
-    /**  */
+    /**
+     *
+     */
     private String smsCd;
 
-    /**  */
+    /**
+     *
+     */
     private String smsId;
 
-    /**  */
+    /**
+     *
+     */
     private String procFlag;
 
-    /**  */
+    /**
+     *
+     */
     private String replacement;
 
-    /**  */
+    /**
+     *
+     */
     private String smsMsg;
 
 }

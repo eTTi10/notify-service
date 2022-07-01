@@ -5,7 +5,6 @@ import com.lguplus.fleta.data.dto.request.inner.SmsAgentRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.exception.smsagent.SmsAgentEtcException;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -40,9 +39,9 @@ public class SmsSender {
     private int callCount = 0;
     private int systemEr = 0;
     private int busyEr = 0;
-    private int retry;
-    private int busyRetry;
-    private long sleepTime;
+    private final int retry;
+    private final int busyRetry;
+    private final long sleepTime;
 
     public SmsSender(SmsAgentClient smsAgentClient, SmsAgentDomainService smsAgentDomainService) {
         this.smsAgentClient = smsAgentClient;
@@ -133,7 +132,7 @@ public class SmsSender {
                 .build();
 
         } catch (SmsAgentCustomException e) {
-            log.error(e.getMessage() , e);
+            log.error(e.getMessage(), e);
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
                 .flag(e.getCode())
                 .message(e.getMessage())
@@ -141,7 +140,7 @@ public class SmsSender {
 
         } catch (Exception e) {
 
-            log.error(e.getMessage() , e);
+            log.error(e.getMessage(), e);
             log.info("[retrySmsSend][Exception] name : " + e.getClass().getName() + ",  " + " : " + e.getMessage() + " , cause : " + e.getCause());
             //9999
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()

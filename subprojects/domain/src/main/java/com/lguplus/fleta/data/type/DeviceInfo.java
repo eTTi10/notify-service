@@ -6,77 +6,75 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */
 public enum DeviceInfo {
 
-	/**
-	 *
-	 */
-	PHONE,
+    /**
+     *
+     */
+    PHONE,
 
-	/**
-	 *
-	 */
-	PAD,
+    /**
+     *
+     */
+    PAD,
 
-	/**
-	 *
-	 */
-	PC,
+    /**
+     *
+     */
+    PC,
 
-	/**
-	 *
-	 */
-	TV,
+    /**
+     *
+     */
+    TV,
 
-	/**
-	 *
-	 */
-	STB,
+    /**
+     *
+     */
+    STB,
 
-	/**
-	 *
-	 */
-	UNDEFINED;
+    /**
+     *
+     */
+    UNDEFINED;
 
-	/**
-	 *
-	 */
-	private static final Map<String, DeviceInfo> all = Stream.of(values())
-			.collect(Collectors.toMap(Enum::name, Function.identity()));
+    /**
+     *
+     */
+    private static final Map<String, DeviceInfo> all = Stream.of(values())
+        .collect(Collectors.toMap(Enum::name, Function.identity()));
 
-	/**
-	 *
-	 */
-	@Override
-	public String toString() {
+    /**
+     * @param code
+     * @return
+     */
+    public static DeviceInfo asValue(final String code) {
 
-		if (this == UNDEFINED) {
-			return "";
-		} else {
-			return super.toString();
-		}
-	}
+        if (code == null || code.isBlank()) {
+            return null;
+        }
 
-	/**
-	 *
-	 * @param code
-	 * @return
-	 */
-	public static DeviceInfo asValue(final String code) {
+        final DeviceInfo deviceInfo = all.get(code);
+        if (deviceInfo == null) {
+            return UNDEFINED;
+        } else {
+            return deviceInfo;
+        }
+    }
 
-		if (code == null || code.isBlank()) {
-			return null;
-		}
+    /**
+     *
+     */
+    @Override
+    public String toString() {
 
-		final DeviceInfo deviceInfo = all.get(code);
-		if (deviceInfo == null) {
-			return UNDEFINED;
-		} else {
-			return deviceInfo;
-		}
-	}
+        if (this == UNDEFINED) {
+            return "";
+        } else {
+            return super.toString();
+        }
+    }
 }

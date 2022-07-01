@@ -17,7 +17,6 @@ public class NoPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NoPlaylistException(final String message) {
@@ -26,7 +25,6 @@ public class NoPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NoPlaylistException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoPlaylistException(final Throwable cause) {

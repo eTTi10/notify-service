@@ -2,19 +2,18 @@ package com.lguplus.fleta.config;
 
 import com.lguplus.fleta.exception.push.InternalErrorException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.PropertiesPropertySource;
-import org.springframework.core.env.StandardEnvironment;
-import org.springframework.stereotype.Component;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.stereotype.Component;
 
 /**
  * HttpPush 설정 파일
@@ -25,10 +24,9 @@ import java.util.Map;
 @PropertySource(name = "push", value = "classpath:push/push-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
 public class PushConfig {
 
+    public static final String PUSH_SERVICE_ID = ".id";
     private static final String PUSH_COMM_PROPERTY_PREFIX = "push.gateway.";
     private static final String PUSH_SERVICE_PROPERTY_PREFIX = "push.service[";
-    public static final String PUSH_SERVICE_ID = ".id";
-
     private final Map<String, String> propertiesPushComm = new HashMap<>();
     private final Map<String, String> propertiesPushService = new HashMap<>();
     private final Map<String, String> propertiesPushServiceLinkType = new HashMap<>();
@@ -36,28 +34,28 @@ public class PushConfig {
     public PushConfig(final StandardEnvironment environment) {
 
         final PropertiesPropertySource propertySource = (PropertiesPropertySource)
-                environment.getPropertySources().get("push");
+            environment.getPropertySources().get("push");
         if (propertySource == null) {
             throw new IllegalStateException("Error properties file not found.");
         }
 
         propertySource.getSource()
-                .forEach((propertyName, propertyValue) -> {
-                    if (propertyName.startsWith(PUSH_COMM_PROPERTY_PREFIX)) {
-                        String nm = propertyName.replace(PUSH_COMM_PROPERTY_PREFIX, "");
-                        propertiesPushComm.put(nm, String.valueOf(propertyValue));
-                    } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(PUSH_SERVICE_ID)) {
-                        //String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "")
-                        String serviceId = String.valueOf(propertyValue);
-                        String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".password")));
-                        propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
+            .forEach((propertyName, propertyValue) -> {
+                if (propertyName.startsWith(PUSH_COMM_PROPERTY_PREFIX)) {
+                    String nm = propertyName.replace(PUSH_COMM_PROPERTY_PREFIX, "");
+                    propertiesPushComm.put(nm, String.valueOf(propertyValue));
+                } else if (propertyName.startsWith(PUSH_SERVICE_PROPERTY_PREFIX) && propertyName.endsWith(PUSH_SERVICE_ID)) {
+                    //String nm = propertyName.replace(PUSH_SERVICE_PROPERTY_PREFIX, "")
+                    String serviceId = String.valueOf(propertyValue);
+                    String servicePass = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".password")));
+                    propertiesPushService.put(serviceId, getSha512Pwd(servicePass));
 
-                        if(propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".type"))) {
-                            String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".type")));
-                            propertiesPushServiceLinkType.put(serviceId, linkType);
-                        }
+                    if (propertySource.getSource().containsKey(propertyName.replace(PUSH_SERVICE_ID, ".type"))) {
+                        String linkType = String.valueOf(propertySource.getSource().get(propertyName.replace(PUSH_SERVICE_ID, ".type")));
+                        propertiesPushServiceLinkType.put(serviceId, linkType);
                     }
-                });
+                }
+            });
     }
 
     public String getCommPropValue(String key) {
@@ -73,7 +71,7 @@ public class PushConfig {
     }
 
     public Map<String, Object> getServiceMap() {
-        Map<String,Object> serviceMap = new HashMap<>();
+        Map<String, Object> serviceMap = new HashMap<>();
         propertiesPushService.forEach((key, value) -> serviceMap.put(key, new Object()));
 
         return serviceMap;

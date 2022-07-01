@@ -15,6 +15,7 @@ error:
         fleta:
           validation:
             NetworkTypePattern: "5008"
+            Perl5Pattern: "5008"
           exception:
             NoResultException: "0001"
             ExceedMaxRequestException: "1201"

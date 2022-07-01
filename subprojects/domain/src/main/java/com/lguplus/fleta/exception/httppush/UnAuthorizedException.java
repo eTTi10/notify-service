@@ -11,11 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class UnAuthorizedException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -25,7 +20,6 @@ public class UnAuthorizedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public UnAuthorizedException(final String message) {
@@ -34,7 +28,6 @@ public class UnAuthorizedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -44,11 +37,14 @@ public class UnAuthorizedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public UnAuthorizedException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
     }
 }

@@ -17,7 +17,6 @@ public class InvalidCouponOwnerException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public InvalidCouponOwnerException(final String message) {
@@ -26,7 +25,6 @@ public class InvalidCouponOwnerException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class InvalidCouponOwnerException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public InvalidCouponOwnerException(final Throwable cause) {

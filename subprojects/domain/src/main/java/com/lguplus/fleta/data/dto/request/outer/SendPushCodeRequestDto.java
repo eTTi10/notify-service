@@ -1,8 +1,14 @@
 package com.lguplus.fleta.data.dto.request.outer;
 
-import lombok.*;
 import java.util.List;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -35,7 +41,7 @@ public class SendPushCodeRequestDto {
 
     public String getPushType() {
 
-        if(sendCode.substring(0,1).equals("T")){
+        if (sendCode.charAt(0) == 'T') {
             pushType = "G";
         }
 

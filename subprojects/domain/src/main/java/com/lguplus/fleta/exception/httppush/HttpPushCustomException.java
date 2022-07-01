@@ -5,21 +5,13 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 import lombok.Getter;
 
 /**
- *
- *
  * @author Taekuk Song
  * @since 1.0
  */
 @Getter
 public class HttpPushCustomException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
-    }
-
     private final Integer statusCode;
-
     private final String code;
 
     /**
@@ -33,7 +25,6 @@ public class HttpPushCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public HttpPushCustomException(final Integer statusCode, final String code, final String message) {
@@ -44,7 +35,6 @@ public class HttpPushCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -56,7 +46,6 @@ public class HttpPushCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public HttpPushCustomException(final Integer statusCode, final String code, final Throwable cause) {
@@ -64,5 +53,9 @@ public class HttpPushCustomException extends NotifyRuntimeException {
         super(cause);
         this.statusCode = statusCode;
         this.code = code;
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.HTTP_PUSH_SERVER_ERROR;
     }
 }

@@ -19,22 +19,21 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.inf;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.common.StringToEnumMap;
-
 import java.util.Map;
 
 public enum Priority {
 
-	NORMAL("Normal"), HIGH("High"), LOW("Low");
-	private Priority(String display) {
-		this.display = display;
-	}
+    NORMAL("Normal"), HIGH("High"), LOW("Low");
 
-	@Override
-	public String toString() {
-		return display;
-	}
+    static final Map<String, ChargedParty> map = new StringToEnumMap<>(ChargedParty.values());
+    private final String display;
 
-	private final String display;
+    Priority(String display) {
+        this.display = display;
+    }
 
-	static final Map<String, ChargedParty> map = new StringToEnumMap<>(ChargedParty.values());
+    @Override
+    public String toString() {
+        return display;
+    }
 }

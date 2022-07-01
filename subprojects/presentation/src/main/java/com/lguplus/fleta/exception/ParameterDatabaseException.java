@@ -19,7 +19,6 @@ public class ParameterDatabaseException extends RuntimeException implements Payl
     }
 
     /**
-     *
      * @param message
      */
     public ParameterDatabaseException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterDatabaseException extends RuntimeException implements Payl
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterDatabaseException extends RuntimeException implements Payl
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterDatabaseException(final Throwable cause) {

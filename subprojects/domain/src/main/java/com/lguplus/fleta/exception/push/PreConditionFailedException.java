@@ -11,11 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class PreConditionFailedException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -25,7 +20,6 @@ public class PreConditionFailedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public PreConditionFailedException(final String message) {
@@ -34,7 +28,6 @@ public class PreConditionFailedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -44,11 +37,14 @@ public class PreConditionFailedException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public PreConditionFailedException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
     }
 }

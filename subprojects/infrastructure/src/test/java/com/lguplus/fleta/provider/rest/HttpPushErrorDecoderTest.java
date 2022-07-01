@@ -7,22 +7,24 @@ import feign.Request;
 import feign.Response;
 import feign.Util;
 import feign.codec.ErrorDecoder;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 class HttpPushErrorDecoderTest {
 
-    ErrorDecoder errorDecoder;
     final HttpPushConfig.HttpPushExceptionCode httpPushExceptionCode = new HttpPushConfig.HttpPushExceptionCode();
     final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage = new HttpPushConfig.HttpPushExceptionMessage();
     final Map<String, Collection<String>> headers = new LinkedHashMap<>();
     final Request request = Request.create(Request.HttpMethod.POST, "/test", Collections.emptyMap(), null, Util.UTF_8, null);
+    ErrorDecoder errorDecoder;
 
     @BeforeEach
     void setUp() {
@@ -64,11 +66,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testAcceptedException() {
         final Response response = Response.builder()
-                .status(202)
-                .reason("The request Accepted")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(202)
+            .reason("The request Accepted")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -80,11 +82,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testBadRequestException() {
         final Response response = Response.builder()
-                .status(400)
-                .reason("Push GW BadRequest")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(400)
+            .reason("Push GW BadRequest")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -96,11 +98,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testUnAuthorizedException() {
         final Response response = Response.builder()
-                .status(401)
-                .reason("Push GW UnAuthorized")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(401)
+            .reason("Push GW UnAuthorized")
+            .request(request)
+            .headers(headers)
+            .build();
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
         });
@@ -111,11 +113,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testForbiddenException() {
         final Response response = Response.builder()
-                .status(403)
-                .reason("Push GW Forbidden")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(403)
+            .reason("Push GW Forbidden")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -127,11 +129,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testNotFoundException() {
         final Response response = Response.builder()
-                .status(404)
-                .reason("Push GW Not Found")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(404)
+            .reason("Push GW Not Found")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -143,11 +145,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testNotExistRegisterIdException() {
         final Response response = Response.builder()
-                .status(410)
-                .reason("Not Exist RegistID")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(410)
+            .reason("Not Exist RegistID")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -159,11 +161,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testPreConditionFailedException() {
         final Response response = Response.builder()
-                .status(412)
-                .reason("Push GW Precondition Failed")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(412)
+            .reason("Push GW Precondition Failed")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -175,11 +177,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testInternalErrorException() {
         final Response response = Response.builder()
-                .status(500)
-                .reason("Push GW Internal Error")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(500)
+            .reason("Push GW Internal Error")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -191,11 +193,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testExceptionOccursException() {
         final Response response = Response.builder()
-                .status(502)
-                .reason("Exception Occurs")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(502)
+            .reason("Exception Occurs")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -207,11 +209,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testServiceUnavailableException() {
         final Response response = Response.builder()
-                .status(503)
-                .reason("Push GW Service Unavailable")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(503)
+            .reason("Push GW Service Unavailable")
+            .request(request)
+            .headers(headers)
+            .build();
 
         HttpPushCustomException exception = assertThrows(HttpPushCustomException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);
@@ -223,11 +225,11 @@ class HttpPushErrorDecoderTest {
     @Test
     void testRuntimeException() {
         final Response response = Response.builder()
-                .status(9999)
-                .reason("기타 오류")
-                .request(request)
-                .headers(headers)
-                .build();
+            .status(9999)
+            .reason("기타 오류")
+            .request(request)
+            .headers(headers)
+            .build();
 
         Exception exception = assertThrows(RuntimeException.class, () -> {
             throw errorDecoder.decode("HttpPushTest#test()", response);

@@ -19,158 +19,154 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.content;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.MM7Context;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class BinaryContent extends BasicContent {
 
-	/**
-	 * Reads up to <code>len</code> bytes from <code>in</code> and writes them
-	 * to <code>dest</code> starting with <code>off</code>. Returns number of
-	 * bytes copied. If returned number is less than len then InputStream has
-	 * returned end-of-file.
-	 *
-	 * @param in
-	 * @param dest
-	 * @param off
-	 * @param len
-	 * @return number of bytes copied
-	 * @throws IOException
-	 */
-	public static int copyStreamToByteArray(InputStream in, byte[] dest, int off, int len) throws IOException {
-		int r = 0;
-		while (r < len) {
-			int n = in.read(dest, off + r, len - r);
-			if (n > 0) {
-				r += n;
-			} else if (n == -1) {
-				break;
-			} else {
-				throw new IOException("Read 0 bytes from input stream");
-			}
-		}
-		return r;
-	}
+    private byte[] data;
 
-	public static byte[] toByteArray(InputStream in, int startSize, int maxSize) throws IOException {
-		if (startSize > maxSize) {
-			startSize = maxSize;
-		}
+    public BinaryContent() {
+    }
 
-		// Allocate a buffer
-		byte[] buffer = new byte[startSize];
-
-		int pos = 0;
-		for (;;) {
-			// Copy stream into buffer
-			int r = copyStreamToByteArray(in, buffer, pos, buffer.length - pos);
-
-			// We've reached EOF
-			if (r == 0) {
-				break;
-			}
-
-			pos += r;
-
-			// We've filled up a buffer
-			if (pos == buffer.length) {
-				// Calculate new buffer length
-				int newLen = buffer.length * 2;
-
-				// Don't use more than maxSize
-				if (newLen > maxSize) {
-					newLen = maxSize;
-				}
-
-				// Copy into a new buffer
-				byte[] newBuffer = new byte[newLen];
-				System.arraycopy(buffer, 0, newBuffer, 0, pos);
-				buffer = newBuffer;
-			}
-		}
-
-		// Copy to result array
-		if (pos < buffer.length) {
-			byte[] newBuffer = new byte[pos];
-			System.arraycopy(buffer, 0, newBuffer, 0, pos);
-			buffer = newBuffer;
-		}
-
-		return buffer;
-	}
-
-	public BinaryContent() {
-	}
-
-	public BinaryContent(String contentType, InputStream in) throws IOException {
+    public BinaryContent(String contentType, InputStream in) throws IOException {
         this(contentType, in, 2 * 1024 * 1024);
-	}
+    }
 
-	public BinaryContent(String contentType, InputStream in, int maxSize) throws IOException {
-		setContentType(contentType);
-		if (in == null) {
-			throw new IOException("in == null");
-		}
-		try {
-			data = toByteArray(in, 16 * 1024, maxSize);
-		} finally {
-			in.close();
-		}
-	}
+    public BinaryContent(String contentType, InputStream in, int maxSize) throws IOException {
+        setContentType(contentType);
+        if (in == null) {
+            throw new IOException("in == null");
+        }
+        try {
+            data = toByteArray(in, 16 * 1024, maxSize);
+        } finally {
+            in.close();
+        }
+    }
 
-	@Override
-	public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
-		if (contentId == null) {
-			contentId = getContentId();
-		}
+    /**
+     * Reads up to <code>len</code> bytes from <code>in</code> and writes them to <code>dest</code> starting with <code>off</code>. Returns number of bytes copied. If returned number is less than len then InputStream has returned end-of-file.
+     *
+     * @param in
+     * @param dest
+     * @param off
+     * @param len
+     * @return number of bytes copied
+     * @throws IOException
+     */
+    public static int copyStreamToByteArray(InputStream in, byte[] dest, int off, int len) throws IOException {
+        int r = 0;
+        while (r < len) {
+            int n = in.read(dest, off + r, len - r);
+            if (n > 0) {
+                r += n;
+            } else if (n == -1) {
+                break;
+            } else {
+                throw new IOException("Read 0 bytes from input stream");
+            }
+        }
+        return r;
+    }
 
-		StringBuilder b = new StringBuilder();
-		b.append("\r\nContent-Type: ").append(getContentType());
-		
-		if(getContentLocation() != null && !getContentLocation().equals("")){
-			b.append(";Name=\"").append(getContentLocation()).append("\"");
-		}
-		
-		if (contentId != null) {
-			b.append("\r\nContent-ID: <" + contentId + ">");
-		}
+    public static byte[] toByteArray(InputStream in, int startSize, int maxSize) throws IOException {
+        if (startSize > maxSize) {
+            startSize = maxSize;
+        }
 
-		boolean eightBit = ("application/smil".equals(getContentType()) || "application/smil+xml".equals(getContentType())); 
-		if (eightBit) {
-			b.append("\r\nContent-Transfer-Encoding: 8bit");
-		} else {
-		    b.append("\r\nContent-Transfer-Encoding: BASE64");
-		}
+        // Allocate a buffer
+        byte[] buffer = new byte[startSize];
 
-		if(this.getContentLocation() != null) {
-			b.append("\r\nContent-Location: ").append(this.getContentLocation());
-			b.append("\r\nContent-Disposition: Attachment; Filename=").append(this.getContentLocation());
-		}
-		b.append("\r\n\r\n");
-		out.write(b.toString().getBytes("euc-kr"));
-		
-		if(eightBit){
-			out.write(data);
-			out.flush();
-		} else {
-			OutputStream base64out = ctx.newBase64OutputStream(out);
-			
-			base64out.write(data);
-			base64out.flush();
-		}
-		
-	}
+        int pos = 0;
+        for (; ; ) {
+            // Copy stream into buffer
+            int r = copyStreamToByteArray(in, buffer, pos, buffer.length - pos);
 
-	@Override
-	public int getContentLength() {
-		return data.length;
-	};
+            // We've reached EOF
+            if (r == 0) {
+                break;
+            }
+
+            pos += r;
+
+            // We've filled up a buffer
+            if (pos == buffer.length) {
+                // Calculate new buffer length
+                int newLen = buffer.length * 2;
+
+                // Don't use more than maxSize
+                if (newLen > maxSize) {
+                    newLen = maxSize;
+                }
+
+                // Copy into a new buffer
+                byte[] newBuffer = new byte[newLen];
+                System.arraycopy(buffer, 0, newBuffer, 0, pos);
+                buffer = newBuffer;
+            }
+        }
+
+        // Copy to result array
+        if (pos < buffer.length) {
+            byte[] newBuffer = new byte[pos];
+            System.arraycopy(buffer, 0, newBuffer, 0, pos);
+            buffer = newBuffer;
+        }
+
+        return buffer;
+    }
+
+    @Override
+    public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
+        if (contentId == null) {
+            contentId = getContentId();
+        }
+
+        StringBuilder b = new StringBuilder();
+        b.append("\r\nContent-Type: ").append(getContentType());
+
+        if (getContentLocation() != null && !getContentLocation().equals("")) {
+            b.append(";Name=\"").append(getContentLocation()).append("\"");
+        }
+
+        if (contentId != null) {
+            b.append("\r\nContent-ID: <" + contentId + ">");
+        }
+
+        boolean eightBit = ("application/smil".equals(getContentType()) || "application/smil+xml".equals(getContentType()));
+        if (eightBit) {
+            b.append("\r\nContent-Transfer-Encoding: 8bit");
+        } else {
+            b.append("\r\nContent-Transfer-Encoding: BASE64");
+        }
+
+        if (this.getContentLocation() != null) {
+            b.append("\r\nContent-Location: ").append(this.getContentLocation());
+            b.append("\r\nContent-Disposition: Attachment; Filename=").append(this.getContentLocation());
+        }
+        b.append("\r\n\r\n");
+        out.write(b.toString().getBytes("euc-kr"));
+
+        if (eightBit) {
+            out.write(data);
+            out.flush();
+        } else {
+            OutputStream base64out = ctx.newBase64OutputStream(out);
+
+            base64out.write(data);
+            base64out.flush();
+        }
+
+    }
+
+    @Override
+    public int getContentLength() {
+        return data.length;
+    }
 
     public byte[] getData() {
         return data;
     }
-
-	private byte[] data;
 }

@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 
  * @author Minwoo Lee
  * @since 1.0
  */
@@ -14,9 +13,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ParamAlias {
 
-	/**
-	 * 
-	 * @return
-	 */
-	String[] value() default {};
+    /**
+     * @return
+     */
+    String[] value() default {};
 }

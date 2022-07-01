@@ -17,7 +17,6 @@ public class PlaylistNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public PlaylistNotExistsException(final String message) {
@@ -26,7 +25,6 @@ public class PlaylistNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class PlaylistNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public PlaylistNotExistsException(final Throwable cause) {

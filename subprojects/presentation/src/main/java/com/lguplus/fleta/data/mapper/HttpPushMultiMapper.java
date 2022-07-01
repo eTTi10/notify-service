@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 
 /**
  * 멀티푸시등록 요청 MapStruct Mapper
- *
  */
 @Mapper(config = ObjectMapperConfig.class)
 public interface HttpPushMultiMapper {

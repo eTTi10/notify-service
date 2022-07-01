@@ -1,13 +1,12 @@
 package com.lguplus.fleta.config;
 
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * HttpPush 설정 파일
@@ -22,7 +21,14 @@ public class HttpPushConfig {
         return new HttpPushExceptionCode();
     }
 
+    @Bean
+    @ConfigurationProperties(prefix = "error")
+    public HttpPushExceptionMessage httpPushExceptionMessage() {
+        return new HttpPushExceptionMessage();
+    }
+
     public static class HttpPushExceptionCode {
+
         private Map<String, String> httpPush = new HashMap<>();
 
         public Map<String, String> getHttpPush() {
@@ -34,13 +40,8 @@ public class HttpPushConfig {
         }
     }
 
-    @Bean
-    @ConfigurationProperties(prefix = "error")
-    public HttpPushExceptionMessage httpPushExceptionMessage() {
-        return new HttpPushExceptionMessage();
-    }
-
     public static class HttpPushExceptionMessage {
+
         private Map<String, String> message = new HashMap<>();
 
         public Map<String, String> getMessage() {

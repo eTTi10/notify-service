@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -22,44 +22,44 @@ import org.jdom2.Element;
 
 public class SubmitRsp extends MM7Response {
 
-	public String getMessageId() {
-		return messageId;
-	}
+    private String messageId;
 
-	@Override
-	public void load(Element element) {
-		super.load(element);
+    public String getMessageId() {
+        return messageId;
+    }
 
-		Element body = element.getChild("Body", MM7Message.ENVELOPE);
-		Element rsp = body.getChild("SubmitRsp", namespace);
-		setMessageId(rsp.getChildTextTrim("MessageID", namespace));
-		
-		Element status = rsp.getChild("Status");
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
 
-		if (status != null) {
-			setStatusCode(Integer.parseInt(status.getChildTextTrim("StatusCode")));
-			setStatusText(status.getChildTextTrim("StatusText"));
-		}
-	}
+    @Override
+    public void load(Element element) {
+        super.load(element);
 
-	@Override
-	public Element save(Element parent) {
-		Element e = super.save(parent);
-		if (messageId != null) {
-			e.addContent(new Element("MessageID").setText(messageId));
-		}
-		Element status = new Element("Status");
-		if (getStatusCode() > 0) {
-			status.addContent(new Element("StatusCode").setText(Integer.toString(getStatusCode())));
-			status.addContent(new Element("StatusText").setText(getStatusText()));
-		}
-		e.addContent(status);
-		return e;
-	}
+        Element body = element.getChild("Body", MM7Message.ENVELOPE);
+        Element rsp = body.getChild("SubmitRsp", namespace);
+        setMessageId(rsp.getChildTextTrim("MessageID", namespace));
 
-	public void setMessageId(String messageId) {
-		this.messageId = messageId;
-	}
+        Element status = rsp.getChild("Status");
 
-	private String messageId;
+        if (status != null) {
+            setStatusCode(Integer.parseInt(status.getChildTextTrim("StatusCode")));
+            setStatusText(status.getChildTextTrim("StatusText"));
+        }
+    }
+
+    @Override
+    public Element save(Element parent) {
+        Element e = super.save(parent);
+        if (messageId != null) {
+            e.addContent(new Element("MessageID").setText(messageId));
+        }
+        Element status = new Element("Status");
+        if (getStatusCode() > 0) {
+            status.addContent(new Element("StatusCode").setText(Integer.toString(getStatusCode())));
+            status.addContent(new Element("StatusText").setText(getStatusText()));
+        }
+        e.addContent(status);
+        return e;
+    }
 }

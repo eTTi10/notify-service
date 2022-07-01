@@ -13,34 +13,55 @@ import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelConfig;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelId;
+import io.netty.channel.ChannelMetadata;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.ChannelProgressivePromise;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.EventLoop;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
-
-import static org.mockito.Mockito.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateFormatUtils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 
 @Slf4j
@@ -182,7 +203,7 @@ class NettyTcpClientTest implements PushMultiClient {
         return DateFormatUtils.format(new Date(), "yyyyMMdd") + String.format("%04x", transactionMsgId.updateAndGet(x -> (x + 1 < 10000) ? x + 1 : 0) & 0xFFFF);
     }
 
-   @Test
+    @Test
     void test_01_requestPushMulti2() throws InterruptedException {
         NettyTcpClient nettyTcpClient = getNettyClient();
         try {
@@ -195,13 +216,12 @@ class NettyTcpClientTest implements PushMultiClient {
 
             int processSatusId = response.orElse(PushMessageInfoDto.builder().messageId(0).build()).getMessageId();
             Assertions.assertEquals(14, processSatusId);
-        }
-        finally {
+        } finally {
             nettyTcpClient.disconnect();
         }
     }
 
-   @Test
+    @Test
     void test_02_messageHandler() {
 
         Test01Client test01 = new Test01Client();
@@ -228,7 +248,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-   @Test
+    @Test
     void test_03_messageDecoder() throws Exception {
         ChannelTest channel = new ChannelTest("id", true, false);
         ChannelHandlerContext channelHandlerContext = new ChannelHandlerContextTest(channel);
@@ -351,7 +371,7 @@ class NettyTcpClientTest implements PushMultiClient {
         return byteTotalData;
     }
 
-   @Test
+    @Test
     void test_04_clientInvalid() throws IOException {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
@@ -403,7 +423,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-   @Test
+    @Test
     void test_05_write() throws IOException, InterruptedException {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
@@ -420,7 +440,8 @@ class NettyTcpClientTest implements PushMultiClient {
             doReturn(new ChannelTest("test", true, false)).when(spyNettyTcpClient).getSocketChannel();
 
             int COMMAND_REQUEST = 15;
-            String data = "{\"request\":{\"service_key\":\"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=\",\"badge\":\"1\",\"push_id\":\"202201100001\",\"service_id\":\"30011\",\"sound\":\"ring.caf\",\"service_passwd\":\"5643a19ce9fa3ddf470b33afdfe57a976e9e99af082d1a366d69185299425e45ca8fb3c18539751432e207b99d52d3f8f13956513a1126792072c3d18e8cea3a\",\"cm\":\"aaaa\",\"noti_contents\":\"\\\"PushCtrl\\\":\\\"ON\\\",\\\"MESSGAGE\\\": \\\"NONE\\\"\",\"msg_id\":\"PUSH_NOTI\",\"app_id\":\"lguplushdtvgcm\"}}";
+            String data =
+                "{\"request\":{\"service_key\":\"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=\",\"badge\":\"1\",\"push_id\":\"202201100001\",\"service_id\":\"30011\",\"sound\":\"ring.caf\",\"service_passwd\":\"5643a19ce9fa3ddf470b33afdfe57a976e9e99af082d1a366d69185299425e45ca8fb3c18539751432e207b99d52d3f8f13956513a1126792072c3d18e8cea3a\",\"cm\":\"aaaa\",\"noti_contents\":\"\\\"PushCtrl\\\":\\\"ON\\\",\\\"MESSGAGE\\\": \\\"NONE\\\"\",\"msg_id\":\"PUSH_NOTI\",\"app_id\":\"lguplushdtvgcm\"}}";
             spyNettyTcpClient.write(PushMessageInfoDto.builder().messageId(COMMAND_REQUEST).channelId(channelID).destinationIp("222.231.13.85").data(data).build());
             Assertions.assertTrue(spyNettyTcpClient.isInValid());
 
@@ -436,7 +457,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-   @Test
+    @Test
     void test_06_connect_timeout() {
         NettyTcpClient nettyTcpClient = getNettyClientInvalid();
 
@@ -450,7 +471,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
     }
 
-   @Test
+    @Test
     void test_07_connect_ChannelFuture() {
         NettyTcpClient nettyTcpClient = getNettyClient();
 
@@ -488,8 +509,7 @@ class NettyTcpClientTest implements PushMultiClient {
 
         NettyTcpClient nettyTcpClient = getNettyClient();
 
-        try
-        {
+        try {
             String channelID = nettyTcpClient.connect(this);
 
             NettyTcpClient spyNettyTcpClient = spy(nettyTcpClient);
@@ -508,9 +528,7 @@ class NettyTcpClientTest implements PushMultiClient {
             //return null
             int msgId = response.orElse(PushMessageInfoDto.builder().messageId(-1).build()).getMessageId();
             Assertions.assertEquals(-1, msgId);
-        }
-        finally
-        {
+        } finally {
             nettyTcpClient.disconnect();
         }
     }

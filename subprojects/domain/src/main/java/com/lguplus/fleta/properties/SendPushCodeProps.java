@@ -1,13 +1,12 @@
 package com.lguplus.fleta.properties;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Component
 @Getter
@@ -15,10 +14,14 @@ import java.util.Optional;
 @ConfigurationProperties(prefix = "push")
 public class SendPushCodeProps {
 
-    /** send_code에 해당하는 push info */
+    /**
+     * send_code에 해당하는 push info
+     */
     private List<Map<String, String>> sendCodes;
 
-    /** service_type에 해당하는 appid, serviceid */
+    /**
+     * service_type에 해당하는 appid, serviceid
+     */
     private List<Map<String, String>> serviceTargets;
 
     /**

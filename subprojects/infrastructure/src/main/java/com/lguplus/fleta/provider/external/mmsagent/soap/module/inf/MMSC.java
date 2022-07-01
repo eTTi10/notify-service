@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -25,23 +25,19 @@ import com.lguplus.fleta.provider.external.mmsagent.soap.module.SubmitReq;
 
 /**
  * MM7 Interface implemented by MMSC side.
- * 
+ * <p>
  * TODO add all the other VASP methods
  */
 public interface MMSC {
 
-	/**
-	 * Submits an MMS message to MMSC.
-	 * 
-	 * @param submitReq
-	 *            message sent to MMSC
-	 * 
-	 * @return submit response from MMSC
-	 * 
-	 * @throws MM7Error
-	 *             if MMSC returns an error
-	 */
-	MM7Response submit(SubmitReq submitReq) throws MM7Error;
+    /**
+     * Submits an MMS message to MMSC.
+     *
+     * @param submitReq message sent to MMSC
+     * @return submit response from MMSC
+     * @throws MM7Error if MMSC returns an error
+     */
+    MM7Response submit(SubmitReq submitReq) throws MM7Error;
 
-	MM7Context getContext();
+    MM7Context getContext();
 }

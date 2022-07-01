@@ -2,10 +2,9 @@ package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.validation.Groups;
-import lombok.Getter;
-
 import javax.validation.GroupSequence;
 import javax.validation.constraints.NotBlank;
+import lombok.Getter;
 
 @Getter
 @GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, SendSmsCodeVo.class})

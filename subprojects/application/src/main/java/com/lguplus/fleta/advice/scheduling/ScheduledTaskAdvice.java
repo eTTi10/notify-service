@@ -1,6 +1,9 @@
 package com.lguplus.fleta.advice.scheduling;
 
 import com.lguplus.fleta.data.annotation.SynchronousScheduled;
+import com.lguplus.fleta.service.ManipulationDataDispatcher;
+import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -12,9 +15,6 @@ import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
 
 @Profile("!test")
 @Slf4j
@@ -29,24 +29,24 @@ public class ScheduledTaskAdvice {
     public Object proceed(final ProceedingJoinPoint joinPoint) throws Throwable {
 
         final SynchronousScheduled annotation = getAnnotation(joinPoint.getSignature());
-        if (annotation == null) {
-            return joinPoint.proceed();
+        if (annotation == null || ManipulationDataDispatcher.WORKER_NAME.equals(Thread.currentThread().getName())) {
+            return proceedInternal(joinPoint);
         }
 
         final RPermitExpirableSemaphore semaphore =
-                redissonClient.getPermitExpirableSemaphore("SEMAPHORE_CACHE::" + annotation.semaphore());
+            redissonClient.getPermitExpirableSemaphore("CN::SEMAPHORE::" + annotation.semaphore());
         if (!semaphore.isExists() && !semaphore.trySetPermits(1)) {
             return null;
         }
 
-        final String permitId =  semaphore.tryAcquire();
+        final String permitId = semaphore.tryAcquire();
         if (permitId == null) {
             return null;
         }
 
         semaphore.updateLeaseTime(permitId, annotation.autoReleaseSeconds(), TimeUnit.SECONDS);
         try {
-            return joinPoint.proceed();
+            return proceedInternal(joinPoint);
         } finally {
             semaphore.release(permitId);
         }
@@ -58,7 +58,7 @@ public class ScheduledTaskAdvice {
             return null;
         }
 
-        final Method method = ((MethodSignature)signature).getMethod();
+        final Method method = ((MethodSignature) signature).getMethod();
         if (method.getReturnType() != void.class) {
             if (log.isWarnEnabled()) {
                 log.warn("SynchronousScheduled method should returns void.");
@@ -67,5 +67,15 @@ public class ScheduledTaskAdvice {
         }
 
         return method.getAnnotation(SynchronousScheduled.class);
+    }
+
+    private Object proceedInternal(final ProceedingJoinPoint joinPoint) throws Throwable {
+
+        try {
+            return joinPoint.proceed();
+        } catch (final Throwable e) {
+            log.error(e.getMessage(), e);
+            throw e;
+        }
     }
 }

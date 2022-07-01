@@ -17,7 +17,6 @@ public class LastPlaylistFolderNotDeletableException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public LastPlaylistFolderNotDeletableException(final String message) {
@@ -26,7 +25,6 @@ public class LastPlaylistFolderNotDeletableException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class LastPlaylistFolderNotDeletableException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public LastPlaylistFolderNotDeletableException(final Throwable cause) {

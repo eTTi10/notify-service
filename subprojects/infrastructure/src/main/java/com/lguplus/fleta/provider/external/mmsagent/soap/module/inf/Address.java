@@ -19,170 +19,168 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.inf;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.common.StringToEnumMap;
-import org.jdom2.Element;
-
 import java.util.Map;
+import org.jdom2.Element;
 
 public class Address implements JDOMSupport {
 
-	public enum AddressCoding {
-		ENCRYPTED, OBFUSCATED;
+    private RecipientType recipientType = RecipientType.TO;
+    private AddressType addressType = AddressType.NUMBER;
+    private boolean displayOnly;
 
-		public static final Map<String, AddressCoding> map = new StringToEnumMap<>(AddressCoding.values());
+    private AddressCoding addressCoding;
+    private String id;
+    private String address;
 
-		@Override
-		public String toString() {
-			return name().toString();
-		}
-	}
+    public Address() {
+    }
 
-	public enum AddressType {
-		RFC822_ADDRESS("RFC822Address"), NUMBER("Number"), SHORT_CODE("ShortCode");
+    public Address(String address) {
+        setAddress(address);
+    }
 
-		private AddressType(String display) {
-			this.display = display;
-		}
+    public Address(String address, RecipientType recipientType) {
+        setAddress(address);
+        setRecipientType(recipientType);
+    }
 
-		@Override
-		public String toString() {
-			return display;
-		}
+    public Address(String address, RecipientType recipientType, AddressType addressType) {
+        setAddress(address);
+        setRecipientType(recipientType);
+        setAddressType(addressType);
+    }
 
-		private final String display;
+    public String getAddress() {
+        return address;
+    }
 
-		public static final Map<String, AddressType> map = new StringToEnumMap<AddressType>(AddressType.values());
-	}
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-	public enum RecipientType {
-		TO("To"), CC("Cc"), BCC("Bcc");
+    public AddressCoding getAddressCoding() {
+        return addressCoding;
+    }
 
-		private RecipientType(String display) {
-			this.display = display;
-		}
+    public void setAddressCoding(AddressCoding addressCoding) {
+        this.addressCoding = addressCoding;
+    }
 
-		@Override
-		public String toString() {
-			return display;
-		}
+    public AddressType getAddressType() {
+        return addressType;
+    }
 
-		private final String display;
+    public void setAddressType(AddressType addressType) {
+        this.addressType = addressType;
+    }
 
-		public static final Map<String, RecipientType> map = new StringToEnumMap<RecipientType>(RecipientType.values());
-	};
+    public String getId() {
+        return id;
+    }
 
-	public Address() {
-	}
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	public Address(String address) {
-		setAddress(address);
-	}
+    public RecipientType getRecipientType() {
+        return recipientType;
+    }
 
-	public Address(String address, RecipientType recipientType) {
-		setAddress(address);
-		setRecipientType(recipientType);
-	}
+    public void setRecipientType(RecipientType recipientType) {
+        this.recipientType = recipientType;
+    }
 
-	public Address(String address, RecipientType recipientType, AddressType addressType) {
-		setAddress(address);
-		setRecipientType(recipientType);
-		setAddressType(addressType);
-	}
+    public boolean isDisplayOnly() {
+        return displayOnly;
+    }
 
-	public String getAddress() {
-		return address;
-	}
+    public void setDisplayOnly(boolean displayOnly) {
+        this.displayOnly = displayOnly;
+    }
 
-	public AddressCoding getAddressCoding() {
-		return addressCoding;
-	}
+    @Override
+    public void load(Element e) {
+        {
+            String value = e.getAttributeValue("displayOnly", e.getNamespace());
+            String valueNoNS = e.getAttributeValue("displayOnly");
+            if (value != null) {
+                displayOnly = Boolean.parseBoolean(value);
+            } else if (valueNoNS != null) {
+                displayOnly = Boolean.parseBoolean(valueNoNS);
+            }
+        }
+        {
+            String value = e.getAttributeValue("addressCoding", e.getNamespace());
+            if (value != null) {
+                addressCoding = AddressCoding.map.get(value);
+            }
+        }
+        addressType = AddressType.map.get(e.getName());
+        id = e.getAttributeValue("id");
+        address = e.getText();
+    }
 
-	public AddressType getAddressType() {
-		return addressType;
-	}
+    @Override
+    public Element save(Element parent) {
+        Element e = new Element(addressType.toString(), parent.getNamespace());
+        if (displayOnly) {
+            e.setAttribute("displayOnly", Boolean.toString(displayOnly), parent.getNamespace());
+        }
+        if (addressCoding != null) {
+            e.setAttribute("addressCoding", addressCoding.toString(), parent.getNamespace());
+        }
+        if (id != null) {
+            e.setAttribute("id", id, parent.getNamespace());
+        }
+        e.setText(address);
+        return e;
+    }
 
-	public String getId() {
-		return id;
-	}
+    @Override
+    public String toString() {
+        return address != null ? address : "<unspecified>";
+    }
 
-	public RecipientType getRecipientType() {
-		return recipientType;
-	}
+    public enum AddressCoding {
+        ENCRYPTED, OBFUSCATED;
 
-	public boolean isDisplayOnly() {
-		return displayOnly;
-	}
+        public static final Map<String, AddressCoding> map = new StringToEnumMap<>(AddressCoding.values());
 
-	@Override
-	public void load(Element e) {
-		{
-			String value = e.getAttributeValue("displayOnly", e.getNamespace());
-			String valueNoNS = e.getAttributeValue("displayOnly");
-			if (value != null) {
-				displayOnly = Boolean.parseBoolean(value);
-			} else if (valueNoNS != null) {
-				displayOnly = Boolean.parseBoolean(valueNoNS);
-			}
-		}
-		{
-			String value = e.getAttributeValue("addressCoding", e.getNamespace());
-			if (value != null) {
-				addressCoding = AddressCoding.map.get(value);
-			}
-		}
-		addressType = AddressType.map.get(e.getName());
-		id = e.getAttributeValue("id");
-		address = e.getText();
-	}
+        @Override
+        public String toString() {
+            return name();
+        }
+    }
 
-	@Override
-	public Element save(Element parent) {
-		Element e = new Element(addressType.toString(), parent.getNamespace());
-		if (displayOnly) {
-			e.setAttribute("displayOnly", Boolean.toString(displayOnly), parent.getNamespace());
-		}
-		if (addressCoding != null) {
-			e.setAttribute("addressCoding", addressCoding.toString(), parent.getNamespace());
-		}
-		if (id != null) {
-			e.setAttribute("id", id, parent.getNamespace());
-		}
-		e.setText(address);
-		return e;
-	}
+    public enum AddressType {
+        RFC822_ADDRESS("RFC822Address"), NUMBER("Number"), SHORT_CODE("ShortCode");
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
+        public static final Map<String, AddressType> map = new StringToEnumMap<AddressType>(AddressType.values());
+        private final String display;
 
-	public void setAddressCoding(AddressCoding addressCoding) {
-		this.addressCoding = addressCoding;
-	}
+        AddressType(String display) {
+            this.display = display;
+        }
 
-	public void setAddressType(AddressType addressType) {
-		this.addressType = addressType;
-	}
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
 
-	public void setDisplayOnly(boolean displayOnly) {
-		this.displayOnly = displayOnly;
-	}
+    public enum RecipientType {
+        TO("To"), CC("Cc"), BCC("Bcc");
 
-	public void setId(String id) {
-		this.id = id;
-	}
+        public static final Map<String, RecipientType> map = new StringToEnumMap<RecipientType>(RecipientType.values());
+        private final String display;
 
-	public void setRecipientType(RecipientType recipientType) {
-		this.recipientType = recipientType;
-	}
+        RecipientType(String display) {
+            this.display = display;
+        }
 
-	@Override
-	public String toString() {
-		return address != null ? address : "<unspecified>";
-	}
-
-	private RecipientType recipientType = RecipientType.TO;
-	private AddressType addressType = AddressType.NUMBER;
-	private boolean displayOnly;
-	private AddressCoding addressCoding;
-	private String id;
-	private String address;
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
 }
