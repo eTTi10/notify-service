@@ -198,7 +198,9 @@ subprojects {
         inputs.dir snippetsDir
         dependsOn test
         sources{
-            include("**/*.adoc","**/**/*.adoc")
+//            include("**/*.adoc","**/**/*.adoc")
+            include("/**/*.adoc","**/**/*.adoc")
+
         }
 
         baseDirFollowsSourceFile()
