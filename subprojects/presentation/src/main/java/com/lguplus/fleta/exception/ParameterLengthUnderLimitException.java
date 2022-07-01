@@ -19,7 +19,6 @@ public class ParameterLengthUnderLimitException extends RuntimeException impleme
     }
 
     /**
-     *
      * @param message
      */
     public ParameterLengthUnderLimitException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterLengthUnderLimitException extends RuntimeException impleme
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterLengthUnderLimitException extends RuntimeException impleme
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterLengthUnderLimitException(final Throwable cause) {

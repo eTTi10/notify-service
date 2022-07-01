@@ -22,9 +22,9 @@ public class FeignConfig {
     private ObjectFactory<HttpMessageConverters> getObjectFactory() {
 
         final ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         final HttpMessageConverter<Object> messageConverter =
-                new MappingJackson2HttpMessageConverter(objectMapper);
+            new MappingJackson2HttpMessageConverter(objectMapper);
         return () -> new HttpMessageConverters(messageConverter);
     }
 

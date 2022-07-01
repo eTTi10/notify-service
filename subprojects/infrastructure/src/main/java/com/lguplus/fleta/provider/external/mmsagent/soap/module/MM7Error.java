@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -24,115 +24,114 @@ import org.jdom2.output.XMLOutputter;
 
 public class MM7Error extends Exception implements JDOMSupport {
 
-	private static final long serialVersionUID = 4698982334914854725L;
+    private static final long serialVersionUID = 4698982334914854725L;
+    private MM7Response response;
+    private String faultCode;
+    private String faultMessage;
 
-	public MM7Error() {
-	}
+    public MM7Error() {
+    }
 
-	public MM7Error(String message) {
-		super(message);
-	}
+    public MM7Error(String message) {
+        super(message);
+    }
 
-	public MM7Error(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public MM7Error(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-	public MM7Error(Throwable cause) {
-		super(cause);
-	}
+    public MM7Error(Throwable cause) {
+        super(cause);
+    }
 
-	public String getFaultCode() {
-		return faultCode;
-	}
+    public String getFaultCode() {
+        return faultCode;
+    }
 
-	public String getFaultMessage() {
-		return faultMessage;
-	}
+    public void setFaultCode(String faultCode) {
+        this.faultCode = faultCode;
+    }
 
-	@Override
-	public String getMessage() {
-		String m = super.getMessage();
-		if (m == null) {
-			StringBuilder b = new StringBuilder();
-			if (faultCode != null) {
-				b.append(faultCode);
-			}
-			if (faultMessage != null) {
-				b.append(':').append(faultMessage);
-			}
-			if (response != null) {
-				b.append(':').append(response);
-			}
-			m = b.toString();
-		}
-		return m;
-	}
+    public String getFaultMessage() {
+        return faultMessage;
+    }
 
-	public MM7Response getResponse() {
-		return response;
-	}
+    public void setFaultMessage(String faultMessage) {
+        this.faultMessage = faultMessage;
+    }
 
-	@Override
-	public void load(Element element) {
+    @Override
+    public String getMessage() {
+        String m = super.getMessage();
+        if (m == null) {
+            StringBuilder b = new StringBuilder();
+            if (faultCode != null) {
+                b.append(faultCode);
+            }
+            if (faultMessage != null) {
+                b.append(':').append(faultMessage);
+            }
+            if (response != null) {
+                b.append(':').append(response);
+            }
+            m = b.toString();
+        }
+        return m;
+    }
 
-		Element body = element.getChild("Body", MM7Message.ENVELOPE);
-		Element e = (Element) body.getChildren().get(0);
+    public MM7Response getResponse() {
+        return response;
+    }
 
-		this.faultCode = e.getChildTextTrim("faultcode");
-		this.faultMessage = e.getChildTextTrim("faultstring");
+    public void setResponse(MM7Response response) {
+        this.response = response;
+    }
 
-		if(faultCode == null) {
-			this.faultCode = e.getChildTextTrim("faultcode", MM7Message.ENVELOPE);
-		}
+    @Override
+    public void load(Element element) {
 
-		if(faultMessage == null) {
-			this.faultMessage = e.getChildTextTrim("faultstring", MM7Message.ENVELOPE);
-		}
+        Element body = element.getChild("Body", MM7Message.ENVELOPE);
+        Element e = body.getChildren().get(0);
 
-		try {
-			Element detail;
-			if (element.getNamespace("") != null) {
-				 detail = (Element) e.getChild("detail",element.getNamespace("")).getChildren().get(0);
-			} else {
-				 if(e.getChild("detail") != null) {
-					 detail = (Element) e.getChild("detail").getChildren().get(0);
-				 } else {
-					 detail = (Element) e.getChild("detail", MM7Message.ENVELOPE).getChildren().get(0);
-				 }
-			}
-			String message = detail.getName();
-			// Instantiate correct status type
+        this.faultCode = e.getChildTextTrim("faultcode");
+        this.faultMessage = e.getChildTextTrim("faultstring");
 
-			Class<?> clazz = Class.forName("com.lguplus.fleta.provider.external.mmsagent.soap.module." + message);
-			this.response = (MM7Response) clazz.newInstance();
-			this.response.load(element);
-		} catch (Throwable t) {
-			// Ignored
-			XMLOutputter outp = new XMLOutputter();
-			String s = outp.outputString(element);
-			System.err.println("Failed to instantiate a correct response type" + s);
-			t.printStackTrace();
-		}
-	}
+        if (faultCode == null) {
+            this.faultCode = e.getChildTextTrim("faultcode", MM7Message.ENVELOPE);
+        }
 
-	@Override
-	public Element save(Element parent) {
-		throw new UnsupportedOperationException();
-	}
+        if (faultMessage == null) {
+            this.faultMessage = e.getChildTextTrim("faultstring", MM7Message.ENVELOPE);
+        }
 
-	public void setFaultCode(String faultCode) {
-		this.faultCode = faultCode;
-	}
+        try {
+            Element detail;
+            if (element.getNamespace("") != null) {
+                detail = e.getChild("detail", element.getNamespace("")).getChildren().get(0);
+            } else {
+                if (e.getChild("detail") != null) {
+                    detail = e.getChild("detail").getChildren().get(0);
+                } else {
+                    detail = e.getChild("detail", MM7Message.ENVELOPE).getChildren().get(0);
+                }
+            }
+            String message = detail.getName();
+            // Instantiate correct status type
 
-	public void setFaultMessage(String faultMessage) {
-		this.faultMessage = faultMessage;
-	}
+            Class<?> clazz = Class.forName("com.lguplus.fleta.provider.external.mmsagent.soap.module." + message);
+            this.response = (MM7Response) clazz.newInstance();
+            this.response.load(element);
+        } catch (Throwable t) {
+            // Ignored
+            XMLOutputter outp = new XMLOutputter();
+            String s = outp.outputString(element);
+            System.err.println("Failed to instantiate a correct response type" + s);
+            t.printStackTrace();
+        }
+    }
 
-	public void setResponse(MM7Response response) {
-		this.response = response;
-	}
-
-	private MM7Response response;
-	private String faultCode;
-	private String faultMessage;
+    @Override
+    public Element save(Element parent) {
+        throw new UnsupportedOperationException();
+    }
 }

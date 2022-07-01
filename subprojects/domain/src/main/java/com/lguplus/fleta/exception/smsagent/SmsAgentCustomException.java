@@ -9,12 +9,8 @@ import lombok.Setter;
 @Getter
 public class SmsAgentCustomException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.SMS_SERVER_ERROR;
-    }
-
     private final String code;
+
     /**
      *
      */
@@ -25,7 +21,6 @@ public class SmsAgentCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public SmsAgentCustomException(final String code, final String message) {
@@ -35,7 +30,6 @@ public class SmsAgentCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -46,12 +40,15 @@ public class SmsAgentCustomException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SmsAgentCustomException(final String code, final Throwable cause) {
 
         super(cause);
         this.code = code;
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 }

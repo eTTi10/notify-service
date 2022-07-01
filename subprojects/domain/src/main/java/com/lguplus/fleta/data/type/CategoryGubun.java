@@ -6,54 +6,52 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */
 public enum CategoryGubun {
 
-	/**
-	 *
-	 */
-	I20,
+    /**
+     *
+     */
+    I20,
 
-	/**
-	 *
-	 */
-	I30,
-	
-	/**
-	 *
-	 */
-	NSC,
+    /**
+     *
+     */
+    I30,
 
-	/**
-	 *
-	 */
-	UNDEFINED;
+    /**
+     *
+     */
+    NSC,
 
-	/**
-	 *
-	 */
-	private static final Map<String, CategoryGubun> all = Stream.of(values())
-			.collect(Collectors.toMap(Enum::name, Function.identity()));
+    /**
+     *
+     */
+    UNDEFINED;
 
-	/**
-	 *
-	 * @param code
-	 * @return
-	 */
-	public static CategoryGubun asValue(final String code) {
+    /**
+     *
+     */
+    private static final Map<String, CategoryGubun> all = Stream.of(values())
+        .collect(Collectors.toMap(Enum::name, Function.identity()));
 
-		if (code == null || code.isBlank()) {
-			return null;
-		}
+    /**
+     * @param code
+     * @return
+     */
+    public static CategoryGubun asValue(final String code) {
 
-		final CategoryGubun categoryGubun = all.get(code.toUpperCase());
-		if (categoryGubun == null) {
-			return UNDEFINED;
-		} else {
-			return categoryGubun;
-		}
-	}
+        if (code == null || code.isBlank()) {
+            return null;
+        }
+
+        final CategoryGubun categoryGubun = all.get(code.toUpperCase());
+        if (categoryGubun == null) {
+            return UNDEFINED;
+        } else {
+            return categoryGubun;
+        }
+    }
 }

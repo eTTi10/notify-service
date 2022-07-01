@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -22,11 +22,11 @@ import java.util.HashMap;
 
 public class StringToEnumMap<K extends Enum<K>> extends HashMap<String, K> {
 
-	private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 1;
 
-	public StringToEnumMap(K[] enums) {
-		for (K o : enums) {
-			put(o.toString(), o);
-		}
-	}
+    public StringToEnumMap(K[] enums) {
+        for (K o : enums) {
+            put(o.toString(), o);
+        }
+    }
 }

@@ -1,16 +1,14 @@
 package com.lguplus.fleta.validation;
 
+import com.lguplus.fleta.validation.AlphabetOrEmptyPattern.Validator;
 import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import com.lguplus.fleta.validation.AlphabetOrEmptyPattern.Validator;
 
 class AlphabetOrEmptyPatternTest {
 
     Validator validator;
-    
+
     @BeforeEach
     void setUp() throws Exception {
         validator = new AlphabetOrEmptyPattern.Validator();
@@ -21,7 +19,7 @@ class AlphabetOrEmptyPatternTest {
         boolean result = validator.isValid("ab", null);
         assertThat(result).isTrue();
     }
-    
+
     @Test
     void test_2() {
         boolean result = validator.isValid("", null);

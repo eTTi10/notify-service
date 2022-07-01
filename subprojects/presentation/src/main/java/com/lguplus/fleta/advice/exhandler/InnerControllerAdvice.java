@@ -8,6 +8,7 @@ import com.lguplus.fleta.data.type.response.InnerResponseErrorType;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -18,15 +19,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.List;
-
 /**
  * MSA간 통신 Controller Advice
+ *
  * @version 0.1.0
  */
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.inner")
 public class InnerControllerAdvice {
+
     /**
      *
      */
@@ -52,7 +53,7 @@ public class InnerControllerAdvice {
         BindingResult bindingResult = e.getBindingResult();
         if (bindingResult.hasErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
-            for (FieldError fieldError: fieldErrors) {
+            for (FieldError fieldError : fieldErrors) {
                 String field = fieldError.getField();
                 String defaultMessage = fieldError.getDefaultMessage();
                 String detailMessage = "[" + field + "] " + defaultMessage;

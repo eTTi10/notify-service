@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -20,123 +20,131 @@ package com.lguplus.fleta.provider.external.mmsagent.soap.module.common;
 
 public class ParameterListTokenizer {
 
-	public ParameterListTokenizer(String in) {
-		this.in = in;
-		this.pos = 0;
-	}
+    private final String in;
+    private int pos;
 
-	public String readParameter() {
-		if (pos >= in.length()) return null;
+    public ParameterListTokenizer(String in) {
+        this.in = in;
+        this.pos = 0;
+    }
 
-		int end = pos + 1;
-		do {
-			char c = in.charAt(end);
-			if (c == ';' || c == '=') break;
-			++end;
-		} while (end < in.length());
+    public String readParameter() {
+        if (pos >= in.length()) {
+            return null;
+        }
 
-		String result = in.substring(pos, end).trim();
-		pos = end;
-		return result;
-	}
+        int end = pos + 1;
+        do {
+            char c = in.charAt(end);
+            if (c == ';' || c == '=') {
+                break;
+            }
+            ++end;
+        } while (end < in.length());
 
-	private String readQuoted() {
-		StringBuffer result = new StringBuffer(30);
-		++pos;
-		while (pos < in.length()) {
-			char c = in.charAt(pos++);
-			if (c == '\\' && in.charAt(pos) == '"') {
-				result.append('"');
-				++pos;
-			} else if (c == '"') {
-				skipLWS();
-				if (pos < in.length() && in.charAt(pos) == ';') {
-					++pos;
-					skipLWS();
-				}
-				break;
-			} else {
-				result.append(c);
-			}
-		}
-		return result.toString();
-	}
+        String result = in.substring(pos, end).trim();
+        pos = end;
+        return result;
+    }
 
-	public String readSubtype() {
-		if (pos >= in.length()) return null;
+    private String readQuoted() {
+        StringBuffer result = new StringBuffer(30);
+        ++pos;
+        while (pos < in.length()) {
+            char c = in.charAt(pos++);
+            if (c == '\\' && in.charAt(pos) == '"') {
+                result.append('"');
+                ++pos;
+            } else if (c == '"') {
+                skipLWS();
+                if (pos < in.length() && in.charAt(pos) == ';') {
+                    ++pos;
+                    skipLWS();
+                }
+                break;
+            } else {
+                result.append(c);
+            }
+        }
+        return result.toString();
+    }
 
-		int idx = in.indexOf(";", pos);
-		String result;
-		if (idx == -1) {
-			result = in.substring(pos);
-			pos = in.length();
-		} else {
-			result = in.substring(pos, idx);
-			pos = idx + 1;
-			skipLWS();
-		}
-		return result;
-	}
+    public String readSubtype() {
+        if (pos >= in.length()) {
+            return null;
+        }
 
-	private String readToken() {
-		StringBuffer result = new StringBuffer(15);
-		while (pos < in.length()) {
-			char c = in.charAt(pos++);
-			if (c == ';' || Character.isSpaceChar(c)) {
-				skipLWS();
-				break;
-			} else {
-				result.append(c);
-			}
-		}
+        int idx = in.indexOf(";", pos);
+        String result;
+        if (idx == -1) {
+            result = in.substring(pos);
+            pos = in.length();
+        } else {
+            result = in.substring(pos, idx);
+            pos = idx + 1;
+            skipLWS();
+        }
+        return result;
+    }
 
-		return result.toString();
-	}
+    private String readToken() {
+        StringBuffer result = new StringBuffer(15);
+        while (pos < in.length()) {
+            char c = in.charAt(pos++);
+            if (c == ';' || Character.isSpaceChar(c)) {
+                skipLWS();
+                break;
+            } else {
+                result.append(c);
+            }
+        }
 
-	public String readType() {
-		int idx = in.indexOf('/');
-		String result;
-		if (idx == -1) {
-			result = in;
-			idx = in.length();
-		} else {
-			result = in.substring(0, idx);
-		}
-		pos = idx + 1;
-		return result;
-	}
+        return result.toString();
+    }
 
-	public String readValue() {
-		if (pos >= in.length()) return null;
+    public String readType() {
+        int idx = in.indexOf('/');
+        String result;
+        if (idx == -1) {
+            result = in;
+            idx = in.length();
+        } else {
+            result = in.substring(0, idx);
+        }
+        pos = idx + 1;
+        return result;
+    }
 
-		String result;
+    public String readValue() {
+        if (pos >= in.length()) {
+            return null;
+        }
 
-		char c = in.charAt(pos);
-		if (c == ';') {
-			++pos;
-			result = null;
-		} else if (c == '=') {
-			++pos;
-			c = in.charAt(pos);
-			if (c == '"') {
-				result = readQuoted();
-			} else {
-				result = readToken();
-			}
-		} else {
-			throw new RuntimeException();
-		}
+        String result;
 
-		skipLWS();
-		return result;
-	}
+        char c = in.charAt(pos);
+        if (c == ';') {
+            ++pos;
+            result = null;
+        } else if (c == '=') {
+            ++pos;
+            c = in.charAt(pos);
+            if (c == '"') {
+                result = readQuoted();
+            } else {
+                result = readToken();
+            }
+        } else {
+            throw new RuntimeException();
+        }
 
-	private void skipLWS() {
-		while (pos < in.length() && Character.isSpaceChar(in.charAt(pos))) {
-			++pos;
-		}
-	}
+        skipLWS();
+        return result;
+    }
 
-	private String in;
-	private int pos;
+    private void skipLWS() {
+        while (pos < in.length() && Character.isSpaceChar(in.charAt(pos))) {
+            ++pos;
+        }
+    }
 }

@@ -17,7 +17,6 @@ public class DeleteNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DeleteNotFoundException(final String message) {
@@ -26,7 +25,6 @@ public class DeleteNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DeleteNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DeleteNotFoundException(final Throwable cause) {

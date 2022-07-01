@@ -5,10 +5,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import io.swagger.annotations.ApiModel;
-import lombok.*;
-
 import java.io.Serializable;
 import java.util.Date;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @ApiModel(value = "최신회 알림조회", description = "최신회 알림조회 리턴")
 @NoArgsConstructor(access = AccessLevel.PRIVATE)

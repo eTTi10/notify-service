@@ -17,7 +17,6 @@ public class NotChangedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NotChangedException(final String message) {
@@ -26,7 +25,6 @@ public class NotChangedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NotChangedException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NotChangedException(final Throwable cause) {

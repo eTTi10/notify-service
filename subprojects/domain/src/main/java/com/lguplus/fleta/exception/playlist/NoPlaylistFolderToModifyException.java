@@ -17,7 +17,6 @@ public class NoPlaylistFolderToModifyException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NoPlaylistFolderToModifyException(final String message) {
@@ -26,7 +25,6 @@ public class NoPlaylistFolderToModifyException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NoPlaylistFolderToModifyException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoPlaylistFolderToModifyException(final Throwable cause) {

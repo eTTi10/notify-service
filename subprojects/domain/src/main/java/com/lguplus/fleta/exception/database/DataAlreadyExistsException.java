@@ -17,7 +17,6 @@ public class DataAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DataAlreadyExistsException(final String message) {
@@ -26,7 +25,6 @@ public class DataAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DataAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DataAlreadyExistsException(final Throwable cause) {

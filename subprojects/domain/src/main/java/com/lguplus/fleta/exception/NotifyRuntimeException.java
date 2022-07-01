@@ -10,8 +10,6 @@ import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
  */
 public abstract class NotifyRuntimeException extends RuntimeException {
 
-    public abstract InnerResponseCodeType getInnerResponseCodeType();
-
     /**
      *
      */
@@ -44,4 +42,6 @@ public abstract class NotifyRuntimeException extends RuntimeException {
 
         super(cause);
     }
+
+    public abstract InnerResponseCodeType getInnerResponseCodeType();
 }

@@ -5,9 +5,12 @@ import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.data.mapper.UxSimpleJoinSmsMapper;
 import com.lguplus.fleta.service.uflix.UxSimpleJoinService;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -16,24 +19,20 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest
 @ContextConfiguration(classes = {UxSimpleJoinController.class
-        , ArgumentResolverConfig.class
-        , MessageConverterConfig.class})
+    , ArgumentResolverConfig.class
+    , MessageConverterConfig.class})
 class UxSimpleJoinControllerTest {
 
-    private static final String URL_TEMPLATE = "/smartux/gw/UXSimpleJoin";
+    private static final String URL_TEMPLATE = "/smartux/gw/UXSimpleJoin.php";
     private static final String SUCCESS_CODE = "0000";
     private static final String CTN_EMPTY_CODE = "5000";
     private static final String CTN_WRONG_CODE = "5001";
@@ -62,9 +61,9 @@ class UxSimpleJoinControllerTest {
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(URL_TEMPLATE).accept(MediaType.APPLICATION_JSON).params(paramMap))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
 
@@ -87,9 +86,9 @@ class UxSimpleJoinControllerTest {
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(URL_TEMPLATE).accept(MediaType.APPLICATION_JSON).params(paramMap))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
 
@@ -112,9 +111,9 @@ class UxSimpleJoinControllerTest {
 
         // when
         MvcResult mvcResult = mockMvc.perform(get(URL_TEMPLATE).accept(MediaType.APPLICATION_JSON).params(paramMap))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
 

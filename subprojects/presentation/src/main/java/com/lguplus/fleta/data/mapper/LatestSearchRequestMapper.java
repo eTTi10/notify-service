@@ -7,5 +7,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(config = ObjectMapperConfig.class)
 public interface LatestSearchRequestMapper {
+
     LatestRequestDto toDto(LatestSearchRequestVo member);
 }

@@ -10,13 +10,12 @@ import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Component
@@ -26,14 +25,11 @@ public class PushMultiDomainService {
     private final PushConfig pushConfig;
     private final PushMultiClient pushMultiClient;
     private final PushMapper pushMapper;
-
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Value("${push.gateway.appId}")
     private String oldLgPushAppId;
-
     @Value("${push.gateway.notiType}")
     private String oldLgPushNotiType;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Multi 푸시등록

@@ -19,7 +19,6 @@ public class ParameterContainsWhitespaceException extends RuntimeException imple
     }
 
     /**
-     *
      * @param message
      */
     public ParameterContainsWhitespaceException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterContainsWhitespaceException extends RuntimeException imple
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterContainsWhitespaceException extends RuntimeException imple
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterContainsWhitespaceException(final Throwable cause) {

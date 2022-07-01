@@ -5,19 +5,18 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 /**
- * 
  * @author Minwoo Lee
  * @since 1.0
  */
 @Component
 public class PagingTypeConverter implements Converter<String, PagingType> {
 
-	/**
-	 * 
-	 */
-	@Override
-	public PagingType convert(final String source) {
+    /**
+     *
+     */
+    @Override
+    public PagingType convert(final String source) {
 
-		return PagingType.asValue(source);
-	}
+        return PagingType.asValue(source);
+    }
 }

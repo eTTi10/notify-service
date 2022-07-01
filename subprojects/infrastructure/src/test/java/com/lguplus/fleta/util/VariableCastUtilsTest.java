@@ -1,9 +1,6 @@
 package com.lguplus.fleta.util;
 
 import com.lguplus.fleta.testutil.TestDto;
-import org.assertj.core.api.ThrowableAssert;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -11,12 +8,14 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.assertj.core.api.ThrowableAssert;
+import org.junit.jupiter.api.Test;
 
 /**
  * VariableCastUtils 유닛 테스트
+ *
  * @version 1.0
  */
 class VariableCastUtilsTest {

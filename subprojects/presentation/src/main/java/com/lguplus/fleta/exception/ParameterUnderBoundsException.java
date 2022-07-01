@@ -19,7 +19,6 @@ public class ParameterUnderBoundsException extends RuntimeException implements P
     }
 
     /**
-     *
      * @param message
      */
     public ParameterUnderBoundsException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterUnderBoundsException extends RuntimeException implements P
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterUnderBoundsException extends RuntimeException implements P
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterUnderBoundsException(final Throwable cause) {

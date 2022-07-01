@@ -1,5 +1,6 @@
 package com.lguplus.fleta.util;
 
+import static java.lang.String.valueOf;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,17 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.lang.String.valueOf;
-
 /**
  * 변수 Cast Util
+ *
  * @version 1.0
  */
 public class VariableCastUtils {
-
-    private VariableCastUtils() {
-        throw new IllegalStateException("Utility class");
-    }
 
     private static final Map<Class<?>, Class<?>> wrappingClassMap = new HashMap<>();
 
@@ -33,8 +29,13 @@ public class VariableCastUtils {
         wrappingClassMap.put(double.class, Double.class);
     }
 
+    private VariableCastUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * wrapperClass 가 있다면 찾아내고 primitiveClass 가 아니라면 그대로 반환한다.
+     *
      * @param classType 클래스 타입
      * @return Class<?>
      */
@@ -47,6 +48,7 @@ public class VariableCastUtils {
 
     /**
      * 필드 값을 해당 클래스로 변환하여 반환한다.
+     *
      * @param value     값
      * @param classType 클래스 타입
      * @return Optional<Object>

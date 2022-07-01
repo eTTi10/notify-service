@@ -2,11 +2,18 @@ package com.lguplus.fleta.data.entity;
 
 
 import com.lguplus.fleta.data.entity.id.LatestId;
-import lombok.*;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
+import javax.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -15,7 +22,8 @@ import java.util.Date;
 @Entity
 @Table(name = "SMARTUX.PT_UX_LATEST")
 @IdClass(LatestId.class)
-public class LatestEntity implements Serializable{
+public class LatestEntity implements Serializable {
+
     @Id
     @Column(name = "sa_id")
     private String saId;

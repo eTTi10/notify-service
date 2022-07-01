@@ -17,7 +17,6 @@ public class DuplicateKeyException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DuplicateKeyException(final String message) {
@@ -26,7 +25,6 @@ public class DuplicateKeyException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DuplicateKeyException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DuplicateKeyException(final Throwable cause) {

@@ -5,15 +5,17 @@ import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Http MultiPush Service
- *
+ * <p>
  * 멀티 푸시등록
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HttpMultiPushService {
 
     private final HttpMultiPushDomainService httpMultiPushDomainService;
