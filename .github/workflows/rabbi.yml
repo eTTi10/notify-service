@@ -23,6 +23,7 @@ jobs:
       - name: Copy document files
         run: |
           mkdir -p docs report
+          cp build/api-spec/openapi3.json docs/
           cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
           cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
           
@@ -30,6 +31,7 @@ jobs:
       - name: Copy document files
         run: |
           mkdir -p docs
+          cp build/api-spec/openapi3.json docs/
           cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
 
       - name: Pushes docs to docs repository
