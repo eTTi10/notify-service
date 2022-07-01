@@ -5,6 +5,7 @@ import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;

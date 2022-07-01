@@ -3,5 +3,8 @@ ifndef::snippets[]
 endif::[]
 
 :operation-HTTP-request-title:  HTTP request
-operation::push/deviceinfo[snippets='http-request,http-response']
 
+operation::postDeviceInfo[snippets='http-request,http-response']
+operation::postDeviceInfoBadParam[snippets='http-request,http-response']
+operation::putDeviceInfo[snippets='http-request,http-response']
+operation::deleteDeviceInfo[snippets='http-request,http-response']
