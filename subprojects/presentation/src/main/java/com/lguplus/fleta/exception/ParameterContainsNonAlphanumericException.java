@@ -19,7 +19,6 @@ public class ParameterContainsNonAlphanumericException extends RuntimeException 
     }
 
     /**
-     *
      * @param message
      */
     public ParameterContainsNonAlphanumericException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterContainsNonAlphanumericException extends RuntimeException 
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterContainsNonAlphanumericException extends RuntimeException 
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterContainsNonAlphanumericException(final Throwable cause) {

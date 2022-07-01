@@ -1,16 +1,14 @@
 package com.lguplus.fleta.properties;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 class SendPushCodePropsTest {
@@ -20,7 +18,6 @@ class SendPushCodePropsTest {
 
     @Test
     void findMapBySendCode() {
-
 
         Map<String, String> sendCodeMap = new HashMap<>();
         sendCodeMap.put("sendcode", "P001");

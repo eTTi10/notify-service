@@ -1,6 +1,5 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
-import com.lguplus.fleta.config.KafkaConfig;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,8 +19,6 @@ import java.util.concurrent.locks.LockSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
-import org.springframework.kafka.listener.MessageListenerContainer;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -94,11 +91,7 @@ public class SmsGateway {
     }
 
     public void setBindState(boolean bind) {
-        if (bind) {
-            this.isBind = true;
-        } else {
-            this.isBind = false;
-        }
+        this.isBind = bind;
     }
 
     public Date getLastSendDate() {
@@ -416,7 +409,7 @@ public class SmsGateway {
 
     public static class BindTimerTask extends TimerTask {
 
-        private SmsGateway smsGateway;
+        private final SmsGateway smsGateway;
 
         public BindTimerTask(SmsGateway gw) {
             smsGateway = gw;
@@ -434,7 +427,7 @@ public class SmsGateway {
 
     public static class LinkTimerTask extends TimerTask {
 
-        private SmsGateway smsGateway;
+        private final SmsGateway smsGateway;
 
         public LinkTimerTask(SmsGateway gw) {
             smsGateway = gw;
@@ -454,7 +447,7 @@ public class SmsGateway {
 
     public static class ErrorTimerTask extends TimerTask {
 
-        private SmsGateway smsGateway;
+        private final SmsGateway smsGateway;
 
         public ErrorTimerTask(SmsGateway gw) {
             smsGateway = gw;

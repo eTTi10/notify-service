@@ -17,7 +17,6 @@ public class FailToUseCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public FailToUseCouponException(final String message) {
@@ -26,7 +25,6 @@ public class FailToUseCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class FailToUseCouponException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public FailToUseCouponException(final Throwable cause) {

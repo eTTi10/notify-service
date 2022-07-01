@@ -34,9 +34,9 @@ public class UxSimpleJoinService {
         log.debug("smsMessage ::::::::::::::::::::: {}", smsMessage);
 
         SendSmsRequestDto sendSmsRequestDto = SendSmsRequestDto.builder()
-                .sCtn(uxSimpleJoinSmsRequestDto.getCtn())
-                .rCtn(uxSimpleJoinSmsRequestDto.getCtn())
-                .msg(smsMessage).build();
+            .sCtn(uxSimpleJoinSmsRequestDto.getCtn())
+            .rCtn(uxSimpleJoinSmsRequestDto.getCtn())
+            .msg(smsMessage).build();
 
         // SMS 전송
         try {

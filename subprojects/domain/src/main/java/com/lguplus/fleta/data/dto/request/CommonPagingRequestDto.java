@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */

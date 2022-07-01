@@ -4,17 +4,16 @@ import com.lguplus.fleta.data.dto.request.outer.UxSimpleJoinSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class UxSimpleJoinServiceTest {
@@ -34,10 +33,10 @@ class UxSimpleJoinServiceTest {
         given(smsAgentDomainService.sendSms(any())).willReturn(smsGatewayResponseDto);
 
         UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto = UxSimpleJoinSmsRequestDto.builder()
-                .saId("500058151453")
-                .stbMac("001c.627e.039c")
-                .ctn("01055805424")
-                .build();
+            .saId("500058151453")
+            .stbMac("001c.627e.039c")
+            .ctn("01055805424")
+            .build();
 
         // when
         uxSimpleJoinService.requestUxSimpleJoinSms(uxSimpleJoinSmsRequestDto);
@@ -55,10 +54,10 @@ class UxSimpleJoinServiceTest {
         given(smsAgentDomainService.sendSms(any())).willThrow(smsAgentCustomException);
 
         UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto = UxSimpleJoinSmsRequestDto.builder()
-                .saId("500058151453")
-                .stbMac("001c.627e.039c")
-                .ctn("03299999999")
-                .build();
+            .saId("500058151453")
+            .stbMac("001c.627e.039c")
+            .ctn("03299999999")
+            .build();
 
         // when
         SmsGatewayResponseDto smsGatewayResponseDto = uxSimpleJoinService.requestUxSimpleJoinSms(uxSimpleJoinSmsRequestDto);

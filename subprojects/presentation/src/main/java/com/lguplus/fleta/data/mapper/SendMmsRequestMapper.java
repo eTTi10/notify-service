@@ -7,5 +7,6 @@ import org.mapstruct.Mapper;
 
 @Mapper(config = ObjectMapperConfig.class)
 public interface SendMmsRequestMapper {
+
     SendMmsRequestDto toDto(SendMmsVo member);
 }

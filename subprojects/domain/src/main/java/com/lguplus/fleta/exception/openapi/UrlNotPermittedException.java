@@ -17,7 +17,6 @@ public class UrlNotPermittedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public UrlNotPermittedException(final String message) {
@@ -26,7 +25,6 @@ public class UrlNotPermittedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class UrlNotPermittedException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public UrlNotPermittedException(final Throwable cause) {

@@ -4,25 +4,22 @@ import com.lguplus.fleta.config.HttpPushConfig;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.apache.commons.lang3.tuple.Pair;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class HttpPushSupportTest {
@@ -126,8 +123,8 @@ class HttpPushSupportTest {
             method.setAccessible(true);
 
             HttpPushDto httpPushDto = HttpPushDto.builder()
-                    .payload("보낼 메시지")
-                    .build();
+                .payload("보낼 메시지")
+                .build();
 
             method.invoke(httpPushSupport, httpPushDto, "", "");
         });

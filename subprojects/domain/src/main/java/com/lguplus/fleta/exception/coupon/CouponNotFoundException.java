@@ -17,7 +17,6 @@ public class CouponNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public CouponNotFoundException(final String message) {
@@ -26,7 +25,6 @@ public class CouponNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class CouponNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public CouponNotFoundException(final Throwable cause) {

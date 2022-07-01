@@ -1,12 +1,11 @@
 package com.lguplus.fleta.validation;
 
+import static com.lguplus.fleta.validation.Perl5Pattern.Validator;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import static com.lguplus.fleta.validation.Perl5Pattern.Validator;
-import static org.assertj.core.api.Assertions.assertThat;
 
 class Perl5PatternTest {
 
@@ -24,9 +23,9 @@ class Perl5PatternTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-            "NIL",
-            "abcdEFGH1234",
-            "abcd한글1234"
+        "NIL",
+        "abcdEFGH1234",
+        "abcd한글1234"
     }, nullValues = "NIL")
     void test_WordOrNull(String value) {
         boolean result = validator.isValid(value, null);

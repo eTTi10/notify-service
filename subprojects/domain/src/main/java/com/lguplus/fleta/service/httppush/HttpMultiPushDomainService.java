@@ -4,9 +4,23 @@ import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushMultiRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
-import com.lguplus.fleta.exception.httppush.*;
+import com.lguplus.fleta.exception.httppush.AcceptedException;
+import com.lguplus.fleta.exception.httppush.BadRequestException;
+import com.lguplus.fleta.exception.httppush.ForbiddenException;
+import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
+import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
+import com.lguplus.fleta.exception.httppush.NotFoundException;
+import com.lguplus.fleta.exception.httppush.UnAuthorizedException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
@@ -14,15 +28,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-
 /**
  * Http MultiPush Component
- *
+ * <p>
  * 멀티 푸시등록
  */
 @Slf4j
@@ -65,10 +73,10 @@ public class HttpMultiPushDomainService {
         Pair<String, String> cdMsgMap = httpPushSupport.getHttpServiceProps().getExceptionCodeMessage("SendingFailedException");
 
         return HttpPushResponseDto.builder()
-                .code(cdMsgMap.getLeft())
-                .message(cdMsgMap.getRight())
-                .failUsers(failUsers)
-                .build();
+            .code(cdMsgMap.getLeft())
+            .message(cdMsgMap.getRight())
+            .failUsers(failUsers)
+            .build();
     }
 
     /**
@@ -125,24 +133,24 @@ public class HttpMultiPushDomainService {
             }
 
             futures.add(executor.submit(() -> {
-                        try {
-                            Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
+                    try {
+                        Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
 
-                            OpenApiPushResponseDto openApiPushResponseDto = httpPushClient.requestHttpPushSingle(paramMap);
+                        OpenApiPushResponseDto openApiPushResponseDto = httpPushClient.requestHttpPushSingle(paramMap);
 
-                            return regId + "|" + openApiPushResponseDto.getError().get("CODE");
+                        return regId + "|" + openApiPushResponseDto.getError().get("CODE");
 
-                        } catch (HttpPushCustomException ex) {
-                            if (ex.getStatusCode() >= 500) {
-                                return regId + "|" + "900";
-                            }
-
-                            return regId + "|" + ex.getStatusCode();
-
-                        } catch (Exception ex) {
+                    } catch (HttpPushCustomException ex) {
+                        if (ex.getStatusCode() >= 500) {
                             return regId + "|" + "900";
                         }
-                    })
+
+                        return regId + "|" + ex.getStatusCode();
+
+                    } catch (Exception ex) {
+                        return regId + "|" + "900";
+                    }
+                })
             );
 
             // TPS 설정에 따른 Time delay

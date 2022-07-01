@@ -4,13 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
-
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ManipulationDataDispatcher {
@@ -23,10 +22,10 @@ public class ManipulationDataDispatcher {
     public ManipulationDataDispatcher() {
 
         executorService = new ThreadPoolExecutor(8, 256,
-                0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                runnable -> new Thread(runnable, WORKER_NAME));
+            0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            runnable -> new Thread(runnable, WORKER_NAME));
         objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     public void dispatch(final DataManipulationListener dataManipulationListener, final String message) {
@@ -54,11 +53,16 @@ public class ManipulationDataDispatcher {
     }
 
     static class Manipulation {
-        @JsonProperty Payload payload;
+
+        @JsonProperty
+        Payload payload;
     }
 
     static class Payload {
-        @JsonProperty Map<String, String> after;
-        @JsonProperty Map<String, String> before;
+
+        @JsonProperty
+        Map<String, String> after;
+        @JsonProperty
+        Map<String, String> before;
     }
 }

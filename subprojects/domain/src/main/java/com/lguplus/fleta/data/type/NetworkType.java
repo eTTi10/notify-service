@@ -1,97 +1,94 @@
 package com.lguplus.fleta.data.type;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */
 public enum NetworkType {
 
-	/**
-	 *
-	 */
-	OPTICAL_LAN("02"),
+    /**
+     *
+     */
+    OPTICAL_LAN("02"),
 
-	/**
-	 *
-	 */
-	HFC_100M("01"),
+    /**
+     *
+     */
+    HFC_100M("01"),
 
-	/**
-	 *
-	 */
-	HFC_10M("31"),
+    /**
+     *
+     */
+    HFC_10M("31"),
 
-	/**
-	 *
-	 */
-	UNDEFINED("");
+    /**
+     *
+     */
+    UNDEFINED("");
 
-	/**
-	 *
-	 */
-	private static final Map<String, NetworkType> all = Stream.of(values())
-			.collect(Collectors.toMap(NetworkType::toString, Function.identity()));
+    /**
+     *
+     */
+    private static final Map<String, NetworkType> all = Stream.of(values())
+        .collect(Collectors.toMap(NetworkType::toString, Function.identity()));
 
-	/**
-	 *
-	 */
-	private final String code;
+    /**
+     *
+     */
+    private final String code;
 
-	/**
-	 *
-	 */
+    /**
+     *
+     */
     NetworkType(final String code) {
 
-		this.code = code;
-	}
+        this.code = code;
+    }
 
-	/**
-	 *
-	 */
-	@Override
-	public String toString() {
+    /**
+     * @param code
+     * @return
+     */
+    public static NetworkType asValue(final String code) {
 
-		return code;
-	}
+        if (code == null || code.isBlank()) {
+            return null;
+        }
 
-	/**
-	 *
-	 * @param code
-	 * @return
-	 */
-	public static NetworkType asValue(final String code) {
+        final NetworkType networkType = all.get(code);
+        if (networkType == null) {
+            return fromNumber(code);
+        } else {
+            return networkType;
+        }
+    }
 
-		if (code == null || code.isBlank()) {
-			return null;
-		}
+    private static NetworkType fromNumber(final String code) {
 
-		final NetworkType networkType = all.get(code);
-		if (networkType == null) {
-			return fromNumber(code);
-		} else {
-			return networkType;
-		}
-	}
+        try {
+            final String newCode = StringUtils.leftPad(String.valueOf(Integer.parseInt(code)), 2, "0");
+            final NetworkType networkType = all.get(newCode);
+            if (networkType != null) {
+                return networkType;
+            }
+        } catch (final NumberFormatException e) {
+            // Do nothing.
+        }
+        return UNDEFINED;
+    }
 
-	private static NetworkType fromNumber(final String code) {
+    /**
+     *
+     */
+    @Override
+    public String toString() {
 
-		try {
-			final String newCode = StringUtils.leftPad(String.valueOf(Integer.parseInt(code)), 2, "0");
-			final NetworkType networkType = all.get(newCode);
-			if (networkType != null) {
-				return networkType;
-			}
-		} catch (final NumberFormatException e) {
-			// Do nothing.
-		}
-		return UNDEFINED;
-	}
+        return code;
+    }
 }

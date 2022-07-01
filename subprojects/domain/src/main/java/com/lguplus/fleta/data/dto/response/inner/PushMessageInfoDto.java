@@ -1,6 +1,11 @@
 package com.lguplus.fleta.data.dto.response.inner;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
 @Getter
@@ -9,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 @Builder
 @ToString
 public class PushMessageInfoDto {
+
     private int messageId;
     private String transactionId; //12 char
     private String channelId;

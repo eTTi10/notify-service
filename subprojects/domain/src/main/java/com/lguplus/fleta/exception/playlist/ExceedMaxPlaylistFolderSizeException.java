@@ -17,7 +17,6 @@ public class ExceedMaxPlaylistFolderSizeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExceedMaxPlaylistFolderSizeException(final String message) {
@@ -26,7 +25,6 @@ public class ExceedMaxPlaylistFolderSizeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ExceedMaxPlaylistFolderSizeException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExceedMaxPlaylistFolderSizeException(final Throwable cause) {

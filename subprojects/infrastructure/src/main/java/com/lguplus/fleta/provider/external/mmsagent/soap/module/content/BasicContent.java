@@ -9,7 +9,7 @@
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
  * https://raw.github.com/vnesek/instantcom-mm7/master/LICENSE.txt
- * See the License for the specific language governing permissions and 
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
@@ -20,165 +20,169 @@ package com.lguplus.fleta.provider.external.mmsagent.soap.module.content;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.MM7Context;
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.inf.Content;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
 
 public class BasicContent implements Content {
 
-	public BasicContent() {
-	}
+    private String boundary;
+    private String contentLocation;
+    private String contentId;
+    private String contentType;
+    private List<Content> parts;
 
-	public BasicContent(Content... parts) {
-		this(Arrays.asList(parts));
-	}
+    public BasicContent() {
+    }
 
-	public BasicContent(List<Content> parts) {
-		setParts(parts);
-	}
+    public BasicContent(Content... parts) {
+        this(Arrays.asList(parts));
+    }
 
-	@Override
-	public String getContentId() {
-		if (contentId == null) {
-			contentId = UUID.randomUUID().toString();
-		}
-		return contentId;
-	}
+    public BasicContent(List<Content> parts) {
+        setParts(parts);
+    }
 
-	public int getContentLength() {
-		return -1;
-	}
+    @Override
+    public String getContentId() {
+        if (contentId == null) {
+            contentId = UUID.randomUUID().toString();
+        }
+        return contentId;
+    }
 
-	@Override
-	public String getContentLocation() {
-		return contentLocation;
-	}
+    public void setContentId(String contentId) {
+        this.contentId = contentId;
+    }
 
-	@Override
-	public String getContentType() {
-		return contentType;
-	}
+    public int getContentLength() {
+        return -1;
+    }
 
-	@Override
-	public List<Content> getParts() {
-		return parts;
-	}
+    @Override
+    public String getContentLocation() {
+        return contentLocation;
+    }
 
-	@Override
-	public Iterator<Content> iterator() {
-		Iterator<Content> result;
-		if (parts != null) {
-			result = parts.iterator();
-		} else {
-			result = new ArrayList<Content>().iterator();
-		}
-		return result;
-	}
+    public void setContentLocation(String contentLocation) {
+        this.contentLocation = contentLocation;
+    }
 
-	public void setContentId(String contentId) {
-		this.contentId = contentId;
-	}
+    @Override
+    public String getContentType() {
+        return contentType;
+    }
 
-	public void setContentLocation(String contentLocation) {
-		this.contentLocation = contentLocation;
-	}
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
 
-	public void setContentType(String contentType) {
-		this.contentType = contentType;
-	}
+    @Override
+    public List<Content> getParts() {
+        return parts;
+    }
 
-	public void setParts(List<Content> parts) {
-		this.parts = parts;
-		if (parts != null && !parts.isEmpty() && contentType == null) {
-			// Check if there is a smil inside
-			Content smil = null;
-			for (Content c : parts) {
-				if (c.getContentType().contains("smil") || c.getContentType().contains("LG")) {
-					smil = c;
-					break;
-				}
-			}
+    public void setParts(List<Content> parts) {
+        this.parts = parts;
+        if (parts != null && !parts.isEmpty() && contentType == null) {
+            // Check if there is a smil inside
+            Content smil = null;
+            for (Content c : parts) {
+                if (c.getContentType().contains("smil") || c.getContentType().contains("LG")) {
+                    smil = c;
+                    break;
+                }
+            }
 
-			this.boundary = "ContentParts_" + UUID.randomUUID().toString();
-			if (smil == null) {
-				setContentType("multipart/mixed; boundary=\"" + boundary + "\"");
-			} else {
-				if(smil.getContentType().contains("LG")){
-					String smilcontentType = smil.getContentType();
-					setContentType("multipart/related; start=\"<" + smil.getContentId() + ">\"; type=\"" + smilcontentType
-							+ "\"; boundary=\"" + boundary + "\"");
-				}else{
-					String smilcontentType = smil.getContentType();
-					if (smilcontentType.indexOf(";")!=-1) {
-						smilcontentType = smilcontentType.substring(0, smilcontentType.indexOf(';'));
-					}
-					setContentType("multipart/related; start=\"<" + smil.getContentId() + ">\"; type=\"" + smilcontentType
-							+ "\"; boundary=\"" + boundary + "\"");
-				}
-			}
-		}
-	}
+            this.boundary = "ContentParts_" + UUID.randomUUID();
+            if (smil == null) {
+                setContentType("multipart/mixed; boundary=\"" + boundary + "\"");
+            } else {
+                if (smil.getContentType().contains("LG")) {
+                    String smilcontentType = smil.getContentType();
+                    setContentType("multipart/related; start=\"<" + smil.getContentId() + ">\"; type=\"" + smilcontentType
+                        + "\"; boundary=\"" + boundary + "\"");
+                } else {
+                    String smilcontentType = smil.getContentType();
+                    if (smilcontentType.indexOf(";") != -1) {
+                        smilcontentType = smilcontentType.substring(0, smilcontentType.indexOf(';'));
+                    }
+                    setContentType("multipart/related; start=\"<" + smil.getContentId() + ">\"; type=\"" + smilcontentType
+                        + "\"; boundary=\"" + boundary + "\"");
+                }
+            }
+        }
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder b = new StringBuilder(getClass().getSimpleName());
-		b.append("({");
-		b.append(getContentType());
-		b.append('}');
-		if (contentId != null) {
-			b.append(", cid:").append(contentId);
-		}
-		if (contentLocation != null) {
-			b.append(", ").append(contentLocation);
-		}
-		if (parts != null && !parts.isEmpty()) {
-			b.append(", [");
-			for (Content c : parts) {
-				b.append(c);
-				b.append(", ");
-			}
-			b.setLength(b.length() - 2);
-			b.append(']');
-		} else {
-			b.append(", length=").append(getContentLength());
-		}
-		b.append(')');
-		return b.toString();
-	}
+    @Override
+    public Iterator<Content> iterator() {
+        Iterator<Content> result;
+        if (parts != null) {
+            result = parts.iterator();
+        } else {
+            result = Collections.emptyIterator();
+        }
+        return result;
+    }
 
-	@Override
-	public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
-		if (contentId == null) {
-			contentId = getContentId();
-		}
-		StringBuilder b = new StringBuilder();
-		b.append("\r\nContent-Type: ");
-		b.append(getContentType());
-		if (contentId != null) {
-			b.append("\r\nContent-ID: <" + contentId + ">");
-		}
-		b.append("\r\n");
-		out.write(b.toString().getBytes("euc-kr"));
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder(getClass().getSimpleName());
+        b.append("({");
+        b.append(getContentType());
+        b.append('}');
+        if (contentId != null) {
+            b.append(", cid:").append(contentId);
+        }
+        if (contentLocation != null) {
+            b.append(", ").append(contentLocation);
+        }
+        if (parts != null && !parts.isEmpty()) {
+            b.append(", [");
+            for (Content c : parts) {
+                b.append(c);
+                b.append(", ");
+            }
+            b.setLength(b.length() - 2);
+            b.append(']');
+        } else {
+            b.append(", length=").append(getContentLength());
+        }
+        b.append(')');
+        return b.toString();
+    }
 
-		for (Content c : getParts()) {
-			b.setLength(0);
-			b.append("\r\n--");
-			b.append(boundary);
-			out.write(b.toString().getBytes("euc-kr"));
-			c.writeTo(out, null, ctx);
-		}
+    @Override
+    public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
+        if (contentId == null) {
+            contentId = getContentId();
+        }
+        StringBuilder b = new StringBuilder();
+        b.append("\r\nContent-Type: ");
+        b.append(getContentType());
+        if (contentId != null) {
+            b.append("\r\nContent-ID: <" + contentId + ">");
+        }
+        b.append("\r\n");
+        out.write(b.toString().getBytes("euc-kr"));
 
-		b.setLength(0);
-		b.append("\r\n--");
-		b.append(boundary);
-		b.append("--");
-		out.write(b.toString().getBytes("euc-kr"));
-	}
+        for (Content c : getParts()) {
+            b.setLength(0);
+            b.append("\r\n--");
+            b.append(boundary);
+            out.write(b.toString().getBytes("euc-kr"));
+            c.writeTo(out, null, ctx);
+        }
 
-	private String boundary;
-	private String contentLocation;
-	private String contentId;
-	private String contentType;
-	private List<Content> parts;
+        b.setLength(0);
+        b.append("\r\n--");
+        b.append(boundary);
+        b.append("--");
+        out.write(b.toString().getBytes("euc-kr"));
+    }
 }

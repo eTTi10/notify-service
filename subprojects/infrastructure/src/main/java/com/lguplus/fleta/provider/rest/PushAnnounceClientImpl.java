@@ -4,23 +4,33 @@ import com.lguplus.fleta.client.PushAnnounceClient;
 import com.lguplus.fleta.config.PushConfig;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
-import com.lguplus.fleta.exception.push.*;
+import com.lguplus.fleta.exception.push.AcceptedException;
+import com.lguplus.fleta.exception.push.BadRequestException;
+import com.lguplus.fleta.exception.push.ExceptionOccursException;
+import com.lguplus.fleta.exception.push.ForbiddenException;
+import com.lguplus.fleta.exception.push.InternalErrorException;
+import com.lguplus.fleta.exception.push.NotExistRegistIdException;
+import com.lguplus.fleta.exception.push.NotFoundException;
+import com.lguplus.fleta.exception.push.PreConditionFailedException;
+import com.lguplus.fleta.exception.push.PushEtcException;
+import com.lguplus.fleta.exception.push.ServiceUnavailableException;
+import com.lguplus.fleta.exception.push.SocketTimeException;
+import com.lguplus.fleta.exception.push.UnAuthorizedException;
 import feign.FeignException;
 import feign.Response;
 import feign.RetryableException;
 import feign.codec.ErrorDecoder;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Push Announcement FeignClient
- *
+ * <p>
  * 공지 푸시등록
  */
 @Slf4j
@@ -54,15 +64,14 @@ public class PushAnnounceClientImpl implements PushAnnounceClient {
         Map<String, Map<String, String>> sendMap = new HashMap<>();
         sendMap.put("request", paramMap);
         try {
-            Map<String,Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
-            Map<String,String> stateMap = (Map<String,String>)retMap.get("response");
+            Map<String, Object> retMap = pushAnnounceFeignClient.requestAnnouncement(URI.create(getBaseUrl(paramMap.get("service_id"))), sendMap);
+            Map<String, String> stateMap = (Map<String, String>) retMap.get("response");
 
             //String json = objectMapper.writeValueAsString(stateMap)
             //log.debug("==json:" + json)
 
             return pushMapper.toResponseDto(stateMap);
-        }
-        catch (RetryableException ex) {
+        } catch (RetryableException ex) {
             log.debug(":::::::::::::::::::: RetryableException Read Timeout :: <{}>", ex.toString());
             throw new SocketTimeException();
         }
@@ -93,7 +102,7 @@ public class PushAnnounceClientImpl implements PushAnnounceClient {
         public RuntimeException decode(String methodKey, Response response) {
             FeignException ex = FeignException.errorStatus(methodKey, response);
 
-            if(ex instanceof FeignException.FeignServerException) {
+            if (ex instanceof FeignException.FeignServerException) {
                 //500 : InternalServerError
                 //501 : NotImplemented
                 //502 : BadGateway
@@ -111,8 +120,7 @@ public class PushAnnounceClientImpl implements PushAnnounceClient {
                         break;
                 }
 
-            }
-            else if(ex instanceof FeignException.FeignClientException) {
+            } else if (ex instanceof FeignException.FeignClientException) {
                 //400 : BadRequest
                 //401 : Unauthorized
                 //403 : Forbidden
@@ -141,9 +149,8 @@ public class PushAnnounceClientImpl implements PushAnnounceClient {
                     default:
                         break;
                 }
-            }
-            else {
-                if(202 == ex.status()) {
+            } else {
+                if (202 == ex.status()) {
                     return new AcceptedException();
                 }
             }

@@ -1,6 +1,7 @@
 package com.lguplus.fleta.config;
 
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,8 +9,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * MMSAgent 설정 파일
@@ -23,5 +22,6 @@ import java.util.Map;
 @Getter
 @Setter
 public class MmsAgentConfig {
+
     private Map<String, ?> mms;
 }

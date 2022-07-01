@@ -3,20 +3,18 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 class PushServiceTest {
@@ -38,18 +36,17 @@ class PushServiceTest {
         List<PushServiceResultDto> pushServiceResultDtoArrayList = new ArrayList<>();
 
         PushServiceResultDto pushServiceResultDto = PushServiceResultDto.builder()
-                .type("H")
-                .flag(sFlag)
-                .message(sMessage)
-                .build();
+            .type("H")
+            .flag(sFlag)
+            .message(sMessage)
+            .build();
 
         pushServiceResultDtoArrayList.add(pushServiceResultDto);
 
         SendPushResponseDto sendPushResponseDto = SendPushResponseDto.builder()
-                .message(sMessage)
-                .service(pushServiceResultDtoArrayList)
-                .build();
-
+            .message(sMessage)
+            .service(pushServiceResultDtoArrayList)
+            .build();
 
         given(pushDomainService.sendPushCode(any())).willReturn(sendPushResponseDto);
 
@@ -60,17 +57,17 @@ class PushServiceTest {
         items.add("sound!^ring.caf");
         items.add("cm!^aaaa");
 
-        Map<String, String> reserveMap = Map.of("address","111111");
+        Map<String, String> reserveMap = Map.of("address", "111111");
 
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
-                .registrationId("M00020200205")
-                .pushType("G|A|L")
-                .sendCode("P001")
-                .regType("1")
-                .serviceType("C|TV")
-                .reserve(reserveMap)
-                .items(items)
-                .build();
+            .registrationId("M00020200205")
+            .pushType("G|A|L")
+            .sendCode("P001")
+            .regType("1")
+            .serviceType("C|TV")
+            .reserve(reserveMap)
+            .items(items)
+            .build();
 
         //then
         SendPushResponseDto responseDto = pushService.sendPushCode(sendPushCodeRequestDto);

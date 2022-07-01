@@ -10,28 +10,28 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class CommonRequestDto {
 
-	private String saId;
+    private String saId;
 
-	private String stbMac;
+    private String stbMac;
 
-	private String appType;
+    private String appType;
 
-	private String appName;
+    private String appName;
 
-	private String uiVersion;
+    private String uiVersion;
 
-	private String previousPage;
+    private String previousPage;
 
-	private String currentPage;
+    private String currentPage;
 
-	private DeviceInfo deviceInfo;
+    private DeviceInfo deviceInfo;
 
-	private String osInfo;
+    private String osInfo;
 
-	private NetworkInfo networkInfo;
+    private NetworkInfo networkInfo;
 
-	private String deviceModel;
+    private String deviceModel;
 
-	private CarrierType carrierType;
+    private CarrierType carrierType;
 
 }

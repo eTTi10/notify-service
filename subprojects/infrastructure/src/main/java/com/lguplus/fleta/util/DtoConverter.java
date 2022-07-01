@@ -1,15 +1,22 @@
 package com.lguplus.fleta.util;
 
 import com.lguplus.fleta.exception.ServiceException;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
  * DTO 직접 반환을 위한 Converter
+ *
  * @version 1.0
  */
 public class DtoConverter {
@@ -20,6 +27,7 @@ public class DtoConverter {
 
     /**
      * 쿼리 결과 목록을 DTO(setter) 에 주입한다.
+     *
      * @param results   쿼리 결과 목록
      * @param classType dto
      * @return List<T>
@@ -41,7 +49,7 @@ public class DtoConverter {
         List<T> resultModels = new ArrayList<>();
 
         try {
-            for (Map<String, Object> element: aliasResults) {
+            for (Map<String, Object> element : aliasResults) {
                 Constructor<T> constructor = classType.getConstructor();
                 T model = constructor.newInstance();
                 executeReflection(element, setterMethod, model);
@@ -56,6 +64,7 @@ public class DtoConverter {
 
     /**
      * 단건 쿼리 결과를 DTO(setter) 에 주입한다.
+     *
      * @param element   단건 쿼리 결과
      * @param classType dto
      * @return Optional<T>
@@ -87,6 +96,7 @@ public class DtoConverter {
 
     /**
      * 컬럼명 aliasSet 와 일치하는 class 에 있는 setter 를 찾는다.
+     *
      * @param aliasSet  setter 이름
      * @param classType dto
      * @return Map<String, Method>
@@ -94,7 +104,7 @@ public class DtoConverter {
     private static <T> Map<String, Method> getSetterMethod(Set<String> aliasSet, Class<T> classType) {
         Map<String, Method> map = new HashMap<>();
 
-        for (String alias: aliasSet) {
+        for (String alias : aliasSet) {
             String setterMethodName = "set" + StringCaseUtils.autoPascalCase(alias);
 
             Arrays.stream(classType.getMethods())
@@ -107,12 +117,13 @@ public class DtoConverter {
 
     /**
      * setter 에 대한 정보를 가진 맵을 가지고 reflection (setter 파라미터에 맞는 형 변환 후 값 대입)을 수행한다.
+     *
      * @param element         Map 으로 변환된 쿼리 결과
      * @param setterMethodMap setter Map
      * @param model           dto
      */
     private static <T> void executeReflection(Map<String, Object> element, Map<String, Method> setterMethodMap, T model) throws InvocationTargetException, IllegalAccessException {
-        for (Map.Entry<String, Object> entry: element.entrySet()) {
+        for (Map.Entry<String, Object> entry : element.entrySet()) {
             String alias = entry.getKey();
             Object value = entry.getValue();
 
@@ -127,6 +138,7 @@ public class DtoConverter {
 
     /**
      * List<Object> 형식의 쿼리 결과를 List<Map<String, Object>> 로 변환한다. 쿼리 결과는 Object:Map<alias, tuple> 값이어야 한다.
+     *
      * @param results 쿼리 결과 목록
      * @return List<Map < String, Object>>
      */
@@ -136,6 +148,7 @@ public class DtoConverter {
 
     /**
      * Object 형식의 레코드 하나가 Map<alias, tuple> 값으로, 형변환을 통해 String, Object 형태로 변경하여 반환한다.
+     *
      * @param element 쿼리 결과(하나의 레코드)
      * @return Map<String, Object>
      */
@@ -144,7 +157,7 @@ public class DtoConverter {
 
         Map<String, Object> resultMap = new TreeMap<>();
 
-        for (Map.Entry<?, ?> entry: map.entrySet()) {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             String key = (String) entry.getKey(); // 칼럼 알리아스
             Object value = entry.getValue(); // 칼럼 값
 

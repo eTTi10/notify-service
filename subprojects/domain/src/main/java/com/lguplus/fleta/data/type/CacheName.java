@@ -4,8 +4,6 @@ import java.lang.reflect.Field;
 
 public final class CacheName {
 
-    private CacheName() {}
-
     public static final String PUSH_STATISTICS = "PUSH_STATISTICS";
 
     static {
@@ -24,5 +22,8 @@ public final class CacheName {
         } catch (final IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    private CacheName() {
     }
 }

@@ -17,7 +17,6 @@ public class NoPlaylistToDeleteException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NoPlaylistToDeleteException(final String message) {
@@ -26,7 +25,6 @@ public class NoPlaylistToDeleteException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NoPlaylistToDeleteException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoPlaylistToDeleteException(final Throwable cause) {

@@ -5,17 +5,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 public class NotSendTimeException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.SMS_SERVER_ERROR;
-    }
-
     public NotSendTimeException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public NotSendTimeException(final String message) {
@@ -24,7 +18,6 @@ public class NotSendTimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -34,12 +27,15 @@ public class NotSendTimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NotSendTimeException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 
 }
