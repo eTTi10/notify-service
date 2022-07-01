@@ -197,6 +197,11 @@ subprojects {
     asciidoctor {
         inputs.dir snippetsDir
         dependsOn test
+        sources{
+            include("**/*.adoc","**/**/*.adoc")
+        }
+
+        baseDirFollowsSourceFile()
     }
 //    asciidoctor.doFirst {
 //        delete file('src/main/resources/static/docs')

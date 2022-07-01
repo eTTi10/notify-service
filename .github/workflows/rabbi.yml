@@ -24,15 +24,15 @@ jobs:
         run: |
           mkdir -p docs
           cp subprojects/presentation/build/api-spec/openapi3.json docs/
-          cp subprojects/presentation/build/docs/asciidoc/api.html docs/index.html
-          cp subprojects/presentation/build/docs/asciidoc/api.html report/index.html
+          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
+          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
           
 
       - name: Copy document files
         run: |
           mkdir -p docs
-          cp subprojects/presentation/build/api-spec/openapi3.json docs/
-          cp subprojects/presentation/build/docs/asciidoc/api.html docs/index.html
+          cp /build/api-spec/openapi3.json docs/
+          cp /build/docs/asciidoc/index.html docs/index.html
 
       - name: Pushes docs to docs repository
         uses: cpina/github-action-push-to-another-repository@main
