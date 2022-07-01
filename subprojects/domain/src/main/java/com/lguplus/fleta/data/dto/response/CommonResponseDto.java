@@ -33,6 +33,7 @@ public interface CommonResponseDto extends PlainTextibleDto {
         public static final String COLUMN = "!^";
         public static final String RECORD = "!@";
         public static final String ARRAY = "\b";
+
         private Separator() {
         }
     }
