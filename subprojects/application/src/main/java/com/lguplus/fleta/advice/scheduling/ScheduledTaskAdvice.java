@@ -2,6 +2,8 @@ package com.lguplus.fleta.advice.scheduling;
 
 import com.lguplus.fleta.data.annotation.SynchronousScheduled;
 import com.lguplus.fleta.service.ManipulationDataDispatcher;
+import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,9 +15,6 @@ import org.redisson.api.RPermitExpirableSemaphore;
 import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
 
 @Profile("!test")
 @Slf4j
@@ -35,12 +34,12 @@ public class ScheduledTaskAdvice {
         }
 
         final RPermitExpirableSemaphore semaphore =
-                redissonClient.getPermitExpirableSemaphore("CN::SEMAPHORE::" + annotation.semaphore());
+            redissonClient.getPermitExpirableSemaphore("CN::SEMAPHORE::" + annotation.semaphore());
         if (!semaphore.isExists() && !semaphore.trySetPermits(1)) {
             return null;
         }
 
-        final String permitId =  semaphore.tryAcquire();
+        final String permitId = semaphore.tryAcquire();
         if (permitId == null) {
             return null;
         }
@@ -59,7 +58,7 @@ public class ScheduledTaskAdvice {
             return null;
         }
 
-        final Method method = ((MethodSignature)signature).getMethod();
+        final Method method = ((MethodSignature) signature).getMethod();
         if (method.getReturnType() != void.class) {
             if (log.isWarnEnabled()) {
                 log.warn("SynchronousScheduled method should returns void.");

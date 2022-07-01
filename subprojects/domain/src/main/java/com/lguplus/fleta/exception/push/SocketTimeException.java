@@ -12,11 +12,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class SocketTimeException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -26,7 +21,6 @@ public class SocketTimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public SocketTimeException(final String message) {
@@ -35,7 +29,6 @@ public class SocketTimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -45,11 +38,14 @@ public class SocketTimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SocketTimeException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
     }
 }

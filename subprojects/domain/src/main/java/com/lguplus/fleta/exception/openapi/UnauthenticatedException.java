@@ -17,7 +17,6 @@ public class UnauthenticatedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public UnauthenticatedException(final String message) {
@@ -26,7 +25,6 @@ public class UnauthenticatedException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class UnauthenticatedException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public UnauthenticatedException(final Throwable cause) {

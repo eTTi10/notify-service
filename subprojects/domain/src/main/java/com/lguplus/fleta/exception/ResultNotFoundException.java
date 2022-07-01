@@ -17,7 +17,6 @@ public class ResultNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ResultNotFoundException(final String message) {
@@ -26,7 +25,6 @@ public class ResultNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ResultNotFoundException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ResultNotFoundException(final Throwable cause) {

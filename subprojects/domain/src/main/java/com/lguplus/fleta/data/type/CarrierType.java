@@ -6,81 +6,79 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */
 public enum CarrierType {
 
-	/**
-	 *
-	 */
-	LGU("L"),
+    /**
+     *
+     */
+    LGU("L"),
 
-	/**
-	 *
-	 */
-	KT("K"),
+    /**
+     *
+     */
+    KT("K"),
 
-	/**
-	 *
-	 */
-	SKT("S"),
+    /**
+     *
+     */
+    SKT("S"),
 
-	/**
-	 *
-	 */
-	ETC("E"),
+    /**
+     *
+     */
+    ETC("E"),
 
-	/**
-	 *
-	 */
-	UNDEFINED("");
+    /**
+     *
+     */
+    UNDEFINED("");
 
-	/**
-	 *
-	 */
-	private static final Map<String, CarrierType> all = Stream.of(values())
-			.collect(Collectors.toMap(CarrierType::toString, Function.identity()));
+    /**
+     *
+     */
+    private static final Map<String, CarrierType> all = Stream.of(values())
+        .collect(Collectors.toMap(CarrierType::toString, Function.identity()));
 
-	/**
-	 *
-	 */
-	private final String code;
+    /**
+     *
+     */
+    private final String code;
 
-	/**
-	 *
-	 */
-	CarrierType(final String code) {
+    /**
+     *
+     */
+    CarrierType(final String code) {
 
-		this.code = code;
-	}
+        this.code = code;
+    }
 
-	/**
-	 *
-	 */
-	@Override
-	public String toString() {
+    /**
+     * @param code
+     * @return
+     */
+    public static CarrierType asValue(final String code) {
 
-		return code;
-	}
+        if (code == null || code.isBlank()) {
+            return null;
+        }
 
-	/**
-	 *
-	 * @param code
-	 * @return
-	 */
-	public static CarrierType asValue(final String code) {
+        final CarrierType carrierType = all.get(code);
+        if (carrierType == null) {
+            return UNDEFINED;
+        } else {
+            return carrierType;
+        }
+    }
 
-		if (code == null || code.isBlank()) {
-			return null;
-		}
+    /**
+     *
+     */
+    @Override
+    public String toString() {
 
-		final CarrierType carrierType = all.get(code);
-		if (carrierType == null) {
-			return UNDEFINED;
-		} else {
-			return carrierType;
-		}
-	}
+        return code;
+    }
 }

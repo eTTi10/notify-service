@@ -11,11 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class ExceptionOccursException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -25,7 +20,6 @@ public class ExceptionOccursException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExceptionOccursException(final String message) {
@@ -34,7 +28,6 @@ public class ExceptionOccursException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -44,11 +37,14 @@ public class ExceptionOccursException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExceptionOccursException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
     }
 }

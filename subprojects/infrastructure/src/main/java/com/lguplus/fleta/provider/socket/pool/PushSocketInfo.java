@@ -6,26 +6,24 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.FailException;
-import lombok.*;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Slf4j
 public class PushSocketInfo {
-    private final Socket socket;                //Push 소켓
-    private String channelID;                   //Push Header channelId
-    private String destinationIp;
-    private int port;
 
     private static final String PUSH_ENCODING = "euc-kr";
     private static final int PUSH_MSG_HEADER_LEN = 64;
@@ -42,11 +40,14 @@ public class PushSocketInfo {
     private static final int PROCESS_STATE_REQUEST_ACK = 14;
     private static final int COMMAND_REQUEST = 15;
     private static final int COMMAND_REQUEST_ACK = 16;
-
+    private final Socket socket;                //Push 소켓
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private String channelID;                   //Push Header channelId
+    private String destinationIp;
+    private int port;
     private long lastTransactionTime = Instant.now().getEpochSecond();
     private boolean isOpened = false;
     private boolean isFailure = false;
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private BufferedInputStream mInputStream;
     private BufferedOutputStream mOutputStream;
 
@@ -103,8 +104,7 @@ public class PushSocketInfo {
 
             isOpened = true;
             lastTransactionTime = Instant.now().getEpochSecond();
-        }
-        else {
+        } else {
             isOpened = false;
             log.error("requestPushServer return code failure channelId:{}", this.channelID);
         }
@@ -112,9 +112,9 @@ public class PushSocketInfo {
     }
 
     public boolean isInValid() {
-        return (   !socket.isConnected()
-                || !this.isOpened()
-                || this.isFailure());
+        return (!socket.isConnected()
+            || !this.isOpened()
+            || this.isFailure());
     }
 
     public boolean isTimeoutStatus(long closeSeconds) {
@@ -139,19 +139,19 @@ public class PushSocketInfo {
          * ------------------------------------------------------------------------------
          */
         byte[] byteArrayDatas = new byte[0];
-        if(COMMAND_REQUEST == requestMsgId) {
+        if (COMMAND_REQUEST == requestMsgId) {
             byteArrayDatas = notiMsg.getBytes(PUSH_ENCODING);
         }
 
         byte[] sendHeader = new byte[PUSH_MSG_HEADER_LEN + byteArrayDatas.length];
         System.arraycopy(Ints.toByteArray(requestMsgId), 0, sendHeader, 0, 4);
-        if(COMMAND_REQUEST == requestMsgId) {
+        if (COMMAND_REQUEST == requestMsgId) {
             System.arraycopy(transactionId.getBytes(PUSH_ENCODING), 0, sendHeader, 4, 12);   //Transaction Id
         }
         System.arraycopy(this.channelID.getBytes(PUSH_ENCODING), 0, sendHeader, 16, 14);
         System.arraycopy(destinationIp.getBytes(PUSH_ENCODING), 0, sendHeader, 32, destinationIp.getBytes(PUSH_ENCODING).length);
         System.arraycopy(Ints.toByteArray(byteArrayDatas.length), 0, sendHeader, 60, 4);
-        if(COMMAND_REQUEST == requestMsgId) {
+        if (COMMAND_REQUEST == requestMsgId) {
             System.arraycopy(byteArrayDatas, 0, sendHeader, 64, byteArrayDatas.length); //Data
         }
 
@@ -177,7 +177,7 @@ public class PushSocketInfo {
 
     }
 
-    private PushRcvHeaderVo recvPushMessageHeader()  throws IOException {
+    private PushRcvHeaderVo recvPushMessageHeader() throws IOException {
         /* server -> client header
          * Message Header Structure (64Byte)
          * ------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ public class PushSocketInfo {
         PushResponseDto responseDto = PushResponseDto.builder().responseCode(pushRcvHeaderVo.getStatus()).build();
 
         switch (pushRcvHeaderVo.getStatus()) {
-            case SUCCESS :
+            case SUCCESS:
                 byte[] bJsonMsg = new byte[pushRcvHeaderVo.getRecvLength() - 2];
                 System.arraycopy(pushRcvHeaderVo.getRecvBuffer(), 2, bJsonMsg, 0, bJsonMsg.length);
                 String retJsonMsg = new String(bJsonMsg, PUSH_ENCODING);
@@ -230,7 +230,7 @@ public class PushSocketInfo {
                 responseDto.setStatusMsg(msgWrapperVo.getResponse().getStatusMsg());
                 return responseDto;
 
-            case FAIL :
+            case FAIL:
                 log.error("[setNoti] 서버 응답 FA ");
                 break;
 
@@ -245,8 +245,7 @@ public class PushSocketInfo {
 
     public void isServerInValidStatus() {
 
-        try
-        {
+        try {
             sendHeaderMsg(CHANNEL_PROCESS_STATE_REQUEST);
 
             //Header
@@ -266,8 +265,7 @@ public class PushSocketInfo {
             if (healthStatus == 1) {
                 log.debug("[" + channelID + "][Health Check] - [SUCCESS]");
                 lastTransactionTime = Instant.now().getEpochSecond();
-            }
-            else {
+            } else {
                 log.error("[" + channelID + "][Health Check] - [Failure]");
             }
 
@@ -284,7 +282,7 @@ public class PushSocketInfo {
 
         if (length >= 0 && length < bufferSize) {
             log.error("readByteBuffer length < bufferSize error!");
-        } else if (length == -1){
+        } else if (length == -1) {
             log.error("readByteBuffer error!");
             StackTraceElement[] stacks = (new Throwable()).getStackTrace();
             for (StackTraceElement element : stacks) {
@@ -295,12 +293,11 @@ public class PushSocketInfo {
         return buffer;
     }
 
-    public void closeSocket()  {
+    public void closeSocket() {
 
         try {
             closeSocketResource();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             log.error("closeSocket io-exception : {}", e.getMessage());
         }
 
@@ -321,7 +318,7 @@ public class PushSocketInfo {
 
     public int byteToInt(byte[] src, int... b) {
         int offset = 0;
-        if(b.length > 0) {
+        if (b.length > 0) {
             offset = b[0];
         }
         return (src[offset] & 0xff) << 24 | (src[offset + 1] & 0xff) << 16 | (src[offset + 2] & 0xff) << 8 | src[offset + 3] & 0xff;
@@ -334,7 +331,7 @@ public class PushSocketInfo {
     }
 
     public String toString() {
-        return channelID + ":"  + port + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
+        return channelID + ":" + port + ",isOpened:" + isOpened + ",isFailure:" + isFailure + ",time:" + (Instant.now().getEpochSecond() - this.lastTransactionTime);
     }
 
     @Getter
@@ -342,6 +339,7 @@ public class PushSocketInfo {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @Builder
     static class PushRcvHeaderVo {
+
         private String status;
         private int recvLength;
         private byte[] recvBuffer;
@@ -352,6 +350,7 @@ public class PushSocketInfo {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @ToString
     static class PushRcvStatusMsgVo {
+
         @JsonProperty("msg_id")
         private String messageId;
 
@@ -370,6 +369,7 @@ public class PushSocketInfo {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     @ToString
     static class PushRcvStatusMsgWrapperVo {
+
         @JsonProperty("response")
         private PushRcvStatusMsgVo response;
     }

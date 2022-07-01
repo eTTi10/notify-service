@@ -5,7 +5,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class SendMmsRequestDto extends CommonRequestDto{
+public class SendMmsRequestDto extends CommonRequestDto {
 
     private String saId;
 

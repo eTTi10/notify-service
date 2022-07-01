@@ -3,27 +3,25 @@ package com.lguplus.fleta.provider.external.mmsagent;
 import com.lguplus.fleta.data.dto.request.MmsRequestDto;
 import com.lguplus.fleta.data.dto.request.SendMmsRequestDto;
 import com.lguplus.fleta.provider.external.mmsagent.soap.MmsAgentSoapClient;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @Slf4j
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 class MmsAgentSoapClientTest {
-    private static Map<String, Object> mmsConfig;//yml파일/mms
+
     private static final String saId = "M14070200159";
     private static final String stbMac = "9893.cc1f.e11c";
     private static final String mmsCd = "M011";
     private static final String ctn = "01025851111";
     private static final String replacement = "영희|컴퓨터";
-
+    private static Map<String, Object> mmsConfig;//yml파일/mms
     private MmsAgentSoapClient mmsAgentSoapClient;
 
     @BeforeEach
@@ -49,12 +47,12 @@ class MmsAgentSoapClientTest {
     @Test
     void testSendMMS() {
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
-                .saId(saId)
-                .stbMac(stbMac)
-                .mmsCd(mmsCd)
-                .ctn(ctn)
-                .replacement(replacement)
-                .build();
+            .saId(saId)
+            .stbMac(stbMac)
+            .mmsCd(mmsCd)
+            .ctn(ctn)
+            .replacement(replacement)
+            .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
         mmsAgentSoapClient.sendMMS(mmsConfig, mmsRequestDto);
         log.info("End SUCCESS");
@@ -63,12 +61,12 @@ class MmsAgentSoapClientTest {
     @Test
     void testSendMMS_urlNull() {
         SendMmsRequestDto sendMmsRequestDto = SendMmsRequestDto.builder()
-                .saId(saId)
-                .stbMac(stbMac)
-                .mmsCd(mmsCd)
-                .ctn(ctn)
-                .replacement(replacement)
-                .build();
+            .saId(saId)
+            .stbMac(stbMac)
+            .mmsCd(mmsCd)
+            .ctn(ctn)
+            .replacement(replacement)
+            .build();
         MmsRequestDto mmsRequestDto = MmsRequestDto.builder().build();
         mmsConfig.put("server_url", "");
         String resultStr = mmsAgentSoapClient.sendMMS(mmsConfig, mmsRequestDto);

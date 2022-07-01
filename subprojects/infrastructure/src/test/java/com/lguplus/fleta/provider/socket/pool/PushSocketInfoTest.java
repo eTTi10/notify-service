@@ -3,11 +3,6 @@ package com.lguplus.fleta.provider.socket.pool;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.push.FailException;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,9 +10,21 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -33,10 +40,6 @@ class PushSocketInfoTest {
     int testTimeout = 2000;
     String testDestIp = "222.231.13.85";
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @BeforeAll
     static void setUpAll() throws InterruptedException {
         server = new NettyTcpJunitServer();
@@ -51,6 +54,10 @@ class PushSocketInfoTest {
         server.stopServer();
     }
 
+    @BeforeEach
+    void setUp() {
+    }
+
     @Test
     void test_01_isInValid() throws IOException {
 
@@ -58,8 +65,7 @@ class PushSocketInfoTest {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         try {
             pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "0", testDestIp);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
 
         }
         Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "socket");
@@ -94,7 +100,7 @@ class PushSocketInfoTest {
     void test_03_recvPushMessageBody() throws IOException {
 
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"1", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "1", testDestIp);
         //Object normalSocket = ReflectionTestUtils.getField(pushSocketInfo, "pushSocket");
         assertTrue(!pushSocketInfo.isInValid());
 
@@ -102,13 +108,13 @@ class PushSocketInfoTest {
 
         //byte[] bJsonMsg = new byte[pushRcvHeaderVo.getRecvLength() - 2];
         String responseJson = "SC{\n" +
-                "\"response\" : {\n" +
-                "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                "\"push_id\" : \"202201030820\",\n" +
-                "\"status_code\" : \"200\",\n" +
-                "\"statusmsg\" : \"@test_message\"\n" +
-                "}\n" +
-                "}";
+            "\"response\" : {\n" +
+            "\"msg_id\" : \"PUSH_NOTI\",\n" +
+            "\"push_id\" : \"202201030820\",\n" +
+            "\"status_code\" : \"200\",\n" +
+            "\"statusmsg\" : \"@test_message\"\n" +
+            "}\n" +
+            "}";
         responseJson = responseJson.replaceAll("(\r\n|\n)", "");
         byte[] byteBody = responseJson.getBytes(PUSH_ENCODING);
 
@@ -119,7 +125,7 @@ class PushSocketInfoTest {
 
         final PushSocketInfo.PushRcvHeaderVo testVo2 = PushSocketInfo.PushRcvHeaderVo.builder().status("FA").recvLength(byteBody.length).recvBuffer(byteBody).build();
         assertThrows(FailException.class, () -> {
-          ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo2);
+            ReflectionTestUtils.invokeMethod(pushSocketInfo, "recvPushMessageBody", testVo2);
         });
 
         final PushSocketInfo.PushRcvHeaderVo testVo1 = PushSocketInfo.PushRcvHeaderVo.builder().status("--").recvLength(byteBody.length).recvBuffer(byteBody).build();
@@ -128,11 +134,11 @@ class PushSocketInfoTest {
         });
 
         String responseJson1 = "SC{\n" +
-                "\"response\" : {\n" +
-                "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                "\"push_id\" : \"202201030820\"\n" +
-                "}\n" +
-                "}";
+            "\"response\" : {\n" +
+            "\"msg_id\" : \"PUSH_NOTI\",\n" +
+            "\"push_id\" : \"202201030820\"\n" +
+            "}\n" +
+            "}";
         responseJson1 = responseJson1.replaceAll("(\r\n|\n)", "");
         byte[] byteBody1 = responseJson1.getBytes(PUSH_ENCODING);
 
@@ -147,7 +153,7 @@ class PushSocketInfoTest {
     @Test
     void test_04_isServerInValidStatus() throws IOException {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"2", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "2", testDestIp);
 
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
         short retSuccess = 1;//Success
@@ -178,7 +184,7 @@ class PushSocketInfoTest {
         byte[] reqData = new byte[]{(byte) 0x53, (byte) 0x43, (byte) 0x00, (byte) 0x00};//SC
 
         doReturn("FA").when(spyPushSocket).getEncodeStr(reqData, 0, 2);
-        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"3", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "3", testDestIp);
 
         assertTrue(!spyPushSocket.isOpened());
         spyPushSocket.closeSocket();
@@ -191,7 +197,7 @@ class PushSocketInfoTest {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
 
-        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"4", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "4", testDestIp);
 
         final int CHANNEL_PROCESS_STATE_REQUEST = 13;
         doThrow(new IOException("")).when(spyPushSocket).sendHeaderMsg(CHANNEL_PROCESS_STATE_REQUEST);//, null, null);
@@ -199,7 +205,7 @@ class PushSocketInfoTest {
         long firstTime = spyPushSocket.getLastTransactionTime();
         //assertThrows(IOException.class, () -> {
         spyPushSocket.isServerInValidStatus();
-            //ReflectionTestUtils.invokeMethod(spyPushSocket, "isServerInValidStatus");
+        //ReflectionTestUtils.invokeMethod(spyPushSocket, "isServerInValidStatus");
         //});
         long lastTime = spyPushSocket.getLastTransactionTime();
         assertEquals(firstTime, lastTime);
@@ -214,7 +220,7 @@ class PushSocketInfoTest {
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
         PushSocketInfo spyPushSocket = spy(pushSocketInfo);
 
-        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"5", testDestIp);
+        spyPushSocket.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "5", testDestIp);
 
         doThrow(new IOException("")).when(spyPushSocket).closeSocketResource();
         assertThrows(IOException.class, () -> {
@@ -229,11 +235,11 @@ class PushSocketInfoTest {
     void test_08_readByteBuffer() throws IOException {
 
         PushSocketInfo pushSocketInfo = new PushSocketInfo();
-        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId+"6", testDestIp);
+        pushSocketInfo.openSocket(SERVER_IP, SERVER_PORT, testTimeout, channelId + "6", testDestIp);
 
         int testValue = 999;
         ReflectionTestUtils.setField(pushSocketInfo, "mInputStream"
-                , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(testValue).putInt(testValue).array())));
+            , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(8).putInt(testValue).putInt(testValue).array())));
         byte[] recvBytes = ReflectionTestUtils.invokeMethod(pushSocketInfo, "readByteBuffer", 4);
         ByteBuffer recvBuff = ByteBuffer.wrap(recvBytes, 0, 4);
         assertEquals(testValue, recvBuff.getInt());
@@ -243,7 +249,7 @@ class PushSocketInfoTest {
 
         //length == -1
         ReflectionTestUtils.setField(pushSocketInfo, "mInputStream"
-                , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(0).array())));
+            , new BufferedInputStream(new ByteArrayInputStream(ByteBuffer.allocate(0).array())));
         recvBytes = ReflectionTestUtils.invokeMethod(pushSocketInfo, "readByteBuffer", 4);
 
         pushSocketInfo.closeSocket();

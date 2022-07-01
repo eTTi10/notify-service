@@ -19,49 +19,48 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.content;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.MM7Context;
-
 import java.io.IOException;
 import java.io.OutputStream;
 
 public class TextContent extends BasicContent {
 
-	public TextContent() {
-		this("");
-	}
+    private String text;
 
-	public TextContent(String text) {
-		setText(text);
-		setContentType("text/plain; charset=\"euc-kr\"");
-	}
+    public TextContent() {
+        this("");
+    }
 
-	public String getText() {
-		return text;
-	}
+    public TextContent(String text) {
+        setText(text);
+        setContentType("text/plain; charset=\"euc-kr\"");
+    }
 
-	public void setText(String text) {
-		this.text = text;
-	}
+    public String getText() {
+        return text;
+    }
 
-	@Override
-	public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
-		if (contentId == null) {
-			contentId = getContentId();
-		}
-		StringBuilder b = new StringBuilder();
-		b.append("\r\nContent-Type: ");
-		b.append(getContentType());
-		if (contentId != null) {
-			b.append("\r\nContent-ID: <" + contentId + ">");
-		}
-		b.append("\r\n\r\n");
-		out.write(b.toString().getBytes("euc-kr"));
-		out.write(text.getBytes("euc-kr"));
-	}
+    public void setText(String text) {
+        this.text = text;
+    }
 
-	@Override
-	public int getContentLength() {
-		return text.length();
-	}
+    @Override
+    public void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException {
+        if (contentId == null) {
+            contentId = getContentId();
+        }
+        StringBuilder b = new StringBuilder();
+        b.append("\r\nContent-Type: ");
+        b.append(getContentType());
+        if (contentId != null) {
+            b.append("\r\nContent-ID: <" + contentId + ">");
+        }
+        b.append("\r\n\r\n");
+        out.write(b.toString().getBytes("euc-kr"));
+        out.write(text.getBytes("euc-kr"));
+    }
 
-	private String text;
+    @Override
+    public int getContentLength() {
+        return text.length();
+    }
 }

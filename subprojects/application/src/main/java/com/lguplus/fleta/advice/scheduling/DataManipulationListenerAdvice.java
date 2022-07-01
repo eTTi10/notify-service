@@ -14,10 +14,10 @@ import org.springframework.stereotype.Component;
 public class DataManipulationListenerAdvice {
 
     @Around("target(com.lguplus.fleta.service.DataManipulationListener) && (" +
-                "execution(public void *.onInsert(java.util.Map)) || " +
-                "execution(public void *.onUpdate(java.util.Map, java.util.Map)) || " +
-                "execution(public void *.onDelete(java.util.Map))" +
-            ")")
+        "execution(public void *.onInsert(java.util.Map)) || " +
+        "execution(public void *.onUpdate(java.util.Map, java.util.Map)) || " +
+        "execution(public void *.onDelete(java.util.Map))" +
+        ")")
     public Object proceed(final ProceedingJoinPoint joinPoint) throws Throwable {
 
         try {

@@ -3,19 +3,17 @@ package com.lguplus.fleta.service.push;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class PushMultiServiceTest {
@@ -50,13 +48,13 @@ class PushMultiServiceTest {
         addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         PushRequestMultiDto pushRequestMultiDto = PushRequestMultiDto.builder()
-                .serviceId("lguplushdtvgcm")
-                .pushType("G")
-                .applicationId("30011")
-                .users(items)
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("lguplushdtvgcm")
+            .pushType("G")
+            .applicationId("30011")
+            .users(items)
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
 
         PushClientResponseMultiDto responseDto = pushMultiService.requestMultiPush(pushRequestMultiDto);
 

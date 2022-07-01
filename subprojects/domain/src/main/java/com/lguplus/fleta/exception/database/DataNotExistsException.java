@@ -17,7 +17,6 @@ public class DataNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DataNotExistsException(final String message) {
@@ -26,7 +25,6 @@ public class DataNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DataNotExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DataNotExistsException(final Throwable cause) {

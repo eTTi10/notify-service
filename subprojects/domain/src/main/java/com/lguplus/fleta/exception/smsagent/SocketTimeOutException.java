@@ -12,12 +12,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class SocketTimeOutException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.SMS_SERVER_ERROR;
-    }
-
-
     /**
      *
      */
@@ -26,8 +20,8 @@ public class SocketTimeOutException extends NotifyRuntimeException {
         super();
     }
 
+
     /**
-     *
      * @param message
      */
     public SocketTimeOutException(final String message) {
@@ -36,7 +30,6 @@ public class SocketTimeOutException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -46,11 +39,14 @@ public class SocketTimeOutException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SocketTimeOutException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.SMS_SERVER_ERROR;
     }
 }

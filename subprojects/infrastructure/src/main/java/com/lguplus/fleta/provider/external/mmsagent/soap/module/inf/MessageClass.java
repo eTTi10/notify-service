@@ -19,23 +19,21 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.inf;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.common.StringToEnumMap;
-
 import java.util.Map;
 
 public enum MessageClass {
 
-	PERSONAL("Personal"), INFORMATIONAL("Informational"), ADVERTISMENT("Advertisment"), AUTO("Auto");
+    PERSONAL("Personal"), INFORMATIONAL("Informational"), ADVERTISMENT("Advertisment"), AUTO("Auto");
 
-	private MessageClass(String display) {
-		this.display = display;
-	}
+    static final Map<String, MessageClass> map = new StringToEnumMap<>(MessageClass.values());
+    private final String display;
 
-	@Override
-	public String toString() {
-		return display;
-	}
+    MessageClass(String display) {
+        this.display = display;
+    }
 
-	private final String display;
-
-	static final Map<String, MessageClass> map = new StringToEnumMap<>(MessageClass.values());
+    @Override
+    public String toString() {
+        return display;
+    }
 }

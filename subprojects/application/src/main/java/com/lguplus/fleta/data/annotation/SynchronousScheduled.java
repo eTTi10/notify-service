@@ -1,12 +1,11 @@
 package com.lguplus.fleta.data.annotation;
 
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

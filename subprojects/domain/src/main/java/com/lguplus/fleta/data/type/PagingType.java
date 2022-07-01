@@ -6,66 +6,64 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author Minwoo Lee
  * @since 1.0
  */
 public enum PagingType {
 
-	/**
-	 *
-	 */
-	NEW("N"),
+    /**
+     *
+     */
+    NEW("N"),
 
-	/**
-	 *
-	 */
-	UNDEFINED("");
+    /**
+     *
+     */
+    UNDEFINED("");
 
-	/**
-	 *
-	 */
-	private static final Map<String, PagingType> all = Stream.of(values())
-			.collect(Collectors.toMap(PagingType::toString, Function.identity()));
+    /**
+     *
+     */
+    private static final Map<String, PagingType> all = Stream.of(values())
+        .collect(Collectors.toMap(PagingType::toString, Function.identity()));
 
-	/**
-	 *
-	 */
-	private final String code;
+    /**
+     *
+     */
+    private final String code;
 
-	/**
-	 *
-	 */
-	PagingType(final String code) {
+    /**
+     *
+     */
+    PagingType(final String code) {
 
-		this.code = code;
-	}
+        this.code = code;
+    }
 
-	/**
-	 *
-	 */
-	@Override
-	public String toString() {
+    /**
+     * @param code
+     * @return
+     */
+    public static PagingType asValue(final String code) {
 
-		return code;
-	}
+        if (code == null || code.isBlank()) {
+            return null;
+        }
 
-	/**
-	 *
-	 * @param code
-	 * @return
-	 */
-	public static PagingType asValue(final String code) {
+        final PagingType pagingType = all.get(code);
+        if (pagingType == null) {
+            return UNDEFINED;
+        } else {
+            return pagingType;
+        }
+    }
 
-		if (code == null || code.isBlank()) {
-			return null;
-		}
+    /**
+     *
+     */
+    @Override
+    public String toString() {
 
-		final PagingType pagingType = all.get(code);
-		if (pagingType == null) {
-			return UNDEFINED;
-		} else {
-			return pagingType;
-		}
-	}
+        return code;
+    }
 }

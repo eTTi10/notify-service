@@ -8,18 +8,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class DatabaseException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public DatabaseException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public DatabaseException(final String message) {
@@ -28,7 +21,6 @@ public class DatabaseException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,12 +30,16 @@ public class DatabaseException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DatabaseException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 }

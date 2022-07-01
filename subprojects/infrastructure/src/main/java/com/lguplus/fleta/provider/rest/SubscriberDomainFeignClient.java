@@ -2,11 +2,10 @@ package com.lguplus.fleta.provider.rest;
 
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.SaIdDto;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

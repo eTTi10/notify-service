@@ -11,11 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class SocketNotFoundException extends NotifyRuntimeException {
 
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.PUSH_SERVER_ERROR;
-    }
-
     /**
      *
      */
@@ -25,7 +20,6 @@ public class SocketNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public SocketNotFoundException(final String message) {
@@ -34,7 +28,6 @@ public class SocketNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -44,11 +37,14 @@ public class SocketNotFoundException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SocketNotFoundException(final Throwable cause) {
 
         super(cause);
+    }
+
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.PUSH_SERVER_ERROR;
     }
 }

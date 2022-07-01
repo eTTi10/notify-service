@@ -2,11 +2,10 @@ package com.lguplus.fleta.exhandler;
 
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
-import lombok.AllArgsConstructor;
-import org.springframework.util.ReflectionUtils;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import lombok.AllArgsConstructor;
+import org.springframework.util.ReflectionUtils;
 
 @AllArgsConstructor
 public class CustomErrorResponseConverter {
@@ -15,7 +14,7 @@ public class CustomErrorResponseConverter {
     private final String builderName;
 
     public CommonResponseDto convert(final ErrorResponseDto error)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         final Object builder = responseClass.getMethod(builderName).invoke(null);
         final Class<?> builderClass = builder.getClass();
@@ -23,6 +22,6 @@ public class CustomErrorResponseConverter {
         builderClass.getMethod("message", String.class).invoke(builder, error.getMessage());
         final Method builderMethod = builderClass.getMethod("build");
         ReflectionUtils.makeAccessible(builderMethod);
-        return (CommonResponseDto)builderMethod.invoke(builder);
+        return (CommonResponseDto) builderMethod.invoke(builder);
     }
 }
