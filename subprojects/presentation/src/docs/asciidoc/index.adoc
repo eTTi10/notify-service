@@ -2,9 +2,37 @@ ifndef::snippets[]
 :snippets: ./build/generated-snippets
 endif::[]
 
-:operation-HTTP-request-title:  HTTP request
 
-operation::postDeviceInfo[snippets='http-request,http-response']
-operation::postDeviceInfoBadParam[snippets='http-request,http-response']
-operation::putDeviceInfo[snippets='http-request,http-response']
-operation::deleteDeviceInfo[snippets='http-request,http-response']
+=== postDeviceInfo
+
+==== Http Request
+include::{snippets}/postDeviceInfo/http-request.adoc[]
+
+==== Http Response
+include::{snippets}/postDeviceInfo/http-response.adoc[]
+
+==== Failure Case
+===== 400 Bad Request
+include::{snippets}/postDeviceInfoBadParam/http-request.adoc[]
+include::{snippets}/postDeviceInfoBadParam/http-response.adoc[]
+
+=== putDeviceInfo
+
+==== Http Request
+include::{snippets}/putDeviceInfo/http-request.adoc[]
+
+
+
+==== Http Response
+include::{snippets}/putDeviceInfo/http-response.adoc[]
+
+
+=== deleteDeviceInfo
+
+==== Http Request
+include::{snippets}/deleteDeviceInfo/http-request.adoc[]
+
+==== Http Response
+include::{snippets}/deleteDeviceInfo/http-response.adoc[]
+
+
