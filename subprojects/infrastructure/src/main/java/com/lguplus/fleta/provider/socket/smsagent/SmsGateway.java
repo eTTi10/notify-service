@@ -467,13 +467,14 @@ public class SmsGateway {
 
         @Override
         public void run() {
-            while (isBind) {
-                try {
+            try {
+                while (isBind) {
                     readHeader();
-                } catch (IOException ignored) {
-                    mStatusLog.error("readHeader Error");
-                    reConnectGateway();
                 }
+            } catch (IOException ignored) {
+                mStatusLog.error("readHeader Error");
+                setBindState(false);
+                connectGateway();
             }
         }
     }
