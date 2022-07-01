@@ -17,8 +17,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -281,6 +279,7 @@ public class SmsGateway {
             ByteBuffer rHeader = ByteBuffer.wrap(buffer, 0, bufferSize);
             return rHeader.getInt();
         } else {
+            log.debug("return -1");
             return -1;
         }
     }
@@ -385,6 +384,7 @@ public class SmsGateway {
                 sn = readBufferToInt(4);
                 String time = readBufferToString(20);
                 String code = readBufferToString(12);
+                log.debug("REPORT");
 
                 StringBuilder resultBuilder = new StringBuilder();
 
@@ -405,6 +405,7 @@ public class SmsGateway {
                 isLinked = true;
                 break;
             default:
+                log.debug("default! type : {}" , type);
                 break;
         }
 
@@ -472,6 +473,7 @@ public class SmsGateway {
         public void run() {
             try {
                 while (isBind) {
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
                     log.debug("loop ....");
                     readHeader();
                 }
