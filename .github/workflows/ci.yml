@@ -2,7 +2,7 @@ name: document CI
 
 on:
   push:
-    branches: [  feature/deviceinfo  ]
+    branches: [main]
 
 env:  # 해당 Action Workflow(ci-containerize-with-runner)가 사용할 전역 변수
   COMMITER_NAME: iptv_develop2
