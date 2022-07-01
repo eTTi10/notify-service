@@ -11,6 +11,7 @@ public class CacheNameType {
     public static final String TTL_D1 = "TTL_D1";
     public static final String TTL_D7 = "TTL_D7";
     public static final String TTL_UNLIMITED = "TTL_UNLIMITED";
+
     private CacheNameType() {
     }
 }

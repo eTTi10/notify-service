@@ -141,7 +141,7 @@ public class SmsGateway {
 
             bindGateway();
         } catch (IOException e) {
-            mStatusLog.error("connectGateway Error");
+            log.error("connectGateway Error");
             reConnectGateway(); // <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
         }
 
@@ -149,7 +149,7 @@ public class SmsGateway {
 
     private void reConnectGateway() {
 
-        mStatusLog.info("ReConnect Try[" + mPort + "]");
+        log.info("ReConnect Try[" + mPort + "]");
 
         setBindState(false);
         mTimerMap.get(TIMER_RECONNECT).cancel();
@@ -183,7 +183,7 @@ public class SmsGateway {
         mOutputStream.write(header);
         mOutputStream.write(body);
 
-        mStatusLog.info("Bind Try[" + mPort + "]");
+        log.info("Bind Try[" + mPort + "]");
     }
 
     public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
@@ -227,7 +227,7 @@ public class SmsGateway {
 
     public void checkLink() throws IOException {
 
-        mStatusLog.info("checkLink[" + mPort + "]");
+        log.info("checkLink[" + mPort + "]");
 
         byte[] header = new byte[8];
 
@@ -340,7 +340,7 @@ public class SmsGateway {
 
                 result = readBufferToInt(4);
 
-                mStatusLog.info("readHeader() BIND_ACK result:" + result);
+                log.info("readHeader() BIND_ACK result:" + result);
 
                 setBindState(0 == result);
 
@@ -352,16 +352,16 @@ public class SmsGateway {
 
                     mTimerMap.get(TIMER_LINK_CHECK).schedule(timerTask, LINK_CHECK_TERM, LINK_CHECK_TERM);
 
-                    mStatusLog.info("Bind Success[" + mPort + "]");
+                    log.info("Bind Success[" + mPort + "]");
                 } else {
-                    mStatusLog.info("Bind Fail[" + mPort + "]");
+                    log.info("Bind Fail[" + mPort + "]");
                     reConnectGateway();
                 }
                 break;
             case DELIVER_ACK:
                 result = readBufferToInt(4);
 
-                mStatusLog.info("readHeader() DELIVER_ACK result:" + result);
+                log.info("readHeader() DELIVER_ACK result:" + result);
 
                 switch (result) {
                     case 0:
@@ -393,12 +393,12 @@ public class SmsGateway {
                 resultBuilder.append(code).append("|");
                 resultBuilder.append(time);
 
-                mFileLog.info(resultBuilder.toString());
+                log.debug(resultBuilder.toString());
 
                 sendReport();
                 break;
             case LINK_RECV:
-                mStatusLog.info("Link Success[" + mPort + "]");
+                log.info("Link Success[" + mPort + "]");
                 isLinked = true;
                 break;
             default:
@@ -469,10 +469,11 @@ public class SmsGateway {
         public void run() {
             try {
                 while (isBind) {
+                    log.debug("loop ....");
                     readHeader();
                 }
             } catch (IOException ignored) {
-                mStatusLog.error("readHeader Error");
+                log.error("readHeader Error");
                 setBindState(false);
                 connectGateway();
             }
