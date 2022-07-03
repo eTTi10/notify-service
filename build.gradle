@@ -194,20 +194,23 @@ subprojects {
         }
         outputs.dir snippetsDir
     }
+    ext {
+        snippetsDir = file('build/generated-snippets')
+    }
     asciidoctor {
         inputs.dir snippetsDir
         dependsOn test
         sources{
-//            include("**/*.adoc","**/**/*.adoc")
-            include("/**/*.adoc","**/**/*.adoc")
-
+            include("**/*.adoc","/**/*.adoc")
         }
 
         baseDirFollowsSourceFile()
     }
-//    asciidoctor.doFirst {
-//        delete file('src/main/resources/static/docs')
-//    }
+
+    asciidoctor.doFirst {
+        delete file('src/main/resources/static/docs')
+    }
+
     task copyDocument(type: Copy) {
         dependsOn asciidoctor
         from file("build/docs/asciidoc")
