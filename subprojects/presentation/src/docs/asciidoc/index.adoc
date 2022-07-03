@@ -16,6 +16,7 @@ include::{snippets}/postDeviceInfo/http-request.adoc[]
 include::{snippets}/postDeviceInfo/http-response.adoc[]
 
 ==== Failure Case
+
 ===== 200 Bad Request
 include::{snippets}/postDeviceInfoBadParam/http-request.adoc[]
 include::{snippets}/postDeviceInfoBadParam/http-response.adoc[]
@@ -24,6 +25,7 @@ include::{snippets}/postDeviceInfoBadParam/http-response.adoc[]
 
 ==== Http Request
 include::{snippets}/putDeviceInfo/http-request.adoc[]
+
 ==== Http Response
 include::{snippets}/putDeviceInfo/http-response.adoc[]
 
