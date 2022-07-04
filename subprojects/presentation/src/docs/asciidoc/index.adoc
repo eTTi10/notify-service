@@ -6,6 +6,8 @@ endif::[]
 //operation::postDeviceInfoBadParam[snippets='http-request,http-response']
 //operation::putDeviceInfo[snippets='http-request,http-response']
 //operation::deleteDeviceInfo[snippets='http-request,http-response']
+=== print snippets path
+{snippets}
 
 === postDeviceInfo
 
