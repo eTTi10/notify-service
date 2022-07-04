@@ -10,7 +10,7 @@ on:
 env:
   TOKEN: ${{ secrets.GHP_TOKEN_SJH }}
   HELM_REPO_NAME: LGUPLUS-IPTV-MSA/helm-charts
-  HELM_REF: develop
+  HELM_REF: main
   CHART_PATH: helm-charts
   JAR_PATH: subprojects/boot/build/libs
 
@@ -210,7 +210,7 @@ jobs:
           yq eval -i '.image.version = "${{ env.TAG }}"' shd-values.yaml
           yq eval -i '.image.version = "${{ env.TAG }}"' prd-values.yaml 
 
-      - name: Push helm (develop branch)
+      - name: Push helm
         working-directory: ./helm
         run: |
           git pull origin ${{ env.HELM_REF }}
@@ -218,34 +218,6 @@ jobs:
           git commit -m "Update from ${{ env.COMMIT_URI }}"
           git push
 
-      - name: Push helm (staging branch)
-        if: ${{ startsWith(github.ref_name, 'release/') }}
-        working-directory: ./helm
-        run: |
-          git fetch origin staging
-          git checkout staging
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/stg-values.yaml << EOF
-          a
-          EOF
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-
-          git push
-
-      - name: Push helm (main branch)
-        if: ${{ github.ref_name == 'main' }}
-        working-directory: ./helm
-        run: |
-          git fetch origin main
-          git checkout main
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/shd-values.yaml << EOF
-          a
-          EOF
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/prd-values.yaml << EOF
-          a
-          EOF
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-
-          git push
 
       - name: slack message
         if: always()
