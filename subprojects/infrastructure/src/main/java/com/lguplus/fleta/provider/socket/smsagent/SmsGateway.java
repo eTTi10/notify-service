@@ -53,7 +53,7 @@ public class SmsGateway {
     private final int mPort;
     private final Map<Integer, Timer> mTimerMap = new HashMap<>();
     private boolean isLinked = false;
-    private boolean isBind = false; //true이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
+    private boolean isBind = false; //true 이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
     private String mResult = "";
     private Date mLastSendDate;
     private InputStream mInputStream;
@@ -174,12 +174,7 @@ public class SmsGateway {
         System.arraycopy(idBytes, 0, body, 0, idBytes.length);
         System.arraycopy(pwdBytes, 0, body, 16, pwdBytes.length);
 
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(BIND);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
+        byte[] header = getHeader(intToByte(BIND), intToByte(body.length));
 
         mOutputStream.write(header);
         mOutputStream.write(body);
@@ -187,30 +182,32 @@ public class SmsGateway {
         log.info("Bind Try[" + mPort + "]");
     }
 
+    private byte[] getHeader(byte[] msgType, byte[] msgLen) {
+        byte[] header = new byte[8];
+        System.arraycopy(msgType, 0, header, 0, msgType.length);
+        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
+        return header;
+    }
+
     public void sendMessage(String orgAddr, String dstAddr, String callBack, String message, int sn) throws IOException {
 
         byte[] body = new byte[264];
 
         byte[] tidBytes = intToByte(4098);
-        byte[] orgAddrBytes = orgAddr.getBytes();
-        byte[] dstAddrBytes = dstAddr.getBytes();
+        byte[] orgAddressBytes = orgAddr.getBytes();
+        byte[] dstAddressBytes = dstAddr.getBytes();
         byte[] callBackBytes = callBack.getBytes();
         byte[] messageBytes = message.getBytes("KSC5601");
         byte[] snBytes = intToByte(sn);
 
         System.arraycopy(tidBytes, 0, body, 0, tidBytes.length);
-        System.arraycopy(orgAddrBytes, 0, body, 4, orgAddrBytes.length);
-        System.arraycopy(dstAddrBytes, 0, body, 36, dstAddrBytes.length);
+        System.arraycopy(orgAddressBytes, 0, body, 4, orgAddressBytes.length);
+        System.arraycopy(dstAddressBytes, 0, body, 36, dstAddressBytes.length);
         System.arraycopy(callBackBytes, 0, body, 68, callBackBytes.length);
         System.arraycopy(messageBytes, 0, body, 100, messageBytes.length);
         System.arraycopy(snBytes, 0, body, 260, snBytes.length);
 
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(DELIVER);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
+        byte[] header = getHeader(intToByte(DELIVER), intToByte(body.length));
 
         mOutputStream.write(header);
         mOutputStream.write(body);
@@ -223,18 +220,14 @@ public class SmsGateway {
         TimerTask timerTask = new ErrorTimerTask(this);
 
         mTimerMap.get(TIMER_TIME_OUT).schedule(timerTask, TIMEOUT_TERM);
-        //3초후에 mResult가 빈 값인지 체크하여 1500 처리
+        //3초후에 mResult 가 빈 값인지 체크하여 1500 처리
     }
 
     public void checkLink() throws IOException {
 
         log.info("checkLink[" + mPort + "]");
 
-        byte[] header = new byte[8];
-
-        System.arraycopy(intToByte(LINK_SEND), 0, header, 0, 4);
-        System.arraycopy(intToByte(0), 0, header, 4, 4);
-
+        byte[] header = getHeader(intToByte(LINK_SEND), intToByte(0));
         mOutputStream.write(header);
 
         mTimerMap.get(TIMER_LINK_RESULT).cancel();
@@ -249,12 +242,7 @@ public class SmsGateway {
 
         byte[] body = intToByte(0);
 
-        byte[] header = new byte[8];
-        byte[] msgType = intToByte(REPORT_ACK);
-        byte[] msgLen = intToByte(body.length);
-
-        System.arraycopy(msgType, 0, header, 0, msgType.length);
-        System.arraycopy(msgLen, 0, header, 4, msgLen.length);
+        byte[] header = getHeader(intToByte(REPORT_ACK), intToByte(body.length));
 
         mOutputStream.write(header);
         mOutputStream.write(body);
@@ -328,13 +316,15 @@ public class SmsGateway {
 
     //소켓서버의 응답을 파싱한다
     private void readHeader() throws IOException {
+        log.debug("Before read");
         int type = readBufferToInt(4);
+        log.debug("After read");
         // message length
         readBufferToInt(4);
         int result;
 
-        String orgAddr;
-        String dstAddr;
+        String orgAddress;
+        String dstAddress;
         int sn;
 
         switch (type) {
@@ -379,24 +369,22 @@ public class SmsGateway {
                 break;
             case REPORT:
                 result = readBufferToInt(4);
-                orgAddr = readBufferToString(32);
-                dstAddr = readBufferToString(32);
+                orgAddress = readBufferToString(32);
+                dstAddress = readBufferToString(32);
                 sn = readBufferToInt(4);
                 String time = readBufferToString(20);
                 String code = readBufferToString(12);
                 log.debug("REPORT");
 
-                StringBuilder resultBuilder = new StringBuilder();
+                String resultBuilder = result + "|"
+                    + mPort + "|"
+                    + orgAddress + "|"
+                    + dstAddress + "|"
+                    + sn + "|"
+                    + code + "|"
+                    + time;
 
-                resultBuilder.append(result).append("|");
-                resultBuilder.append(mPort).append("|");
-                resultBuilder.append(orgAddr).append("|");
-                resultBuilder.append(dstAddr).append("|");
-                resultBuilder.append(sn).append("|");
-                resultBuilder.append(code).append("|");
-                resultBuilder.append(time);
-
-                log.debug(resultBuilder.toString());
+                log.debug(resultBuilder);
 
                 sendReport();
                 break;
@@ -478,7 +466,7 @@ public class SmsGateway {
                     readHeader();
                 }
             } catch (IOException ignored) {
-                log.error("readHeader Error");
+                log.error("readHeader Error : {}" , ignored.getMessage());
                 setBindState(false);
                 connectGateway();
             }
