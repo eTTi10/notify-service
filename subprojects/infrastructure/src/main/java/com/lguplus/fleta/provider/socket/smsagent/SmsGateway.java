@@ -45,7 +45,6 @@ public class SmsGateway {
     private static final int TIME_OUT = 5000;                        // 타임아웃(5초)
     private static final int RECONNECT_TERM = Integer.sum(1000 * 60 * 3, 0);        // 재접속 시간(3분)
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
-    private static final int READ_TIMEOUT_VALUE = 1000 * 3;
     private static final int LINK_CHECK_TERM = Integer.sum(1000 * 50, 0);           // 링크 체크 주기(50초)
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
     private final String mIpAddress;
@@ -127,7 +126,6 @@ public class SmsGateway {
 
             mSocket = new Socket();
 
-            mSocket.setSoTimeout(READ_TIMEOUT_VALUE);
             mSocket.connect(socketAddress, TIME_OUT);
 
             mInputStream = mSocket.getInputStream();
