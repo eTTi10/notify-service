@@ -1,0 +1,48 @@
+name: rabbi
+
+on:
+  push:
+    branches: [ feature/deviceinfo ]
+
+jobs:
+  test:
+    runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Test and Generate Docs with Gradle
+        run: ./gradlew asciidoctor openapi3
+
+
+      - name: Copy document files
+        run: |
+          mkdir -p docs report
+          cp build/api-spec/openapi3.json docs/
+          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
+          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
+          
+
+      - name: Copy document files
+        run: |
+          mkdir -p docs
+          cp build/api-spec/openapi3.json docs/
+          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
+
+      - name: Pushes docs to docs repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'docs'
+          target-directory: 'notify'
+          destination-github-username: 'LGUPLUS-IPTV-MSA'
+          destination-repository-name: 'rabbi'
+          user-email: etti10@lguplus.co.kr
+          target-branch: main
