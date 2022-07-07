@@ -15,6 +15,6 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
 
     @Override
     public GetPushDto getPush(GetPushRequestDto requestDto) {
-        return emRepository.getPush1(requestDto);
+        return emRepository.getPush(requestDto);
     }
 }

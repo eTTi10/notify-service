@@ -34,26 +34,7 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository{
                 .setParameter("stb_mac", requestDto.getStbMac())
                 .setParameter("service_type", requestDto.getServiceType())
                 .setParameter("album_id", requestDto.getAlbumId());
-            return super.convertSingle(query, GetPushDto.class).orElse(null);  };
-
-
-    public GetPushDto getPush1(GetPushRequestDto requestDto){
-        String sql = "SELECT\n"
-            + "    album_id,\n"
-            + "    push_yn,\n"
-            + "    result_code,\n"
-            + "    DECODE(push_yn,\n"
-            + "           'Y',\n"
-            + "           TO_CHAR(send_dt,\n"
-            + "                   'YYYYMMDDHH24MI'),\n"
-            + "           '')  as start_dt\n"
-            + "FROM\n"
-            + "    smartux.pt_cm_push_target\n"
-            + "WHERE stb_mac = 'v010.0049.4369'\n"
-            + "AND album_id = 'M01198F435PPV00'";
-
-        Query query = this.entityManager.createNativeQuery(sql);
-        return super.convertSingle(query, GetPushDto.class).orElse(null);
+            return super.convertSingle(query, GetPushDto.class).orElse(null);
     };
 
 }

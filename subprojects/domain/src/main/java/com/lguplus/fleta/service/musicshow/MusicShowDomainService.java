@@ -13,7 +13,6 @@ public class MusicShowDomainService {
     private final MusicShowRepository getPushRepository;
 
     public GetPushDto getPush(GetPushRequestDto requestDto){
-        System.out.println("test" +getPushRepository.getPush(requestDto).getAlbumId());
         return getPushRepository.getPush(requestDto);
     }
 }

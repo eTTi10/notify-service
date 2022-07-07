@@ -2,7 +2,6 @@ package com.lguplus.fleta.api.outer.musicshow;
 
 import com.lguplus.fleta.data.dto.GetPushResponseDto;
 import com.lguplus.fleta.service.musicshow.MusicShowService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,9 +22,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest
-@ContextConfiguration(classes = {MusicshowController.class
-   })
-class MusicshowControllerTest {
+@ContextConfiguration(classes = {MusicShowController.class})
+@DisplayName("MusicShowController 테스트 ")
+class MusicShowControllerTest {
 
     private static final String SUCCESS_CODE = "0000";
     private static final String URL_TEMPLATE = "/musicshow/push";

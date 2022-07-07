@@ -5,6 +5,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign:3.0.4'
     implementation 'org.apache.commons:commons-pool2:2.9.0'
     //implementation 'io.netty:netty-transport-native-epoll:4.1.72.Final'
+    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 }
 
 test {

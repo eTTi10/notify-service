@@ -13,16 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(tags = "뮤직공연 콘서트 LIVE 알람")
 @RestController
 @RequiredArgsConstructor
-public class MusicshowController {
+public class MusicShowController {
 
     private final MusicShowService service;
 
