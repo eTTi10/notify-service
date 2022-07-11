@@ -1,8 +1,9 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -56,7 +57,7 @@ public class SmsGateway {
     private boolean isBind = false; //true 이더라도 바인딩 완료된 상태가 아니라 접속만 완료가 된 상태
     private String mResult = "";
     private Date mLastSendDate;
-    private InputStream mInputStream;
+    private DataInputStream mInputStream;
     private OutputStream mOutputStream;
     private Socket mSocket;
 
@@ -127,8 +128,7 @@ public class SmsGateway {
             mSocket = new Socket();
 
             mSocket.connect(socketAddress, TIME_OUT);
-
-            mInputStream = mSocket.getInputStream();
+            mInputStream = new DataInputStream(new BufferedInputStream(mSocket.getInputStream()));
             mOutputStream = mSocket.getOutputStream();
 
             setBindState(true);
@@ -252,24 +252,24 @@ public class SmsGateway {
 
         ByteBuffer buff = ByteBuffer.allocate(Integer.SIZE / 8);
         buff.putInt(value);
-        buff.order(ByteOrder.BIG_ENDIAN);
+        buff.order(ByteOrder.LITTLE_ENDIAN);
 
         return buff.array();
     }
 
-    private int readBufferToInt(int bufferSize) throws IOException {
+    private int readBufferToInt() throws IOException {
 
-        byte[] buffer = new byte[bufferSize];
+        byte[] buffer = new byte[4];
 
-        int length = mInputStream.read(buffer);
+        mInputStream.readFully(buffer);
 
-        if (0 < length) {
-            ByteBuffer rHeader = ByteBuffer.wrap(buffer, 0, bufferSize);
-            return rHeader.getInt();
-        } else {
-            log.debug("return -1");
-            return -1;
-        }
+        //        if (0 < length) {
+        ByteBuffer rHeader = ByteBuffer.wrap(buffer, 0, 4);
+        return rHeader.getInt();
+        //        } else {
+        //            log.debug("return -1");
+        //            return -1;
+        //        }
     }
 
     private String readBufferToString(int bufferSize) throws IOException {
@@ -317,10 +317,10 @@ public class SmsGateway {
     //소켓서버의 응답을 파싱한다
     private void readHeader() throws IOException {
         log.debug("Before read");
-        int type = readBufferToInt(4);
+        int type = readBufferToInt();
         log.debug("After read");
         // message length
-        readBufferToInt(4);
+        readBufferToInt();
         int result;
 
         String orgAddress;
@@ -330,7 +330,7 @@ public class SmsGateway {
         switch (type) {
             case BIND_ACK:
 
-                result = readBufferToInt(4);
+                result = readBufferToInt();
 
                 log.info("readHeader() BIND_ACK result:" + result);
 
@@ -351,7 +351,7 @@ public class SmsGateway {
                 }
                 break;
             case DELIVER_ACK:
-                result = readBufferToInt(4);
+                result = readBufferToInt();
 
                 log.info("readHeader() DELIVER_ACK result:" + result);
 
@@ -368,10 +368,10 @@ public class SmsGateway {
 
                 break;
             case REPORT:
-                result = readBufferToInt(4);
+                result = readBufferToInt();
                 orgAddress = readBufferToString(32);
                 dstAddress = readBufferToString(32);
-                sn = readBufferToInt(4);
+                sn = readBufferToInt();
                 String time = readBufferToString(20);
                 String code = readBufferToString(12);
                 log.debug("REPORT");
@@ -390,10 +390,10 @@ public class SmsGateway {
                 break;
             case LINK_RECV:
                 log.info("Link Success[" + mPort + "]");
-                isLinked = true;
+                setLinkState(true);
                 break;
             default:
-                log.debug("default! type : {}" , type);
+                log.debug("default! type : {}", type);
                 break;
         }
 
@@ -427,8 +427,8 @@ public class SmsGateway {
 
         @Override
         public void run() {
-            if (smsGateway.isLinked) {
-                smsGateway.isLinked = false;
+            if (smsGateway.getLinkState()) {
+                smsGateway.setLinkState(false);
             } else {
                 log.info("Link Fail[" + smsGateway.mPort + "]");
                 smsGateway.setBindState(false);
@@ -465,8 +465,8 @@ public class SmsGateway {
                     log.debug("loop ....");
                     readHeader();
                 }
-            } catch (IOException ignored) {
-                log.error("readHeader Error : {}" , ignored.getMessage());
+            } catch (IOException exception) {
+                log.error("readHeader Error : {}", exception.getMessage());
                 setBindState(false);
                 connectGateway();
             }
