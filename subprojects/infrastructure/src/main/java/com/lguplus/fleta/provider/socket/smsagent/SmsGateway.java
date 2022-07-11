@@ -346,6 +346,11 @@ public class SmsGateway {
                 break;
             case DELIVER_ACK:
                 result = readBufferToInt();
+                orgAddress = readBufferToString(32);
+                dstAddress = readBufferToString(32);
+                sn = readBufferToInt();
+
+                log.debug("DELIVER_ACK {} {} {}", orgAddress,dstAddress,sn);
 
                 log.info("readHeader() DELIVER_ACK result:" + result);
 
