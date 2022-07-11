@@ -138,7 +138,7 @@ jobs:
         run: ./gradlew -x test build
 
 
-      - name: Copy war to workspace
+      - name: Copy jar to workspace
         run: cp -v microservice/${{ env.JAR_PATH}}/*${{ env.VERSION }}.jar ./microservice/Docker/
 
           
@@ -211,13 +211,18 @@ jobs:
           yq eval -i '.image.version = "${{ env.TAG }}"' prd-values.yaml 
 
       - name: Push helm
-        working-directory: ./helm
-        run: |
-          git pull origin ${{ env.HELM_REF }}
-          git add .
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-          git push
-
+        uses: nick-fields/retry@v2.7.0
+        with:
+          retry_on: error
+          timeout_seconds: 30
+          max_attempts: 3
+          command: |
+            cd ./helm
+            git add .
+            git commit -m "Update from ${{ env.COMMIT_URI }}" | true
+            git fetch origin ${{ env.HELM_REF }}
+            git rebase origin/${{ env.HELM_REF }}
+            git push
 
       - name: slack message
         if: always()
