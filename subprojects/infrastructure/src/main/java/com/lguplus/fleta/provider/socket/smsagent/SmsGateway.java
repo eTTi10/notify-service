@@ -258,30 +258,21 @@ public class SmsGateway {
     }
 
     private int readBufferToInt() throws IOException {
-
         byte[] buffer = new byte[4];
-
         mInputStream.readFully(buffer);
 
-        //        if (0 < length) {
         ByteBuffer rHeader = ByteBuffer.wrap(buffer, 0, 4);
         return rHeader.getInt();
-        //        } else {
-        //            log.debug("return -1");
-        //            return -1;
-        //        }
+
     }
 
     private String readBufferToString(int bufferSize) throws IOException {
 
         byte[] buffer = new byte[bufferSize];
-        int length = mInputStream.read(buffer);
+        mInputStream.readFully(buffer);
 
-        if (0 < length) {
-            return new String(buffer, 0, bufferSize).trim();
-        } else {
-            return "";
-        }
+        return new String(buffer, 0, bufferSize).trim();
+
     }
 
     @Async
@@ -331,6 +322,9 @@ public class SmsGateway {
             case BIND_ACK:
 
                 result = readBufferToInt();
+                String prefix = readBufferToString(16);
+
+                log.debug("prefix {}" , prefix);
 
                 log.info("readHeader() BIND_ACK result:" + result);
 
