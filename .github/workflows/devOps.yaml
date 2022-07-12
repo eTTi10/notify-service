@@ -196,7 +196,7 @@ jobs:
         if: ${{ github.ref_name == 'develop' }}
         run: |
           yq eval -i '.image.version = "${{ env.TAG }}"' dev-values.yaml
-          yq eval -i '.image.version = "${{ env.TAG }}"' devstp-values.yaml 
+          yq eval -i '.image.version = "${{ env.TAG }}"' stp-values.yaml 
 
       - name: Update stg values
         working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
