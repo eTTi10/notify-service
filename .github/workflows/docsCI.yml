@@ -32,7 +32,7 @@ jobs:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
           source-directory: 'docs'
-          target-directory: 'notifyication'
+          target-directory: 'notify'
           destination-github-username: 'LGUPLUS-IPTV-MSA'
           destination-repository-name: 'rabbi'
           user-email: gooah@lguplus.co.kr
