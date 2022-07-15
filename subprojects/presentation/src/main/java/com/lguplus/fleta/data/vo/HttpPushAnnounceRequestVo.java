@@ -56,7 +56,7 @@ public class HttpPushAnnounceRequestVo {
     /**
      * 추가할 항목 입력(name!^value)
      */
-    @ApiModelProperty(position = 5, example = "[gcm_multi_count!^100]", value = "추가할 항목(name!^value)")
+    @ApiModelProperty(position = 5, example = "[\"gcm_multi_count!^100\"]", value = "추가할 항목(name!^value)")
     private List<String> items;
 
 }
