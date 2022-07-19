@@ -1,6 +1,7 @@
 package com.lguplus.fleta.data.vo.musicshow;
 
 import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
+import com.lguplus.fleta.data.type.ServiceType;
 import com.lguplus.fleta.validation.AlphabetAndNumberPattern;
 import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,7 @@ public class GetPushRequestVo {
             .saId(this.sa_id)
             .stbMac(this.stb_mac)
             .albumId(this.album_id)
-            .serviceType(GetPushRequestDto.SERVICE_TYPE.MUSIC_SHOW.CODE)
+            .serviceType(ServiceType.MUSIC_SHOW.getCode())
             .build();
     }
 
