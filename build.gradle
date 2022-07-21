@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.6'
@@ -52,6 +55,7 @@ subprojects {
 
     ext {
         swaggerOutputDir = file("${buildDir}/swagger")
+        htmlOutputDir = file("${buildDir}/docs/asciidoc")
     }
 
     dependencies {
@@ -201,9 +205,8 @@ subprojects {
         }
     }
 
-    // *.adoc을 *.html로 변환합니다.
     asciidoctor {
-        dependsOn test
+        logger.quiet "Executing asciidoctor in ${project.name}"
         configurations 'asciidoctorExtensions'
         sourceDir = swaggerOutputDir
 
@@ -211,11 +214,41 @@ subprojects {
             include('**/*.adoc')
         }
 
+        //haegol index.adoc 기준으로 맞췄습니다
         options doctype: 'book'
         attributes 'source-highlighter': 'highlightjs',
                 toc                 : 'left',
                 toclevels           : 4
         baseDirFollowsSourceFile()
+    }
+
+    task convertDocs {
+        doFirst {
+            logger.quiet "Executing convertDocs in ${project.name}"
+            String outputDir = htmlOutputDir
+            boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
+
+            if (!factor) {
+                println "Found swagger.html: start to converting works."
+                BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(outputDir + "/swagger.html"))
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir + "/swaggerFinal.html"))
+
+                bufferedReader.lines().forEach(line -> {
+                    line = line.replaceAll("&lt;", "<").replaceAll("&gt;", ">")
+
+                    try {
+                        writer.write(line)
+                        writer.newLine()
+                    } catch (IOException e) {
+                        throw new RuntimeException(e)
+                    }
+                })
+                writer.flush()
+                writer.close()
+            } else {
+                println "can't convert swagger.html: the file is not exist."
+            }
+        }
     }
 
     testlogger {
