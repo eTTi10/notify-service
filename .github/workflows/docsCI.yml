@@ -19,11 +19,16 @@ jobs:
       - name: Test boot module and Generate Docs with Gradle
         run: ./gradlew :boot:test
 
+      - name: Convert swagger.html to swaggerFinal.html
+        run: |
+          ./gradlew :boot:convertDocs
+          rm subprojects/boot/build/docs/asciidoc/swagger.html
+
       - name: Copy document files
         run: |
           mkdir -p docs
           cp subprojects/boot/build/swagger/swagger.json docs/swagger.json
-          cp subprojects/boot/build/docs/asciidoc/swagger.html docs/index.html
+          cp subprojects/boot/build/docs/asciidoc/swaggerFinal.html docs/index.html
 
       - name: Pushes docs to docs repository
         uses: cpina/github-action-push-to-another-repository@main
