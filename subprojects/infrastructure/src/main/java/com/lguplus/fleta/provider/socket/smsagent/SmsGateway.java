@@ -3,8 +3,8 @@ package com.lguplus.fleta.provider.socket.smsagent;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -14,9 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -37,16 +41,14 @@ public class SmsGateway {
     private static final int REPORT_ACK = 5;
     private static final int LINK_SEND = 6;
     private static final int LINK_RECV = 7;
-
-    private static final int TIMER_RECONNECT = 0;
     private static final int TIMER_LINK_CHECK = 1;
     private static final int TIMER_LINK_RESULT = 2;
     private static final int TIMER_TIME_OUT = 3;
 
     private static final int TIME_OUT = 5000;                        // 타임아웃(5초)
-    private static final int RECONNECT_TERM = Integer.sum(1000 * 60 * 3, 0);        // 재접속 시간(3분)
+    private static final int RECONNECT_TERM = Integer.sum(1000 * 6 * 3, 0);        // 재접속 시간(3분)
     private static final int TIMEOUT_TERM = 1000 * 3;               // 메세지 전송 후 타임아웃 시간(3초)
-    private static final int LINK_CHECK_TERM = Integer.sum(1000 * 50, 0);           // 링크 체크 주기(50초)
+    private static final int LINK_CHECK_TERM = Integer.sum(1000 * 5, 0);           // 링크 체크 주기(50초)
     private static final int LINK_ERROR_TERM = 1000 * 5;            // 링크 에러 체크 시간(5초)
     private final String mIpAddress;
     private final String mID;
@@ -58,11 +60,20 @@ public class SmsGateway {
     private String mResult = "";
     private Date mLastSendDate;
     private DataInputStream mInputStream;
-    private OutputStream mOutputStream;
+    private DataOutputStream mOutputStream;
     private Socket mSocket;
 
+    private final Thread connectThread;
+    private final Thread readThread;
+    private final Thread linkThread;
+
+    private final ExecutorService connectThreadExecutorService;
+
+    private final ExecutorService readThreadExecutorService;
+
+    private final ScheduledExecutorService linkThreadExecutorService;
+
     public SmsGateway(String ip, String port, String id, String password) {
-        mTimerMap.put(TIMER_RECONNECT, new Timer());
         mTimerMap.put(TIMER_LINK_CHECK, new Timer());
         mTimerMap.put(TIMER_LINK_RESULT, new Timer());
         mTimerMap.put(TIMER_TIME_OUT, new Timer());
@@ -76,6 +87,13 @@ public class SmsGateway {
         log.info("ip:" + ip);
         log.info("port:" + port);
 
+        connectThread = new Thread(new ConnectTask());
+        readThread = new Thread(new SocketReadTask());
+        linkThread = new Thread(new SocketReadTask());
+
+        connectThreadExecutorService = Executors.newSingleThreadExecutor();
+        readThreadExecutorService = Executors.newSingleThreadExecutor();
+        linkThreadExecutorService = Executors.newSingleThreadScheduledExecutor();
         connectGateway();
 
     }
@@ -110,59 +128,36 @@ public class SmsGateway {
 
     public void connectGateway() {
 
-        log.info("Connect Try[" + mPort + "]");
-
-        mTimerMap.get(TIMER_RECONNECT).cancel();
         mTimerMap.get(TIMER_LINK_CHECK).cancel();
         mTimerMap.get(TIMER_LINK_RESULT).cancel();
         mTimerMap.get(TIMER_TIME_OUT).cancel();
 
-        InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
+        while (mSocket == null) {
+            connectThreadExecutorService.submit(connectThread);
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+        }
+
+        shutdownExecutorService(connectThreadExecutorService);
+
+        log.debug("Success Connection");
 
         try {
-            if (null != mSocket) {
-                mSocket.close();
-                mSocket = null;
-            }
-
-            mSocket = new Socket();
-
-            mSocket.connect(socketAddress, TIME_OUT);
-            mInputStream = new DataInputStream(new BufferedInputStream(mSocket.getInputStream()));
-            mOutputStream = mSocket.getOutputStream();
-
-            setBindState(true);
-
-            log.info("Connect Success[" + mPort + "]");
-            log.info("Socket Open[" + mPort + "]");
-
-            // 게이트웨이에 접속 시도하는 쓰레드
-            Thread thread = new Thread(new SmsGatewayTask());
-            thread.start();
-
             bindGateway();
         } catch (IOException e) {
-            log.error("connectGateway Error");
-            reConnectGateway(); // <=========== 연결되지 않는 커넥션...임시주석처리 계속해서 로그가 찍힘
+            throw new RuntimeException(e);
         }
 
     }
 
-    private void reConnectGateway() {
-
-        log.info("ReConnect Try[" + mPort + "]");
-
-        setBindState(false);
-        mTimerMap.get(TIMER_RECONNECT).cancel();
-        mTimerMap.put(TIMER_RECONNECT, new Timer());
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                connectGateway();
+    private void shutdownExecutorService(ExecutorService executorService) {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(1000, TimeUnit.MILLISECONDS)) {
+                executorService.shutdownNow();
             }
-        };
-
-        mTimerMap.get(TIMER_RECONNECT).schedule(timerTask, RECONNECT_TERM);
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+        }
     }
 
     private void bindGateway() throws IOException {
@@ -179,7 +174,9 @@ public class SmsGateway {
         mOutputStream.write(header);
         mOutputStream.write(body);
 
+        readThreadExecutorService.submit(readThread);
         log.info("Bind Try[" + mPort + "]");
+
     }
 
     private byte[] getHeader(byte[] msgType, byte[] msgLen) {
@@ -230,11 +227,7 @@ public class SmsGateway {
         byte[] header = getHeader(intToByte(LINK_SEND), intToByte(0));
         mOutputStream.write(header);
 
-        mTimerMap.get(TIMER_LINK_RESULT).cancel();
-        mTimerMap.put(TIMER_LINK_RESULT, new Timer());
-        TimerTask timerTask = new LinkTimerTask(this);
-
-        mTimerMap.get(TIMER_LINK_RESULT).schedule(timerTask, LINK_ERROR_TERM);
+        readThreadExecutorService.submit(readThread);
 
     }
 
@@ -320,11 +313,10 @@ public class SmsGateway {
 
         switch (type) {
             case BIND_ACK:
-
                 result = readBufferToInt();
                 String prefix = readBufferToString(16);
 
-                log.debug("prefix {}" , prefix);
+                log.debug("prefix {}", prefix);
 
                 log.info("readHeader() BIND_ACK result:" + result);
 
@@ -334,14 +326,13 @@ public class SmsGateway {
                     mTimerMap.get(TIMER_LINK_CHECK).cancel();
                     mTimerMap.put(TIMER_LINK_CHECK, new Timer());
 
-                    TimerTask timerTask = new BindTimerTask(this);
 
-                    mTimerMap.get(TIMER_LINK_CHECK).schedule(timerTask, LINK_CHECK_TERM, LINK_CHECK_TERM);
+                    Runnable linkCheck = new BindTimerTask(this);
+                    linkThreadExecutorService.scheduleAtFixedRate(linkCheck , 0, LINK_CHECK_TERM,TimeUnit.SECONDS);
 
                     log.info("Bind Success[" + mPort + "]");
                 } else {
                     log.info("Bind Fail[" + mPort + "]");
-                    reConnectGateway();
                 }
                 break;
             case DELIVER_ACK:
@@ -350,7 +341,7 @@ public class SmsGateway {
                 dstAddress = readBufferToString(32);
                 sn = readBufferToInt();
 
-                log.debug("DELIVER_ACK {} {} {}", orgAddress,dstAddress,sn);
+                log.debug("DELIVER_ACK {} {} {}", orgAddress, dstAddress, sn);
 
                 log.info("readHeader() DELIVER_ACK result:" + result);
 
@@ -398,7 +389,7 @@ public class SmsGateway {
 
     }
 
-    public static class BindTimerTask extends TimerTask {
+    public static class BindTimerTask implements Runnable {
 
         private final SmsGateway smsGateway;
 
@@ -416,7 +407,7 @@ public class SmsGateway {
         }
     }
 
-    public static class LinkTimerTask extends TimerTask {
+    public static class LinkTimerTask implements Runnable {
 
         private final SmsGateway smsGateway;
 
@@ -454,16 +445,12 @@ public class SmsGateway {
     }
 
     //게이트웨이에 접속성공 할 때까지 게이트웨이 접속을 무제한으로 시도함
-    private class SmsGatewayTask implements Runnable {
+    private class SocketReadTask implements Runnable {
 
         @Override
         public void run() {
             try {
-                while (isBind) {
-                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
-                    log.debug("loop ....");
-                    readHeader();
-                }
+                readHeader();
             } catch (IOException exception) {
                 log.error("readHeader Error : {}", exception.getMessage());
                 setBindState(false);
@@ -472,4 +459,29 @@ public class SmsGateway {
         }
     }
 
+    private class ConnectTask implements Runnable {
+
+        @SneakyThrows
+        @Override
+        public void run() {
+            try {
+                log.debug("Try connect");
+                InetSocketAddress socketAddress = new InetSocketAddress(mIpAddress, mPort);
+                if (mSocket != null) {
+                    mSocket.close();
+                    mSocket = null;
+                }
+                mSocket = new Socket();
+                mSocket.connect(socketAddress, TIME_OUT);
+
+                mInputStream = new DataInputStream(new BufferedInputStream(mSocket.getInputStream()));
+                mOutputStream = new DataOutputStream(mSocket.getOutputStream());
+            } catch (IOException exception) {
+                log.error("connectGateway Error");
+                mSocket.close();
+                mSocket = null;
+                LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(RECONNECT_TERM));
+            }
+        }
+    }
 }
