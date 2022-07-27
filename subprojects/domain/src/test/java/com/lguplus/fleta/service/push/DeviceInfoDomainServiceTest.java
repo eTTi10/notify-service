@@ -3,6 +3,8 @@ package com.lguplus.fleta.service.push;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.lguplus.fleta.data.dto.request.outer.DeviceInfoRequestDto;
+import com.lguplus.fleta.exception.NoResultException;
+import com.lguplus.fleta.exception.database.DataNotExistsException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.exception.push.NotFoundException;
 import com.lguplus.fleta.repository.push.DeviceInfoRepository;
@@ -72,7 +74,7 @@ class DeviceInfoDomainServiceTest {
             .agentType("G")
             .notiType("A")
             .build();
-        assertThrows(DeleteNotFoundException.class,()-> deviceInfoDomainService.deleteDeviceInfo(deviceInfoRequestDto));
+        assertThrows(DataNotExistsException.class,()-> deviceInfoDomainService.deleteDeviceInfo(deviceInfoRequestDto));
     }
 
     @Test
@@ -85,6 +87,6 @@ class DeviceInfoDomainServiceTest {
             .notiType("A")
             .build();
 
-        assertThrows(NotFoundException.class,()-> deviceInfoDomainService.updateDeviceInfo(deviceInfoRequestDto));
+        assertThrows(NoResultException.class,()-> deviceInfoDomainService.updateDeviceInfo(deviceInfoRequestDto));
     }
 }

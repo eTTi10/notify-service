@@ -54,13 +54,11 @@ public class OuterControllerAdvice {
      * @param errorResponseResolver
      */
     public OuterControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
-
         this.errorResponseResolver = errorResponseResolver;
     }
 
     @InitBinder
     public void initBinder(final WebDataBinder binder) {
-
         binder.initDirectFieldAccess();
     }
 
