@@ -12,7 +12,9 @@ import java.math.RoundingMode;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,15 +58,28 @@ public class SmsAgentSocketClient implements SmsAgentClient {
         int length = idList.length;
 
         for (int i = 0; i < length; i++) {
-            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]);
+            SmsGateway smsGateway = new SmsGateway(ipList[i], Integer.parseInt(portList[i]), idList[i], pwList[i]);
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
+
+        new Thread(() -> {
+            while (true) {
+                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
+                new Thread(() -> {
+                    try {
+                        send("01099790053", "01099790053", "테스트 메시지");
+                    } catch (final Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }).start();
+            }
+        }).start();
     }
 
     public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        Future<SmsGatewayResponseDto> asyncResult;
+        SmsGatewayResponseDto result;
 
         if (!rCtn.startsWith("01") || 7 >= rCtn.length()) {
 
@@ -82,8 +97,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
 
             SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
-            smsGateway.clearResult();
-            long prevSendDate = smsGateway.getLastSendDate().getTime();
+            long prevSendDate = smsGateway.getLastSendTime();
             long currentDate = System.currentTimeMillis();
 
             if (currentDate - prevSendDate <= mSendTerm) {
@@ -96,11 +110,10 @@ public class SmsAgentSocketClient implements SmsAgentClient {
 
             try {
                 //게이트웨이 서버에 소켓접속이 완료된 경우
-                if (smsGateway.getBindState()) {
+                if (smsGateway.isBounded()) {
 
-                    log.debug("smsGateway.sendMessage( {}, {}, {}, {}, {})", sCtn, rCtn, sCtn, message, smsGateway.getPort());
-                    smsGateway.sendMessage(sCtn, rCtn, sCtn, message, smsGateway.getPort());
-                    asyncResult = smsGateway.getResult();
+                    log.debug("smsGateway.sendMessage({}, {}, {})", sCtn, rCtn, message);
+                    result = smsGateway.deliver(sCtn, rCtn, message);
 
                 } else {
 
@@ -121,7 +134,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             throw new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
         }
 
-        return asyncResult.get();
+        return result;
     }
 
     private int calculateTerm() {

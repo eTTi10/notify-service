@@ -96,7 +96,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("04 SMS전송 테스트")
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 8888, id, password);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
@@ -137,7 +137,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("10 SystemBusyException 테스트")
     void send_SystemBusyException2() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 8888, id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.offer(sGateway);
 
@@ -166,7 +166,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("07 SmsAgentEtcException 테스트")
     void isBind() throws IOException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "1", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 1, id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
@@ -183,8 +183,8 @@ class SmsAgentSocketClientTest {
     @DisplayName("09 SystemErrorException 테스트")
     void send_SystemErrorException() throws IOException, InterruptedException {
 
-        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, "8888", id, password));
-        doThrow(new IOException()).when(fakeGateway).sendMessage(anyString(), anyString(), anyString(), anyString(), anyInt());
+        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, 8888, id, password));
+        doThrow(new IOException()).when(fakeGateway).deliver(anyString(), anyString(), anyString());
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
