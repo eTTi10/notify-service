@@ -20,8 +20,6 @@ public class DeviceInfoDomainService {
 
     public void deleteDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-            //8002 be.not Data
-            //message.beNotData = \ub370\uc774\ud130 \ubbf8\uc874\uc7ac
             throw new DataNotExistsException("DeviceInfoDomainService delete 대상 없음");
         }
         deviceInfoRepository.delete(deviceInfoRequestDto);
@@ -29,8 +27,6 @@ public class DeviceInfoDomainService {
 
     public void updateDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-            //notfound 9999 기타오류가 뜸..??
-            //0001로 나오게 해야함.
            throw new NoResultException("DeviceInfoDomainService update 대상 없음");
         }
         deviceInfoRepository.save(deviceInfoRequestDto);
