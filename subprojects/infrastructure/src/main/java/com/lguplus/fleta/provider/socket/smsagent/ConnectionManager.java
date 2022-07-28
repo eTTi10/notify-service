@@ -108,6 +108,7 @@ public class ConnectionManager extends Thread implements Connector, MessageSende
 
         scavenger.shutdown();
 
+        currentThread.interrupt();
         while (currentThread.isAlive()) {
             LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
         }
@@ -145,7 +146,7 @@ public class ConnectionManager extends Thread implements Connector, MessageSende
     public DeliverAckMessage sendDeliverMessage(final String sender, final String receiver, final String message)
             throws IOException {
 
-        final int serialNumber = serialNumberGenerator.getAndIncrement();
+        final int serialNumber = serialNumberGenerator.getAndIncrement() & 0x7fffffff;
         final CountDownLatch deliverTimeoutLatch = new CountDownLatch(1);
         deliveryInfoMap.put(serialNumber, new DeliveryInfo(deliverTimeoutLatch));
 

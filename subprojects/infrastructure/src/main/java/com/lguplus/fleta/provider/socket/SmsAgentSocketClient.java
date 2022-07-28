@@ -112,7 +112,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
                 //게이트웨이 서버에 소켓접속이 완료된 경우
                 if (smsGateway.isBounded()) {
 
-                    log.debug("smsGateway.sendMessage({}, {}, {})", sCtn, rCtn, message);
+                    log.debug("smsGateway.deliver({}, {}, {})", sCtn, rCtn, message);
                     result = smsGateway.deliver(sCtn, rCtn, message);
 
                 } else {
