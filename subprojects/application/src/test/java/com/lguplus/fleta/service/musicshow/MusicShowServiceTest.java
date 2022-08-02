@@ -1,7 +1,7 @@
 package com.lguplus.fleta.service.musicshow;
 
 import com.lguplus.fleta.data.dto.GetPushResponseDto;
-import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,7 +10,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -36,7 +35,7 @@ class MusicShowServiceTest {
 
         given(domainService.getPush(any())).willReturn(dto);
 
-        GetPushRequestDto requestDto = GetPushRequestDto.builder()
+        PushRequestDto requestDto = PushRequestDto.builder()
             .saId("1000494369")
             .stbMac("v010.0049.4369")
             .albumId("M01198F334PPV00")

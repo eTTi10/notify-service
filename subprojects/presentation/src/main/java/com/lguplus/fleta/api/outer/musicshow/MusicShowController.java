@@ -2,10 +2,9 @@ package com.lguplus.fleta.api.outer.musicshow;
 
 import com.lguplus.fleta.data.dto.GetPushResponseDto;
 import com.lguplus.fleta.data.dto.PostPushResponseDto;
-import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
-import com.lguplus.fleta.data.dto.request.outer.PostPushRequestDto;
-import com.lguplus.fleta.data.vo.musicshow.GetPushRequestVo;
+import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.vo.musicshow.PostPushRequestVo;
+import com.lguplus.fleta.data.vo.musicshow.PushRequestVo;
 import com.lguplus.fleta.exception.ParameterValidateException;
 import com.lguplus.fleta.service.musicshow.MusicShowService;
 import io.swagger.annotations.Api;
@@ -35,12 +34,12 @@ public class MusicShowController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 3<br>자리수: 15<br>설명: 앨범ID", example = "")
     })
     @GetMapping("/musicshow/push")
-    public GetPushResponseDto getPush(@ApiIgnore @Valid GetPushRequestVo requestVo, BindingResult bindingResult) {
+    public GetPushResponseDto getPush(@ApiIgnore @Valid PushRequestVo requestVo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ParameterValidateException(bindingResult.getAllErrors(), "1|REQUEST PARAMETER ERROR||||||||||||||||\f");
         }
 
-        GetPushRequestDto requestDto = requestVo.makeRefinedRequest();
+        PushRequestDto requestDto = requestVo.makeRefinedGetRequest();
 
         GetPushResponseDto responseDto = service.getPush(requestDto);
 
@@ -62,7 +61,7 @@ public class MusicShowController {
             throw new ParameterValidateException(bindingResult.getAllErrors(), "1|REQUEST PARAMETER ERROR||||||||||||||||\f");
         }
 
-        PostPushRequestDto requestDto = requestVo.makeRefinedGetRequest();
+        PushRequestDto requestDto = requestVo.makeRefinedPostRequest();
 
         PostPushResponseDto responseDto = service.postPush(requestDto);
 
@@ -76,11 +75,11 @@ public class MusicShowController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 4<br>자리수: 15<br>설명: 앨범ID", example = ""),
     })
     @DeleteMapping("/musicshow/push")
-    public String releasePush(@ApiIgnore @Valid GetPushRequestVo requestVo, BindingResult bindingResult) {
+    public String releasePush(@ApiIgnore @Valid PushRequestVo requestVo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ParameterValidateException(bindingResult.getAllErrors(), "1|REQUEST PARAMETER ERROR||||||||||||||||\f");
         }
-        GetPushRequestDto requestDto = requestVo.makeRefinedRequest();
+        PushRequestDto requestDto = requestVo.makeRefinedReleaseRequest();
 
         PostPushResponseDto responseDto = service.releasePush(requestDto);
 

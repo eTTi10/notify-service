@@ -24,5 +24,6 @@ public class GetPushWithPKeyDto {
     private String pushYn;
     private String resultCode;
     private String startDt;
+    private String regDt;
 
 }

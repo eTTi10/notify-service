@@ -1,6 +1,6 @@
 package com.lguplus.fleta.data.vo.musicshow;
 
-import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.type.ServiceType;
 import com.lguplus.fleta.validation.AlphabetAndNumberPattern;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 @Getter
 @Setter
-public class GetPushRequestVo {
+public class PushRequestVo {
 
     @AlphabetAndNumberPattern
     @Length(min = 7, max = 12)
@@ -29,8 +29,8 @@ public class GetPushRequestVo {
     @NotBlank
     private final String album_id; // 앨범 ID
 
-    public GetPushRequestDto makeRefinedRequest(){
-        return GetPushRequestDto.builder()
+    public PushRequestDto makeRefinedGetRequest() {
+        return PushRequestDto.builder()
             .saId(this.sa_id)
             .stbMac(this.stb_mac)
             .albumId(this.album_id)
@@ -38,4 +38,13 @@ public class GetPushRequestVo {
             .build();
     }
 
+    public PushRequestDto makeRefinedReleaseRequest() {
+        return PushRequestDto.builder()
+            .saId(this.sa_id)
+            .stbMac(this.stb_mac)
+            .albumId(this.album_id)
+            .pushYn(PushRequestDto.CONST.RELEASE.CODE)
+            .serviceType(ServiceType.MUSIC_SHOW.getCode())
+            .build();
+    }
 }

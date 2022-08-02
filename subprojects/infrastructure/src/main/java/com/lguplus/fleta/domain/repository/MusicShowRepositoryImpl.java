@@ -1,6 +1,5 @@
 package com.lguplus.fleta.domain.repository;
 
-import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
@@ -19,7 +18,7 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
     private final MusicShowJpaEmRepository emRepository;
 
     @Override
-    public GetPushDto getPush(GetPushRequestDto requestDto) {
+    public GetPushDto getPush(PushRequestDto requestDto) {
         return emRepository.getPush(requestDto);
     }
 
@@ -41,5 +40,10 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
     @Override
     public void deletePush(PushTargetEntity entity) {
         jpaRepository.delete(entity);
+    }
+
+    @Override
+    public Integer getRegNoNextVal() {
+        return emRepository.getRegNoNextVal();
     }
 }

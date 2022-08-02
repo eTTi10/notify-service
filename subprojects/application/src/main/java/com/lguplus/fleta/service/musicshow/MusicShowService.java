@@ -2,8 +2,7 @@ package com.lguplus.fleta.service.musicshow;
 
 import com.lguplus.fleta.data.dto.GetPushResponseDto;
 import com.lguplus.fleta.data.dto.PostPushResponseDto;
-import com.lguplus.fleta.data.dto.request.outer.GetPushRequestDto;
-import com.lguplus.fleta.data.dto.request.outer.PostPushRequestDto;
+import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.exception.musicshow.MusicShowException;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +16,13 @@ public class MusicShowService {
 
     private final MusicShowDomainService musicShowDomainService;
 
-    public GetPushResponseDto getPush(GetPushRequestDto requestDto) {
+    public GetPushResponseDto getPush(PushRequestDto requestDto) {
         GetPushDto dto = musicShowDomainService.getPush(requestDto);
         return GetPushResponseDto.create(dto);
     }
 
     @Transactional
-    public PostPushResponseDto postPush(PostPushRequestDto requestDto) {
+    public PostPushResponseDto postPush(PushRequestDto requestDto) {
         PostPushResponseDto dto = PostPushResponseDto.builder().build();
         try {
             musicShowDomainService.postPush(requestDto);
@@ -35,7 +34,7 @@ public class MusicShowService {
     }
 
     @Transactional
-    public PostPushResponseDto releasePush(GetPushRequestDto requestDto) {
+    public PostPushResponseDto releasePush(PushRequestDto requestDto) {
         PostPushResponseDto dto = PostPushResponseDto.builder().build();
         try {
             musicShowDomainService.releasePush(requestDto);

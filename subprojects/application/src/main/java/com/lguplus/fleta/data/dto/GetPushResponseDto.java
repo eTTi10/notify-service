@@ -69,6 +69,13 @@ public class GetPushResponseDto implements CommonResponseDto {
 
 
     public static GetPushResponseDto create(GetPushDto dto) {
+
+        if (dto == null) {
+            return GetPushResponseDto.builder()
+                .push_yn("N")
+                .build();
+        }
+
         return GetPushResponseDto.builder()
             .push_yn(dto.getPushYn())
             .start_dt(dto.getStartDt())
