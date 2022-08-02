@@ -2,6 +2,7 @@ package com.lguplus.fleta.provider.socket.smsagent;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -10,7 +11,7 @@ import java.util.concurrent.locks.LockSupport;
 public class Scavenger extends Thread {
 
     private static final int EXPIRE_TIME = 60000;
-    private static final int SCAVENGE_INTERVAL = 300000;
+    private static final int SCAVENGE_INTERVAL = Integer.sum(300000, 0);
 
     private final Map<?, DeliveryInfo> deliveryInfoMap;
     private boolean terminated;
@@ -31,7 +32,7 @@ public class Scavenger extends Thread {
             LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SCAVENGE_INTERVAL));
 
             final long currentTime = System.currentTimeMillis();
-            deliveryInfoMap.entrySet().stream()
+            new LinkedHashSet<>(deliveryInfoMap.entrySet()).stream()
                     .filter(e -> e.getValue().getRequestTime() + EXPIRE_TIME < currentTime)
                     .forEach(e -> {
                         final Object key = e.getKey();

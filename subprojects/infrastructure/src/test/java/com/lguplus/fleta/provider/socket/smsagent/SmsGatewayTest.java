@@ -24,7 +24,7 @@ class SmsGatewayTest {
         try (MockedConstruction<ConnectionManager> ignored = mockConstruction(ConnectionManager.class, (mock, context) ->
                 doReturn(true).when(mock).isBounded()
         )) {
-            SmsGateway smsGateway = spy(new SmsGateway(null, 0, null, null));
+            SmsGateway smsGateway = spy(new SmsGateway("localhost", 0, "test", "test"));
             boolean result = smsGateway.isBounded();
             assertTrue(result);
         }
@@ -36,7 +36,7 @@ class SmsGatewayTest {
         try (MockedConstruction<ConnectionManager> ignored = mockConstruction(ConnectionManager.class, (mock, context) ->
                 doReturn(DeliverAckMessage.builder().result(0).build()).when(mock).sendDeliverMessage(any(), any(), any())
         )) {
-            SmsGateway smsGateway = spy(new SmsGateway(null, 0, null, null));
+            SmsGateway smsGateway = spy(new SmsGateway("localhost", 0, "test", "test"));
             SmsGatewayResponseDto result = smsGateway.deliver("01012345678", "01023456789", "테스트");
             assertThat(result.getFlag()).isEqualTo("0000");
         }
@@ -48,7 +48,7 @@ class SmsGatewayTest {
         try (MockedConstruction<ConnectionManager> ignored = mockConstruction(ConnectionManager.class, (mock, context) ->
                 doReturn(DeliverAckMessage.builder().result(1).build()).when(mock).sendDeliverMessage(any(), any(), any())
         )) {
-            SmsGateway smsGateway = spy(new SmsGateway(null, 0, null, null));
+            SmsGateway smsGateway = spy(new SmsGateway("localhost", 0, "test", "test"));
             SmsGatewayResponseDto result = smsGateway.deliver("01012345678", "01023456789", "테스트");
             assertThat(result.getFlag()).isEqualTo("1500");
         }
@@ -60,7 +60,7 @@ class SmsGatewayTest {
         try (MockedConstruction<ConnectionManager> ignored = mockConstruction(ConnectionManager.class, (mock, context) ->
                 doReturn(null).when(mock).sendDeliverMessage(any(), any(), any())
         )) {
-            SmsGateway smsGateway = spy(new SmsGateway(null, 0, null, null));
+            SmsGateway smsGateway = spy(new SmsGateway("localhost", 0, "test", "test"));
             SmsGatewayResponseDto result = smsGateway.deliver("01012345678", "01023456789", "테스트");
             assertThat(result.getFlag()).isEqualTo("1500");
         }

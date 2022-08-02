@@ -5,22 +5,19 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -62,22 +59,9 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
-
-        new Thread(() -> {
-            while (true) {
-                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
-                new Thread(() -> {
-                    try {
-                        send("01099790053", "01099790053", "테스트 메시지");
-                    } catch (final Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }).start();
-            }
-        }).start();
     }
 
-    public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+    public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) {
 
         SmsGatewayResponseDto result;
 
@@ -87,7 +71,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             throw new SmsAgentCustomException("1502", "전화번호 형식 오류");
         }
 
-        if (80 < message.getBytes("KSC5601").length) {
+        if (80 < message.getBytes(Charset.forName("KSC5601")).length) {
 
             //1501
             throw new SmsAgentCustomException("1501", "메시지 형식 오류");

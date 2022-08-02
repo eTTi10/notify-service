@@ -116,12 +116,12 @@ public class ConnectionManager extends Thread implements Connector, MessageSende
 
     private void release() {
 
-        if (messageReader != null && messageReader.isAlive()) {
-            messageReader.shutdown();
-        }
-
         if (linker != null && linker.isAlive()) {
             linker.shutdown();
+        }
+
+        if (messageReader != null && messageReader.isAlive()) {
+            messageReader.shutdown();
         }
     }
 

@@ -1,8 +1,8 @@
 package com.lguplus.fleta.provider.socket.smsagent;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 public final class MessageUtils {
@@ -15,7 +15,7 @@ public final class MessageUtils {
     private static void checkBufferSize(final byte[] buffer, final int offset, final int required) {
 
         if (buffer.length - offset < required) {
-            throw new IllegalStateException("Insufficient buffer size.");
+            throw new IllegalArgumentException("Insufficient buffer size.");
         }
     }
 
@@ -41,22 +41,14 @@ public final class MessageUtils {
 
         checkBufferSize(buffer, offset, length);
 
-        try {
-            return new String(Arrays.copyOfRange(buffer, offset, offset + length), "KSC5601").trim();
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
+        return new String(Arrays.copyOfRange(buffer, offset, offset + length), Charset.forName("KSC5601")).trim();
     }
 
     public static void writeString(final String value, final byte[] buffer, final int offset, final int length) {
 
         checkBufferSize(buffer, offset, length);
 
-        try {
-            final byte[] bytes = value.getBytes("KSC5601");
-            System.arraycopy(bytes, 0, buffer, offset, Math.min(bytes.length, length));
-        } catch (final UnsupportedEncodingException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
+        final byte[] bytes = value.getBytes(Charset.forName("KSC5601"));
+        System.arraycopy(bytes, 0, buffer, offset, Math.min(bytes.length, length));
     }
 }

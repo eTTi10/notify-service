@@ -139,7 +139,9 @@ class SmsAgentSocketClientTest {
 
         SmsGateway sGateway = new SmsGateway(SERVER_IP, 8888, id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
+        ReflectionTestUtils.setField(sGateway, "lastSendTime", System.currentTimeMillis());
 
         ReflectionTestUtils.setField(smsAgentSocketClient, "mSendTerm", 10000);
         SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
@@ -171,11 +173,9 @@ class SmsAgentSocketClientTest {
         sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
 
-        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
-
-            Thread.sleep(2000);
-            smsAgentSocketClient.send(sCtn, rCtn, message);
-        });
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () ->
+            smsAgentSocketClient.send(sCtn, rCtn, message)
+        );
         assertThat(exception.getCode()).isEqualTo("1500");
     }
 
