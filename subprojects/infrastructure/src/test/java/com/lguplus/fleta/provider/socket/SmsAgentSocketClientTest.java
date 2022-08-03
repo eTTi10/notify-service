@@ -7,6 +7,7 @@ import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServer;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
+
+import org.mockito.MockedConstruction;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -96,7 +99,7 @@ class SmsAgentSocketClientTest {
     @DisplayName("04 SMS전송 테스트")
     void send() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 8888, id, password);
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
@@ -137,9 +140,11 @@ class SmsAgentSocketClientTest {
     @DisplayName("10 SystemBusyException 테스트")
     void send_SystemBusyException2() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "8888", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 8888, id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
+        sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
+        ReflectionTestUtils.setField(sGateway, "lastSendTime", System.currentTimeMillis());
 
         ReflectionTestUtils.setField(smsAgentSocketClient, "mSendTerm", 10000);
         SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
@@ -166,16 +171,14 @@ class SmsAgentSocketClientTest {
     @DisplayName("07 SmsAgentEtcException 테스트")
     void isBind() throws IOException, InterruptedException {
 
-        SmsGateway sGateway = new SmsGateway(SERVER_IP, "1", id, password);
+        SmsGateway sGateway = new SmsGateway(SERVER_IP, 1, id, password);
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
         sGatewayQueue.offer(sGateway);
 
-        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () -> {
-
-            Thread.sleep(2000);
-            smsAgentSocketClient.send(sCtn, rCtn, message);
-        });
+        SmsAgentCustomException exception = assertThrows(SmsAgentCustomException.class, () ->
+            smsAgentSocketClient.send(sCtn, rCtn, message)
+        );
         assertThat(exception.getCode()).isEqualTo("1500");
     }
 
@@ -183,8 +186,8 @@ class SmsAgentSocketClientTest {
     @DisplayName("09 SystemErrorException 테스트")
     void send_SystemErrorException() throws IOException, InterruptedException {
 
-        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, "8888", id, password));
-        doThrow(new IOException()).when(fakeGateway).sendMessage(anyString(), anyString(), anyString(), anyString(), anyInt());
+        SmsGateway fakeGateway = spy(new SmsGateway(SERVER_IP, 8888, id, password));
+        doThrow(new IOException()).when(fakeGateway).deliver(anyString(), anyString(), anyString());
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(4000));
         LinkedList<SmsGateway> sGatewayQueue = (LinkedList<SmsGateway>) ReflectionTestUtils.getField(smsAgentSocketClient, "sGatewayQueue");
         sGatewayQueue.clear();
@@ -197,11 +200,15 @@ class SmsAgentSocketClientTest {
         assertThat(exception.getCode()).isEqualTo("9999");
     }
 
-    //    @Test
-    //    @DisplayName("11 calculateTerm_Exception 테스트")
-    //    void calculateTerm_Exception()  {
-    //
-    //        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
-    //        assertDoesNotThrow(smsAgentSocketClient::initGateway);
-    //    }
+    @Test
+    @DisplayName("11 calculateTerm_Exception 테스트")
+    void calculateTerm_Exception()  {
+
+        try (MockedConstruction<BigDecimal> ignore = mockConstruction(BigDecimal.class, (mock, contest) ->
+                doThrow(IllegalArgumentException.class).when(mock).divide(any(), anyInt(), any())
+        )) {
+            int result = ReflectionTestUtils.invokeMethod(smsAgentSocketClient, "calculateTerm");
+            assertThat(result).isEqualTo(1000);
+        }
+    }
 }
