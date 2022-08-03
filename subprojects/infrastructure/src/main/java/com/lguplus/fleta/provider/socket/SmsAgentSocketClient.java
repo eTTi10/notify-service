@@ -5,20 +5,19 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.properties.SmsAgentProps;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -38,11 +37,6 @@ public class SmsAgentSocketClient implements SmsAgentClient {
     @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {
 
-        if (gatewayIndex.equals("0")) {
-            log.info("SmsGateway Index is 0 ");
-            return;
-        }
-
         Map<String, String> mapServers = smsAgentProps.findMapByIndex(gatewayIndex).orElseThrow();
 
         String[] ipList = mapServers.get("ip").split("\\|");
@@ -56,15 +50,15 @@ public class SmsAgentSocketClient implements SmsAgentClient {
         int length = idList.length;
 
         for (int i = 0; i < length; i++) {
-            SmsGateway smsGateway = new SmsGateway(ipList[i], portList[i], idList[i], pwList[i]);
+            SmsGateway smsGateway = new SmsGateway(ipList[i], Integer.parseInt(portList[i]), idList[i], pwList[i]);
             sGatewayQueue.offer(smsGateway);
         }
         mSendTerm = calculateTerm();
     }
 
-    public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+    public SmsGatewayResponseDto send(String sCtn, String rCtn, String message) {
 
-        Future<SmsGatewayResponseDto> asyncResult;
+        SmsGatewayResponseDto result;
 
         if (!rCtn.startsWith("01") || 7 >= rCtn.length()) {
 
@@ -72,7 +66,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             throw new SmsAgentCustomException("1502", "전화번호 형식 오류");
         }
 
-        if (80 < message.getBytes("KSC5601").length) {
+        if (80 < message.getBytes(Charset.forName("KSC5601")).length) {
 
             //1501
             throw new SmsAgentCustomException("1501", "메시지 형식 오류");
@@ -82,8 +76,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
 
             SmsGateway smsGateway = sGatewayQueue.poll();  //큐의 첫번째 요소 가져오고 삭제
 
-            smsGateway.clearResult();
-            long prevSendDate = smsGateway.getLastSendDate().getTime();
+            long prevSendDate = smsGateway.getLastSendTime();
             long currentDate = System.currentTimeMillis();
 
             if (currentDate - prevSendDate <= mSendTerm) {
@@ -96,11 +89,10 @@ public class SmsAgentSocketClient implements SmsAgentClient {
 
             try {
                 //게이트웨이 서버에 소켓접속이 완료된 경우
-                if (smsGateway.getBindState()) {
+                if (smsGateway.isBounded()) {
 
-                    log.debug("smsGateway.sendMessage( {}, {}, {}, {}, {})", sCtn, rCtn, sCtn, message, smsGateway.getPort());
-                    smsGateway.sendMessage(sCtn, rCtn, sCtn, message, smsGateway.getPort());
-                    asyncResult = smsGateway.getResult();
+                    log.debug("smsGateway.deliver({}, {}, {})", sCtn, rCtn, message);
+                    result = smsGateway.deliver(sCtn, rCtn, message);
 
                 } else {
 
@@ -121,7 +113,7 @@ public class SmsAgentSocketClient implements SmsAgentClient {
             throw new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
         }
 
-        return asyncResult.get();
+        return result;
     }
 
     private int calculateTerm() {

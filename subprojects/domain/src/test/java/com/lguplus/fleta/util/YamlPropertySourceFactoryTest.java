@@ -26,7 +26,7 @@ class YamlPropertySourceFactoryTest {
         };
         EncodedResource encodedResource = new EncodedResource(resource, StandardCharsets.UTF_8);
         YamlPropertySourceFactory factory = new YamlPropertySourceFactory();
-        PropertySource<?> propertySource = factory.createPropertySource(null, encodedResource);
+        PropertySource<?> propertySource = factory.createPropertySource("test", encodedResource);
         assertThat(propertySource.getProperty("key")).isEqualTo("value");
     }
 
