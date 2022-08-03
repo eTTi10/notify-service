@@ -37,11 +37,6 @@ public class SmsAgentSocketClient implements SmsAgentClient {
     @EventListener(ApplicationReadyEvent.class)
     public void initGateway() {
 
-        if (gatewayIndex.equals("0")) {
-            log.info("SmsGateway Index is 0 ");
-            return;
-        }
-
         Map<String, String> mapServers = smsAgentProps.findMapByIndex(gatewayIndex).orElseThrow();
 
         String[] ipList = mapServers.get("ip").split("\\|");

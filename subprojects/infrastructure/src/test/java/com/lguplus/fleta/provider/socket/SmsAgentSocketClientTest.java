@@ -7,6 +7,7 @@ import com.lguplus.fleta.provider.socket.smsagent.NettySmsAgentServer;
 import com.lguplus.fleta.provider.socket.smsagent.SmsGateway;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,10 +30,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
+
+import org.mockito.MockedConstruction;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -197,11 +200,15 @@ class SmsAgentSocketClientTest {
         assertThat(exception.getCode()).isEqualTo("9999");
     }
 
-    //    @Test
-    //    @DisplayName("11 calculateTerm_Exception 테스트")
-    //    void calculateTerm_Exception()  {
-    //
-    //        ReflectionTestUtils.setField(smsAgentSocketClient, "agentTps", null);
-    //        assertDoesNotThrow(smsAgentSocketClient::initGateway);
-    //    }
+    @Test
+    @DisplayName("11 calculateTerm_Exception 테스트")
+    void calculateTerm_Exception()  {
+
+        try (MockedConstruction<BigDecimal> ignore = mockConstruction(BigDecimal.class, (mock, contest) ->
+                doThrow(IllegalArgumentException.class).when(mock).divide(any(), anyInt(), any())
+        )) {
+            int result = ReflectionTestUtils.invokeMethod(smsAgentSocketClient, "calculateTerm");
+            assertThat(result).isEqualTo(1000);
+        }
+    }
 }
