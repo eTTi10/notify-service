@@ -526,4 +526,29 @@ class SmsAgentDomainServiceTest {
 
     }
 
+    @Test
+    void testSendSms_SendTimeFromGreaterThanSendTimeTo() {
+        boolean agentNoSendUse = (boolean)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendUse");
+        int agentNoSendTimeFrom = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeFrom");
+        int agentNoSendTimeTo = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeTo");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", true);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 23);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 1);
+
+        SendSmsRequestDto request = SendSmsRequestDto.builder()
+                .sCtn("01051603997")
+                .rCtn("01012345678")
+                .msg("http://google.com/start/we09gn2ks")
+                .build();
+
+        given(smsAgentClient.send(anyString(), anyString(), anyString())).willReturn(smsGatewayResponseDto);
+
+        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
+        assertThat(result.getFlag()).isEqualTo("0000");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", agentNoSendUse);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", agentNoSendTimeFrom);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", agentNoSendTimeTo);
+    }
 }
