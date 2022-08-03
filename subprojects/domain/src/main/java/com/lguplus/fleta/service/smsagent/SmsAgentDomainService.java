@@ -12,15 +12,14 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.exception.smsagent.SmsAgentEtcException;
-import java.io.UnsupportedEncodingException;
-import java.util.Calendar;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.Calendar;
+import java.util.Optional;
 
 
 /**
@@ -66,7 +65,7 @@ public class SmsAgentDomainService {
      * @param sendSmsRequestDto
      * @return SmsGatewayResponseDto
      */
-    public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto) throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+    public SmsGatewayResponseDto sendSms(SendSmsRequestDto sendSmsRequestDto)  {
 
         String sCtn = sendSmsRequestDto.getSCtn();
         String rCtn = sendSmsRequestDto.getRCtn();

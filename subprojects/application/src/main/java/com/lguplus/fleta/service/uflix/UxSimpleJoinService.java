@@ -6,7 +6,6 @@ import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
 import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
 import com.lguplus.fleta.service.smsagent.SmsAgentDomainService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ public class UxSimpleJoinService {
      * @param uxSimpleJoinSmsRequestDto tvG 유플릭스 간편 가입 안내 SMS 요청을 위한 DTO
      */
 
-    @SneakyThrows
     public SmsGatewayResponseDto requestUxSimpleJoinSms(UxSimpleJoinSmsRequestDto uxSimpleJoinSmsRequestDto) {
         log.debug("smsMessage ::::::::::::::::::::: {}", smsMessage);
 

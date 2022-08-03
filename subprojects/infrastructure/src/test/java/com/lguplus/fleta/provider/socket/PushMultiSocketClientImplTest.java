@@ -302,7 +302,7 @@ class PushMultiSocketClientImplTest {
 
             @Override
             public void run() {
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     //setTime = ;
                     ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
                     pushMultiSocketClient.waitTPS();

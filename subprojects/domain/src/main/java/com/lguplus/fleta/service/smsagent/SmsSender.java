@@ -123,14 +123,6 @@ public class SmsSender {
             log.debug("sendMessage {}", sendMessage);
             smsGatewayResponseDto = smsAgentClient.send(smsSenderNo, smsAgentRequestDto.getSmsId(), sendMessage);
 
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-
-            smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                .flag(codeEtcException)
-                .message(messageEtcException)
-                .build();
-
         } catch (SmsAgentCustomException e) {
             log.error(e.getMessage(), e);
             smsGatewayResponseDto = SmsGatewayResponseDto.builder()
