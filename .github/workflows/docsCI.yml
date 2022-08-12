@@ -2,7 +2,7 @@ name: docsCI
 
 on:
   push:
-    branches: [ feature/docs ]
+    branches: [ develop ]
 
 jobs:
   test:
