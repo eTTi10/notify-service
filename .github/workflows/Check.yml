@@ -1,0 +1,32 @@
+name:  Checkstyle and ReviewDog
+
+on:
+  pull_request:
+    branches: [ feature/deviceinfo ]
+
+jobs:
+  checkstyle_job:
+    name: Checkstyle job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: nikitasavinov/checkstyle-action@master
+        with:
+          checkstyle_config: https://raw.githubusercontent.com/dg-h/open-reference/gh-pages/google_checks_lgup_custom.xml
+          checkstyle_version: 10.1
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_on_error: false
+          level: warning
+
+  reviewdog:
+    name: Check with review dog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: reviewdog/action-misspell@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-check
+          level: warning
+          locale: "US"
