@@ -1,7 +1,7 @@
 name:  Checkstyle and ReviewDog
 
 on:
-  pull_request:
+  push:
     branches: [ feature/deviceinfo ]
 
 jobs:
