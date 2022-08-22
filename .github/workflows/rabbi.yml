@@ -59,7 +59,7 @@ jobs:
 
       - name: Copy jacoco files
         run: |
-          cp -r subprojects/application/build/JacocoReportDir/test/html/* /
+          cp -r subprojects/application/build/JacocoReportDir/test/html/* report/
 
       - name: Log coverage percentage
         run: |
