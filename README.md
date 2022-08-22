@@ -1,0 +1,1 @@
+[![Coverage](https://github.com/LGUPLUS-IPTV-MSA/notify-service/blob/jacoco-badge/jacoco.svg)]
