@@ -19,6 +19,35 @@ jobs:
       - name: Test and Generate Docs with Gradle
         run: ./gradlew asciidoctor openapi3
 
+      #jacoco-badge
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2.5.0
+        with:
+          jacoco-csv-file: build/reports/jacoco/test/jacocoTestReport.csv
+          badges-directory: ./report
+          colors : '#4c1 #4c1 #4c1 #4c1 #fe7d37 #e05d44'
+          intervals: 60 60 60 60 50 0
+
+      - name: Log coverage percentage
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+      - name: Upload JaCoCo coverage report
+        uses: actions/upload-artifact@v2
+        with:
+          name: jacoco-report
+          path: build/reports/jacoco/test/html
+
+      - name: Push
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          REPO: self
+          BRANCH: jacoco-badge
+          FOLDER: report
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MESSAGE: "Add Badge and report by Action"
+      #end-jacoco-badge
 
       - name: Copy document files
         run: |
@@ -26,7 +55,7 @@ jobs:
           cp build/api-spec/openapi3.json docs/
           cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
           cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
-          
+
 
       - name: Copy document files
         run: |
