@@ -94,8 +94,10 @@ subprojects {
         toolVersion = '0.8.7'
 
         // 테스트 결과 리포트 저장 경로 설정
-        // default : "${project.reporting.baseDir}/jacoco"
-        //reportsDir = file("$buildDir/customJacocoReportDir")
+        reportsDir = file("$buildDir/JacocoReportDir")
+//        reportsDirectory = layout.buildDirectory.dir('../documents/coverage/jacoco')
+//        default  "${project.reporting.baseDir}/jacoco"
+//        reportsDir = file("$buildDir/customJacocoReportDir")
     }
 
     // JaCoCo Task
@@ -104,11 +106,12 @@ subprojects {
             // 리포트 활성화
             html.enabled true
             xml.enabled true
-            csv.enabled false
+            csv.enabled true
 
             // 리포트 저장 경로 설정
-            //html.destination file("$buildDir/jacocoHtml")
-            //xml.destination file("$buildDir/jacoco.xml")
+//            csv.destination file("$buildDir/jacoco.csv")
+//            html.destination file("$buildDir/jacocoHtml")
+//            xml.destination file("$buildDir/jacoco.xml")
         }
 
         afterEvaluate {
