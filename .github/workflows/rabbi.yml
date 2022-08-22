@@ -19,6 +19,34 @@ jobs:
       - name: Test and Generate Docs with Gradle
         run: ./gradlew asciidoctor openapi3
 
+
+      - name: Copy document files
+        run: |
+          mkdir -p docs report
+          cp build/api-spec/openapi3.json docs/
+          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
+          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
+
+
+      - name: Copy document files
+        run: |
+          mkdir -p docs
+          cp build/api-spec/openapi3.json docs/
+          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
+
+      - name: Pushes docs to docs repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'docs'
+          target-directory: 'notify'
+          destination-github-username: 'LGUPLUS-IPTV-MSA'
+          destination-repository-name: 'rabbi'
+          user-email: etti10@lguplus.co.kr
+          target-branch: main
+
       #jacoco-badge
       - name: Generate JaCoCo Badge
         id: jacoco
@@ -48,30 +76,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: "Add Badge and report by Action"
       #end-jacoco-badge
-
-      - name: Copy document files
-        run: |
-          mkdir -p docs report
-          cp build/api-spec/openapi3.json docs/
-          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
-          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
-
-
-      - name: Copy document files
-        run: |
-          mkdir -p docs
-          cp build/api-spec/openapi3.json docs/
-          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
-
-      - name: Pushes docs to docs repository
-        uses: cpina/github-action-push-to-another-repository@main
-        env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-        with:
-          source-directory: 'docs'
-          target-directory: 'notify'
-          destination-github-username: 'LGUPLUS-IPTV-MSA'
-          destination-repository-name: 'rabbi'
-          user-email: etti10@lguplus.co.kr
-          target-branch: main
