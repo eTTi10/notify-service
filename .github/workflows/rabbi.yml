@@ -57,9 +57,9 @@ jobs:
           colors : '#4c1 #4c1 #4c1 #4c1 #fe7d37 #e05d44'
           intervals: 60 60 60 60 50 0
 
-      - name: Copy jacoco files
-        run: |
-          cp -r subprojects/application/build/JacocoReportDir/test/html/* report/
+#      - name: Copy jacoco files
+#        run: |
+#          cp -r subprojects/application/build/JacocoReportDir/test/html
 
       - name: Log coverage percentage
         run: |
@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: jacoco-report
-          path: subprojects/presentation/build/reports/jacoco/test/html
+          path: subprojects/application/build/JacocoReportDir/test/html
 
       - name: Push
         uses: s0/git-publish-subdir-action@develop
