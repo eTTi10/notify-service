@@ -1,1 +1,1 @@
-[![presentation Coverage](https://github.com/LGUPLUS-IPTV-MSA/notify-service/blob/jacoco-badge/jacoco.svg)](https://super-adventure-c9ecc7b3.pages.github.io/)
+[![presentation Coverage](https://github.com/LGUPLUS-IPTV-MSA/notify-service/blob/jacoco-badge/jacoco.svg)](https://super-adventure-c9ecc7b3.pages.github.io/index.html)

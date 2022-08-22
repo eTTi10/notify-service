@@ -59,7 +59,7 @@ jobs:
 
 #      - name: Copy jacoco files
 #        run: |
-#          cp -r subprojects/application/build/JacocoReportDir/test/html
+#          cp -r subprojects/presentation/build/JacocoReportDir/test/html
 
       - name: Log coverage percentage
         run: |
@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: jacoco-report
-          path: subprojects/application/build/JacocoReportDir/test/html
+          path: subprojects/presentation/build/JacocoReportDir/test/html
 
       - name: Download Output Directory
         uses: actions/download-artifact@v2
