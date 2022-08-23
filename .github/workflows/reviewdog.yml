@@ -18,7 +18,6 @@ jobs:
           reporter: github-pr-review
           fail_on_error: false
           level: warning
-
   reviewdog:
     name: Check with review dog
     runs-on: ubuntu-latest
