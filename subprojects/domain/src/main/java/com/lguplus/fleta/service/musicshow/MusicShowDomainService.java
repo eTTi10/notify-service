@@ -27,7 +27,9 @@ public class MusicShowDomainService {
         return musicShowRepository.getPush(requestDto);
     }
 
-    public void postPush(PushRequestDto requestDto) {
+    public PushTargetEntity postPush(PushRequestDto requestDto) {
+
+        PushTargetEntity resultEntity;
         Integer count = musicShowRepository.validAlbumId(requestDto.getAlbumId());
 
         if (count == null || count.intValue() < 1) {
@@ -52,7 +54,7 @@ public class MusicShowDomainService {
                 .sendDt(convertFormat(requestDto.getSendDt()))
                 .modDt(null)
                 .build();
-            musicShowRepository.insertPush(entity);
+            resultEntity = musicShowRepository.insertPush(entity);
         } else {
             if (StringUtils.equals(getKeyDto.getPushYn(), requestDto.getPushYn())) {
                 throw new DuplicateKeyException();
@@ -79,24 +81,34 @@ public class MusicShowDomainService {
                         .msg(requestDto.getMsg())
                         .sendDt(convertFormat(requestDto.getSendDt()))
                         .build();
-                    musicShowRepository.insertPush(entity2);
+                    resultEntity = musicShowRepository.insertPush(entity2);
                 } else {
                     //update
                     PushTargetEntity entity = PushTargetEntity.builder()
-                        .regNo(regNo)
-                        .pushYn("Y")
-                        .sendDt(convertFormat(requestDto.getSendDt()))
+                        .pKey(getKeyDto.getPKey())
+                        .regNo(getKeyDto.getRegNo())
+                        .saId(getKeyDto.getSaId())
+                        .stbMac(getKeyDto.getStbMac())
+                        .albumId(getKeyDto.getAlbumId())
+                        .categoryId(getKeyDto.getCategoryId())
+                        .serviceType(getKeyDto.getServiceType())
+                        .msg(getKeyDto.getMsg())
+                        .pushYn("Y") //const 변경
+                        .resultCode(getKeyDto.getResultCode())
+                        .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
+                        .sendDt(requestDto.getSendDt() != null ? convertFormat(requestDto.getSendDt()) : null)
                         .modDt(Timestamp.valueOf(LocalDateTime.now()))
                         .build();
-                    musicShowRepository.insertPush(entity);
-
+                    resultEntity = musicShowRepository.insertPush(entity);
                 }
             }
         }
-
+        return resultEntity;
     }
 
-    public void releasePush(PushRequestDto requestDto) {
+    public PushTargetEntity releasePush(PushRequestDto requestDto) {
+
+        PushTargetEntity resultEntity;
         Integer count = musicShowRepository.validAlbumId(requestDto.getAlbumId());
 
         if (count == null) {
@@ -122,15 +134,17 @@ public class MusicShowDomainService {
                     .pushYn("N")
                     .resultCode(getKeyDto.getResultCode())
                     .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
-                    .sendDt(getKeyDto.getStartDt() != null ? convertFormat(getKeyDto.getStartDt()) : null)
+                    .sendDt(requestDto.getSendDt() != null ? convertFormat(requestDto.getSendDt()) : null)
                     .modDt(Timestamp.valueOf(LocalDateTime.now()))
                     .build();
 
-                musicShowRepository.insertPush(entity);
+                resultEntity = musicShowRepository.insertPush(entity);
             }
         } else {
             throw new NotFoundException();
         }
+
+        return resultEntity;
     }
 
     public Timestamp convertFormat(String sendDt) {

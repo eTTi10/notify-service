@@ -2,10 +2,11 @@ package com.lguplus.fleta.data.dto;
 
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
-import com.lguplus.fleta.util.CommonUtil;
 import lombok.Builder;
+import lombok.Getter;
 
 @Builder
+@Getter
 public class GetPushResponseDto implements CommonResponseDto {
 
     public static final String COLSEP = "!^"; // 열 분리자 -> constants로 변경 필요
@@ -37,28 +38,15 @@ public class GetPushResponseDto implements CommonResponseDto {
      */
     private String start_dt = "";
 
-    //	@XmlElement(name="push_yn")
-    public String getPush_yn() {
-        return push_yn;
-    }
-
-    public void setPush_yn(String push_yn) {
-        this.push_yn = push_yn;
-    }
-
-    //	@XmlElement(name="start_dt")
-    public String getStart_dt() {
-        return CommonUtil.checkNullStr(start_dt);
-    }
-
-    public void setStart_dt(String start_dt) {
-        this.start_dt = start_dt;
-    }
+    private String flag = "";
+    private String message = "";
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(super.toString());
+        sb.append(getFlag());
+        sb.append(COLSEP);
+        sb.append(getMessage());
         sb.append(COLSEP);
         sb.append(push_yn);
         sb.append(COLSEP);
@@ -73,12 +61,16 @@ public class GetPushResponseDto implements CommonResponseDto {
         if (dto == null) {
             return GetPushResponseDto.builder()
                 .push_yn("N")
+                .flag(SUCCESS_FLAG)
+                .message(SUCCESS_MESSAGE)
                 .build();
         }
 
         return GetPushResponseDto.builder()
             .push_yn(dto.getPushYn())
             .start_dt(dto.getStartDt())
+            .flag(SUCCESS_FLAG)
+            .message(SUCCESS_MESSAGE)
             .build();
     }
 }

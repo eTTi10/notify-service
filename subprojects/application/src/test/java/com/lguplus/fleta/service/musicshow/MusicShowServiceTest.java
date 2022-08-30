@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
@@ -44,6 +45,35 @@ class MusicShowServiceTest {
         GetPushResponseDto responseDto = service.getPush(requestDto);
         assertThat(responseDto).isNotNull();
         assertThat(responseDto.getPush_yn()).isEqualTo(dto.getPushYn());
+
+    }
+
+
+    @Test
+    void postPush() {
+
+        PushRequestDto requestDto = PushRequestDto.builder()
+            .saId("1000494369")
+            .stbMac("v010.0049.4369")
+            .albumId("M01198F334PPV00")
+            .categoryId("E967O")
+            .sendDt("202201211214")
+            .build();
+
+        assertDoesNotThrow(() -> service.postPush(requestDto));
+
+    }
+
+    @Test
+    void releasePush() {
+
+        PushRequestDto requestDto = PushRequestDto.builder()
+            .saId("1000494369")
+            .stbMac("v010.0049.4369")
+            .albumId("M01198F334PPV00")
+            .build();
+
+        assertDoesNotThrow(() -> service.releasePush(requestDto));
 
     }
 }
