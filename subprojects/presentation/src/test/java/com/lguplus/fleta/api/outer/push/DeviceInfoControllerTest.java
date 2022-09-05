@@ -94,7 +94,7 @@ class DeviceInfoControllerTest {
     private static final String SERVICE_TYPE = "H";
     private static final String AGENT_TYPE = "G";
     private static final String NOTI_TYPE = "N";
-
+    private static final String STB_MAC = "1111.2222.3333";
     @Test
     void postDeviceInfo() throws Exception {
         MultiValueMap<String , String> params = new LinkedMultiValueMap<>();
@@ -103,7 +103,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
 
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/v1/push/deviceinfo")
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/hdtv/v1/push/deviceinfo")
                 .content(
                     " {\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"A\" ,"
@@ -137,7 +137,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", "a"); // wrong
         params.add("noti_type", NOTI_TYPE);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/hdtv/v1/push/deviceinfo").content(
             " {\"sa_id\" : \"500058151453\" ,"
                             + "\n\"service_type\" : \"a\" ,"
                             + "\n\"agent_type\" : \"G\" ,"
@@ -156,8 +156,9 @@ class DeviceInfoControllerTest {
         params.add("service_type", SERVICE_TYPE);
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
+        params.add("stb_mac",STB_MAC);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/hdtv/v1/push/deviceinfo").content(
                     "{\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"H\" ,"
                         + "\n\"agent_type\" : \"G\" ,"
@@ -187,7 +188,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(delete("/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(delete("/hdtv/v1/push/deviceinfo").content(
                     "{\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"H\" ,"
                         + "\n\"agent_type\" : \"G\" ,"
