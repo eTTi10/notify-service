@@ -20,14 +20,14 @@ public class DeviceInfoDomainService {
 
     public void deleteDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-            throw new DataNotExistsException("DeviceInfoDomainService delete 대상 없음");
+            throw new DataNotExistsException("데이터 미존재");
         }
         deviceInfoRepository.delete(deviceInfoRequestDto);
     }
 
     public void updateDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         if (!deviceInfoRepository.exist(deviceInfoRequestDto)){
-           throw new NoResultException("DeviceInfoDomainService update 대상 없음");
+           throw new NoResultException("데이터 미존재");
         }
         deviceInfoRepository.save(deviceInfoRequestDto);
     }
