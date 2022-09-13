@@ -171,38 +171,38 @@ class SmsAgentDomainServiceTest {
 
     }
 
-    @Test
-    @DisplayName("Interrupted Exception 코드를 이용한 SMS발송 테스트")
-    void sendSmsCode_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
-
-        CallSettingDto dto = CallSettingDto.builder()
-            .code("S001")
-            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-            .build();
-
-        CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-            .code("0000")
-            .message("성공")
-            .result(CallSettingResultDto.builder()
-                .dataCount(1)
-                .data(dto)
-                .build())
-            .build();
-
-        // mock object
-        SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-            .saId("M15030600001")
-            .stbMac("v150.3060.0001")
-            .smsCd("S001")
-            .ctn("01051603997")
-            .replacement("http://google.com/start/we09gn2ks")
-            .build();
-
-        given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(new InterruptedException());
-        SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
-        assertThat(responseDto.getFlag()).isEqualTo("9999");
-    }
+//    @Test
+//    @DisplayName("Interrupted Exception 코드를 이용한 SMS발송 테스트")
+//    void sendSmsCode_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+//
+//        CallSettingDto dto = CallSettingDto.builder()
+//            .code("S001")
+//            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+//            .build();
+//
+//        CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+//            .code("0000")
+//            .message("성공")
+//            .result(CallSettingResultDto.builder()
+//                .dataCount(1)
+//                .data(dto)
+//                .build())
+//            .build();
+//
+//        // mock object
+//        SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
+//            .saId("M15030600001")
+//            .stbMac("v150.3060.0001")
+//            .smsCd("S001")
+//            .ctn("01051603997")
+//            .replacement("http://google.com/start/we09gn2ks")
+//            .build();
+//
+//        given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
+//        given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(new InterruptedException());
+//        SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
+//        assertThat(responseDto.getFlag()).isEqualTo("9999");
+//    }
 
     @Test
     @DisplayName("Exception 코드를 이용한 SMS발송 테스트")
@@ -526,4 +526,29 @@ class SmsAgentDomainServiceTest {
 
     }
 
+    @Test
+    void testSendSms_SendTimeFromGreaterThanSendTimeTo() {
+        boolean agentNoSendUse = (boolean)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendUse");
+        int agentNoSendTimeFrom = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeFrom");
+        int agentNoSendTimeTo = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeTo");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", true);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 23);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 1);
+
+        SendSmsRequestDto request = SendSmsRequestDto.builder()
+                .sCtn("01051603997")
+                .rCtn("01012345678")
+                .msg("http://google.com/start/we09gn2ks")
+                .build();
+
+        given(smsAgentClient.send(anyString(), anyString(), anyString())).willReturn(smsGatewayResponseDto);
+
+        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
+        assertThat(result.getFlag()).isEqualTo("0000");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", agentNoSendUse);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", agentNoSendTimeFrom);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", agentNoSendTimeTo);
+    }
 }
