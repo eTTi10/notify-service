@@ -40,7 +40,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
-class PushDomainServiceTest {
+class PushSenderTest {
 
     private static final String REG_ID = "M00020200205";
     private static final String SA_ID = "500223046118";
@@ -58,7 +58,7 @@ class PushDomainServiceTest {
     String sMessage = "성공";
 
     @InjectMocks
-    PushDomainService pushDomainService;
+    PushSender pushSender;
 
     @Mock
     HttpSinglePushDomainService httpSinglePushDomainService;
@@ -77,9 +77,9 @@ class PushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(pushDomainService, "fcmExtraSend", "N");
-        ReflectionTestUtils.setField(pushDomainService, "extraServiceId", "30015");
-        ReflectionTestUtils.setField(pushDomainService, "extraApplicationId", "smartuxapp");
+        ReflectionTestUtils.setField(pushSender, "fcmExtraSend", "N");
+        ReflectionTestUtils.setField(pushSender, "extraServiceId", "30015");
+        ReflectionTestUtils.setField(pushSender, "extraApplicationId", "smartuxapp");
 
         //response given
         httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
@@ -239,7 +239,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<String>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -260,12 +260,12 @@ class PushDomainServiceTest {
         SendPushResponseDto responseDto;
 
         //정상 응답
-        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
 
         // (sendCode.substring(0,1).equals("T")) 테스트
         sendPushCodeRequestDto.setSendCode("T001");
-        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
 
     }
@@ -298,7 +298,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<String>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -319,7 +319,7 @@ class PushDomainServiceTest {
         SendPushResponseDto responseDto;
 
         //정상 응답
-        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
     }
 
@@ -357,7 +357,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -378,7 +378,7 @@ class PushDomainServiceTest {
         SendPushResponseDto responseDto;
 
         //정상 응답
-        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
     }
 
@@ -415,7 +415,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -436,7 +436,7 @@ class PushDomainServiceTest {
         SendPushResponseDto responseDto;
 
         // 실패
-        responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
     }
 
@@ -464,7 +464,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -482,7 +482,7 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        SendPushResponseDto responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        SendPushResponseDto responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
 
     }
@@ -514,7 +514,7 @@ class PushDomainServiceTest {
             .service(pushServiceResultDtoArrayList)
             .build();
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -532,7 +532,7 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        SendPushResponseDto responseDto = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        SendPushResponseDto responseDto = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(responseDto.getMessage()).isEqualTo(sendPushResponseDto.getMessage());
 
     }
@@ -552,7 +552,7 @@ class PushDomainServiceTest {
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException(null, "1113");
         given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<String>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -570,7 +570,7 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        assertDoesNotThrow(() -> pushDomainService.sendPushCode(sendPushCodeRequestDto));
+        assertDoesNotThrow(() -> pushSender.sendPushCode(sendPushCodeRequestDto));
     }
 
     @Test
@@ -588,7 +588,7 @@ class PushDomainServiceTest {
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException(null, "1108");
         given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<String>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -606,8 +606,235 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        assertDoesNotThrow(() -> pushDomainService.sendPushCode(sendPushCodeRequestDto));
+        assertDoesNotThrow(() -> pushSender.sendPushCode(sendPushCodeRequestDto));
     }
+
+
+    @Test
+    @DisplayName("정상적으로 regId를 가져오는 지 확인")
+    void getRegistrationID() {
+        //given
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        SendPushCodeRequestDto sendPushCodeRequestDto = SendPushCodeRequestDto.builder()
+            .saId("500058151453")
+            .stbMac("001c.627e.039c")
+            .build();
+
+        //when
+        String regId = pushSender.getRegistrationID(sendPushCodeRequestDto);
+
+        //then
+        assertThat(regId).isEqualTo(REG_ID);
+    }
+
+    @Test
+    @DisplayName("ctn을 입력으로 받아 정상적으로 regId 조회하는 지 확인")
+    void getRegistrationIDbyCtn() {
+
+        //given
+        SaIdDto saIdDto = SaIdDto.builder()
+            .saId(SA_ID)
+            .build();
+
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
+        String ctn = REG_ID;
+
+        //when
+        String regId = pushSender.getRegistrationIDbyCtn(ctn);
+
+        //then
+        assertThat(regId).isEqualTo(SA_ID);
+    }
+
+    @Test
+    @DisplayName("ctn을 입력으로 받아 regId 조회하지 못한 경우 확인")
+    void getRegistrationIDbyCtn_Fail() {
+
+        //given
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(List.of());
+        String ctn = REG_ID;
+
+        //when
+        String regId = pushSender.getRegistrationIDbyCtn(ctn);
+
+        //then
+        assertThat(regId).isEmpty();
+    }
+
+    @Test
+    void getGcmOrTVRequestDto() {
+
+        //given
+        doReturn(Optional.of(serviceTargetMap.get("default"))).when(sendPushCodeProps).findMapByServiceType("default");
+        doReturn(Optional.of(serviceTargetMap.get("C"))).when(sendPushCodeProps).findMapByServiceType("C");
+        doReturn(Optional.of(sendCodeMap.get("P001"))).when(sendPushCodeProps).findMapBySendCode("P001");
+
+        SaIdDto saIdDto = SaIdDto.builder()
+            .saId(SA_ID)
+            .build();
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
+
+        //serviceType : C
+        HttpPushSingleRequestDto result;
+        result = pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "C", "G");
+        assertThat(result.getApplicationId()).isEqualTo("musicshow_gcm");
+        assertThat(result.getServiceId()).isEqualTo("30104");
+
+        //serviceType : H
+        result = pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "H", "G");
+        assertThat(result.getApplicationId()).isEqualTo("hdtv_GCM01");
+        assertThat(result.getServiceId()).isEqualTo("20014");
+
+        //serviceType : ""
+        result = pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "G");
+        assertThat(result.getApplicationId()).isEqualTo("hdtv_GCM01");
+        assertThat(result.getServiceId()).isEqualTo("20014");
+
+        result = pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "Invalid", "Invalid");
+        assertThat(result.getApplicationId()).isEqualTo("");
+        assertThat(result.getServiceId()).isEqualTo("");
+
+        //regType : 2
+        sendPushCodeRequestDto.setRegType("2");
+        result = pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "G");
+        assertThat(result.getApplicationId()).isEqualTo("hdtv_GCM01");
+        assertThat(result.getServiceId()).isEqualTo("20014");
+
+        Exception exception = assertThrows(InvalidSendPushCodeException.class, () -> {
+            pushSender.getGcmOrTVRequestDto(sendPushCodeRequestDto, "", "L");
+        });
+
+        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
+
+        Exception exception2 = assertThrows(InvalidSendPushCodeException.class, () -> {
+            pushSender.getApnsRequestDto(sendPushCodeRequestDto, "", "L");
+        });
+
+        assertThat(exception2.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
+
+    }
+
+    @Test
+    @DisplayName("InvalidSendPushCodeException 처리가 잘되는 지 테스트")
+    void checkInvalidSendPushCode() {
+
+        //given
+        Map<String, String> pushInfoMap = new HashMap<>();
+        pushInfoMap.put("gcm.payload.body", "tesst");
+
+        pushSender.checkGCMBody(pushInfoMap);
+
+        Map<String, String> pushInfoMapE = new HashMap<>();
+        pushInfoMapE.put("gcm.payload.body", "");
+        //sendcode 미지원 exceptioin
+        Exception exception = assertThrows(InvalidSendPushCodeException.class, () -> {
+            pushSender.checkGCMBody(pushInfoMapE);
+        });
+        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
+
+    }
+
+    @Test
+    @DisplayName("pushType이 APNS일 경우 requestDto조립 테스트")
+    void getApnsRequestDto() {
+
+        //given
+        doReturn(Optional.of(serviceTargetMap.get("default"))).when(sendPushCodeProps).findMapByServiceType("default");
+        doReturn(Optional.of(serviceTargetMap.get("C"))).when(sendPushCodeProps).findMapByServiceType("C");
+        doReturn(Optional.of(sendCodeMap.get("P001"))).when(sendPushCodeProps).findMapBySendCode("P001");
+
+        SaIdDto saIdDto = SaIdDto.builder()
+            .saId(SA_ID)
+            .build();
+        List<SaIdDto> saIdDtos = List.of(saIdDto);
+        given(subscriberDomainClient.getRegistrationIDbyCtn(any())).willReturn(saIdDtos);
+
+        HttpPushSingleRequestDto result;
+        //pushType : "A"
+        result = pushSender.getApnsRequestDto(sendPushCodeRequestDto, "C", "A");
+        assertThat(result.getApplicationId()).isEqualTo("musicshow_apns");
+        assertThat(result.getServiceId()).isEqualTo("30107");
+
+        //regType : 2
+        sendPushCodeRequestDto.setRegType("2");
+        result = pushSender.getApnsRequestDto(sendPushCodeRequestDto, "C", "A");
+        assertThat(result.getApplicationId()).isEqualTo("musicshow_apns");
+        assertThat(result.getServiceId()).isEqualTo("30107");
+
+        //serviceType : H
+        result = pushSender.getApnsRequestDto(sendPushCodeRequestDto, "H", "A");
+        assertThat(result.getApplicationId()).isEqualTo("hdtv_APNS1");
+        assertThat(result.getServiceId()).isEqualTo("30005");
+
+        //serviceType : ""
+        result = pushSender.getApnsRequestDto(sendPushCodeRequestDto, "", "A");
+        assertThat(result.getApplicationId()).isEqualTo("hdtv_APNS1");
+        assertThat(result.getServiceId()).isEqualTo("30005");
+
+
+    }
+
+    @Test
+    @DisplayName("소켓푸시일 경우 requestDto조립 테스트")
+    void getExtraPushRequestDto() {
+
+        doReturn(Optional.of(serviceTargetMap.get("default"))).when(sendPushCodeProps).findMapByServiceType("default");
+        doReturn(Optional.of(serviceTargetMap.get("C"))).when(sendPushCodeProps).findMapByServiceType("C");
+        doReturn(Optional.of(sendCodeMap.get("P001"))).when(sendPushCodeProps).findMapBySendCode("P001");
+
+        List<PushRequestItemDto> addItems = new ArrayList<>();
+        addItems.add(PushRequestItemDto.builder().itemKey("badge").itemValue("1").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("sound").itemValue("ring.caf").build());
+        addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
+
+        //given
+        PushRequestSingleDto pushRequestSingleDto = PushRequestSingleDto.builder()
+            .applicationId("30015")
+            .serviceId("smartuxapp")
+            .pushType("L")
+            .message("\"result\":{\"noti_type\":\"PA_TM\", \"address\":\"111111\", \"unumber\":\"948-0719\",\"req_date\":\"202002141124\",\"ctn\":\"\",\"trans_id\":\"\"}")
+            .regId("M00020200205")
+            .items(addItems)
+            .build();
+
+        RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
+        given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
+
+        //serviceType : C
+        PushRequestSingleDto result;
+        result = pushSender.getExtraPushRequestDto(sendPushCodeRequestDto, "C", "G");
+        assertThat(result.getApplicationId()).isEqualTo("smartuxapp");
+        assertThat(result.getServiceId()).isEqualTo("30015");
+
+        //serviceType : H
+        result = pushSender.getExtraPushRequestDto(sendPushCodeRequestDto, "H", "G");
+        assertThat(result.getApplicationId()).isEqualTo("smartuxapp");
+        assertThat(result.getServiceId()).isEqualTo("30015");
+
+        //serviceType : ""
+        result = pushSender.getExtraPushRequestDto(sendPushCodeRequestDto, "", "G");
+        assertThat(result.getApplicationId()).isEqualTo("smartuxapp");
+        assertThat(result.getServiceId()).isEqualTo("30015");
+
+        //pushType : "A"
+        result = pushSender.getExtraPushRequestDto(sendPushCodeRequestDto, "", "A");
+        assertThat(result.getApplicationId()).isEqualTo("smartuxapp");
+        assertThat(result.getServiceId()).isEqualTo("30015");
+
+        //regType : 2
+        sendPushCodeRequestDto.setRegType("2");
+        result = pushSender.getExtraPushRequestDto(sendPushCodeRequestDto, "", "G");
+        assertThat(result.getApplicationId()).isEqualTo("smartuxapp");
+        assertThat(result.getServiceId()).isEqualTo("30015");
+
+
+    }
+
 
     @Test
     @DisplayName("HTTP PUSH에서 오류코드가 1113 혹은 1108이 아닌 경우 테스트")
@@ -621,7 +848,7 @@ class PushDomainServiceTest {
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException(null, "1004");
         given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
-        List items = new ArrayList();
+        ArrayList<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -639,7 +866,7 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        SendPushResponseDto result = pushDomainService.sendPushCode(sendPushCodeRequestDto);
+        SendPushResponseDto result = pushSender.sendPushCode(sendPushCodeRequestDto);
         assertThat(result.getFlag()).isEqualTo(httpPushCustomException.getCode());
     }
 
@@ -655,7 +882,7 @@ class PushDomainServiceTest {
         HttpPushCustomException httpPushCustomException = new HttpPushCustomException(null, "1113");
         given(httpSinglePushDomainService.requestHttpPushSingle(any())).willThrow(httpPushCustomException);
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -673,7 +900,7 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        assertDoesNotThrow(() -> pushDomainService.sendPushCode(sendPushCodeRequestDto));
+        assertDoesNotThrow(() -> pushSender.sendPushCode(sendPushCodeRequestDto));
     }
 
     @Test
@@ -688,7 +915,7 @@ class PushDomainServiceTest {
         RegIdDto regIdDto = RegIdDto.builder().registrationId(REG_ID).build();
         given(personalizationDomainClient.getRegistrationID(any())).willReturn(regIdDto);
 
-        List items = new ArrayList();
+        List<String> items = new ArrayList<>();
 
         items.add("badge!^1");
         items.add("sound!^ring.caf");
@@ -706,7 +933,6 @@ class PushDomainServiceTest {
             .items(items)
             .build();
 
-        assertDoesNotThrow(() -> pushDomainService.sendPushCode(sendPushCodeRequestDto));
+        assertDoesNotThrow(() -> pushSender.sendPushCode(sendPushCodeRequestDto));
     }
-
 }

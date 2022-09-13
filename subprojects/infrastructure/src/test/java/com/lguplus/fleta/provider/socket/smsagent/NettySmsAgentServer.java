@@ -152,6 +152,13 @@ public class NettySmsAgentServer {
                     .body(body)
                     .build());
             }
+            // LINK
+            else if (message.type == 6) {
+                ctx.writeAndFlush(SmsMessage.builder()
+                        .type(7)
+                        .body(new byte[0])
+                        .build());
+            }
         }
 
         @Override
