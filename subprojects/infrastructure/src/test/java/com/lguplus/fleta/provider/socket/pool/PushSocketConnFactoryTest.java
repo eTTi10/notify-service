@@ -1,30 +1,28 @@
 package com.lguplus.fleta.provider.socket.pool;
 
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
+import java.time.Instant;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.DestroyMode;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.time.Instant;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.LockSupport;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-
 @Slf4j
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 class PushSocketConnFactoryTest {
 
     static NettyTcpJunitServer server;
@@ -49,15 +47,15 @@ class PushSocketConnFactoryTest {
     void validateObject() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
         ReflectionTestUtils.setField(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
 
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1));
 
         PushSocketInfo socketInfo = pool.borrowObject();
 
@@ -69,15 +67,15 @@ class PushSocketConnFactoryTest {
     void validateObject_error2() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt("1"+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("1" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
         ReflectionTestUtils.setField(pushSocketConnFactory, "commChannelNum", new AtomicInteger(9999));
 
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1));
 
         assertThrows(Exception.class, () -> {
             pool.borrowObject();
@@ -89,13 +87,13 @@ class PushSocketConnFactoryTest {
     void validateObject2() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfig(2, 1));
 
         PushSocketInfo socketInfo = pool.borrowObject();
 
@@ -113,14 +111,14 @@ class PushSocketConnFactoryTest {
     void validateObject3() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
         int maxCount = 1;
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1));
 
         PushSocketInfo socketInfo = pool.borrowObject();
         log.debug(socketInfo.toString());
@@ -136,7 +134,7 @@ class PushSocketConnFactoryTest {
         assertTrue(!socketInfoRtn.isOpened());
         pool.returnObject(socketInfoRtn);
 
-        pool.setConfig(getPoolConfig(1,1));
+        pool.setConfig(getPoolConfig(1, 1));
 
         socketInfoRtn = pool.borrowObject();
         log.debug(socketInfoRtn.toString());
@@ -148,24 +146,24 @@ class PushSocketConnFactoryTest {
     void validateObject4() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
         int maxCount = 1;
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1));
 
         PushSocketInfo socketInfo = pool.borrowObject();
         log.debug(socketInfo.toString());
 
         assertTrue(socketInfo.isOpened());
 
-        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-200);
+        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond() - 200);
         pool.returnObject(socketInfo);
 
-        pool.setConfig(getPoolConfig(1,1));
+        pool.setConfig(getPoolConfig(1, 1));
 
         PushSocketInfo socketInfoRtn = pool.borrowObject();
         log.debug(socketInfoRtn.toString());
@@ -178,24 +176,24 @@ class PushSocketConnFactoryTest {
     void validateObject5() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
 
         int maxCount = 1;
-        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1) );
+        GenericObjectPool<PushSocketInfo> pool = new GenericObjectPool<>(pushSocketConnFactory, getPoolConfigErr(maxCount, 1));
 
         PushSocketInfo socketInfo = pool.borrowObject();
         log.debug(socketInfo.toString());
 
         assertTrue(socketInfo.isOpened());
 
-        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond()-400);
+        ReflectionTestUtils.setField(socketInfo, "lastTransactionTime", Instant.now().getEpochSecond() - 400);
         pool.returnObject(socketInfo);
 
-        pool.setConfig(getPoolConfig(1,1));
+        pool.setConfig(getPoolConfig(1, 1));
 
         PushSocketInfo socketInfoRtn = pool.borrowObject();
         log.debug(socketInfoRtn.toString());
@@ -243,9 +241,9 @@ class PushSocketConnFactoryTest {
     void createInvalid() throws Exception {
         //normal case
         PushSocketConnFactory.PushServerInfoVo serverInfo = PushSocketConnFactory.PushServerInfoVo.builder()
-                .host(SERVER_IP).port(Integer.parseInt(""+SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
-                .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
-                .isLgPush(false).build();
+            .host(SERVER_IP).port(Integer.parseInt("" + SERVER_PORT)).timeout(Integer.parseInt("2000")).channelPort(Integer.parseInt("8080"))
+            .defaultChannelHost("PsAgt").closeSecond(Integer.parseInt("170")).destinationIp("222.231.13.85")
+            .isLgPush(false).build();
 
         PushSocketConnFactory pushSocketConnFactory = new PushSocketConnFactory(serverInfo);
         PushSocketConnFactory spyFactory = spy(pushSocketConnFactory);

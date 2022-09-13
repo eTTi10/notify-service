@@ -19,7 +19,6 @@ public class InvalidRequestTypeException extends RuntimeException implements Pay
     }
 
     /**
-     *
      * @param message
      */
     public InvalidRequestTypeException(final String message) {
@@ -28,7 +27,6 @@ public class InvalidRequestTypeException extends RuntimeException implements Pay
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class InvalidRequestTypeException extends RuntimeException implements Pay
     }
 
     /**
-     *
      * @param cause
      */
     public InvalidRequestTypeException(final Throwable cause) {

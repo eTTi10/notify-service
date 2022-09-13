@@ -10,7 +10,7 @@ on:
 env:
   TOKEN: ${{ secrets.GHP_TOKEN_SJH }}
   HELM_REPO_NAME: LGUPLUS-IPTV-MSA/helm-charts
-  HELM_REF: develop
+  HELM_REF: main
   CHART_PATH: helm-charts
   JAR_PATH: subprojects/boot/build/libs
 
@@ -138,7 +138,7 @@ jobs:
         run: ./gradlew -x test build
 
 
-      - name: Copy war to workspace
+      - name: Copy jar to workspace
         run: cp -v microservice/${{ env.JAR_PATH}}/*${{ env.VERSION }}.jar ./microservice/Docker/
 
           
@@ -196,7 +196,7 @@ jobs:
         if: ${{ github.ref_name == 'develop' }}
         run: |
           yq eval -i '.image.version = "${{ env.TAG }}"' dev-values.yaml
-          yq eval -i '.image.version = "${{ env.TAG }}"' devstp-values.yaml 
+          yq eval -i '.image.version = "${{ env.TAG }}"' stp-values.yaml 
 
       - name: Update stg values
         working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
@@ -210,42 +210,19 @@ jobs:
           yq eval -i '.image.version = "${{ env.TAG }}"' shd-values.yaml
           yq eval -i '.image.version = "${{ env.TAG }}"' prd-values.yaml 
 
-      - name: Push helm (develop branch)
-        working-directory: ./helm
-        run: |
-          git pull origin ${{ env.HELM_REF }}
-          git add .
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-          git push
-
-      - name: Push helm (staging branch)
-        if: ${{ startsWith(github.ref_name, 'release/') }}
-        working-directory: ./helm
-        run: |
-          git fetch origin staging
-          git checkout staging
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/stg-values.yaml << EOF
-          a
-          EOF
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-
-          git push
-
-      - name: Push helm (main branch)
-        if: ${{ github.ref_name == 'main' }}
-        working-directory: ./helm
-        run: |
-          git fetch origin main
-          git checkout main
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/shd-values.yaml << EOF
-          a
-          EOF
-          git checkout -p ${{ env.HELM_REF }} ${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}/prd-values.yaml << EOF
-          a
-          EOF
-          git commit -m "Update from ${{ env.COMMIT_URI }}"
-
-          git push
+      - name: Push helm
+        uses: nick-fields/retry@v2.7.0
+        with:
+          retry_on: error
+          timeout_seconds: 30
+          max_attempts: 3
+          command: |
+            cd ./helm
+            git add .
+            git commit -m "Update from ${{ env.COMMIT_URI }}" | true
+            git fetch origin ${{ env.HELM_REF }}
+            git rebase origin/${{ env.HELM_REF }}
+            git push
 
       - name: slack message
         if: always()

@@ -5,16 +5,15 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushAnnounceRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.util.HttpPushSupport;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * Http AnnouncementPush Component
- *
+ * <p>
  * 공지 푸시등록
  */
 @Slf4j

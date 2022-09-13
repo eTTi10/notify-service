@@ -2,36 +2,46 @@ package com.lguplus.fleta.provider.jpa;
 
 import com.lguplus.fleta.exception.ServiceException;
 import com.lguplus.fleta.testutil.TestDto;
+import java.util.List;
+import java.util.Optional;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.persistence.Query;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import org.assertj.core.api.ThrowableAssert;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.transform.Transformers;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.when;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import javax.persistence.*;
-import java.util.*;
-
-import static org.assertj.core.api.AssertionsForClassTypes.*;
-import static org.mockito.Mockito.*;
 
 /**
  * AbstractJpaEmRepository 유닛 테스트
+ *
  * @version 1.0
  */
 @ExtendWith(MockitoExtension.class)
 class AbstractJpaEmRepositoryTest {
 
     // @Spy EntityManager em;
-    @Mock Query query;
-    @Mock NativeQuery<?> nativeQuery;
-    @Mock org.hibernate.query.Query hibernateQuery;
+    @Mock
+    Query query;
+    @Mock
+    NativeQuery<?> nativeQuery;
+    @Mock
+    org.hibernate.query.Query hibernateQuery;
 
-    @Spy @InjectMocks TestConcreteJpaEmRepository jpaEmRepository;
+    @Spy
+    @InjectMocks
+    TestConcreteJpaEmRepository jpaEmRepository;
     TestDto expectedDto;
-
-    private static class TestConcreteJpaEmRepository extends AbstractJpaEmRepository { }
 
     @BeforeEach
     void beforeEach() {
@@ -186,5 +196,9 @@ class AbstractJpaEmRepositoryTest {
         ThrowableAssert.ThrowingCallable callable = () -> jpaEmRepository.convertList(query, TestDto.class);
         // Then
         assertThatThrownBy(callable).isInstanceOf(NullPointerException.class);
+    }
+
+    private static class TestConcreteJpaEmRepository extends AbstractJpaEmRepository {
+
     }
 }

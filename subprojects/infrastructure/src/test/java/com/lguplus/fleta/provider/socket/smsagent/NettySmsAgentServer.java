@@ -2,16 +2,21 @@ package com.lguplus.fleta.provider.socket.smsagent;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
+import java.util.List;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 @Slf4j
 public class NettySmsAgentServer {
@@ -30,8 +35,8 @@ public class NettySmsAgentServer {
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializerTest(this));
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializerTest(this));
 
             // 포트 지정
             ChannelFuture future = bootstrap.bind(port).sync();
@@ -47,13 +52,13 @@ public class NettySmsAgentServer {
         try {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     static class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
+
         NettySmsAgentServer nettyTcpServer;
 
         public ChannelInitializerTest(NettySmsAgentServer server) {
@@ -76,8 +81,8 @@ public class NettySmsAgentServer {
         protected void encode(ChannelHandlerContext ctx, SmsMessage message, ByteBuf out) throws Exception {
 
             out.writeInt(message.type)
-                    .writeInt(message.body.length)
-                    .writeBytes(message.body);
+                .writeInt(message.body.length)
+                .writeBytes(message.body);
         }
     }
 
@@ -112,9 +117,9 @@ public class NettySmsAgentServer {
             byte[] body = new byte[length];
             in.readBytes(body);
             out.add(SmsMessage.builder()
-                    .type(type)
-                    .body(body)
-                    .build());
+                .type(type)
+                .body(body)
+                .build());
         }
     }
 
@@ -131,9 +136,9 @@ public class NettySmsAgentServer {
                 byte[] body = new byte[20];
                 buf.readBytes(body, 0, 4);
                 ctx.writeAndFlush(SmsMessage.builder()
-                        .type(1)
-                        .body(body)
-                        .build());
+                    .type(1)
+                    .body(body)
+                    .build());
             }
             // DELIVER
             else if (message.type == 2) {
@@ -143,8 +148,15 @@ public class NettySmsAgentServer {
                 byte[] body = new byte[72];
                 buf.readBytes(body, 0, 4);
                 ctx.writeAndFlush(SmsMessage.builder()
-                        .type(3)
-                        .body(body)
+                    .type(3)
+                    .body(body)
+                    .build());
+            }
+            // LINK
+            else if (message.type == 6) {
+                ctx.writeAndFlush(SmsMessage.builder()
+                        .type(7)
+                        .body(new byte[0])
                         .build());
             }
         }
@@ -157,6 +169,7 @@ public class NettySmsAgentServer {
 
     @Builder
     static class SmsMessage {
+
         int type;
         byte[] body;
     }

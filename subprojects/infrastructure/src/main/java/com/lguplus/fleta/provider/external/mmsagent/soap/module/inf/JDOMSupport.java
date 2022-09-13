@@ -22,21 +22,19 @@ import org.jdom2.Element;
 
 public interface JDOMSupport {
 
-	/**
-	 * Save object's state to a new JDOM element.
-	 *
-	 * @param parent
-	 *            of a element
-	 * @return JDOM element with serialized object' state
-	 */
-	Element save(Element parent);
+    /**
+     * Save object's state to a new JDOM element.
+     *
+     * @param parent of a element
+     * @return JDOM element with serialized object' state
+     */
+    Element save(Element parent);
 
-	/**
-	 * Loads object's state from an JDOM Element.
-	 *
-	 * @param element
-	 *            to load state from
-	 */
-	void load(Element element);
+    /**
+     * Loads object's state from an JDOM Element.
+     *
+     * @param element to load state from
+     */
+    void load(Element element);
 
 }

@@ -18,53 +18,53 @@
 
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.inf;
 
+import java.util.Date;
+import java.util.GregorianCalendar;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 public class RelativeDate {
 
-	private static DatatypeFactory dataTypeFactory;
+    private static final DatatypeFactory dataTypeFactory;
 
-	static {
-		try {
-			dataTypeFactory = DatatypeFactory.newInstance();
-		} catch (DatatypeConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-	}
+    static {
+        try {
+            dataTypeFactory = DatatypeFactory.newInstance();
+        } catch (DatatypeConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-	public RelativeDate(Date date) {
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(date);
-		XMLGregorianCalendar xcal;
-		synchronized (dataTypeFactory) {
-			xcal = dataTypeFactory.newXMLGregorianCalendar(cal);
-		}
-		this.representation = xcal.toXMLFormat();
-	}
+    private final String representation;
 
-	public RelativeDate(String representation) {
-		this.representation = representation;
-	}
+    public RelativeDate(Date date) {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(date);
+        XMLGregorianCalendar xcal;
+        synchronized (dataTypeFactory) {
+            xcal = dataTypeFactory.newXMLGregorianCalendar(cal);
+        }
+        this.representation = xcal.toXMLFormat();
+    }
 
-	public Date toDate() {
-		if (representation == null) {
-			return null;
-		}
-		XMLGregorianCalendar xcal;
-		synchronized (dataTypeFactory) {
-			xcal = dataTypeFactory.newXMLGregorianCalendar(representation);
-		}
-		return xcal.toGregorianCalendar().getTime();
-	}
+    public RelativeDate(String representation) {
+        this.representation = representation;
+    }
 
-	@Override
-	public String toString() {
-		return representation;
-	}
+    public Date toDate() {
+        if (representation == null) {
+            return null;
+        }
+        XMLGregorianCalendar xcal;
+        synchronized (dataTypeFactory) {
+            xcal = dataTypeFactory.newXMLGregorianCalendar(representation);
+        }
+        return xcal.toGregorianCalendar().getTime();
+    }
 
-	private String representation;
+    @Override
+    public String toString() {
+        return representation;
+    }
 }

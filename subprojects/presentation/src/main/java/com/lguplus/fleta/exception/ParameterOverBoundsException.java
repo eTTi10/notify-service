@@ -19,7 +19,6 @@ public class ParameterOverBoundsException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param message
      */
     public ParameterOverBoundsException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterOverBoundsException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterOverBoundsException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterOverBoundsException(final Throwable cause) {

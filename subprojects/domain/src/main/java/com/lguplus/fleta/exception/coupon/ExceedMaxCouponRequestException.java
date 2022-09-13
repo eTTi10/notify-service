@@ -17,7 +17,6 @@ public class ExceedMaxCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public ExceedMaxCouponRequestException(final String message) {
@@ -26,7 +25,6 @@ public class ExceedMaxCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class ExceedMaxCouponRequestException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public ExceedMaxCouponRequestException(final Throwable cause) {

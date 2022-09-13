@@ -10,20 +10,34 @@ import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.exception.NoResultException;
+import com.lguplus.fleta.exception.mmsagent.BlackListException;
+import com.lguplus.fleta.exception.mmsagent.DatabaseException;
+import com.lguplus.fleta.exception.mmsagent.DuplicateKeyException;
+import com.lguplus.fleta.exception.mmsagent.MessageSocketException;
+import com.lguplus.fleta.exception.mmsagent.MmsRuntimeException;
+import com.lguplus.fleta.exception.mmsagent.MmsServiceException;
+import com.lguplus.fleta.exception.mmsagent.MsgTypeErrorException;
+import com.lguplus.fleta.exception.mmsagent.NoHttpsException;
+import com.lguplus.fleta.exception.mmsagent.NotFoundMsgException;
+import com.lguplus.fleta.exception.mmsagent.NotSendTimeException;
 import com.lguplus.fleta.exception.mmsagent.NumberFormatException;
-import com.lguplus.fleta.exception.mmsagent.*;
+import com.lguplus.fleta.exception.mmsagent.ParameterMissingException;
+import com.lguplus.fleta.exception.mmsagent.PhoneNumberErrorException;
+import com.lguplus.fleta.exception.mmsagent.ServerSettingInfoException;
+import com.lguplus.fleta.exception.mmsagent.SystemBusyException;
+import com.lguplus.fleta.exception.mmsagent.SystemErrorException;
+import java.util.Map;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.Map;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 
 public class MmsAgentDomainService {
+
     private final SettingDomainClient apiClient;
     private final MmsAgentConfig config;
     private final MmsAgentClient mmsSoap;
@@ -38,34 +52,34 @@ public class MmsAgentDomainService {
 
     /**
      * 전송메세지를 취득후 MM7모듈함수를 실행
+     *
      * @param sendMmsRequestDto
      * @return
      */
     public SuccessResponseDto sendMmsCode(SendMmsRequestDto sendMmsRequestDto) {
         //setting API 호출관련 파라메타 셋팅
         CallSettingRequestDto prm = CallSettingRequestDto.builder()
-                .code(sendMmsRequestDto.getMmsCd())//ex) M011
-                .svcType("E")//ex) MMS:E SMS:I
-                .build();
+            .code(sendMmsRequestDto.getMmsCd())//ex) M011
+            .svcType("E")//ex) MMS:E SMS:I
+            .build();
 
         CallSettingResultMapDto callSettingApi = apiClient.callSettingApi(prm);
-        CallSettingDto settingApi =  callSettingApi.getResult().getData();
+        CallSettingDto settingApi = callSettingApi.getResult().getData();
 
-        if(settingApi == null){
+        if (settingApi == null) {
             throw new NotFoundMsgException();//1506: 해당 코드에 존재하는 메세지가 없음
         }
 
-
         MmsRequestDto mmsDto = MmsRequestDto.builder()
-                .ctn(sendMmsRequestDto.getCtn())
-                .mmsTitle(sendMmsRequestDto.getMmsCd())
-                .mmsMsg(settingApi.getName())//메세지
-                .mmsRep(sendMmsRequestDto.getReplacement())
-                .build();
+            .ctn(sendMmsRequestDto.getCtn())
+            .mmsTitle(sendMmsRequestDto.getMmsCd())
+            .mmsMsg(settingApi.getName())//메세지
+            .mmsRep(sendMmsRequestDto.getReplacement())
+            .build();
         String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
 
-        if(!returnMmsCode.equals("1000")){
-            switch (returnMmsCode){
+        if (!returnMmsCode.equals("1000")) {
+            switch (returnMmsCode) {
                 case "0001":
                     throw new NoResultException();//검색 결과 없음
                 case "1500":
@@ -98,7 +112,7 @@ public class MmsAgentDomainService {
                     throw new DatabaseException();//DB 에러
                 case "9998":
                     throw new MmsServiceException();//MM7 Service Error
-                default :
+                default:
                     throw new MmsRuntimeException();
             }
         }

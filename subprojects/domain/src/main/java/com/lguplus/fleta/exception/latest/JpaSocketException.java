@@ -1,8 +1,8 @@
 package com.lguplus.fleta.exception.latest;
 
 /**
- * Exception for error flag 1401.
- * 5101 소켓에러
+ * Exception for error flag 1401. 5101 소켓에러
+ *
  * @author Minwoo Lee
  * @since 1.0
  */
@@ -17,7 +17,6 @@ public class JpaSocketException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public JpaSocketException(final String message) {
@@ -26,7 +25,6 @@ public class JpaSocketException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class JpaSocketException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public JpaSocketException(final Throwable cause) {

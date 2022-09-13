@@ -7,11 +7,10 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.lguplus.fleta.data.dto.PlainTextibleDto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.experimental.SuperBuilder;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 @ApiModel
 @Getter
@@ -20,38 +19,38 @@ import java.util.stream.Collectors;
 public class GenericResultResponseDto<S> extends SuccessResponseDto {
 
     /**
-    *
-    */
-   @ApiModelProperty(position=3, dataType="string", value="순번: 3<br>자리수: 3<br>설명: 검색 갯수<br>검색된 앨범들의 총 갯수", example="1")
-   @JsonProperty("total_count")
-   private int totalCount;
+     *
+     */
+    @ApiModelProperty(position = 3, dataType = "string", value = "순번: 3<br>자리수: 3<br>설명: 검색 갯수<br>검색된 앨범들의 총 갯수", example = "1")
+    @JsonProperty("total_count")
+    private int totalCount;
 
-   /**
-    *
-    */
-   @ApiModelProperty(position=1000, dataType="array")
-   @JsonProperty("recordset")
-   @JacksonXmlElementWrapper(localName="recordset")
-   @JacksonXmlProperty(localName="result")
-   private List<S> recordset;
+    /**
+     *
+     */
+    @ApiModelProperty(position = 1000, dataType = "array")
+    @JsonProperty("recordset")
+    @JacksonXmlElementWrapper(localName = "recordset")
+    @JacksonXmlProperty(localName = "result")
+    private List<S> recordset;
 
-   @Override
-   public String toPlainText() {
+    @Override
+    public String toPlainText() {
 
-       final StringBuilder buffer = new StringBuilder()
-               .append(getTotalCount());
-       final List<S> localRecordset = getRecordset();
-       if (localRecordset != null && !localRecordset.isEmpty()) {
-           buffer.append(Separator.RECORD)
-                   .append(localRecordset.stream()
-                           .filter(PlainTextibleDto.class::isInstance)
-                           .map(value -> ((PlainTextibleDto)value).toPlainText())
-                           .collect(Collectors.joining(Separator.ROW)));
-       }
+        final StringBuilder buffer = new StringBuilder()
+            .append(getTotalCount());
+        final List<S> localRecordset = getRecordset();
+        if (localRecordset != null && !localRecordset.isEmpty()) {
+            buffer.append(Separator.RECORD)
+                .append(localRecordset.stream()
+                    .filter(PlainTextibleDto.class::isInstance)
+                    .map(value -> ((PlainTextibleDto) value).toPlainText())
+                    .collect(Collectors.joining(Separator.ROW)));
+        }
 
-       return String.join(Separator.COLUMN,
-               super.toPlainText(), buffer);
-   }
-    
-    
+        return String.join(Separator.COLUMN,
+            super.toPlainText(), buffer);
+    }
+
+
 }

@@ -1,6 +1,10 @@
 package com.lguplus.fleta.properties;
 
 import com.lguplus.fleta.config.HttpPushConfig;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -8,11 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Slf4j
@@ -22,29 +21,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 @ConfigurationProperties(prefix = "push")
 public class HttpServiceProps {
 
-    private final HttpPushConfig.HttpPushExceptionCode httpPushExceptionCode;
-
-    private final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage;
-
-    /** 트랜잭션 ID 관리용(단건, 멀티) */
+    /**
+     * 트랜잭션 ID 관리용(단건, 멀티)
+     */
     public static final AtomicInteger singleTransactionIdNum = new AtomicInteger(0);
-
-    /** 트랜잭션 ID 관리용(공지) */
+    /**
+     * 트랜잭션 ID 관리용(공지)
+     */
     public static final AtomicInteger announceTransactionIdNum = new AtomicInteger(0);
-
-    /** Push 요청 서버 타입 (단건, 멀티에서 사용) */
+    /**
+     * Push 요청 서버 타입 (단건, 멀티에서 사용)
+     */
     public static final String PUSH_REQUEST_PART = "SP";
-
     public static final int SECOND = 1000;
-
-    /** Push 요청 서버 타입(공지) */
+    /**
+     * Push 요청 서버 타입(공지)
+     */
     public static final String ANNOUNCE_REQUEST_PART = "WEB";
-
-    /** GCM 만 사용하며, 한번에 GCM 으로 보내지는 Push notification request 의 registration_ids 개수 */
+    /**
+     * GCM 만 사용하며, 한번에 GCM 으로 보내지는 Push notification request 의 registration_ids 개수
+     */
     public static final String GCM_MULTI_COUNT = "300";
-
-
-    /** http push service-keys */
+    private final HttpPushConfig.HttpPushExceptionCode httpPushExceptionCode;
+    private final HttpPushConfig.HttpPushExceptionMessage httpPushExceptionMessage;
+    /**
+     * http push service-keys
+     */
     private List<Map<String, String>> service = null;
 
 

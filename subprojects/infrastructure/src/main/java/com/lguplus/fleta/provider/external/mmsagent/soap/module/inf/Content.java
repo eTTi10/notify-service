@@ -19,7 +19,6 @@
 package com.lguplus.fleta.provider.external.mmsagent.soap.module.inf;
 
 import com.lguplus.fleta.provider.external.mmsagent.soap.module.MM7Context;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -27,17 +26,18 @@ import java.util.List;
 
 public interface Content extends Iterable<Content> {
 
-	String getContentId();
+    String getContentId();
 
-	void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException;
+    void writeTo(OutputStream out, String contentId, MM7Context ctx) throws IOException;
 
-	String getContentType();
+    String getContentType();
 
-	String getContentLocation();
+    String getContentLocation();
 
-	/**
-	 * Returns a list of parts or null if content isn't multipart
-	 * @return a list of parts or null if content isn't multipart
-	 */
-	List<Content> getParts();
+    /**
+     * Returns a list of parts or null if content isn't multipart
+     *
+     * @return a list of parts or null if content isn't multipart
+     */
+    List<Content> getParts();
 }

@@ -17,7 +17,6 @@ public class DuplicateSubscriptionException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public DuplicateSubscriptionException(final String message) {
@@ -26,7 +25,6 @@ public class DuplicateSubscriptionException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class DuplicateSubscriptionException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public DuplicateSubscriptionException(final Throwable cause) {

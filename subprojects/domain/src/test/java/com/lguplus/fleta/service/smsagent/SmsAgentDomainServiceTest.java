@@ -1,34 +1,35 @@
 package com.lguplus.fleta.service.smsagent;
 
-import com.lguplus.fleta.client.SmsAgentClient;
 import com.lguplus.fleta.client.SettingDomainClient;
+import com.lguplus.fleta.client.SmsAgentClient;
 import com.lguplus.fleta.data.dto.request.SendSmsCodeRequestDto;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultDto;
 import com.lguplus.fleta.data.dto.response.inner.CallSettingResultMapDto;
 import com.lguplus.fleta.data.dto.response.inner.SmsGatewayResponseDto;
-import com.lguplus.fleta.exception.smsagent.*;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
+import com.lguplus.fleta.exception.smsagent.NotFoundMsgException;
+import com.lguplus.fleta.exception.smsagent.SmsAgentCustomException;
+import com.lguplus.fleta.exception.smsagent.SmsAgentEtcException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ExecutionException;
-
+import lombok.extern.slf4j.Slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -53,15 +54,14 @@ class SmsAgentDomainServiceTest {
 
         // mock object
         smsGatewayResponseDto = SmsGatewayResponseDto.builder()
-                .flag(sFlag)
-                .message(sMessage)
-                .build();
-
+            .flag(sFlag)
+            .message(sMessage)
+            .build();
 
         ReflectionTestUtils.setField(smsAgentDomainService, "smsSenderNo", "01011112222");
 
-//        ReflectionTestUtils.setField(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
-//        ReflectionTestUtils.setField(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
+        //        ReflectionTestUtils.setField(smsAgentDomainService, "codePhoneNumberErrorException", "1500");
+        //        ReflectionTestUtils.setField(smsAgentDomainService, "codeMsgTypeErrorException", "1500");
         ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemBusyException", "1503");
         ReflectionTestUtils.setField(smsAgentDomainService, "codeSystemErrorException", "1500");
 
@@ -75,17 +75,17 @@ class SmsAgentDomainServiceTest {
 
         //requestDto
         SendSmsRequestDto request = SendSmsRequestDto.builder()
-                .rCtn("01051603997")
-                .sCtn("01051603997")
-                .msg("문자내용")
-                .build();
+            .rCtn("01051603997")
+            .sCtn("01051603997")
+            .msg("문자내용")
+            .build();
 
         /* 1 SmsAgentEtcException */
         SmsAgentCustomException exception;
 
-//        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
+        //        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
 
-//        assertThat(exception.getClass()).isEqualTo(SmsAgentCustomException.class);
+        //        assertThat(exception.getClass()).isEqualTo(SmsAgentCustomException.class);
 
         /* 정상리턴 */
         ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", false);
@@ -95,10 +95,10 @@ class SmsAgentDomainServiceTest {
 
 
         /* agentNoSendTime 빈값일때 ServerSettingInfoException */
-//        exception = assertThrows(SmsAgentCustomException.class, () -> {
-//            smsAgentDomainService.sendSms(request);
-//        });
-//        assertThat(exception.getCode()).isEqualTo("5200");
+        //        exception = assertThrows(SmsAgentCustomException.class, () -> {
+        //            smsAgentDomainService.sendSms(request);
+        //        });
+        //        assertThat(exception.getCode()).isEqualTo("5200");
 
         /* startTime이 endTime 보다 크거나 같을 때 */
         ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 23);
@@ -120,8 +120,8 @@ class SmsAgentDomainServiceTest {
         String startHour = now.format(formatter);  //현재 시간 -2
         String endHour = now.plusHours(1).format(formatter); //현재 시간 -1
 
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", Integer.parseInt(startHour) );
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", Integer.parseInt(endHour) );
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", Integer.parseInt(startHour));
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", Integer.parseInt(endHour));
         assertDoesNotThrow(() -> smsAgentDomainService.sendSms(request));
     }
 
@@ -130,18 +130,18 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
 
@@ -149,88 +149,87 @@ class SmsAgentDomainServiceTest {
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
         SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
         assertThat(responseDto.getFlag()).isEqualTo(smsGatewayResponseDto.getFlag());
 
-
         // convertMsg 함수 용 replacement 공백 테스트
         SendSmsCodeRequestDto noReplacementRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("")
+            .build();
         responseDto = smsAgentDomainService.sendSmsCode(noReplacementRequestDto);
         assertThat(responseDto.getFlag()).isEqualTo(smsGatewayResponseDto.getFlag());
 
     }
 
-    @Test
-    @DisplayName("Interrupted Exception 코드를 이용한 SMS발송 테스트")
-    void sendSmsCode_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
-
-        CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
-
-        CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
-
-        // mock object
-        SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
-
-        given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
-        given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(new InterruptedException());
-        SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
-        assertThat(responseDto.getFlag()).isEqualTo("9999");
-    }
+//    @Test
+//    @DisplayName("Interrupted Exception 코드를 이용한 SMS발송 테스트")
+//    void sendSmsCode_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+//
+//        CallSettingDto dto = CallSettingDto.builder()
+//            .code("S001")
+//            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+//            .build();
+//
+//        CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
+//            .code("0000")
+//            .message("성공")
+//            .result(CallSettingResultDto.builder()
+//                .dataCount(1)
+//                .data(dto)
+//                .build())
+//            .build();
+//
+//        // mock object
+//        SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
+//            .saId("M15030600001")
+//            .stbMac("v150.3060.0001")
+//            .smsCd("S001")
+//            .ctn("01051603997")
+//            .replacement("http://google.com/start/we09gn2ks")
+//            .build();
+//
+//        given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
+//        given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(new InterruptedException());
+//        SmsGatewayResponseDto responseDto = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
+//        assertThat(responseDto.getFlag()).isEqualTo("9999");
+//    }
 
     @Test
     @DisplayName("Exception 코드를 이용한 SMS발송 테스트")
     void sendSmsCode_Exception() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         given(smsAgentClient.send(anyString(), anyString(), anyString())).willThrow(new NullPointerException());
@@ -244,27 +243,27 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_PhoneNumberErrorException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
 
@@ -278,30 +277,30 @@ class SmsAgentDomainServiceTest {
 
     @Test
     @DisplayName("MsgTypeErrorException 테스트")
-    void sendSmsCode_MsgTypeErrorException () throws UnsupportedEncodingException, ExecutionException, InterruptedException {
+    void sendSmsCode_MsgTypeErrorException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1501", "전화번호 형식 오류");
@@ -315,27 +314,27 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SystemBusyException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
@@ -349,27 +348,27 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SystemErrorException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1500", "시스템 장애");
@@ -384,27 +383,27 @@ class SmsAgentDomainServiceTest {
     void sendSmsCode_SmsAgentEtcException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("9999", "기타 오류");
@@ -418,29 +417,29 @@ class SmsAgentDomainServiceTest {
     void callSettingApi_returnTotalCountZero() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(0)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(0)
+                .data(dto)
+                .build())
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         assertThrows(NotFoundMsgException.class, () -> {
             smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
@@ -454,12 +453,12 @@ class SmsAgentDomainServiceTest {
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         given(apiClient.callSettingApi(any())).willThrow(new SmsAgentEtcException());
         assertThrows(SmsAgentEtcException.class, () -> {
@@ -468,13 +467,13 @@ class SmsAgentDomainServiceTest {
     }
 
 
-
     @Test
     @DisplayName("retrySmsSend함수의 InterruptedException 테스트")
     void retrySmsSend_InterruptedException() throws UnsupportedEncodingException, ExecutionException, InterruptedException {
 
         //Define a thread for interrupts
         final class InterruptThread extends Thread {
+
             Thread targetThread = null;
 
             public InterruptThread(Thread thread) {
@@ -492,18 +491,18 @@ class SmsAgentDomainServiceTest {
         th.start();
 
         CallSettingDto dto = CallSettingDto.builder()
-                .code("S001")
-                .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
-                .build();
+            .code("S001")
+            .name("구매한 VOD를 U+비디오포털앱으로 추가 결제없이 시청하세요. http://goo.gl/YguRj6")
+            .build();
 
         CallSettingResultMapDto resultMapDto = CallSettingResultMapDto.builder()
-                .code("0000")
-                .message("성공")
-                .result(CallSettingResultDto.builder()
-                        .dataCount(1)
-                        .data(dto)
-                        .build())
-                .build();
+            .code("0000")
+            .message("성공")
+            .result(CallSettingResultDto.builder()
+                .dataCount(1)
+                .data(dto)
+                .build())
+            .build();
 
         given(apiClient.callSettingApi(any())).willReturn(resultMapDto);
         SmsAgentCustomException smsAgentCustomException = new SmsAgentCustomException("1503", "메시지 처리 수용 한계 초과");
@@ -511,20 +510,45 @@ class SmsAgentDomainServiceTest {
 
         // mock object
         SendSmsCodeRequestDto sendSmsCodeRequestDto = SendSmsCodeRequestDto.builder()
-                .saId("M15030600001")
-                .stbMac("v150.3060.0001")
-                .smsCd("S001")
-                .ctn("01051603997")
-                .replacement("http://google.com/start/we09gn2ks")
-                .build();
+            .saId("M15030600001")
+            .stbMac("v150.3060.0001")
+            .smsCd("S001")
+            .ctn("01051603997")
+            .replacement("http://google.com/start/we09gn2ks")
+            .build();
 
         // when
         SmsGatewayResponseDto result = smsAgentDomainService.sendSmsCode(sendSmsCodeRequestDto);
 
         // then
-//        assertThat(exception).isInstanceOf(SmsAgentCustomException.class);
+        //        assertThat(exception).isInstanceOf(SmsAgentCustomException.class);
         assertThat(result.getFlag()).isEqualTo("1503");
 
     }
 
+    @Test
+    void testSendSms_SendTimeFromGreaterThanSendTimeTo() {
+        boolean agentNoSendUse = (boolean)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendUse");
+        int agentNoSendTimeFrom = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeFrom");
+        int agentNoSendTimeTo = (int)ReflectionTestUtils.getField(smsAgentDomainService, "agentNoSendTimeTo");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", true);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 23);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 1);
+
+        SendSmsRequestDto request = SendSmsRequestDto.builder()
+                .sCtn("01051603997")
+                .rCtn("01012345678")
+                .msg("http://google.com/start/we09gn2ks")
+                .build();
+
+        given(smsAgentClient.send(anyString(), anyString(), anyString())).willReturn(smsGatewayResponseDto);
+
+        SmsGatewayResponseDto result = smsAgentDomainService.sendSms(request);
+        assertThat(result.getFlag()).isEqualTo("0000");
+
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", agentNoSendUse);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", agentNoSendTimeFrom);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", agentNoSendTimeTo);
+    }
 }

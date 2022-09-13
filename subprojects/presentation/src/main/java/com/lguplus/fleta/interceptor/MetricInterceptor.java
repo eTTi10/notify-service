@@ -1,16 +1,14 @@
 package com.lguplus.fleta.interceptor;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-
-@RequiredArgsConstructor
-@Component
+/**
+ * 공통 HTTP 응답시간 측정 Interceptor
+ * @version 1.1
+ */
 public class MetricInterceptor implements HandlerInterceptor {
 
     public static final String START_TIME = "startTime";

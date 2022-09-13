@@ -7,12 +7,6 @@ import com.lguplus.fleta.data.dto.request.inner.HttpPushDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.exception.httppush.HttpPushEtcException;
 import com.lguplus.fleta.properties.HttpServiceProps;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
-import org.springframework.stereotype.Component;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -27,10 +21,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.stereotype.Component;
 
 /**
- *  Http Push 관련 유틸 클래스
- *
+ * Http Push 관련 유틸 클래스
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -117,11 +115,11 @@ public class HttpPushSupport {
      * 푸시(단건, 멀티) Open API 를 호춣할 파라미터를 만든다.
      *
      * @param applicationId 어플리케이션 ID
-     * @param serviceId 서비스 등록시 부여받은 Unique ID
-     * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @param message 보낼 메시지
-     * @param regId 사용자 ID
-     * @param items 추가할 항목 입력(name!^value)
+     * @param serviceId     서비스 등록시 부여받은 Unique ID
+     * @param pushType      Push 발송 타입 (G: 안드로이드, A: 아이폰)
+     * @param message       보낼 메시지
+     * @param regId         사용자 ID
+     * @param items         추가할 항목 입력(name!^value)
      * @return 푸시(단건, 멀티) Open API 를 호춣할 생성된 파라미터
      */
     public Map<String, Object> makePushParameters(String applicationId, String serviceId, String pushType, String message, String regId, List<String> items) {
@@ -145,7 +143,7 @@ public class HttpPushSupport {
 
             payload = gcmPushOpenApiPayload.apply(message);
 
-        // 아이폰("A")
+            // 아이폰("A")
         } else {
             Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
@@ -153,15 +151,15 @@ public class HttpPushSupport {
         }
 
         HttpPushDto httpPushDto = HttpPushDto.builder()
-                .requestPart(HttpServiceProps.PUSH_REQUEST_PART)
-                .requestTime(getRequestTime())
-                .pushId(transactionId)
-                .serviceId(serviceId)
-                .servicePass(servicePwd)
-                .applicationId(applicationId)
-                .serviceKey(regId)
-                .payload(payload)
-                .build();
+            .requestPart(HttpServiceProps.PUSH_REQUEST_PART)
+            .requestTime(getRequestTime())
+            .pushId(transactionId)
+            .serviceId(serviceId)
+            .servicePass(servicePwd)
+            .applicationId(applicationId)
+            .serviceKey(regId)
+            .payload(payload)
+            .build();
 
         return makePushMap(httpPushDto, "S", "");
     }
@@ -170,10 +168,10 @@ public class HttpPushSupport {
      * 공지 Open API 를 호춣할 파라미터를 만든다.
      *
      * @param applicationId 어플리케이션 ID
-     * @param serviceId 서비스 등록시 부여받은 Unique ID
-     * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
-     * @param message 보낼 메시지
-     * @param items 추가할 항목 입력(name!^value)
+     * @param serviceId     서비스 등록시 부여받은 Unique ID
+     * @param pushType      Push 발송 타입 (G: 안드로이드, A: 아이폰)
+     * @param message       보낼 메시지
+     * @param items         추가할 항목 입력(name!^value)
      * @return 공지 Open API 를 호춣할 생성된 파라미터
      */
     public Map<String, Object> makePushParameters(String applicationId, String serviceId, String pushType, String message, List<String> items) {
@@ -213,7 +211,7 @@ public class HttpPushSupport {
             payload = tmpPair.getLeft();
             gcmMultiCount = tmpPair.getRight();
 
-        // 아이폰("A")
+            // 아이폰("A")
         } else {
             Function<Pair<String, List<String>>, String> apnOpenApiPayload = apnPayload();
 
@@ -221,15 +219,15 @@ public class HttpPushSupport {
         }
 
         HttpPushDto httpPushDto = HttpPushDto.builder()
-                .requestPart(HttpServiceProps.ANNOUNCE_REQUEST_PART)
-                .requestTime(getRequestTime())
-                .pushId(transactionId)
-                .serviceId(serviceId)
-                .servicePass(servicePwd)
-                .applicationId(applicationId)
-                .payload(payload)
-                .gcmMultiCount(gcmMultiCount)
-                .build();
+            .requestPart(HttpServiceProps.ANNOUNCE_REQUEST_PART)
+            .requestTime(getRequestTime())
+            .pushId(transactionId)
+            .serviceId(serviceId)
+            .servicePass(servicePwd)
+            .applicationId(applicationId)
+            .payload(payload)
+            .gcmMultiCount(gcmMultiCount)
+            .build();
 
         return makePushMap(httpPushDto, "A", pushType);
     }
@@ -238,8 +236,8 @@ public class HttpPushSupport {
      * Open API 를 호출하기 위한 푸시맵을 만든다.
      *
      * @param httpPushDto HttpPush 관련 DTO
-     * @param kind 푸시 종류 [S:(단건, 멀티), A:공지]
-     * @param pushType Push 발송 타입 (G: 안드로이드, A: 아이폰)
+     * @param kind        푸시 종류 [S:(단건, 멀티), A:공지]
+     * @param pushType    Push 발송 타입 (G: 안드로이드, A: 아이폰)
      * @return 생성된 푸시맵
      */
     private Map<String, Object> makePushMap(HttpPushDto httpPushDto, String kind, String pushType) {
@@ -252,7 +250,8 @@ public class HttpPushSupport {
         pushMap.put("SERVICE_PASS", httpPushDto.getServicePass());
         pushMap.put("APPLICATION_ID", httpPushDto.getApplicationId());
         try {
-            pushMap.put("PAYLOAD", new ObjectMapper().readValue(httpPushDto.getPayload(), new TypeReference<Object>(){}));
+            pushMap.put("PAYLOAD", new ObjectMapper().readValue(httpPushDto.getPayload(), new TypeReference<Object>() {
+            }));
 
         } catch (JsonProcessingException ex) {
             throw new HttpPushEtcException("기타 오류");
@@ -263,7 +262,7 @@ public class HttpPushSupport {
             pushMap.put("SERVICE_KEY", httpPushDto.getServiceKey());
             pushMap.put("SUB_SERVICE_ID", httpPushDto.getSubServiceId());
 
-        // 공지
+            // 공지
         } else {
             // GCM(안드로이드)
             if (pushType.equals("G")) {

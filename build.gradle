@@ -302,6 +302,7 @@ project(':presentation') {
 project(':application') {
     dependencies {
         implementation project(':domain')
+        implementation project(':infrastructure')
     }
     bootJar { enabled = false }
 }

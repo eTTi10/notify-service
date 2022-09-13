@@ -12,12 +12,26 @@ import com.lguplus.fleta.exception.push.BadRequestException;
 import com.lguplus.fleta.exception.push.MaxRequestOverException;
 import com.lguplus.fleta.exception.push.NotExistRegistIdException;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -25,30 +39,17 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 class PushSingleDomainServiceTest {
 
     @InjectMocks
     PushSingleDomainService pushSingleDomainService;
-
-    private PushConfig pushConfig;
-
-    @Mock
-    private PushSingleClient pushSingleClient;
-
     PushRequestSingleDto pushRequestSingleDto;
-
     List<String> items;
     List<PushRequestItemDto> addItems;
+    private PushConfig pushConfig;
+    @Mock
+    private PushSingleClient pushSingleClient;
 
     @BeforeEach
     void setUp() {
@@ -70,14 +71,14 @@ class PushSingleDomainServiceTest {
         items.add("cm1!^aaaa!^aaaa");
 
         pushRequestSingleDto = PushRequestSingleDto.builder()
-                .serviceId("30011")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("-")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .retryCount(0)
-                .build();
+            .serviceId("30011")
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .regId("-")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .retryCount(0)
+            .build();
 
         ReflectionTestUtils.setField(pushSingleDomainService, "pushDelayReqCnt", 100);
         ReflectionTestUtils.setField(pushSingleDomainService, "pushCallRetryCnt", 2);
@@ -133,32 +134,32 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_normal() {
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         Assertions.assertEquals("200", responseDto.getCode());
 
         PushRequestSingleDto pushRequestSingleDtoLg = PushRequestSingleDto.builder()
-                .serviceId("00007")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("-")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .retryCount(5)
-                .build();
+            .serviceId("00007")
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .regId("-")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .retryCount(5)
+            .build();
         //pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
 
         PushClientResponseDto responseDtoLg = pushSingleDomainService.requestPushSingle(pushRequestSingleDtoLg);
@@ -169,36 +170,36 @@ class PushSingleDomainServiceTest {
     void requestPushSingle_password_null() {
 
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
-                .serviceId("XXXXX") //unknown service id
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("-")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("XXXXX") //unknown service id
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .regId("-")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
         assertThrows(ServiceIdNotFoundException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto1));
     }
 
     @Test
     void requestPushSingle_exception() {
 
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
-        List<String> codeList = Arrays.asList(new String[]{"202", "400", "401","403", "404", "410","412", "500", "502","503", "5102", "5103", "Unknown"});//, "-"});
+        List<String> codeList = Arrays.asList("202", "400", "401", "403", "404", "410", "412", "500", "502", "503", "5102", "5103", "Unknown");//, "-"});
 
-        for(String code : codeList) {
-            given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode(code).build());
+        for (String code : codeList) {
+            given(pushSingleClient.requestPushSingle(anyMap())).willReturn(PushResponseDto.builder().statusCode(code).build());
             assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
         }
     }
@@ -206,42 +207,42 @@ class PushSingleDomainServiceTest {
     @Test
     void requestPushSingle_retryExcludeCode() {
 
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
         //ReflectionTestUtils.setField(pushSingleDomainService, "retryExcludeCodeList", "400|401|403");
         //BadRequestException, UnAuthorizedException, ForbiddenException
 
-        given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("400").build());
+        given(pushSingleClient.requestPushSingle(anyMap())).willReturn(PushResponseDto.builder().statusCode("400").build());
         assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
 
-        given( pushSingleClient.requestPushSingle(anyMap()) ).willReturn(PushResponseDto.builder().statusCode("202").build());
+        given(pushSingleClient.requestPushSingle(anyMap())).willReturn(PushResponseDto.builder().statusCode("202").build());
         assertThrows(NotifyRuntimeException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
     }
 
     @Test
     void requestPushSingle_abnormalTime() {
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-4000)
-                .build()
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 4000)
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
@@ -250,17 +251,17 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_interval_over() {
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(100 * 3)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-100)
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(100 * 3)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 100)
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
         assertThrows(MaxRequestOverException.class, () -> {
@@ -271,17 +272,17 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_interval_over1() {
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(110)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-100)
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(110)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 100)
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
         assertThrows(MaxRequestOverException.class, () -> {
@@ -292,19 +293,19 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_interval_reset() {
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-1100)//측정시간 -1초
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 1100)//측정시간 -1초
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         Assertions.assertEquals("200", responseDto.getCode());
@@ -312,22 +313,22 @@ class PushSingleDomainServiceTest {
 
     @Test
     void requestPushSingle_isRetryExcludeCodeTrue() {
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-1100)//측정시간 -1초
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 1100)//측정시간 -1초
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
-        Assertions.assertEquals("200",responseDto.getCode());
+        Assertions.assertEquals("200", responseDto.getCode());
     }
 
     @Test
@@ -335,33 +336,32 @@ class PushSingleDomainServiceTest {
 
         ReflectionTestUtils.setField(pushSingleDomainService, "tranactionMsgId1", new AtomicInteger(9999));
         ReflectionTestUtils.setField(pushSingleDomainService, "tranactionMsgId2", new AtomicInteger(9999));
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-500)//측정시간 -1초
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 500)//측정시간 -1초
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("200").build());
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("200").build());
 
         PushClientResponseDto responseDto = pushSingleDomainService.requestPushSingle(pushRequestSingleDto);
         Assertions.assertEquals("200", responseDto.getCode());
 
-
         PushRequestSingleDto pushRequestSingleDto1 = PushRequestSingleDto.builder()
-                .serviceId("00007")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("-")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .retryCount(0)
-                .build();
+            .serviceId("00007")
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .regId("-")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .retryCount(0)
+            .build();
 
         PushClientResponseDto responseDto1 = pushSingleDomainService.requestPushSingle(pushRequestSingleDto1);
         Assertions.assertEquals("200", responseDto1.getCode());
@@ -370,27 +370,25 @@ class PushSingleDomainServiceTest {
     @Test
     void requestPushSingle_retry() {
 
-        given( pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)// 100 초과
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis()-500)//측정시간 -1초
-                .build()
+        given(pushSingleClient.getPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)// 100 초과
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis() - 500)//측정시간 -1초
+            .build()
         );
-        given( pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong()) ).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
-                .measurePushCount(0)
-                .measureIntervalMillis(1000L)
-                .measureStartMillis(System.currentTimeMillis())
-                .build()
+        given(pushSingleClient.putPushStatus(anyString(), anyLong(), anyLong())).willReturn(PushStatDto.builder().serviceId(pushRequestSingleDto.getServiceId())
+            .measurePushCount(0)
+            .measureIntervalMillis(1000L)
+            .measureStartMillis(System.currentTimeMillis())
+            .build()
         );
 
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("410").build());
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("410").build());
         assertThrows(NotExistRegistIdException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
 
-        given( pushSingleClient.requestPushSingle(any()) ).willReturn(PushResponseDto.builder().statusCode("400").build());
+        given(pushSingleClient.requestPushSingle(any())).willReturn(PushResponseDto.builder().statusCode("400").build());
         assertThrows(BadRequestException.class, () -> pushSingleDomainService.requestPushSingle(pushRequestSingleDto));
     }
-
-
 
 
 }

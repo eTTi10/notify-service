@@ -8,18 +8,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class NoHttpsException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public NoHttpsException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public NoHttpsException(final String message) {
@@ -28,7 +21,6 @@ public class NoHttpsException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,12 +30,16 @@ public class NoHttpsException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoHttpsException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 }

@@ -7,24 +7,22 @@ import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.properties.HttpServiceProps;
 import com.lguplus.fleta.util.HttpPushSupport;
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class HttpSinglePushDomainServiceTest {
@@ -45,7 +43,7 @@ class HttpSinglePushDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(httpSinglePushDomainService, "rejectReg", Set.of("M20110725000","U01080800201","U01080800202","U01080800203"));
+        ReflectionTestUtils.setField(httpSinglePushDomainService, "rejectReg", Set.of("M20110725000", "U01080800201", "U01080800202", "U01080800203"));
     }
 
     @Test
@@ -57,12 +55,12 @@ class HttpSinglePushDomainServiceTest {
         given(httpPushClient.requestHttpPushSingle(anyMap())).willReturn(openApiPushResponseDto);
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("01099991234"))
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("01099991234"))
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         HttpPushResponseDto responseDto = httpSinglePushDomainService.requestHttpPushSingle(httpPushSingleRequestDto);
@@ -79,12 +77,12 @@ class HttpSinglePushDomainServiceTest {
         given(httpServiceProps.getExceptionCodeMessage(anyString())).willReturn(Pair.of("9998", "발송제한번호"));
 
         HttpPushSingleRequestDto httpPushSingleRequestDto = HttpPushSingleRequestDto.builder()
-                .applicationId("lguplushdtvgcm")
-                .serviceId("30011")
-                .pushType("G")
-                .users(List.of("M20110725000")) // 발송 제외 가번
-                .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
-                .build();
+            .applicationId("lguplushdtvgcm")
+            .serviceId("30011")
+            .pushType("G")
+            .users(List.of("M20110725000")) // 발송 제외 가번
+            .message("\"result\":{\"noti_type\":\"PAIR\", \"name\":\"김삼순\", \"data\":{\"d1\":\"aa\",\"d2\":\"bb\"}}\"")
+            .build();
 
         // when
         Exception exception = assertThrows(HttpPushCustomException.class, () -> {
