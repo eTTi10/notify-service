@@ -1,9 +1,13 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.adarshr.test-logger' version '3.0.0'
     id "org.sonarqube" version "3.3"
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 bootJar { enabled = false }
@@ -11,6 +15,7 @@ bootJar { enabled = false }
 
 allprojects {
     repositories {
+        jcenter()
         mavenCentral()
     }
 }
@@ -35,15 +40,22 @@ subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'jacoco'
+    apply plugin: 'org.asciidoctor.jvm.convert'
 
     group = 'com.lguplus.fleta'
     version = '1.1.0'
     sourceCompatibility = '11'
 
     configurations {
+        asciidoctorExtensions
         compileOnly {
             extendsFrom annotationProcessor
         }
+    }
+
+    ext {
+        swaggerOutputDir = file("${buildDir}/swagger")
+        htmlOutputDir = file("${buildDir}/docs/asciidoc")
     }
 
     dependencies {
@@ -52,6 +64,8 @@ subprojects {
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+        implementation 'io.github.swagger2markup:swagger2markup:1.3.3'
+        asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         implementation "io.springfox:springfox-swagger2:2.9.2"
         implementation "io.springfox:springfox-swagger-ui:2.9.2"
         implementation 'org.apache.commons:commons-lang3:3.11'
@@ -108,7 +122,9 @@ subprojects {
                         "com/lguplus/fleta/exception/*",
                         "com/lguplus/fleta/filter/*",
                         "com/lguplus/fleta/interceptor/*",
-                        "com/lguplus/fleta/provider/external/*"
+                        "com/lguplus/fleta/provider/external/*",
+                        "com.lguplus.fleta.**Application**",
+                        "com.lguplus.fleta.**Config**"
                 ])
             }))
         }
@@ -150,6 +166,8 @@ subprojects {
                         'com.lguplus.fleta.exhandler.*',
                         'com.lguplus.fleta.validation.*',
                         "com.lguplus.fleta.provider.external.*",
+                        "com.lguplus.fleta.**Application**",
+                        "com.lguplus.fleta.**Config**"
                 ]
             }
         }
@@ -179,6 +197,57 @@ subprojects {
         finalizedBy 'jacocoTestReport'
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+        }
+
+        if (project.name == "boot") {
+            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
+            finalizedBy 'asciidoctor'
+        }
+    }
+
+    asciidoctor {
+        logger.quiet "Executing asciidoctor in ${project.name}"
+        configurations 'asciidoctorExtensions'
+        sourceDir = swaggerOutputDir
+
+        sources{
+            include('**/*.adoc')
+        }
+
+        //haegol index.adoc 기준으로 맞췄습니다
+        options doctype: 'book'
+        attributes 'source-highlighter': 'highlightjs',
+                toc                 : 'left',
+                toclevels           : 4
+        baseDirFollowsSourceFile()
+    }
+
+    task convertDocs {
+        doFirst {
+            logger.quiet "Executing convertDocs in ${project.name}"
+            String outputDir = htmlOutputDir
+            boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
+
+            if (!factor) {
+                println "Found swagger.html: start to converting works."
+                BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(outputDir + "/swagger.html"))
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir + "/swaggerFinal.html"))
+
+                bufferedReader.lines().forEach(line -> {
+                    line = line.replaceAll("&lt;", "<").replaceAll("&gt;", ">")
+
+                    try {
+                        writer.write(line)
+                        writer.newLine()
+                    } catch (IOException e) {
+                        throw new RuntimeException(e)
+                    }
+                })
+                writer.flush()
+                writer.close()
+            } else {
+                println "can't convert swagger.html: the file is not exist."
+            }
         }
     }
 
@@ -210,10 +279,10 @@ project(':boot') {
         implementation project(':infrastructure')
     }
 
-    test {
-        exclude '**/*'
-        useJUnitPlatform()
-    }
+//    test {
+//        exclude '**/*'
+//        useJUnitPlatform()
+//    }
 }
 
 project(':presentation') {
@@ -230,6 +299,10 @@ project(':application') {
         implementation project(':infrastructure')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 project(':domain') {
@@ -237,6 +310,10 @@ project(':domain') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 project(':infrastructure') {
@@ -245,6 +322,10 @@ project(':infrastructure') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 task printVersion {

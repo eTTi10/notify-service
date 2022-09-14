@@ -50,7 +50,7 @@ public class PushRequestBodySingleVo {
      * 추가할 항목 입력(name!^value)
      */
     @JsonProperty("items")
-    @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
+    @ApiModelProperty(position = 5, example = "[\"badge!^1\", \"sound!^ring.caf\", \"cm!^aaaa\"]", value = "추가할 항목(name!^value)")
     private List<String> addItems = new ArrayList<>();
 
     /**
@@ -58,7 +58,7 @@ public class PushRequestBodySingleVo {
      */
     @NotNull(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C6.class)
     @JsonProperty("reg_id")
-    @ApiModelProperty(position = 6, example = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=", value = "사용자 ID")
+    @ApiModelProperty(position = 6, example = "\"MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=\"", value = "사용자 ID")
     private String regId;
 
     /**
