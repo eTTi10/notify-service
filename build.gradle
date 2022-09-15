@@ -206,7 +206,6 @@ subprojects {
     }
 
     asciidoctor {
-        logger.quiet "Executing asciidoctor in ${project.name}"
         configurations 'asciidoctorExtensions'
         sourceDir = swaggerOutputDir
 
@@ -224,7 +223,6 @@ subprojects {
 
     task convertDocs {
         doFirst {
-            logger.quiet "Executing convertDocs in ${project.name}"
             String outputDir = htmlOutputDir
             boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
 
