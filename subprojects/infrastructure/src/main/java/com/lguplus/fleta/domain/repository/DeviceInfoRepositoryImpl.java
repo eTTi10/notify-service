@@ -1,7 +1,7 @@
 package com.lguplus.fleta.domain.repository;
 
 import com.lguplus.fleta.data.dto.request.outer.DeviceInfoRequestDto;
-import com.lguplus.fleta.data.entity.DeviceInfoEntity;
+import com.lguplus.fleta.data.entity.DeviceInfo;
 import com.lguplus.fleta.provider.jpa.DeviceInfoJpaRepository;
 import com.lguplus.fleta.repository.push.DeviceInfoRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +16,8 @@ public class DeviceInfoRepositoryImpl implements DeviceInfoRepository {
     private final DeviceInfoJpaRepository deviceInfoJpaRepository;
 
     @Override
-    public DeviceInfoEntity save(DeviceInfoRequestDto deviceInfoRequestDto) {
-        return deviceInfoJpaRepository.save(DeviceInfoEntity.builder()
+    public DeviceInfo save(DeviceInfoRequestDto deviceInfoRequestDto) {
+        return deviceInfoJpaRepository.save(DeviceInfo.builder()
             .saId(deviceInfoRequestDto.getSaId())
             .agentType(deviceInfoRequestDto.getAgentType())
             .serviceType(deviceInfoRequestDto.getServiceType())
@@ -27,7 +27,7 @@ public class DeviceInfoRepositoryImpl implements DeviceInfoRepository {
 
     @Override
     public void  delete(DeviceInfoRequestDto deviceInfoRequestDto){
-        deviceInfoJpaRepository.delete(DeviceInfoEntity.builder()
+        deviceInfoJpaRepository.delete(DeviceInfo.builder()
            .saId(deviceInfoRequestDto.getSaId())
            .agentType(deviceInfoRequestDto.getAgentType())
            .serviceType(deviceInfoRequestDto.getServiceType())

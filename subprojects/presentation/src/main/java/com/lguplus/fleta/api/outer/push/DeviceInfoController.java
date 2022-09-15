@@ -17,12 +17,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Api(tags = "단말 정보 등록, 수정, 삭제")
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/hdtv/v1/push/deviceinfo")
+@RequestMapping(value = "/mobile/hdtv/v1/push/deviceinfo")
 public class DeviceInfoController {
     private final DeviceInfoService deviceInfoService;
 
@@ -44,7 +45,7 @@ public class DeviceInfoController {
     })
     @PostMapping
     public SuccessResponseDto postDeviceInfo(
-            @Validated DeviceInfoPostRequestVo deviceInfoRequestVo){
+            @ApiIgnore @Validated DeviceInfoPostRequestVo deviceInfoRequestVo){
         deviceInfoService.createDeviceInfo(deviceInfoRequestVo.convert());
         return SuccessResponseDto.builder().build();
     }
@@ -67,7 +68,7 @@ public class DeviceInfoController {
     })
     @PutMapping
     public SuccessResponseDto putDeviceInfo(
-            @Validated DeviceInfoPutRequestVo deviceInfoRequestVo){
+            @ApiIgnore  @Validated DeviceInfoPutRequestVo deviceInfoRequestVo){
         deviceInfoService.updateDeviceInfo(deviceInfoRequestVo.convert());
         return SuccessResponseDto.builder().build();
     }
@@ -89,7 +90,7 @@ public class DeviceInfoController {
     })
     @DeleteMapping
     public SuccessResponseDto deleteDeviceInfo(
-            @Validated DeviceInfoDeleteRequestVo deviceInfoRequestVo){
+            @ApiIgnore  @Validated DeviceInfoDeleteRequestVo deviceInfoRequestVo){
         deviceInfoService.deleteDeviceInfo(deviceInfoRequestVo.convert());
         return SuccessResponseDto.builder().build();
     }
