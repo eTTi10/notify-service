@@ -103,7 +103,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
 
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/hdtv/v1/push/deviceinfo")
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/mobile/hdtv/v1/push/deviceinfo")
                 .content(
                     " {\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"A\" ,"
@@ -137,7 +137,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", "a"); // wrong
         params.add("noti_type", NOTI_TYPE);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/hdtv/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/mobile/hdtv/v1/push/deviceinfo").content(
             " {\"sa_id\" : \"500058151453\" ,"
                             + "\n\"service_type\" : \"a\" ,"
                             + "\n\"agent_type\" : \"G\" ,"
@@ -158,7 +158,7 @@ class DeviceInfoControllerTest {
         params.add("noti_type", NOTI_TYPE);
         params.add("stb_mac",STB_MAC);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/hdtv/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(put("/mobile/hdtv/v1/push/deviceinfo").content(
                     "{\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"H\" ,"
                         + "\n\"agent_type\" : \"G\" ,"
@@ -188,7 +188,7 @@ class DeviceInfoControllerTest {
         params.add("agent_type", AGENT_TYPE);
         params.add("noti_type", NOTI_TYPE);
 
-        MvcResult mvcResult = (MvcResult) mockMvc.perform(delete("/hdtv/v1/push/deviceinfo").content(
+        MvcResult mvcResult = (MvcResult) mockMvc.perform(delete("/mobile/hdtv/v1/push/deviceinfo").content(
                     "{\"sa_id\" : \"500058151453\" ,"
                         + "\n\"service_type\" : \"H\" ,"
                         + "\n\"agent_type\" : \"G\" ,"

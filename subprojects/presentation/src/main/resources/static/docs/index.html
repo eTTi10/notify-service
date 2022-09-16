@@ -484,7 +484,7 @@ ex) A:전체받기/ S:구독만받기 / N:푸시 안받기, example=N</p></td>
 <h4 id="_http_request">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 92
 Host: localhost:8080
@@ -519,7 +519,7 @@ Content-Length: 68
 <h5 id="_200_bad_request">200 Bad Request</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=a&amp;noti_type=N HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=a&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 92
 Host: localhost:8080
@@ -534,11 +534,11 @@ Host: localhost:8080
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 122
+Content-Length: 123
 
 {
-  "error" : {
-    "code" : "5006",
+  "result" : {
+    "flag" : "5006",
     "message" : "파라미터 agent_type는 값의 범위가 G|A 이어야 함"
   }
 }</code></pre>
@@ -553,7 +553,7 @@ Content-Length: 122
 <h4 id="_http_request_2">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N&amp;stb_mac=1111.2222.3333 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N&amp;stb_mac=1111.2222.3333 HTTP/1.1
 Accept: application/json
 Content-Length: 91
 Host: localhost:8080
@@ -589,7 +589,7 @@ Content-Length: 68
 <h4 id="_http_request_3">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 91
 Host: localhost:8080
