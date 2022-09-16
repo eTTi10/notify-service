@@ -43,12 +43,13 @@ public class OuterControllerAdvice {
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /hdtv/v1/push/deviceinfo",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/v1/push/deviceinfo",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /hdtv/v1/push/deviceinfo",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/v1/push/deviceinfo",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("PUT /hdtv/v1/push/deviceinfo",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("PUT /mobile/hdtv/v1/push/deviceinfo",
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
 
