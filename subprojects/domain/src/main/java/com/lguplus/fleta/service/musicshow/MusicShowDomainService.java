@@ -111,7 +111,7 @@ public class MusicShowDomainService {
         PushTargetEntity resultEntity;
         Integer count = musicShowRepository.validAlbumId(requestDto.getAlbumId());
 
-        if (count == null) {
+        if (count == null || count.intValue() < 1) {
             throw new NotFoundException();
         }
 

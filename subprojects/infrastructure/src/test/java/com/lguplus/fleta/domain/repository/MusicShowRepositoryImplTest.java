@@ -2,7 +2,12 @@ package com.lguplus.fleta.domain.repository;
 
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
+import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
+import com.lguplus.fleta.data.entity.PushTargetEntity;
 import com.lguplus.fleta.provider.jpa.MusicShowJpaEmRepository;
+import com.lguplus.fleta.provider.jpa.MusicShowJpaRepository;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +25,10 @@ class MusicShowRepositoryImplTest {
 
     @Mock
     MusicShowJpaEmRepository emRepository;
+
+    @Mock
+    MusicShowJpaRepository jpaRepository;
+
 
     @Test
     void getPush() {
@@ -45,4 +54,91 @@ class MusicShowRepositoryImplTest {
         assertThat(resultDto.getAlbumId()).isEqualTo(dto.getAlbumId());
 
     }
+
+    @Test
+    void validAlbumId() {
+        given(emRepository.validAlbumId(any())).willReturn(1);
+
+        Integer count = repositoryImpl.validAlbumId("M01198F334PPV00");
+
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void getPushWithPkey() {
+        PushRequestDto requestDto = PushRequestDto.builder()
+            .saId("1000494369")
+            .stbMac("v010.0049.4369")
+            .albumId("M01198F334PPV00")
+            .build();
+
+        GetPushWithPKeyDto getKeyDto = GetPushWithPKeyDto.builder()
+            .albumId("M01198F334PPV00")
+            .build();
+
+        given(emRepository.getPushWithPkey(any())).willReturn(getKeyDto);
+
+        GetPushWithPKeyDto resultGetKeyDto = repositoryImpl.getPushWithPkey(requestDto);
+
+        assertThat(resultGetKeyDto.getAlbumId()).isEqualTo("M01198F334PPV00");
+    }
+
+    @Test
+    void insertPush() {
+
+        PushTargetEntity entity = PushTargetEntity.builder()
+            .pKey(0)
+            .saId("500055344423")
+            .regNo(11843)
+            .stbMac("v000.5534.4423")
+            .albumId("M0118C3162PPV00")
+            .serviceType("C")
+            .categoryId("E967O")
+            .msg("더쇼")
+            .resultCode("01")
+            .pushYn("Y")
+            .modDt(Timestamp.valueOf(LocalDateTime.now()))
+            .build();
+
+        given(jpaRepository.save(any())).willReturn(entity);
+
+        PushTargetEntity resultEntity = repositoryImpl.insertPush(entity);
+
+        assertThat(resultEntity.getPushYn()).isEqualTo("Y");
+    }
+
+    @Test
+    void deletePush() {
+
+        PushTargetEntity entity = PushTargetEntity.builder()
+            .pKey(0)
+            .saId("500055344423")
+            .regNo(11843)
+            .stbMac("v000.5534.4423")
+            .albumId("M0118C3162PPV00")
+            .serviceType("C")
+            .categoryId("E967O")
+            .msg("더쇼")
+            .resultCode("01")
+            .pushYn("N")
+            .modDt(Timestamp.valueOf(LocalDateTime.now()))
+            .build();
+
+        given(jpaRepository.save(any())).willReturn(entity);
+
+        PushTargetEntity resultEntity = repositoryImpl.insertPush(entity);
+
+        assertThat(resultEntity.getPushYn()).isEqualTo("N");
+    }
+
+    @Test
+    void getRegNoNextVal() {
+
+        given(emRepository.getRegNoNextVal()).willReturn(1000);
+
+        Integer regNoNextVal = repositoryImpl.getRegNoNextVal();
+
+        assertThat(regNoNextVal).isEqualTo(1000);
+    }
+
 }

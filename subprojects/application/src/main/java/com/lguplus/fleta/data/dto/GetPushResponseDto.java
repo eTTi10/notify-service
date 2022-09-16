@@ -1,29 +1,19 @@
 package com.lguplus.fleta.data.dto;
 
-import com.lguplus.fleta.data.dto.response.CommonResponseDto;
+import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
-@Builder
+@SuperBuilder
 @Getter
-public class GetPushResponseDto implements CommonResponseDto {
+public class GetPushResponseDto extends SuccessResponseDto {
 
     public static final String COLSEP = "!^"; // 열 분리자 -> constants로 변경 필요
 
     private static final String SUCCESS_FLAG = "0000";
 
     private static final String SUCCESS_MESSAGE = "성공";
-
-    @Override
-    public String getFlag() {
-        return SUCCESS_FLAG;
-    }
-
-    @Override
-    public String getMessage() {
-        return SUCCESS_MESSAGE;
-    }
 
     /*
      * 푸시등록여부

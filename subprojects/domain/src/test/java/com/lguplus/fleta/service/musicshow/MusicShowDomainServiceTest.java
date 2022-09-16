@@ -6,6 +6,8 @@ import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
 import com.lguplus.fleta.data.entity.PushTargetEntity;
 import com.lguplus.fleta.exception.push.NotFoundException;
 import com.lguplus.fleta.repository.musicshow.MusicShowRepository;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -120,12 +122,29 @@ class MusicShowDomainServiceTest {
             .msg("더쇼")
             .resultCode("01")
             .regDt("2018-12-04 18:13:06")
+            .pushYn("Y")
+            .build();
+
+        PushTargetEntity entity = PushTargetEntity.builder()
+            .pKey(getKeyDto.getPKey())
+            .regNo(getKeyDto.getRegNo())
+            .saId(getKeyDto.getSaId())
+            .stbMac(getKeyDto.getStbMac())
+            .albumId(getKeyDto.getAlbumId())
+            .categoryId(getKeyDto.getCategoryId())
+            .serviceType(getKeyDto.getServiceType())
+            .msg(getKeyDto.getMsg())
+            .pushYn("N")
+            .resultCode(getKeyDto.getResultCode())
+            .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
+            .modDt(Timestamp.valueOf(LocalDateTime.now()))
             .build();
 
         given(repository.getPushWithPkey(any())).willReturn(getKeyDto);
+        given(repository.insertPush(any())).willReturn(entity);
 
-        PushTargetEntity entity = domainService.releasePush(requestDto);
+        PushTargetEntity resultEntity = domainService.releasePush(requestDto);
 
-        assertThat(entity.getPushYn()).isEqualTo("N");
+        assertThat(resultEntity.getPushYn()).isEqualTo("N");
     }
 }

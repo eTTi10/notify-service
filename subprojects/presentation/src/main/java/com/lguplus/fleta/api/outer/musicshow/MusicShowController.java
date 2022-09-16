@@ -31,17 +31,17 @@ public class MusicShowController {
 
     @ApiOperation(value = "알람 여부 조회")
     @ApiImplicitParams(value = {
-        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "sa_id", value = "순번: 1<br>자리수: 12<br>설명:가입번호", example = "M15030600001"),
-        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "stb_mac", value = "순번: 2<br>자리수: 20<br>설명: 가입자 STB MAC Address", example = "v150.3060.0001"),
-        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 3<br>자리수: 15<br>설명: 앨범ID", example = "")
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "sa_id", value = "순번: 1<br>자리수: 12<br>설명:가입번호", example = "500004587606"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "stb_mac", value = "순번: 2<br>자리수: 20<br>설명: 가입자 STB MAC Address", example = "v000.0458.7606"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 3<br>자리수: 15<br>설명: 앨범ID", example = "M0118C3162PPV00")
     })
     @GetMapping
-    public String getPush(@Valid PushRequestVo requestVo) {
+    public GetPushResponseDto getPush(@Valid PushRequestVo requestVo) {
         PushRequestDto requestDto = requestVo.makeRefinedGetRequest();
 
         GetPushResponseDto responseDto = service.getPush(requestDto);
 
-        return responseDto.toString();
+        return responseDto;
     }
 
     @ApiOperation(value = "알람 여부 등록")
@@ -73,7 +73,7 @@ public class MusicShowController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "album_id", value = "순번: 4<br>자리수: 15<br>설명: 앨범ID", example = ""),
     })
     @DeleteMapping
-    public String releasePush(@ApiIgnore @Valid PushRequestVo requestVo, BindingResult bindingResult) {
+    public PostPushResponseDto releasePush(@ApiIgnore @Valid PushRequestVo requestVo, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new ParameterValidateException(bindingResult.getAllErrors(), "1|REQUEST PARAMETER ERROR||||||||||||||||\f");
         }
@@ -81,6 +81,6 @@ public class MusicShowController {
 
         PostPushResponseDto responseDto = service.releasePush(requestDto);
 
-        return responseDto.toString();
+        return responseDto;
     }
 }
