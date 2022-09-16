@@ -118,7 +118,9 @@ public class OuterControllerAdvice {
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
         }
-
+        if (uri.equals("POST /mobile/hdtv/v1/push/deviceinfo") && response.getFlag().equals("9999")) {
+            return response;
+        }
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {
             return response;

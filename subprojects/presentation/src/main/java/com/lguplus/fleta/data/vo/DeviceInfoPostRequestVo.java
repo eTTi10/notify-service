@@ -26,7 +26,7 @@ public class DeviceInfoPostRequestVo{
     @ParamAlias("sa_id")
     @NotBlank(message = "sa_id 파라미터값이 전달이 안됨",groups = Groups.C2.class)
     @AlphabetAndNumberPattern(message = "기타 오류",  groups = Groups.C3.class, payload = EtcException.class)
-    @Size(min = 1, max=12, message = "기타 오류" ,payload = EtcException.class, groups = Groups.C4.class)
+    @Size(min = 1, max=12, message = "기타 오류" ,payload = EtcException.class, groups = Groups.C4.class) // 예외적으로 result로 빼내야함.
     private String saId;
 
     @ParamAlias("service_type")
