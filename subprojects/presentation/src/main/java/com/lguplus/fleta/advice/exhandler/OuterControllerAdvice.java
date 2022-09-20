@@ -5,7 +5,9 @@ import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
-import lombok.NoArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
@@ -13,10 +15,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.outer")
@@ -31,17 +29,23 @@ public class OuterControllerAdvice {
         final String builderName = "errorResponseBuilder";
 
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
     }
 
     /**
@@ -71,7 +75,7 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(BindException.class)
     public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
-                                                                 final BindException ex) {
+        final BindException ex) {
         log.info(ex.getMessage(), ex);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
     }
@@ -85,7 +89,7 @@ public class OuterControllerAdvice {
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
 
-                                                final Throwable th) {
+        final Throwable th) {
         return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
@@ -96,7 +100,7 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<CommonResponseDto> handleThrowable(final HttpServletRequest request,
-                                                             final Throwable th) {
+        final Throwable th) {
         log.error(th.getMessage(), th);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
     }
@@ -108,7 +112,7 @@ public class OuterControllerAdvice {
      * @return
      */
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
-                                                          final ErrorResponseDto response) {
+        final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {

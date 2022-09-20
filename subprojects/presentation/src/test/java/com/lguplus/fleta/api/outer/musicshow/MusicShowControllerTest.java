@@ -30,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class MusicShowControllerTest {
 
     private static final String SUCCESS_CODE = "0000";
-    private static final String ERROR_CODE = "5006";
     private static final String URL_TEMPLATE = "/videolte/musicshow/push";
 
     @Autowired
@@ -41,9 +40,9 @@ class MusicShowControllerTest {
 
     MultiValueMap<String, String> getValidQueryParams01() {
         MultiValueMap<String, String> uriVars = new LinkedMultiValueMap<>();
-        uriVars.add("sa_id", "1000494369");
-        uriVars.add("stb_mac", "v010.0049.4369");
-        uriVars.add("album_id", "M01198F334PPV00");
+        uriVars.add("sa_id", "500154347307");
+        uriVars.add("stb_mac", "v001.5434.7307");
+        uriVars.add("album_id", "M0118C3162PPV00");
         return uriVars;
     }
 

@@ -2,51 +2,57 @@ package com.lguplus.fleta.data.vo.musicshow;
 
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.type.ServiceType;
-import com.lguplus.fleta.exception.ParameterLengthOverLimitException;
-import com.lguplus.fleta.validation.AlphabetAndNumberPattern;
-import com.lguplus.fleta.validation.NumberPattern;
+import com.lguplus.fleta.exception.InvalidRequestTypeException;
+import com.lguplus.fleta.exception.ParameterContainsNonAlphanumericException;
+import com.lguplus.fleta.exception.ParameterContainsWhitespaceException;
+import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
+import com.lguplus.fleta.exception.musicshow.ParameterOutOfRangeException;
+import com.lguplus.fleta.validation.Groups;
 import java.io.UnsupportedEncodingException;
+import javax.validation.GroupSequence;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.constraints.Length;
 
 @Slf4j
 @AllArgsConstructor
 @Getter
 @Setter
+
+@GroupSequence({Groups.R1.class, Groups.C1.class, Groups.R2.class, Groups.C2.class, Groups.R3.class, Groups.C3.class,
+    Groups.R4.class, Groups.C4.class, Groups.C5.class, Groups.R5.class, Groups.C6.class, Groups.R6.class, Groups.C8.class, Groups.C9.class, PostPushRequestVo.class})
 public class PostPushRequestVo {
 
-    @AlphabetAndNumberPattern
-    @Length(min = 7, max = 12)
-    @NotBlank
+    @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.R1.class)
+    @Size(max = 12, message = "파라미터 sa_id의 길이는 12 자리 이하 이어야 함", payload = ParameterOutOfRangeException.class, groups = Groups.C1.class)
     private final String sa_id; // 가입자정보
 
-    @AlphabetAndNumberPattern
-    @Length(min = 14, max = 14)
-    @NotBlank
+    @NotBlank(message = "stb_mac 파라미터값이 전달이 안됨", groups = Groups.R2.class)
+    @Size(max = 38, message = "파라미터 stb_mac의 길이는 38 자리 이하 이어야 함", payload = ParameterOutOfRangeException.class, groups = Groups.C2.class)
     private final String stb_mac; // 가입자 STB MAC Address
 
-    @AlphabetAndNumberPattern
-    @Length(min = 15, max = 15)
-    @NotBlank
-    private final String album_id; // 앨범 ID
-
-    @AlphabetAndNumberPattern
-    @Length(min = 1, max = 5)
-    @NotBlank
+    @NotBlank(message = "category_id 파라미터값이 전달이 안됨", groups = Groups.R3.class)
+    @Size(max = 5, message = "파라미터 category_id의 길이는 5 자리 이하 이어야 함", payload = ParameterOutOfRangeException.class, groups = Groups.C3.class)
     private final String category_id; // 카테고리 ID
 
-    //    @AlphabetAndNumberPattern
-    @Length(min = 1, max = 200)
-    @NotBlank
+    @NotBlank(message = "album_id 파라미터값이 전달이 안됨", groups = Groups.R4.class)
+    @Pattern(regexp = "^[^\\s]+$", message = "파라미터 album_id는 값에 공백이 없어야 함", payload = ParameterContainsWhitespaceException.class, groups = Groups.C4.class)
+    @Pattern(regexp = "[a-zA-Z0-9]*$", message = "파라미터 album_id는 값에 영문숫자만 포함되어야 함", payload = ParameterContainsNonAlphanumericException.class, groups = Groups.C5.class)
+    @Size(max = 20, message = "파라미터 album_id의 길이는 20 자리 이하 이어야 함", groups = Groups.C5.class)
+    private final String album_id; // 앨범 ID
+
+
+    @NotBlank(message = "album_nm 파라미터값이 전달이 안됨", groups = Groups.R5.class)
+    @Size(max = 200, message = "파라미터 album_nm의 길이는 200 자리 이하 이어야 함", payload = ParameterOutOfRangeException.class, groups = Groups.C6.class)
     private final String album_nm; // 보낼메시지(타이틀명) msg
 
-    @NumberPattern
-    @Length(min = 12, max = 12)
-    @NotBlank
+    @NotBlank(message = "start_dt 파라미터값이 전달이 안됨", groups = Groups.R6.class)
+    @Size(max = 12, message = "파라미터 start_dt의 길이는 12 자리 이하 이어야 함", payload = ParameterExceedMaxSizeException.class, groups = Groups.C8.class)
+    @Pattern(regexp = "[0-9]*$", message = "start_dt 파라미터는 숫자형 데이터이어야함", payload = InvalidRequestTypeException.class, groups = Groups.C9.class)
     private final String start_dt; // 공연시작일(푸시발송예정일) send_dt
 
 
@@ -74,7 +80,7 @@ public class PostPushRequestVo {
             valueSize = value.getBytes().length;
         }
         if (valueSize > length) {
-            throw new ParameterLengthOverLimitException();
+            throw new ParameterOutOfRangeException();
         }
     }
 
