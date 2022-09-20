@@ -51,6 +51,7 @@ public class OuterControllerAdvice {
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
 
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
+        UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mobile/hdtv/v1/push/deviceinfo", List.of("^9{4}$"));
     }
 
     /**
@@ -116,9 +117,6 @@ public class OuterControllerAdvice {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
-            return response;
-        }
-        if (uri.equals("POST /mobile/hdtv/v1/push/deviceinfo") && response.getFlag().equals("9999")) {
             return response;
         }
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
