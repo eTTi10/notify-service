@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DeviceInfoService {
     private final DeviceInfoDomainService deviceInfoDomainService;
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    @Transactional
     public void createDeviceInfo(DeviceInfoRequestDto deviceInfoRequestDto){
         try {
             deviceInfoDomainService.createDeviceInfo(deviceInfoRequestDto);

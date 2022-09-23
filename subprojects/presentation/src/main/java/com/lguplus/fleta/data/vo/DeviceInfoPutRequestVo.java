@@ -25,30 +25,23 @@ import javax.validation.constraints.Size;
 public class DeviceInfoPutRequestVo{
 
     @ParamAlias("sa_id")
-//    @NotNull(message = "필수 요청 정보 누락(sa_id)",groups = Groups.C1.class)
     @NotBlank(message = "필수 요청 정보 누락(sa_id)",groups = Groups.C2.class)
     @AlphabetAndNumberPattern(message = "잘못된 포맷 형식 전달 및 응답 결과 지원하지 않는 포맷(sa_id - 특수문자 입력 불가)",  groups = Groups.C3.class, payload = ParameterTypeMismatchException.class)
     @Size(max=12, message = "요청 정보 허용 범위 초과(sa_id - 12 자리 이하)" ,payload = ParameterLengthOverLimitException.class, groups = Groups.C4.class)
     private String saId;
 
     @ParamAlias("service_type")
-//    @NotNull(message = "필수 요청 정보 누락(service_type)",groups = Groups.C6.class)
     @NotBlank(message = "필수 요청 정보 누락(service_type)",groups = Groups.C6.class)
-//    @Size(min = 1, max=1, message = "기타 오류" ,payload = EtcException.class, groups = Groups.C7.class)
     @Pattern(regexp = "[HUCRGDBK]", message = "파라미터 service_type는 값의 범위가 H|U|C|R|G|D|B 이어야 함",groups = Groups.C8.class,payload = ParameterOutOfRangeException.class)
     private String serviceType;
 
     @ParamAlias("agent_type")
-//    @NotNull(message = "필수 요청 정보 누락(agent_type)",groups =Groups.C9.class)
     @NotBlank(message = "필수 요청 정보 누락(agent_type)",groups = Groups.C9.class)
-//    @Size(min = 1, max=1, message = "기타 오류" ,payload = EtcException.class, groups = Groups.C10.class)
     @Pattern(regexp = "[GA]", message = "파라미터 agent_type는 값의 범위가 G|A 이어야 함",groups = Groups.C11.class,payload = ParameterOutOfRangeException.class)
     private String agentType;
 
     @ParamAlias("noti_type")
-//    @NotNull(message = "필수 요청 정보 누락(noti_type)",groups =Groups.C12.class)
     @NotBlank(message = "필수 요청 정보 누락(noti_type)",groups = Groups.C12.class)
-//    @Size(min = 1, max=1, message = "기타 오류" ,payload = EtcException.class, groups = Groups.C13.class)
     @Pattern(regexp = "[ASN]", message = "파라미터 noti_type는 값의 범위가 A|S|N 이어야 함",groups = Groups.C15.class,payload = ParameterOutOfRangeException.class)
     private String notiType;
 

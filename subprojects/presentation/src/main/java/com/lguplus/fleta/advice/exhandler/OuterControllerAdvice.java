@@ -3,6 +3,7 @@ package com.lguplus.fleta.advice.exhandler;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import java.util.HashMap;
@@ -51,7 +52,6 @@ public class OuterControllerAdvice {
                 new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
 
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
-        UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mobile/hdtv/v1/push/deviceinfo", List.of("^9{4}$"));
     }
 
     /**
@@ -80,6 +80,17 @@ public class OuterControllerAdvice {
         final BindException ex) {
         log.info(ex.getMessage(), ex);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
+    }
+
+    /**
+     * @param /mobile/mims/deviceinfo db에서 exception 캐치 해서 result로 감싸 response 해야하는 경우의 예외처리
+     * @return
+     */
+    @ExceptionHandler(UndefinedException.class)
+    public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
+                                                                 final UndefinedException ex) {
+        log.info(ex.getMessage(), ex);
+        return ResponseEntity.ok().body(ErrorResponseDto.builder().flag("9999").message("기타 오류").build());
     }
 
     /**

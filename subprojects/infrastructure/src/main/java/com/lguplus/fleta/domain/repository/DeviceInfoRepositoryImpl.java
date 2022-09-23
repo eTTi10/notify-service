@@ -17,7 +17,7 @@ public class DeviceInfoRepositoryImpl implements DeviceInfoRepository {
 
     @Override
     public DeviceInfo save(DeviceInfoRequestDto deviceInfoRequestDto) {
-        return deviceInfoJpaRepository.save(DeviceInfo.builder()
+        return deviceInfoJpaRepository.saveAndFlush(DeviceInfo.builder()
             .saId(deviceInfoRequestDto.getSaId())
             .agentType(deviceInfoRequestDto.getAgentType())
             .serviceType(deviceInfoRequestDto.getServiceType())
