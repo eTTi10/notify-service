@@ -36,6 +36,7 @@ error:
             ParameterLengthTooShortException: "5017"
             ParameterPhoneNumberErrorException: "1502"
             ParameterDatabaseException: "8999"
+            EtcException: "9999"
             ExtRuntimeException: "9999"
             openapi:
               AccessKeyNotPermittedException: "1300"

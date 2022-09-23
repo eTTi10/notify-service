@@ -3,6 +3,7 @@ package com.lguplus.fleta.advice.exhandler;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import java.util.HashMap;
@@ -42,7 +43,13 @@ public class OuterControllerAdvice {
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
-            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("PUT /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
 
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
@@ -56,13 +63,11 @@ public class OuterControllerAdvice {
      * @param errorResponseResolver
      */
     public OuterControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
-
         this.errorResponseResolver = errorResponseResolver;
     }
 
     @InitBinder
     public void initBinder(final WebDataBinder binder) {
-
         binder.initDirectFieldAccess();
     }
 
@@ -75,6 +80,17 @@ public class OuterControllerAdvice {
         final BindException ex) {
         log.info(ex.getMessage(), ex);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
+    }
+
+    /**
+     * @param /mobile/mims/deviceinfo db에서 exception 캐치 해서 result로 감싸 response 해야하는 경우의 예외처리
+     * @return
+     */
+    @ExceptionHandler(UndefinedException.class)
+    public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
+                                                                 final UndefinedException ex) {
+        log.info(ex.getMessage(), ex);
+        return ResponseEntity.ok().body(ErrorResponseDto.builder().flag("9999").message("기타 오류").build());
     }
 
     /**
@@ -114,7 +130,6 @@ public class OuterControllerAdvice {
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
         }
-
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {
             return response;
