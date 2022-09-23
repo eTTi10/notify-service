@@ -50,7 +50,7 @@ public class PushRequestBodyAnnounceVo {
      * 추가할 항목 입력(name!^value)
      */
     @JsonProperty("items")
-    @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
+    @ApiModelProperty(position = 5, example = "[\"badge!^1\", \"sound!^ring.caf\", \"cm!^aaaa\"]", value = "추가할 항목(name!^value)")
     private List<String> addItems = new ArrayList<>();
 
 }

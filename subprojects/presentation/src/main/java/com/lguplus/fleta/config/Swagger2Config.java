@@ -2,6 +2,8 @@ package com.lguplus.fleta.config;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -17,9 +19,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class Swagger2Config {
 
-    private static final String API_NAME = "MIMS";
-    private static final String API_DESCRIPTION = "API 명세서(스펙)";
+    private static final String API_CLASSIFICATION = "MIMS";
     private static final String API_VERSION = "1.0.0";
+    private static final String API_DESCRIPTION = "API 명세서(스펙)";
+
+    @Value("${spring.application.name}")
+    private String API_NAME;
 
     /**
      * localhost:8080/swagger-ui.html
@@ -54,11 +59,11 @@ public class Swagger2Config {
         return produces;
     }
 
-    private ApiInfo apiInfo() {
+    public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-            .title(API_NAME)
-            .description(API_DESCRIPTION)
-            .version(API_VERSION)
-            .build();
+                .title(API_NAME)
+                .version(API_VERSION)
+                .description(API_CLASSIFICATION + ": " + API_NAME + " 서비스 " + API_DESCRIPTION)
+                .build();
     }
 }

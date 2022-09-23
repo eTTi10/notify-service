@@ -12,11 +12,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JacksonXmlRootElement(localName = "result")
 public interface CommonResponseDto extends PlainTextibleDto {
 
-    @ApiModelProperty(position = 1, dataType = "string", value = "순번: 1<br>자리수: 4<br>설명: 성공여부 코드값", example = "0000")
+    @ApiModelProperty(position = 1, dataType = "string", value = "순번: 1<br/>자리수: 4<br/>설명: 성공여부 코드값", example = "0000")
     @JsonGetter("flag")
     String getFlag();
 
-    @ApiModelProperty(position = 2, dataType = "string", value = "순번: 2<br>자리수: 50<br>설명: 결과 메시지", example = "성공")
+    @ApiModelProperty(position = 2, dataType = "string", value = "순번: 2<br/>자리수: 50<br/>설명: 결과 메시지", example = "성공")
     @JsonGetter("message")
     String getMessage();
 

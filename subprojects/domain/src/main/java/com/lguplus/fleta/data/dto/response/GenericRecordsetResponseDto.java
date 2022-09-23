@@ -23,7 +23,7 @@ public class GenericRecordsetResponseDto<S> extends SuccessResponseDto {
     /**
      *
      */
-    @ApiModelProperty(position = 3, dataType = "string", value = "순번: 3<br>자리수: 3<br>설명: 검색 갯수<br>검색된 앨범들의 총 갯수", example = "1")
+    @ApiModelProperty(position = 3, dataType = "string", value = "순번: 3<br/>자리수: 3<br/>설명: 검색 갯수<br/>검색된 앨범들의 총 갯수", example = "1")
     @JsonProperty("total_count")
     private int totalCount;
 
