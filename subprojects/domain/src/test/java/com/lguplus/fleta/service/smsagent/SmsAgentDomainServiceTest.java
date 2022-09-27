@@ -107,7 +107,7 @@ class SmsAgentDomainServiceTest {
 
         /* 전송할 수 있는 시간이 아닐 때 NotSendTimeException */
         ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendUse", true);
-        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 3);
+        ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeFrom", 0);
         ReflectionTestUtils.setField(smsAgentDomainService, "agentNoSendTimeTo", 23);
         exception = assertThrows(SmsAgentCustomException.class, () -> {
             smsAgentDomainService.sendSms(request);

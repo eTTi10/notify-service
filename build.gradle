@@ -33,7 +33,7 @@ sonarqube{
     }
 }
 
-bootJar { enabled = false }
+//bootJar { enabled = false }
 
 subprojects {
     apply plugin: 'java'
@@ -89,15 +89,18 @@ subprojects {
         // https://mvnrepository.com/artifact/org.jvnet.mimepull/mimepull
         // 관련) MIMEConfig, import org.jvnet.mimepull.*
         implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
-
+        testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 
     jacoco {
         toolVersion = '0.8.7'
 
         // 테스트 결과 리포트 저장 경로 설정
-        // default : "${project.reporting.baseDir}/jacoco"
-        //reportsDir = file("$buildDir/customJacocoReportDir")
+        reportsDir = file("$buildDir/JacocoReportDir")
+//        reportsDirectory = layout.buildDirectory.dir('../documents/coverage/jacoco')
+//        default  "${project.reporting.baseDir}/jacoco"
+//        reportsDir = file("$buildDir/customJacocoReportDir")
     }
 
     // JaCoCo Task
@@ -106,11 +109,12 @@ subprojects {
             // 리포트 활성화
             html.enabled true
             xml.enabled true
-            csv.enabled false
+            csv.enabled true
 
             // 리포트 저장 경로 설정
-            //html.destination file("$buildDir/jacocoHtml")
-            //xml.destination file("$buildDir/jacoco.xml")
+//            csv.destination file("$buildDir/jacoco.csv")
+//            html.destination file("$buildDir/jacocoHtml")
+//            xml.destination file("$buildDir/jacoco.xml")
         }
 
         afterEvaluate {
@@ -198,6 +202,7 @@ subprojects {
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
         }
+
 
         if (project.name == "boot") {
             systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir

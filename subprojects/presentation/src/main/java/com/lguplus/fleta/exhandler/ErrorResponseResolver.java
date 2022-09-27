@@ -2,6 +2,7 @@ package com.lguplus.fleta.exhandler;
 
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.exception.ParameterTypeMismatchException;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -40,6 +41,11 @@ public class ErrorResponseResolver {
      *
      */
     private static final String MESSAGE_PROPERTY_PREFIX = "error.message.";
+
+    /**
+     *
+     */
+    private static final String UNDEFINED_ERROR_FLAG = "9999";
 
     /**
      *
@@ -234,7 +240,8 @@ public class ErrorResponseResolver {
             final String message = th.getMessage();
             return ErrorResponseDto.builder()
                 .flag(errorFlag)
-                .message(StringUtils.isBlank(message) ? messages.get(errorFlag) : message)
+                .message((UNDEFINED_ERROR_FLAG.equals(errorFlag) && !(th instanceof UndefinedException)) ||
+                        StringUtils.isBlank(message) ? messages.get(errorFlag) : message)
                 .build();
         } while (aClass != null);
         return null;
