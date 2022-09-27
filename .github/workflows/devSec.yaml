@@ -66,12 +66,12 @@ jobs:
       - name: zip reports
         if: always()
         run: |
+          mkdir jacoco test
           for SUBPROJECT in `ls subprojects`; do
           
               JACOCO_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/jacoco
               TEST_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/tests
 
-              mkdir jacoco test
               if [ -d $JACOCO_REPORTS_DIR ]; then
                   mkdir jacoco/$SUBPROJECT
                   mv $JACOCO_REPORTS_DIR/test/html/ jacoco/$SUBPROJECT
