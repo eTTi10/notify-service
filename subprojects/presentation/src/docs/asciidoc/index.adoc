@@ -1,5 +1,6 @@
 ifndef::snippets[]
-:snippets:  ../../../build/generated-snippets
+//:snippets:  ../../../build/generated-snippets
+:snippets: /build/generated-snippets
 endif::[]
 
 //operation::postDeviceInfo[snippets='http-request,http-response']
