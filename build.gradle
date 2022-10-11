@@ -92,8 +92,6 @@ subprojects {
         implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        //openapi
-        implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
     }
 
     jacoco {
@@ -130,7 +128,7 @@ subprojects {
                         "com/lguplus/fleta/filter/*",
                         "com/lguplus/fleta/interceptor/*",
                         "com/lguplus/fleta/provider/external/*",
-//                        "com.lguplus.fleta.**Application**",
+                        "com.lguplus.fleta.**Application**",
                         "com.lguplus.fleta.**Config**"
                 ])
             }))
@@ -213,6 +211,7 @@ subprojects {
     }
 
     asciidoctor {
+        dependsOn test
         configurations 'asciidoctorExtensions'
         if (project.name == "boot") {
             sourceDir = swaggerOutputDir
