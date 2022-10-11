@@ -19,12 +19,10 @@ jobs:
       - name: Test and Generate Docs with Gradle
         run: ./gradlew asciidoctor
 
-
       - name: Copy document files
         run: |
-          mkdir -p docs report
+          mkdir -p docs
           cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
-          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
 
       - name: Pushes docs to docs repository
         uses: cpina/github-action-push-to-another-repository@main
