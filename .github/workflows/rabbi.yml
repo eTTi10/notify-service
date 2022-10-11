@@ -2,7 +2,7 @@ name: rabbi
 
 on:
   push:
-    branches: [ feature/deviceinfoDocs ]
+    branches: [ develop, feature/deviceinfoDocs ]
 
 jobs:
   test:
