@@ -115,7 +115,7 @@ subprojects {
             csv.enabled true
 
             // 리포트 저장 경로 설정
-            csv.destination file("$buildDir/jacoco.csv")
+            csv.destination file("$buildDir/JacocoReportDir/test/jacocoTestReport.csv")
 //            html.destination file("$buildDir/jacocoHtml")
 //            xml.destination file("$buildDir/jacoco.xml")
         }
