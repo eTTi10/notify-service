@@ -436,8 +436,36 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="article">
+<body class="book toc2 toc-left">
 <div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel2">
+<li><a href="#_postdeviceinfo">postDeviceInfo</a>
+<ul class="sectlevel3">
+<li><a href="#_http_request">Http Request</a></li>
+<li><a href="#_http_response">Http Response</a></li>
+<li><a href="#_failure_case">Failure Case</a>
+<ul class="sectlevel4">
+<li><a href="#_200_bad_request">200 Bad Request</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_putdeviceinfo">putDeviceInfo</a>
+<ul class="sectlevel3">
+<li><a href="#_http_request_2">Http Request</a></li>
+<li><a href="#_http_response_2">Http Response</a></li>
+</ul>
+</li>
+<li><a href="#_deletedeviceinfo">deleteDeviceInfo</a>
+<ul class="sectlevel3">
+<li><a href="#_http_request_3">Http Request</a></li>
+<li><a href="#_http_response_3">Http Response</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="content">
 <div class="sect2">
@@ -484,7 +512,7 @@ ex) A:전체받기/ S:구독만받기 / N:푸시 안받기, example=N</p></td>
 <h4 id="_http_request">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">POST /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 92
 Host: localhost:8080
@@ -500,7 +528,7 @@ Host: localhost:8080
 <h4 id="_http_response">Http Response</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 68
 
@@ -519,7 +547,7 @@ Content-Length: 68
 <h5 id="_200_bad_request">200 Bad Request</h5>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=a&amp;noti_type=N HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=a&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 92
 Host: localhost:8080
@@ -532,13 +560,13 @@ Host: localhost:8080
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 123
+Content-Length: 122
 
 {
-  "result" : {
-    "flag" : "5006",
+  "error" : {
+    "code" : "5006",
     "message" : "파라미터 agent_type는 값의 범위가 G|A 이어야 함"
   }
 }</code></pre>
@@ -553,7 +581,7 @@ Content-Length: 123
 <h4 id="_http_request_2">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N&amp;stb_mac=1111.2222.3333 HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">PUT /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N&amp;stb_mac=1111.2222.3333 HTTP/1.1
 Accept: application/json
 Content-Length: 91
 Host: localhost:8080
@@ -569,7 +597,7 @@ Host: localhost:8080
 <h4 id="_http_response_2">Http Response</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 68
 
@@ -589,7 +617,7 @@ Content-Length: 68
 <h4 id="_http_request_3">Http Request</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">DELETE /mobile/hdtv/v1/push/deviceinfo?sa_id=500058151453&amp;service_type=H&amp;agent_type=G&amp;noti_type=N HTTP/1.1
 Accept: application/json
 Content-Length: 91
 Host: localhost:8080
@@ -605,7 +633,7 @@ Host: localhost:8080
 <h4 id="_http_response_3">Http Response</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+<pre class="highlightjs highlight nowrap"><code data-lang="http" class="language-http hljs">HTTP/1.1 200 OK
 Content-Type: application/json
 Content-Length: 68
 
@@ -623,8 +651,11 @@ Content-Length: 68
 <div id="footer">
 <div id="footer-text">
 Version 1.1.0<br>
-Last updated 2022-09-02 08:04:24 +0900
+Last updated 2022-10-11 10:02:05 +0900
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
 </body>
 </html>
