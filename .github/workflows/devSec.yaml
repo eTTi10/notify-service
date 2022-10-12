@@ -61,7 +61,7 @@ jobs:
           done
 
       - name: Run test & JaCoCo
-        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification -Dspring.profiles.active=test
+        run: ./gradlew test -PexcludeTests='**/SwaggerTest' jacocoTestReport jacocoTestCoverageVerification -Dspring.profiles.active=test
     
       - name: zip reports
         if: always()
