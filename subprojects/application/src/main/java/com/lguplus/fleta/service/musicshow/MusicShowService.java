@@ -39,8 +39,7 @@ public class MusicShowService {
         PostPushResponseDto dto = PostPushResponseDto.builder().build();
         try {
             musicShowDomainService.releasePush(requestDto);
-            dto.getFlag();
-            dto.getMessage();
+            dto.setSuccessFlag();
         } catch (MusicShowException e) {
             dto.setFlag(e.getFlag());
             dto.setMessage(e.getMessage());

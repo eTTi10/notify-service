@@ -115,6 +115,9 @@ public class OuterControllerAdvice {
         final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
+        if (uri.equals("GET /videolte/musicshow/push") || uri.equals("DELETE /videolte/musicshow/push")/*&& response.getFlag().equals("5000")*/) {
+            return response;
+        }
         if (converter == null) {
             return response;
         }

@@ -39,7 +39,7 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
 
     @Override
     public void deletePush(PushTargetEntity entity) {
-        jpaRepository.delete(entity);
+        jpaRepository.deleteBypKeyAndSaIdAndStbMacAndAlbumIdAndServiceType(entity.getPKey(), entity.getSaId(), entity.getStbMac(), entity.getAlbumId(), entity.getServiceType());
     }
 
     @Override

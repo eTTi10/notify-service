@@ -1,5 +1,6 @@
 package com.lguplus.fleta.service.musicshow;
 
+import com.lguplus.fleta.client.VodlookupClient;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
@@ -30,9 +31,12 @@ class MusicShowDomainServiceTest {
     @Mock
     MusicShowRepository repository;
 
+    @Mock
+    VodlookupClient vodlookupClient;
+
     @BeforeEach
     void setup() {
-        domainService = new MusicShowDomainService(repository);
+        domainService = new MusicShowDomainService(repository, vodlookupClient);
     }
 
     @Test
