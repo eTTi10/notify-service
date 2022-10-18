@@ -1,2 +1,11 @@
 dependencies {
 }
+
+test {
+    if (project.hasProperty('excludeTests')) {
+        logger.quiet 'exclude test : {}', project.findProperty('excludeTests')
+        exclude {
+            project.findProperty('excludeTests')
+        }
+    }
+}
