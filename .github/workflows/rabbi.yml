@@ -2,7 +2,7 @@ name: rabbi
 
 on:
   push:
-    branches: [ feature/deviceinfo ]
+    branches: [ develop, feature/deviceinfoDocs ]
 
 jobs:
   test:
@@ -17,21 +17,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test and Generate Docs with Gradle
-        run: ./gradlew asciidoctor openapi3
-
-
-      - name: Copy document files
-        run: |
-          mkdir -p docs report
-          cp build/api-spec/openapi3.json docs/
-          cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
-          cp subprojects/presentation/build/docs/asciidoc/index.html report/index.html
-
+        run: ./gradlew asciidoctor
 
       - name: Copy document files
         run: |
           mkdir -p docs
-          cp build/api-spec/openapi3.json docs/
           cp subprojects/presentation/build/docs/asciidoc/index.html docs/index.html
 
       - name: Pushes docs to docs repository
