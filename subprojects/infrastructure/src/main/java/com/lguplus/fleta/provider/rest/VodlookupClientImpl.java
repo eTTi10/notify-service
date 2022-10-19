@@ -16,4 +16,6 @@ public class VodlookupClientImpl extends CommonDomainFeignClient implements Vodl
     public List<AlbumProgrammingDto> getAlbumProgramming(String categoryType1, List<String> albumId) {
         return getResult(vodlookupFeignClient.getAlbumProgramming(categoryType1, albumId));
     }
+
+
 }

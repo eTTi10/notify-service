@@ -1,6 +1,7 @@
 package com.lguplus.fleta.service.musicshow;
 
 import com.lguplus.fleta.client.VodlookupClient;
+import com.lguplus.fleta.data.constant.MusicShowConstants;
 import com.lguplus.fleta.data.dto.AlbumProgrammingDto;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
@@ -35,11 +36,9 @@ public class MusicShowDomainService {
 
         PushTargetEntity resultEntity;
 
-        List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming("NSC", List.of(requestDto.getAlbumId()));
+        List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming(MusicShowConstants.CATEGORY_TYPE_MOBILE, List.of(requestDto.getAlbumId()));
 
-        Integer count = validAlbumList.size();
-
-        if (count == null || count.intValue() < 1) {
+        if (validAlbumList == null || validAlbumList.size() < 1) {
             throw new NoResultException();
         }
 
@@ -57,8 +56,8 @@ public class MusicShowDomainService {
                 .categoryId(requestDto.getCategoryId())
                 .serviceType(requestDto.getServiceType())
                 .msg(requestDto.getMsg())
-                .pushYn("Y") //기존 oracle에서 default값
-                .resultCode("00") //기존 oracle에서 default값
+                .pushYn(MusicShowConstants.PUSH_YN_Y) //기존 oracle에서 default값
+                .resultCode(MusicShowConstants.RESULT_CODE_DEFAULT) //기존 oracle에서 default값
                 .regDt(Timestamp.valueOf(LocalDateTime.now())) //기존 oracle에서 default값
                 .sendDt(convertFormat(requestDto.getSendDt()))
                 .build();
@@ -87,8 +86,8 @@ public class MusicShowDomainService {
                         .categoryId(requestDto.getCategoryId())
                         .serviceType(requestDto.getServiceType())
                         .msg(requestDto.getMsg())
-                        .pushYn("Y") //기존 oracle에서 default값
-                        .resultCode("00") //기존 oracle에서 default값
+                        .pushYn(MusicShowConstants.PUSH_YN_Y) //기존 oracle에서 default값
+                        .resultCode(MusicShowConstants.RESULT_CODE_DEFAULT) //기존 oracle에서 default값
                         .regDt(Timestamp.valueOf(LocalDateTime.now())) //기존 oracle에서 default값
                         .sendDt(convertFormat(requestDto.getSendDt()))
                         .build();
@@ -104,7 +103,7 @@ public class MusicShowDomainService {
                         .categoryId(getKeyDto.getCategoryId())
                         .serviceType(getKeyDto.getServiceType())
                         .msg(getKeyDto.getMsg())
-                        .pushYn("Y") //const 변경
+                        .pushYn(MusicShowConstants.PUSH_YN_Y) //const 변경
                         .resultCode(getKeyDto.getResultCode())
                         .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
                         .sendDt(requestDto.getSendDt() != null ? convertFormat(requestDto.getSendDt()) : null)
@@ -121,11 +120,9 @@ public class MusicShowDomainService {
 
         PushTargetEntity resultEntity;
 
-        List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming("NSC", List.of(requestDto.getAlbumId()));
+        List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming(MusicShowConstants.CATEGORY_TYPE_MOBILE, List.of(requestDto.getAlbumId()));
 
-        Integer count = validAlbumList.size();
-
-        if (count == null || count.intValue() < 1) {
+        if (validAlbumList == null || validAlbumList.size() < 1) {
             throw new NoResultException();
         }
 
@@ -145,10 +142,10 @@ public class MusicShowDomainService {
                     .categoryId(getKeyDto.getCategoryId())
                     .serviceType(getKeyDto.getServiceType())
                     .msg(getKeyDto.getMsg())
-                    .pushYn("N")
+                    .pushYn(MusicShowConstants.PUSH_YN_N)
                     .resultCode(getKeyDto.getResultCode())
                     .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
-                    .sendDt(convertFormat(getKeyDto.getStartDt()))
+                    .sendDt(getKeyDto.getStartDt() != null ? convertFormat(getKeyDto.getStartDt()) : null)
                     .modDt(Timestamp.valueOf(LocalDateTime.now()))
                     .build();
 
