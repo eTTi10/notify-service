@@ -7,18 +7,16 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestMultiSendDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
-import com.lguplus.fleta.exception.push.*;
+import com.lguplus.fleta.exception.push.AcceptedException;
+import com.lguplus.fleta.exception.push.BadRequestException;
+import com.lguplus.fleta.exception.push.ForbiddenException;
+import com.lguplus.fleta.exception.push.NotFoundException;
+import com.lguplus.fleta.exception.push.ServiceUnavailableException;
+import com.lguplus.fleta.exception.push.SocketException;
+import com.lguplus.fleta.exception.push.UnAuthorizedException;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpClient;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.Bootstrap;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.util.ReflectionUtils;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -30,10 +28,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
-
 import static java.util.stream.Collectors.toList;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith({MockitoExtension.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -258,7 +266,7 @@ class PushMultiSocketClientImplTest {
     @Test
     void testServer07_checkGateWayServer() throws Exception {
 
-        ReflectionTestUtils.setField(nettyTcpClient, "port", 10000+SERVER_PORT); //unknown port
+        ReflectionTestUtils.setField(nettyTcpClient, "port", 10000 + SERVER_PORT); //unknown port
         assertThrows(SocketException.class, () -> {
             pushMultiSocketClient.checkClientInvalid();
         });
@@ -270,7 +278,7 @@ class PushMultiSocketClientImplTest {
 
         //normal
         ReflectionTestUtils.setField(nettyTcpClient, "port", SERVER_PORT);
-        Bootstrap bootstrap = (Bootstrap)ReflectionTestUtils.getField(nettyTcpClient, "bootstrap");
+        Bootstrap bootstrap = (Bootstrap) ReflectionTestUtils.getField(nettyTcpClient, "bootstrap");
         bootstrap.remoteAddress(SERVER_IP, SERVER_PORT);
         nettyTcpClient.disconnect();
         String channelId = nettyTcpClient.connect(pushMultiSocketClient); //normal connect
@@ -291,9 +299,10 @@ class PushMultiSocketClientImplTest {
         assertTrue(time2.get() > lastTime);
 
         final class TestThread extends Thread {
+
             @Override
             public void run() {
-                while (true) {
+                while (!Thread.currentThread().isInterrupted()) {
                     //setTime = ;
                     ReflectionTestUtils.setField(pushMultiSocketClient, "lastSendMills", new AtomicLong(System.currentTimeMillis() - 500)); //test channel Id
                     pushMultiSocketClient.waitTPS();

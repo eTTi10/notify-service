@@ -11,13 +11,6 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
  */
 public class MmsRuntimeException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
-
     /**
      *
      */
@@ -26,8 +19,8 @@ public class MmsRuntimeException extends NotifyRuntimeException {
         super();
     }
 
+
     /**
-     *
      * @param message
      */
     public MmsRuntimeException(final String message) {
@@ -36,7 +29,6 @@ public class MmsRuntimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -46,11 +38,15 @@ public class MmsRuntimeException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public MmsRuntimeException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 }

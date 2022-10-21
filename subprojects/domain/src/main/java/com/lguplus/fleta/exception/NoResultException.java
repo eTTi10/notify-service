@@ -17,7 +17,6 @@ public class NoResultException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NoResultException(final String message) {
@@ -26,7 +25,6 @@ public class NoResultException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NoResultException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoResultException(final Throwable cause) {

@@ -22,15 +22,13 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequiredArgsConstructor
 public class UxSimpleJoinController {
 
-    private final UxSimpleJoinService uxSimpleJoinService;
-
-    private final UxSimpleJoinSmsMapper uxSimpleJoinSmsMapper;
-
     private static final String CTN_EMPTY_CODE = "5000";
     private static final String CTN_EMPTY_MSG = "필수 요청정보 누락 오류";
     private static final String CTN_WRONG_CODE = "5001";
     private static final String CTN_WRONG_MSG = "잘못된 요청정보 타입 전달";
     private static final String SEPARATOR = "!^";
+    private final UxSimpleJoinService uxSimpleJoinService;
+    private final UxSimpleJoinSmsMapper uxSimpleJoinSmsMapper;
 
     /**
      * tvG 유플릭스 간편 가입 안내 SMS 요청
@@ -38,21 +36,21 @@ public class UxSimpleJoinController {
      * @param uxSimpleJoinSmsRequestVo tvG 유플릭스 간편 가입 안내 SMS 요청을 위한 VO
      * @return tvG 유플릭스 간편 가입 안내 SMS 요청 결과 응답
      */
-    @ApiOperation(value="tvG 유플릭스 간편 가입 안내 SMS 요청", notes="tvG 유플릭스 간편 가입 안내 SMS 요청한다.")
-    @ApiImplicitParams(value={
-            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="sa_id",        value="순번: 1<br>자리수: 12<br>설명:가입번호", example = "500058151453"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="stb_mac",      value="순번: 2<br>자리수: 20<br>설명: 맥주소", example="001c.627e.039c"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=true,  name="ctn",          value="순번: 3<br>자리수: 11<br>전화번호" , example="01055805424"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="app_name",     value="순번: 4<br>자리수: <br>설명: 통합 통계용 서비스명", example=""),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="ui_version",   value="순번: 5<br>자리수: <br>설명: 통합 통계용 UI 버전", example=""),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="pre_page",     value="순번: 6<br>자리수: <br>설명: 통합 통계용 이전 페이지<br>메뉴 ID", example=""),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="cur_page",     value="순번: 7<br>자리수: <br>설명: 통합 통계용 현재 페이지<br>메뉴 ID", example=""),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="dev_info",     value="순번: 8<br>자리수: <br>설명: 통합 통계용 접속 단말 타입<br>ex) PHONE, PAD, PC, TV, STB", example="STB"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="os_info",      value="순번: 9<br>자리수: <br>설명: 통합 통계용 OS 정보<br>ex) android_1.5, android_2.2, android_2.3.22, ios_5, ios_6, window_xp, window_7", example="android_8.0.0"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="nw_info",      value="순번: 10<br>자리수: <br>설명: 통합 통계용 접속 네트워크 정보<br>ex) 3G, 4G, 5G, WIFI, WIRE, ETC", example="WIRE"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="dev_model",    value="순번: 11<br>자리수: <br>설명: 통합 통계용 단말 모델명<br>ex) LE-E250", example="S60UPI"),
-            @ApiImplicitParam(paramType="query", dataType="string", required=false, name="carrier_type", value="순번: 12<br>자리수: <br>설명: 통합 통계용 통신사 구분<br>ex) L:LGU+, K:KT, S:SKT, E:etc", example="L")})
-    @GetMapping(value = "/smartux/gw/UXSimpleJoin")
+    @ApiOperation(value = "tvG 유플릭스 간편 가입 안내 SMS 요청", notes = "tvG 유플릭스 간편 가입 안내 SMS 요청한다.")
+    @ApiImplicitParams(value = {
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "sa_id", value = "순번: 1<br/>자리수: 12<br/>설명:가입번호", example = "500058151453"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "stb_mac", value = "순번: 2<br/>자리수: 20<br/>설명: 맥주소", example = "001c.627e.039c"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "ctn", value = "순번: 3<br/>자리수: 11<br/>전화번호", example = "01055805424"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "app_name", value = "순번: 4<br/>자리수: <br/>설명: 통합 통계용 서비스명", example = ""),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "ui_version", value = "순번: 5<br/>자리수: <br/>설명: 통합 통계용 UI 버전", example = ""),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "pre_page", value = "순번: 6<br/>자리수: <br/>설명: 통합 통계용 이전 페이지<br/>메뉴 ID", example = ""),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "cur_page", value = "순번: 7<br/>자리수: <br/>설명: 통합 통계용 현재 페이지<br/>메뉴 ID", example = ""),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "dev_info", value = "순번: 8<br/>자리수: <br/>설명: 통합 통계용 접속 단말 타입<br/>ex) PHONE, PAD, PC, TV, STB", example = "STB"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "os_info", value = "순번: 9<br/>자리수: <br/>설명: 통합 통계용 OS 정보<br/>ex) android_1.5, android_2.2, android_2.3.22, ios_5, ios_6, window_xp, window_7", example = "android_8.0.0"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "nw_info", value = "순번: 10<br/>자리수: <br/>설명: 통합 통계용 접속 네트워크 정보<br/>ex) 3G, 4G, 5G, WIFI, WIRE, ETC", example = "WIRE"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "dev_model", value = "순번: 11<br/>자리수: <br/>설명: 통합 통계용 단말 모델명<br/>ex) LE-E250", example = "S60UPI"),
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "carrier_type", value = "순번: 12<br/>자리수: <br/>설명: 통합 통계용 통신사 구분<br/>ex) L:LGU+, K:KT, S:SKT, E:etc", example = "L")})
+    @GetMapping(value = "/smartux/gw/UXSimpleJoin.php")
     public String requestUxSimpleJoinSms(@ApiIgnore UxSimpleJoinSmsRequestVo uxSimpleJoinSmsRequestVo) {
         log.debug("==================requestUxSimpleJoinSms BEGIN======================");
 
@@ -63,7 +61,7 @@ public class UxSimpleJoinController {
         if (ctn == null) {
             return SendSmsResponseDto.builder().flag(CTN_EMPTY_CODE).message(CTN_EMPTY_MSG).build().toPlainText();
 
-        // 잘못된 전화번호
+            // 잘못된 전화번호
         } else if (!ctn.matches("^\\d+$")) {
             return SendSmsResponseDto.builder().flag(CTN_WRONG_CODE).message(CTN_WRONG_MSG).build().toPlainText();
         }

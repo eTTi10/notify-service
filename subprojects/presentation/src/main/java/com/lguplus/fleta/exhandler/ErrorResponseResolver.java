@@ -2,7 +2,17 @@ package com.lguplus.fleta.exhandler;
 
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.exception.ParameterTypeMismatchException;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.util.YamlPropertySourceFactory;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.validation.Constraint;
+import javax.validation.ConstraintViolation;
+import javax.validation.Payload;
+import javax.validation.metadata.ConstraintDescriptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.PropertySource;
@@ -11,16 +21,6 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
-
-import javax.validation.Constraint;
-import javax.validation.ConstraintViolation;
-import javax.validation.Payload;
-import javax.validation.metadata.ConstraintDescriptor;
-import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Minwoo Lee
@@ -41,6 +41,11 @@ public class ErrorResponseResolver {
      *
      */
     private static final String MESSAGE_PROPERTY_PREFIX = "error.message.";
+
+    /**
+     *
+     */
+    private static final String UNDEFINED_ERROR_FLAG = "9999";
 
     /**
      *
@@ -194,9 +199,9 @@ public class ErrorResponseResolver {
             }
 
             return ErrorResponseDto.builder()
-                    .flag(flag)
-                    .message(getConstraintMessage(flag, error.getDefaultMessage()))
-                    .build();
+                .flag(flag)
+                .message(getConstraintMessage(flag, error.getDefaultMessage()))
+                .build();
         } catch (final IllegalArgumentException e) {
             return resolveByObjectErrorCode(error.getCode());
         }
@@ -234,9 +239,10 @@ public class ErrorResponseResolver {
 
             final String message = th.getMessage();
             return ErrorResponseDto.builder()
-                    .flag(errorFlag)
-                    .message(StringUtils.isBlank(message) ? messages.get(errorFlag) : message)
-                    .build();
+                .flag(errorFlag)
+                .message((UNDEFINED_ERROR_FLAG.equals(errorFlag) && !(th instanceof UndefinedException)) ||
+                        StringUtils.isBlank(message) ? messages.get(errorFlag) : message)
+                .build();
         } while (aClass != null);
         return null;
     }

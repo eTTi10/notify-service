@@ -19,7 +19,6 @@ public class ParameterLengthTooShortException extends RuntimeException implement
     }
 
     /**
-     *
      * @param message
      */
     public ParameterLengthTooShortException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterLengthTooShortException extends RuntimeException implement
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterLengthTooShortException extends RuntimeException implement
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterLengthTooShortException(final Throwable cause) {

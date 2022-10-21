@@ -17,7 +17,6 @@ public class SubscriberAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public SubscriberAlreadyExistsException(final String message) {
@@ -26,7 +25,6 @@ public class SubscriberAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class SubscriberAlreadyExistsException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SubscriberAlreadyExistsException(final Throwable cause) {

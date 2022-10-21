@@ -9,6 +9,9 @@ import com.lguplus.fleta.data.dto.response.CommonErrorResponseDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.RootErrorResponseDto;
 import com.lguplus.fleta.data.dto.response.RootResponseDto;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,10 +25,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * @author Minwoo Lee
@@ -41,44 +40,40 @@ public class MessageConverterConfig implements WebMvcConfigurer {
     MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
 
         final ObjectMapper objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return new MappingJackson2HttpMessageConverter(objectMapper) {
 
             @Override
             protected void writeInternal(final Object object, final Type type,
-                                         final HttpOutputMessage outputMessage)
-                    throws IOException, HttpMessageNotWritableException {
+                final HttpOutputMessage outputMessage)
+                throws IOException, HttpMessageNotWritableException {
 
                 if (object instanceof CommonErrorResponseDto) {
                     final Object wrappedObject = RootErrorResponseDto.builder()
-                            .error((CommonErrorResponseDto)object)
-                            .build();
+                        .error((CommonErrorResponseDto) object)
+                        .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                }
-                else if (object instanceof CommonResponseDto) {
+                } else if (object instanceof CommonResponseDto) {
                     final Object wrappedObject = RootResponseDto.builder()
-                            .result((CommonResponseDto)object)
-                            .build();
+                        .result((CommonResponseDto) object)
+                        .build();
                     super.writeInternal(wrappedObject, wrappedObject.getClass(), outputMessage);
-                }
-                else {
+                } else {
                     super.writeInternal(object, type, outputMessage);
                 }
             }
 
             @Override
-            public Object read(final Type type, final  Class<?> contextClass, final HttpInputMessage inputMessage)
-                    throws IOException, HttpMessageNotReadableException {
+            public Object read(final Type type, final Class<?> contextClass, final HttpInputMessage inputMessage)
+                throws IOException, HttpMessageNotReadableException {
 
                 if (TypeUtils.isAssignable(type, CommonErrorResponseDto.class)) {
                     final Type wrappedType = TypeUtils.parameterize(RootErrorResponseDto.class, type);
-                    return ((RootErrorResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getError();
-                }
-                else if (TypeUtils.isAssignable(type, CommonResponseDto.class)) {
+                    return ((RootErrorResponseDto<?>) super.read(wrappedType, contextClass, inputMessage)).getError();
+                } else if (TypeUtils.isAssignable(type, CommonResponseDto.class)) {
                     final Type wrappedType = TypeUtils.parameterize(RootResponseDto.class, type);
-                    return ((RootResponseDto<?>)super.read(wrappedType, contextClass, inputMessage)).getResult();
-                }
-                else {
+                    return ((RootResponseDto<?>) super.read(wrappedType, contextClass, inputMessage)).getResult();
+                } else {
                     return super.read(type, contextClass, inputMessage);
                 }
             }

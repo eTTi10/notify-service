@@ -19,7 +19,6 @@ public class ParameterTypeMismatchException extends RuntimeException implements 
     }
 
     /**
-     *
      * @param message
      */
     public ParameterTypeMismatchException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterTypeMismatchException extends RuntimeException implements 
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterTypeMismatchException extends RuntimeException implements 
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterTypeMismatchException(final Throwable cause) {

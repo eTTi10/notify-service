@@ -5,11 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
-import lombok.experimental.SuperBuilder;
-
-import java.util.ArrayList;
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -18,10 +20,12 @@ import java.util.List;
 @ToString
 @ApiModel(value = "Code를 이용한 푸시 요청 응답결과 DTO", description = "Code를 이용한 푸시 요청 응답결과 DTO")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({ "flag", "message" , "service"})
-public class SendPushResponseDto implements CommonResponseDto{
+@JsonPropertyOrder({"flag", "message", "service"})
+public class SendPushResponseDto implements CommonResponseDto {
 
-    /** 응답코드 */
+    /**
+     * 응답코드
+     */
     @ApiModelProperty(position = 1, value = "응답코드")
     @JsonProperty(value = "flag")
     private String flag;

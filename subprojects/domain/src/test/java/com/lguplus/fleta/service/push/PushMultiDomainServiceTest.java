@@ -8,12 +8,22 @@ import com.lguplus.fleta.data.dto.response.inner.PushClientResponseMultiDto;
 import com.lguplus.fleta.data.dto.response.inner.PushMultiResponseDto;
 import com.lguplus.fleta.data.mapper.PushMapper;
 import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
@@ -21,34 +31,19 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 class PushMultiDomainServiceTest {
 
     @InjectMocks
     PushMultiDomainService pushMultiDomainService;
-
-    private PushConfig pushConfig;
-
     @Mock
     PushMultiClient pushMultiClient;
-
-    @Mock
-    private PushMapper pushMapper;
-
     List<String> items;
     List<PushRequestItemDto> addItems = new ArrayList<>();
     PushRequestMultiDto pushRequestMultiDto;
+    private PushConfig pushConfig;
+    @Mock
+    private PushMapper pushMapper;
 
     @BeforeEach
     void setUp() {
@@ -67,13 +62,13 @@ class PushMultiDomainServiceTest {
         addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushRequestMultiDto = PushRequestMultiDto.builder()
-                .serviceId("30011")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .users(items)
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("30011")
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .users(items)
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
 
         ReflectionTestUtils.setField(pushMultiDomainService, "oldLgPushAppId", "smartux0001");
         ReflectionTestUtils.setField(pushMultiDomainService, "oldLgPushNotiType", "POS");
@@ -85,20 +80,20 @@ class PushMultiDomainServiceTest {
         assertThat(PushMultiClient.MsgType.values()).isNotEmpty();
 
         PushRequestMultiDto testDto = PushRequestMultiDto.builder()
-                .serviceId("XXXXX") //unknown service id
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .users(items)
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("XXXXX") //unknown service id
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .users(items)
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
 
         assertThrows(ServiceIdNotFoundException.class, () -> pushMultiDomainService.requestMultiPush(testDto));
     }
 
     @Test
     void requestMultiPush_normal() {
-        given( pushMultiClient.requestPushMulti(any()) ).willReturn(PushMultiResponseDto.builder().statusCode("200").build());
+        given(pushMultiClient.requestPushMulti(any())).willReturn(PushMultiResponseDto.builder().statusCode("200").build());
 
         PushClientResponseMultiDto mockDto = PushClientResponseMultiDto.builder().code("200").build();
         given(pushMapper.toClientResponseDto(any())).willReturn(mockDto);
@@ -111,14 +106,14 @@ class PushMultiDomainServiceTest {
     @Test
     void requestMultiPush_lgpush() {
         PushRequestMultiDto testDto = PushRequestMultiDto.builder()
-                .serviceId("00007") //Lg Push
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .users(items)
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
-        given( pushMultiClient.requestPushMulti(any()) ).willReturn(PushMultiResponseDto.builder().statusCode("200").build());
+            .serviceId("00007") //Lg Push
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .users(items)
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
+        given(pushMultiClient.requestPushMulti(any())).willReturn(PushMultiResponseDto.builder().statusCode("200").build());
 
         PushClientResponseMultiDto mockDto = PushClientResponseMultiDto.builder().code("200").build();
         given(pushMapper.toClientResponseDto(any())).willReturn(mockDto);

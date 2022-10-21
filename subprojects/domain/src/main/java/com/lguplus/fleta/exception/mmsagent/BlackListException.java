@@ -5,18 +5,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 public class BlackListException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public BlackListException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public BlackListException(final String message) {
@@ -25,7 +18,6 @@ public class BlackListException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -35,12 +27,16 @@ public class BlackListException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public BlackListException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 }

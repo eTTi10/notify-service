@@ -1,16 +1,13 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.6'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'com.adarshr.test-logger' version '3.0.0'
     id "org.sonarqube" version "3.3"
-    id "org.asciidoctor.jvm.convert" version "3.3.2"
-    id 'com.epages.restdocs-api-spec' version '0.16.0'
-
-}
-
-ext {
-    snippetsDir = file('build/generated-snippets')
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
 bootJar { enabled = false }
@@ -18,15 +15,16 @@ bootJar { enabled = false }
 
 allprojects {
     repositories {
+        jcenter()
         mavenCentral()
     }
 }
 
-sonarqube {
+sonarqube{
     properties {
         property 'sonar.host.url', 'http://a3b3246d677004387a382e258f515715-86a3a782fd055d12.elb.ap-northeast-2.amazonaws.com'
-        property 'sonar.login', '411e89fdfa7f856077b41c03ff6bfcefcff1239a'
-        property 'sonar.projectKey', 'notify'
+        property 'sonar.login','411e89fdfa7f856077b41c03ff6bfcefcff1239a'
+        property 'sonar.projectKey','notify'
         property 'sonar.sources', 'src'
         property 'sonar.language', 'java'
         property 'sonar.coverage.exclusions', 'subprojects/boot/**, **/data/**, **/config/**, **/filter/**, **/interceptor/**, **/advice/**, **/exception/**'
@@ -49,9 +47,15 @@ subprojects {
     sourceCompatibility = '11'
 
     configurations {
+        asciidoctorExtensions
         compileOnly {
             extendsFrom annotationProcessor
         }
+    }
+
+    ext {
+        swaggerOutputDir = file("${buildDir}/swagger")
+        htmlOutputDir = file("${buildDir}/docs/asciidoc")
     }
 
     dependencies {
@@ -60,6 +64,8 @@ subprojects {
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+        implementation 'io.github.swagger2markup:swagger2markup:1.3.3'
+        asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         implementation "io.springfox:springfox-swagger2:2.9.2"
         implementation "io.springfox:springfox-swagger-ui:2.9.2"
         implementation 'org.apache.commons:commons-lang3:3.11'
@@ -85,17 +91,16 @@ subprojects {
         implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        //open api
-        implementation 'org.springdoc:springdoc-openapi-ui:1.6.3'
-
     }
 
     jacoco {
         toolVersion = '0.8.7'
 
         // 테스트 결과 리포트 저장 경로 설정
-        // default : "${project.reporting.baseDir}/jacoco"
-        //reportsDir = file("$buildDir/customJacocoReportDir")
+        reportsDir = file("$buildDir/JacocoReportDir")
+//        reportsDirectory = layout.buildDirectory.dir('../documents/coverage/jacoco')
+//        default  "${project.reporting.baseDir}/jacoco"
+//        reportsDir = file("$buildDir/customJacocoReportDir")
     }
 
     // JaCoCo Task
@@ -104,11 +109,12 @@ subprojects {
             // 리포트 활성화
             html.enabled true
             xml.enabled true
-            csv.enabled false
+            csv.enabled true
 
             // 리포트 저장 경로 설정
-            //html.destination file("$buildDir/jacocoHtml")
-            //xml.destination file("$buildDir/jacoco.xml")
+//            csv.destination file("$buildDir/jacoco.csv")
+//            html.destination file("$buildDir/jacocoHtml")
+//            xml.destination file("$buildDir/jacoco.xml")
         }
 
         afterEvaluate {
@@ -120,7 +126,9 @@ subprojects {
                         "com/lguplus/fleta/exception/*",
                         "com/lguplus/fleta/filter/*",
                         "com/lguplus/fleta/interceptor/*",
-                        "com/lguplus/fleta/provider/external/*"
+                        "com/lguplus/fleta/provider/external/*",
+                        "com.lguplus.fleta.**Application**",
+                        "com.lguplus.fleta.**Config**"
                 ])
             }))
         }
@@ -141,14 +149,14 @@ subprojects {
                 limit {
                     counter = 'METHOD' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
                     value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
-//                    minimum = 1.00
+                    minimum = 1.00
                 }
 
                 // Branch 커버리지
                 limit {
                     counter = 'BRANCH' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
                     value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
-//                    minimum = 0.60
+                    minimum = 0.60
                 }
 
                 // 커버리지 체크 제외 클래스
@@ -162,6 +170,8 @@ subprojects {
                         'com.lguplus.fleta.exhandler.*',
                         'com.lguplus.fleta.validation.*',
                         "com.lguplus.fleta.provider.external.*",
+                        "com.lguplus.fleta.**Application**",
+                        "com.lguplus.fleta.**Config**"
                 ]
             }
         }
@@ -192,56 +202,56 @@ subprojects {
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
         }
-        outputs.dir snippetsDir
+
+
+        if (project.name == "boot") {
+            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
+            finalizedBy 'asciidoctor'
+        }
     }
-    ext {
-        snippetsDir = file('build/generated-snippets')
-    }
+
     asciidoctor {
-        inputs.dir snippetsDir
-        dependsOn test
-        sources {
-            include("**/*.adoc", "/**/*.adoc")
+        configurations 'asciidoctorExtensions'
+        sourceDir = swaggerOutputDir
+
+        sources{
+            include('**/*.adoc')
         }
 
+        //haegol index.adoc 기준으로 맞췄습니다
+        options doctype: 'book'
+        attributes 'source-highlighter': 'highlightjs',
+                toc                 : 'left',
+                toclevels           : 4
         baseDirFollowsSourceFile()
     }
 
-    asciidoctor.doFirst {
-        delete file('src/main/resources/static/docs')
-    }
+    task convertDocs {
+        doFirst {
+            String outputDir = htmlOutputDir
+            boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
 
-    task copyDocument(type: Copy) {
-        dependsOn asciidoctor
-        from file("build/docs/asciidoc")
-        into file("src/main/resources/static/docs")
-    }
+            if (!factor) {
+                println "Found swagger.html: start to converting works."
+                BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(outputDir + "/swagger.html"))
+                BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir + "/swaggerFinal.html"))
 
-    build {
-        dependsOn copyDocument
-    }
+                bufferedReader.lines().forEach(line -> {
+                    line = line.replaceAll("&lt;", "<").replaceAll("&gt;", ">")
 
-    openapi {
-        host = 'http://' + this.rootProject.name + '.up.internal'
-        basePath = '/'
-        title = this.rootProject.name
-        description = this.description
-        version = this.version
-        format = 'json'
-    }
-
-    openapi3 {
-        server = 'http://' + this.rootProject.name + '.up.internal'
-        title = this.rootProject.name
-        description = this.description
-        version = this.version
-        format = 'json'
-    }
-
-    postman {
-        title = this.rootProject.name
-        version = this.version
-        baseUrl = 'http://' + rootProject.name + '.up.internal'
+                    try {
+                        writer.write(line)
+                        writer.newLine()
+                    } catch (IOException e) {
+                        throw new RuntimeException(e)
+                    }
+                })
+                writer.flush()
+                writer.close()
+            } else {
+                println "can't convert swagger.html: the file is not exist."
+            }
+        }
     }
 
     testlogger {
@@ -272,20 +282,10 @@ project(':boot') {
         implementation project(':infrastructure')
     }
 
-
-    bootJar {
-        dependsOn asciidoctor
-        copy {
-            from "${asciidoctor.outputDir}"
-            into 'BOOT-INF/classes/static/docs'
-        }
-    }
-
-    test {
-        exclude '**/*'
-        useJUnitPlatform()
-        outputs.dir snippetsDir
-    }
+//    test {
+//        exclude '**/*'
+//        useJUnitPlatform()
+//    }
 }
 
 project(':presentation') {
@@ -299,8 +299,13 @@ project(':presentation') {
 project(':application') {
     dependencies {
         implementation project(':domain')
+        implementation project(':infrastructure')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 project(':domain') {
@@ -308,6 +313,10 @@ project(':domain') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 project(':infrastructure') {
@@ -316,6 +325,10 @@ project(':infrastructure') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
+    test {
+        exclude '**/*'
+        useJUnitPlatform()
+    }
 }
 
 task printVersion {

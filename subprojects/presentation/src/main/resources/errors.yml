@@ -15,6 +15,7 @@ error:
         fleta:
           validation:
             NetworkTypePattern: "5008"
+            Perl5Pattern: "5008"
           exception:
             NoResultException: "0001"
             ExceedMaxRequestException: "1201"
@@ -35,6 +36,7 @@ error:
             ParameterLengthTooShortException: "5017"
             ParameterPhoneNumberErrorException: "1502"
             ParameterDatabaseException: "8999"
+            EtcException: "9999"
             ExtRuntimeException: "9999"
             openapi:
               AccessKeyNotPermittedException: "1300"

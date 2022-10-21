@@ -7,61 +7,78 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushClientResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.exception.NotifyRuntimeException;
-import com.lguplus.fleta.exception.push.*;
-import lombok.*;
+import com.lguplus.fleta.exception.push.AcceptedException;
+import com.lguplus.fleta.exception.push.BadRequestException;
+import com.lguplus.fleta.exception.push.ExceptionOccursException;
+import com.lguplus.fleta.exception.push.ForbiddenException;
+import com.lguplus.fleta.exception.push.InternalErrorException;
+import com.lguplus.fleta.exception.push.MaxRequestOverException;
+import com.lguplus.fleta.exception.push.NotExistRegistIdException;
+import com.lguplus.fleta.exception.push.NotFoundException;
+import com.lguplus.fleta.exception.push.PreConditionFailedException;
+import com.lguplus.fleta.exception.push.PushEtcException;
+import com.lguplus.fleta.exception.push.ServiceIdNotFoundException;
+import com.lguplus.fleta.exception.push.ServiceUnavailableException;
+import com.lguplus.fleta.exception.push.SocketException;
+import com.lguplus.fleta.exception.push.SocketTimeException;
+import com.lguplus.fleta.exception.push.UnAuthorizedException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.IntStream;
+import javax.annotation.PostConstruct;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.IntStream;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class PushSingleDomainService {
 
-    private final PushConfig pushConfig;
-    private final PushSingleClient pushSingleClient;
-
-    @Value("${push.gateway.appId}")
-    private String oldLgPushAppId;
-
-    @Value("${push.gateway.notiType}")
-    private String oldLgPushNotiType;
-
-    @Value("${push.gateway.serviceId}")
-    private String lgPushServceId;
-
-    @Value("${push.gateway.delay.request}")
-    private long pushDelayReqCnt;
-
-    @Value("${push.gateway.retry.count}")
-    private int pushCallRetryCnt;
-
-    @Value("${push.gateway.retry.exclude}")
-    private Set<String> retryExcludeCodeList;
-
-    private final AtomicInteger tranactionMsgId1 = new AtomicInteger(0);
-    private final AtomicInteger tranactionMsgId2 = new AtomicInteger(0);
-
-    private Map<String,Object> requestLock;
-    private Map<String,Object> progressLock;
-    private final List<ProcessCounter> pushProgressCnt = Collections.synchronizedList(new ArrayList<>());
-
-    private static final String DATE_FOMAT = "yyyyMMdd";
+    private static final String DATE_FORMAT = "yyyyMMdd";
     private static final String PUSH_COMMAND = "PUSH_NOTI";
     private static final String LG_PUSH_OLD = "LGUPUSH_OLD";
     private static final int TRANSACTION_MAX_SEQ_NO = 10000;
+    private final PushConfig pushConfig;
+    private final PushSingleClient pushSingleClient;
+    private final AtomicInteger tranactionMsgId1 = new AtomicInteger(0);
+    private final AtomicInteger tranactionMsgId2 = new AtomicInteger(0);
+    private final List<ProcessCounter> pushProgressCnt = Collections.synchronizedList(new ArrayList<>());
+    @Value("${push.gateway.appId}")
+    private String oldLgPushAppId;
+    @Value("${push.gateway.notiType}")
+    private String oldLgPushNotiType;
+    @Value("${push.gateway.serviceId}")
+    private String lgPushServceId;
+    @Value("${push.gateway.delay.request}")
+    private long pushDelayReqCnt;
+    @Value("${push.gateway.retry.count}")
+    private int pushCallRetryCnt;
+    @Value("${push.gateway.retry.exclude}")
+    private Set<String> retryExcludeCodeList;
+    private Map<String, Object> requestLock;
+    private Map<String, Object> progressLock;
 
     @PostConstruct
-    public void initialize(){
+    public void initialize() {
 
         requestLock = pushConfig.getServiceMap();
         progressLock = pushConfig.getServiceMap();
@@ -109,7 +126,7 @@ public class PushSingleDomainService {
             }
 
             // 200 : 정상 처리, 재시도 예외인 경우
-            isFutureSuccess.set( recvStatusCode.get().equals("200") || isRetryExcludeCode(recvStatusCode.get()) );
+            isFutureSuccess.set(recvStatusCode.get().equals("200") || isRetryExcludeCode(recvStatusCode.get()));
         });
 
         //test
@@ -204,11 +221,10 @@ public class PushSingleDomainService {
     }
 
     private String getTransactionId(String serviceId) {
-        if(!isLgPushServiceId(serviceId)) {
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
-        }
-        else {
-            return DateFormatUtils.format(new Date(), DATE_FOMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x ->(x+1 < TRANSACTION_MAX_SEQ_NO) ? x+1 : 0));
+        if (!isLgPushServiceId(serviceId)) {
+            return DateFormatUtils.format(new Date(), DATE_FORMAT) + String.format("%04d", tranactionMsgId1.updateAndGet(x -> (x + 1 < TRANSACTION_MAX_SEQ_NO) ? x + 1 : 0));
+        } else {
+            return DateFormatUtils.format(new Date(), DATE_FORMAT) + String.format("%04d", tranactionMsgId2.updateAndGet(x -> (x + 1 < TRANSACTION_MAX_SEQ_NO) ? x + 1 : 0));
         }
     }
 
@@ -216,7 +232,7 @@ public class PushSingleDomainService {
     // 1Service ID => 100/1sec
     private ImmutablePair<Long, Long> getPushCountInterval(String serviceId) {
 
-        synchronized(requestLock.get(serviceId)) {
+        synchronized (requestLock.get(serviceId)) {
             long resultCnt = 0;
             long curTimeMillis = System.currentTimeMillis();
             long processCount = getPushProcessCount(serviceId);
@@ -226,18 +242,17 @@ public class PushSingleDomainService {
 
             // 비정상적으로 TimeGap이 크다면
             int abnormalRequestTimeMills = 3000;
-            if(curTimeMillis - pushStatDto.getMeasureStartMillis() > abnormalRequestTimeMills) {
+            if (curTimeMillis - pushStatDto.getMeasureStartMillis() > abnormalRequestTimeMills) {
                 pushStatDto = pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
             }
 
             // Get 측정 기준 시간 지나침
             long timeoutgap = pushStatDto.getIntervalTimeGap();
-            if(pushStatDto.isIntervalOver()) {
+            if (pushStatDto.isIntervalOver()) {
                 pushSingleClient.putPushStatus(serviceId, processCount, curTimeMillis);
                 pushStatDto.setMeasurePushCount(processCount);
                 pushStatDto.setMeasureStartMillis(curTimeMillis);
-            }
-            else {
+            } else {
                 resultCnt = pushStatDto.getMeasurePushCount();
                 //log.debug(":: getPushCountInterval getMeasurePushCount={} timeoutgap={} currentTime={}", resultCnt, timeoutgap, curTimeMillis)
             }
@@ -265,14 +280,13 @@ public class PushSingleDomainService {
     private void setPushProgressCnt(String serviceId, int changeVal, boolean isReset) {
         synchronized (progressLock.get(serviceId)) {
             Optional<ProcessCounter> processCounter = pushProgressCnt.stream().filter(t -> t.getServiceId().equals(serviceId)).findAny();
-            if(processCounter.isPresent()) {
+            if (processCounter.isPresent()) {
                 long setCount = processCounter.get().getTransactionCount() + changeVal;
-                if(isReset) {
+                if (isReset) {
                     setCount = changeVal;
                 }
                 processCounter.get().setTransactionCount(setCount);
-            }
-            else {
+            } else {
                 pushProgressCnt.add(ProcessCounter.builder().serviceId(serviceId).transactionCount(changeVal * 1L).build());
             }
         }
@@ -288,6 +302,7 @@ public class PushSingleDomainService {
     @Builder
     @ToString
     static class ProcessCounter {
+
         private String serviceId;
         private Long transactionCount;
 

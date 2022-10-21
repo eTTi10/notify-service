@@ -2,12 +2,11 @@ package com.lguplus.fleta.client;
 
 import com.lguplus.fleta.data.dto.PushStatDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
-
 import java.util.Map;
 
 /**
  * Push 단건 Socket client
- *
+ * <p>
  * 공지 푸시등록
  */
 public interface PushSingleClient {

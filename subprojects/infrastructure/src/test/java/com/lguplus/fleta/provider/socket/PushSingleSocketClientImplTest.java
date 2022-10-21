@@ -6,13 +6,6 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.response.inner.PushResponseDto;
 import com.lguplus.fleta.provider.socket.multi.NettyTcpJunitServer;
 import com.lguplus.fleta.provider.socket.pool.PushSocketInfo;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -23,24 +16,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @Slf4j
-@ExtendWith({ MockitoExtension.class})
+@ExtendWith({MockitoExtension.class})
 @TestMethodOrder(MethodOrderer.MethodName.class)
 class PushSingleSocketClientImplTest {
 
     static NettyTcpJunitServer server;
     static String SERVER_IP = "127.0.0.1";
     static int SERVER_PORT = 9600;
-
+    final String sendSuccessCode = "200"; //200
     private final PushSingleSocketClientImpl pushSingleSocketClientImpl;
-
     PushRequestSingleDto pushRequestSingleDto, pushRequestSingleDtoLg;
-
     Map<String, String> paramMap;
     Map<String, String> paramMapLg;
 
-    final String sendSuccessCode = "200"; //200
+    public PushSingleSocketClientImplTest() {
+        pushSingleSocketClientImpl = new PushSingleSocketClientImpl();
+    }
 
     @BeforeAll
     static void setUpAll() throws InterruptedException {
@@ -54,10 +60,6 @@ class PushSingleSocketClientImplTest {
     @AfterAll
     static void setUpClose() {
         server.stopServer();
-    }
-
-    public PushSingleSocketClientImplTest() {
-        pushSingleSocketClientImpl = new PushSingleSocketClientImpl();
     }
 
     // Service Password
@@ -82,13 +84,13 @@ class PushSingleSocketClientImplTest {
         addItems.add(PushRequestItemDto.builder().itemKey("cm").itemValue("aaaa").build());
 
         pushRequestSingleDto = PushRequestSingleDto.builder()
-                .serviceId("30011")
-                .pushType("G")
-                .applicationId("lguplushdtvgcm")
-                .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("30011")
+            .pushType("G")
+            .applicationId("lguplushdtvgcm")
+            .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
 
         PushRequestSingleDto dto = pushRequestSingleDto;
 
@@ -105,13 +107,13 @@ class PushSingleSocketClientImplTest {
 
         /////////////// LG
         pushRequestSingleDtoLg = PushRequestSingleDto.builder()
-                .serviceId("00007")
-                .pushType("G")
-                .applicationId("smartux")
-                .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
-                .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
-                .items(addItems)
-                .build();
+            .serviceId("00007")
+            .pushType("G")
+            .applicationId("smartux")
+            .regId("MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=")
+            .message("\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"")
+            .items(addItems)
+            .build();
 
         dto = pushRequestSingleDtoLg;
 
@@ -162,14 +164,14 @@ class PushSingleSocketClientImplTest {
     private void clearPool() {
         try {
             ReflectionTestUtils.invokeMethod(pushSingleSocketClientImpl, "destroy");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
         }
     }
 
     //ok
-    @Test // Push
+    @Test
+    // Push
     //@Disabled
     void test01_requestPushSingle_case_01() {
 
@@ -182,7 +184,8 @@ class PushSingleSocketClientImplTest {
     }
 
     //ok
-    @Test() // Push Lg
+    @Test()
+    // Push Lg
     //@Disabled
     void test02_requestPushSingle_case_02() {
 
@@ -192,8 +195,9 @@ class PushSingleSocketClientImplTest {
         Assertions.assertEquals(sendSuccessCode, responseDto.getStatusCode());
     }
 
-    @Test // pool empty Exception
-    void test03_requestPushSingle_case_03()  {
+    @Test
+        // pool empty Exception
+    void test03_requestPushSingle_case_03() {
 
         Long currentTimeMillis = System.currentTimeMillis();
         Long pushCount = 10L;
@@ -206,13 +210,14 @@ class PushSingleSocketClientImplTest {
 
     }
 
-    @Test // pool empty Exception
-    void test04_requestPushSingle_case_04()  {
+    @Test
+        // pool empty Exception
+    void test04_requestPushSingle_case_04() {
 
         int EXTRA_CONN_COUNT = 50;
-        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>)ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
+        List<GenericObjectPool<PushSocketInfo>> poolListEmpty = (List<GenericObjectPool<PushSocketInfo>>) ReflectionTestUtils.getField(pushSingleSocketClientImpl, "socketPools");
 
-        for(int i=0; i<2+EXTRA_CONN_COUNT; i++) {
+        for (int i = 0; i < 2 + EXTRA_CONN_COUNT; i++) {
             try {
                 PushSocketInfo pushSocketInfo = poolListEmpty.get(0).borrowObject();
                 PushSocketInfo pushSocketInfo1 = poolListEmpty.get(1).borrowObject();

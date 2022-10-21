@@ -8,15 +8,13 @@ import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.vo.PushRequestBodyAnnounceVo;
 import com.lguplus.fleta.data.vo.PushRequestBodyMultiVo;
 import com.lguplus.fleta.data.vo.PushRequestBodySingleVo;
+import java.util.ArrayList;
+import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * 푸시등록 요청 MapStruct Mapper
- *
  */
 @Mapper(config = ObjectMapperConfig.class)
 public interface PushRequestMapper {

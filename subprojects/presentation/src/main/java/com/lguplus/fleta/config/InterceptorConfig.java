@@ -1,6 +1,7 @@
 package com.lguplus.fleta.config;
 
-import com.lguplus.fleta.interceptor.*;
+import com.lguplus.fleta.interceptor.LogInterceptor;
+import com.lguplus.fleta.interceptor.MetricInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

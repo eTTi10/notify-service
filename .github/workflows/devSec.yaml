@@ -6,19 +6,44 @@ on:
 
 env:
   PROFILE_PATH: subprojects/boot/src/main/resources/application-test.yml
+  AWS_REGION: ap-northeast-2
+  SHR_ROLE_NAME: dev-role-share-iptv-relengd-eks-self_hosted_runner
 
 jobs:
   JaCoCo:
-    runs-on: test-runner
+    runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
     steps:
       - run: sudo rm -rf *
 
       - uses: actions/checkout@v3
 
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '11'
+          cache: 'gradle'
+          
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Dependency > Install AWS CLI 2
+        run: |
+          mkdir temp && cd temp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip && sudo ./aws/install
+          echo [INFO] "Installed AWS CLI Version: $(aws --version)"
+
+      - name: Dependency > Configure for AWS CLI 2 > Assume Role - using ServiceAccount
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
+          role-to-assume: ${{ env.SHR_ROLE_NAME }}
+          web-identity-token-file: /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+
       - name: aws secrets manager
         run: |
           SECRET=$(aws secretsmanager get-secret-value \
-                      --secret-id dev \
+                      --secret-id secrets-share-iptv-relengd-microservices-ci-common \
                       --output json \
                       | jq -r '.SecretString')
           
@@ -41,18 +66,19 @@ jobs:
       - name: zip reports
         if: always()
         run: |
+          mkdir jacoco test
           for SUBPROJECT in `ls subprojects`; do
           
               JACOCO_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/jacoco
               TEST_REPORTS_DIR=subprojects/$SUBPROJECT/build/reports/tests
 
               if [ -d $JACOCO_REPORTS_DIR ]; then
-                  mkdir -p jacoco/$SUBPROJECT
+                  mkdir jacoco/$SUBPROJECT
                   mv $JACOCO_REPORTS_DIR/test/html/ jacoco/$SUBPROJECT
               fi
 
               if [ -d $TEST_REPORTS_DIR ]; then
-                  mkdir -p test/$SUBPROJECT
+                  mkdir test/$SUBPROJECT
                   mv $TEST_REPORTS_DIR/test/ test/$SUBPROJECT
               fi
           done

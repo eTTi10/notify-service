@@ -13,14 +13,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
 @Entity
-@Table(name = "SMARTUX.PT_PUSH_TARGET_INFO")
+@Table(name = "PT_PUSH_TARGET_INFO" ,schema = "SMARTUX")
 @IdClass(DeviceInfoId.class)
-public class DeviceInfoEntity implements Serializable {
+public class DeviceInfo implements Serializable {
     @Id
     @Column(name = "sa_id")
     private String saId;

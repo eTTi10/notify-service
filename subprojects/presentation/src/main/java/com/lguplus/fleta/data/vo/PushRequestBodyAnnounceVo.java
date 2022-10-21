@@ -5,16 +5,15 @@ import com.lguplus.fleta.exception.ParameterExceedMaxSizeException;
 import com.lguplus.fleta.validation.Groups;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Getter;
-import lombok.ToString;
-
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.GroupSequence;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString
@@ -39,15 +38,19 @@ public class PushRequestBodyAnnounceVo {
     @ApiModelProperty(position = 3, example = "G", value = "Push 발송 타입 (G: 안드로이드, A: 아이폰)", allowableValues = "G, A")
     private String pushType;
 
-    /** 보낼 메시지 */
+    /**
+     * 보낼 메시지
+     */
     @NotBlank(message = "필수 BODY DATA 미존재[message]", payload = ParameterExceedMaxSizeException.class, groups = Groups.C5.class)
     @JsonProperty("msg")
     @ApiModelProperty(position = 4, example = "\"PushCtrl\":\"ON\",\"MESSGAGE\": \"NONE\"", value = "보낼 메시지")
     private String message;
 
-    /** 추가할 항목 입력(name!^value) */
+    /**
+     * 추가할 항목 입력(name!^value)
+     */
     @JsonProperty("items")
-    @ApiModelProperty(position = 5, example = "[badge!^1, sound!^ring.caf, cm!^aaaa]", value = "추가할 항목(name!^value)")
+    @ApiModelProperty(position = 5, example = "[\"badge!^1\", \"sound!^ring.caf\", \"cm!^aaaa\"]", value = "추가할 항목(name!^value)")
     private List<String> addItems = new ArrayList<>();
 
 }

@@ -8,6 +8,7 @@ import lombok.ToString;
 
 /**
  * HTTP API 표준 응답 Result Page
+ *
  * @version 0.1.0
  */
 @Getter

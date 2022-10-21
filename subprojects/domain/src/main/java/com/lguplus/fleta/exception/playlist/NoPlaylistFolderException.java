@@ -17,7 +17,6 @@ public class NoPlaylistFolderException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public NoPlaylistFolderException(final String message) {
@@ -26,7 +25,6 @@ public class NoPlaylistFolderException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class NoPlaylistFolderException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public NoPlaylistFolderException(final Throwable cause) {

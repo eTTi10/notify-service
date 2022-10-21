@@ -6,9 +6,15 @@ import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.mapper.HttpPushMultiMapper;
 import com.lguplus.fleta.service.httppush.HttpMultiPushService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,14 +23,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,8 +30,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest
 @ContextConfiguration(classes = {HttpMultiPushController.class
-        , ArgumentResolverConfig.class
-        , MessageConverterConfig.class})
+    , ArgumentResolverConfig.class
+    , MessageConverterConfig.class})
 class HttpMultiPushControllerTest {
 
     private static final String URL_TEMPLATE_MULTI = "/notify/httppush/multi";
@@ -70,9 +68,9 @@ class HttpMultiPushControllerTest {
 
         // when
         MvcResult mvcResult = mockMvc.perform(post(URL_TEMPLATE_MULTI).content(content).contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print())
-                .andReturn();
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
 

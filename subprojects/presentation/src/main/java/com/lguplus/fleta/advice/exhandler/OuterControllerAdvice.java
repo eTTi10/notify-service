@@ -3,10 +3,13 @@ package com.lguplus.fleta.advice.exhandler;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ public class OuterControllerAdvice {
      *
      */
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
+    private static final Map<String, List<String>> UNCONVERTIBLE_ERROR_CODE_PATTERNS = new HashMap<>();
 
     static {
         final String builderName = "errorResponseBuilder";
@@ -32,20 +36,22 @@ public class OuterControllerAdvice {
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin",
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin.php",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/comm/latest",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
-            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /videolte/musicshow/push",
-            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /videolte/musicshow/push",
-            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /videolte/musicshow/push",
-            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("PUT /mobile/hdtv/v1/push/deviceinfo",
+                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+
+        UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
 
     /**
@@ -54,22 +60,18 @@ public class OuterControllerAdvice {
     private final ErrorResponseResolver errorResponseResolver;
 
     /**
-     *
      * @param errorResponseResolver
      */
     public OuterControllerAdvice(final ErrorResponseResolver errorResponseResolver) {
-
         this.errorResponseResolver = errorResponseResolver;
     }
 
     @InitBinder
     public void initBinder(final WebDataBinder binder) {
-
         binder.initDirectFieldAccess();
     }
 
     /**
-     *
      * @param ex
      * @return
      */
@@ -81,20 +83,31 @@ public class OuterControllerAdvice {
     }
 
     /**
-     *  /mims/sendPushCode RequestBody가 Null일 때 Exception 처리 용
+     * @param /mobile/mims/deviceinfo db에서 exception 캐치 해서 result로 감싸 response 해야하는 경우의 예외처리
+     * @return
+     */
+    @ExceptionHandler(UndefinedException.class)
+    public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
+                                                                 final UndefinedException ex) {
+        log.info(ex.getMessage(), ex);
+        return ResponseEntity.ok().body(ErrorResponseDto.builder().flag("9999").message("기타 오류").build());
+    }
+
+    /**
+     * /mims/sendPushCode RequestBody가 Null일 때 Exception 처리 용
+     *
      * @param request
      * @param th
      * @return
      */
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
-
         final Throwable th) {
+        log.error(th.getMessage(), th);
         return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
     /**
-     *
      * @param th
      * @return
      */
@@ -106,7 +119,6 @@ public class OuterControllerAdvice {
     }
 
     /**
-     *
      * @param request
      * @param response
      * @return
@@ -114,10 +126,11 @@ public class OuterControllerAdvice {
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
         final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
-        final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
-        if (uri.equals("GET /videolte/musicshow/push") || uri.equals("DELETE /videolte/musicshow/push")/*&& response.getFlag().equals("5000")*/) {
+        if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
+            .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
         }
+        final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {
             return response;
         }

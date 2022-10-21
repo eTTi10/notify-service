@@ -3,19 +3,17 @@ package com.lguplus.fleta.provider.rest;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.type.response.InnerResponseCodeType;
+import java.util.HashMap;
+import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 
 @ExtendWith(SpringExtension.class)
 class PersonalizationDomainFeignClientTest {
@@ -34,8 +32,8 @@ class PersonalizationDomainFeignClientTest {
 
         //given
         RegIdDto regIdDto = RegIdDto.builder()
-                .registrationId(REG_ID)
-                .build();
+            .registrationId(REG_ID)
+            .build();
 
         InnerResponseDto<RegIdDto> regIdDtoInnerResponseDto = new InnerResponseDto<>(InnerResponseCodeType.OK, regIdDto);
         given(personalizationFeignClient.getRegistrationID(any())).willReturn(regIdDtoInnerResponseDto);

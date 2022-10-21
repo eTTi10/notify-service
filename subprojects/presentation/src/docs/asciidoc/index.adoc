@@ -8,6 +8,7 @@ endif::[]
 //operation::deleteDeviceInfo[snippets='http-request,http-response']
 
 === postDeviceInfo
+include::{snippets}/postDeviceInfo/request-parameters.adoc[]
 
 ==== Http Request
 include::{snippets}/postDeviceInfo/http-request.adoc[]

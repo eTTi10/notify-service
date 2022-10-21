@@ -17,7 +17,6 @@ public class InvalidExpireTimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public InvalidExpireTimeException(final String message) {
@@ -26,7 +25,6 @@ public class InvalidExpireTimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class InvalidExpireTimeException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public InvalidExpireTimeException(final Throwable cause) {

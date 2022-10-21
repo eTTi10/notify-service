@@ -5,18 +5,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 public class SystemErrorException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public SystemErrorException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public SystemErrorException(final String message) {
@@ -25,7 +18,6 @@ public class SystemErrorException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -35,12 +27,16 @@ public class SystemErrorException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public SystemErrorException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 

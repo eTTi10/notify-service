@@ -11,53 +11,53 @@ import java.util.stream.Stream;
 public enum CategoryType {
 
     /**
-     *code1
-    */
+     * code1
+     */
     LIVE("LIVE"),
 
     /**
-     *code2
-    */
+     * code2
+     */
     VOD("VOD"),
 
     /**
-     *code3
-    */
+     * code3
+     */
     CAT_MAP("CAT_MAP"),
 
     /**
-     *code4
-    */
+     * code4
+     */
     SCHEDULE("SCHEDULE"),
 
     /**
-     *code5
-    */
+     * code5
+     */
     WISH("WISH"),
 
     /**
-    *code6
-    */
+     * code6
+     */
     AD_H("AD_H"),
 
     /**
-     *code7
-    */
+     * code7
+     */
     AD_F("AD_F"),
 
     /**
-     *code8
-    */
+     * code8
+     */
     BOOKTV("BOOKTV"),
 
     /**
-     *code9
-    */
+     * code9
+     */
     ENG_PRESCH("ENG_PRESCH"),
 
     /**
-     *code10
-    */
+     * code10
+     */
     BRAND("BRAND"),
 
     /**
@@ -70,30 +70,25 @@ public enum CategoryType {
      */
     UNDEFINED("");
 
-    private static Map<String, CategoryType> all = Stream.of(values())
-            .collect(Collectors.toMap(CategoryType::toString, Function.identity()));
+    private static final Map<String, CategoryType> all = Stream.of(values())
+        .collect(Collectors.toMap(CategoryType::toString, Function.identity()));
 
-    private static Set<String> i20Categories = Stream.of(CAT_MAP, BOOKTV, ENG_PRESCH, BRAND)
-            .map(CategoryType::toString)
-            .collect(Collectors.toSet());
+    private static final Set<String> i20Categories = Stream.of(CAT_MAP, BOOKTV, ENG_PRESCH, BRAND)
+        .map(CategoryType::toString)
+        .collect(Collectors.toSet());
 
-    private static Set<String> bestVodCategories = Stream.of(VOD, CA_RANK)
-            .map(CategoryType::toString)
-            .collect(Collectors.toSet());
+    private static final Set<String> bestVodCategories = Stream.of(VOD, CA_RANK)
+        .map(CategoryType::toString)
+        .collect(Collectors.toSet());
 
-    private static Set<String> suxmCategories = Stream.of(SCHEDULE)
-            .map(CategoryType::toString)
-            .collect(Collectors.toSet());
+    private static final Set<String> suxmCategories = Stream.of(SCHEDULE)
+        .map(CategoryType::toString)
+        .collect(Collectors.toSet());
 
-    private String code;
+    private final String code;
 
     CategoryType(final String code) {
         this.code = code;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 
     public static CategoryType asValue(final String code) {
@@ -144,5 +139,10 @@ public enum CategoryType {
 
     public static List<String> getSuxmCategories() {
         return new ArrayList<>(suxmCategories);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

@@ -1,8 +1,8 @@
 package com.lguplus.fleta.exception.latest;
 
 /**
- * Exception for error flag 1401.
- * 5102 소켓 타임 아웃 에러
+ * Exception for error flag 1401. 5102 소켓 타임 아웃 에러
+ *
  * @author Minwoo Lee
  * @since 1.0
  */
@@ -17,7 +17,6 @@ public class JpaSocketTimeoutException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public JpaSocketTimeoutException(final String message) {
@@ -26,7 +25,6 @@ public class JpaSocketTimeoutException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class JpaSocketTimeoutException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public JpaSocketTimeoutException(final Throwable cause) {

@@ -5,18 +5,11 @@ import com.lguplus.fleta.exception.NotifyRuntimeException;
 
 public class PhoneNumberErrorException extends NotifyRuntimeException {
 
-    @Override
-    public InnerResponseCodeType getInnerResponseCodeType()
-    {
-        return InnerResponseCodeType.MMS_SERVER_ERROR;
-    }
-
     public PhoneNumberErrorException() {
         super();
     }
 
     /**
-     *
      * @param message
      */
     public PhoneNumberErrorException(final String message) {
@@ -25,7 +18,6 @@ public class PhoneNumberErrorException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -35,12 +27,16 @@ public class PhoneNumberErrorException extends NotifyRuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public PhoneNumberErrorException(final Throwable cause) {
 
         super(cause);
+    }
+
+    @Override
+    public InnerResponseCodeType getInnerResponseCodeType() {
+        return InnerResponseCodeType.MMS_SERVER_ERROR;
     }
 
 

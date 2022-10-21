@@ -5,20 +5,26 @@ import com.google.common.primitives.Shorts;
 import com.lguplus.fleta.data.dto.response.inner.PushMessageInfoDto;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NettyTcpJunitServer {
+
     public String responseCode = "200";
     public int responseCount = 0;
     public String responseTestMode = "normal";
@@ -33,8 +39,8 @@ public class NettyTcpJunitServer {
         try {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializerTest(this));
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializerTest(this));
 
             // 포트 지정
             ChannelFuture future = bootstrap.bind(port).sync();
@@ -50,13 +56,13 @@ public class NettyTcpJunitServer {
         try {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     static class ChannelInitializerTest extends ChannelInitializer<SocketChannel> {
+
         NettyTcpJunitServer nettyTcpServer;
 
         public ChannelInitializerTest(NettyTcpJunitServer server) {
@@ -74,6 +80,7 @@ public class NettyTcpJunitServer {
     }
 
     static class MessageEncoderTest extends MessageToByteEncoder<PushMessageInfoDto> {
+
         final String PUSH_ENCODING = "euc-kr";
         final int PUSH_MSG_HEADER_LEN = 64;
 
@@ -94,7 +101,7 @@ public class NettyTcpJunitServer {
                 dataLen = 2;
             }
 
-            if(message.getMessageId() == 2) {//SC00
+            if (message.getMessageId() == 2) {//SC00
                 dataLen = 4;
             }
 
@@ -106,12 +113,11 @@ public class NettyTcpJunitServer {
 
             System.arraycopy(Ints.toByteArray(dataLen), 0, byteTotalData, 60, 4);                 //Data Length
 
-            if(message.getMessageId() == 2) {//connect ack SC+00, FA+(short code)
+            if (message.getMessageId() == 2) {//connect ack SC+00, FA+(short code)
                 System.arraycopy(dataInfo, 0, byteTotalData, 64, dataInfo.length);
                 byte[] short2bytes = Shorts.toByteArray((short) (0));
-                System.arraycopy(short2bytes, 0, byteTotalData, 64+2, 2);
-            }
-            else if (message.getData().startsWith("@Short!^")) {
+                System.arraycopy(short2bytes, 0, byteTotalData, 64 + 2, 2);
+            } else if (message.getData().startsWith("@Short!^")) {
                 byte[] short2bytes = Shorts.toByteArray((short) (message.getData().equals("@Short!^1") ? 1 : 0));
                 System.arraycopy(short2bytes, 0, byteTotalData, 64, short2bytes.length);
             } else {
@@ -183,20 +189,20 @@ public class NettyTcpJunitServer {
             switch (messageID) {
                 case CHANNEL_CONNECTION_REQUEST:
                     pushMessageInfoDto = PushMessageInfoDto.builder()
-                            .messageId(messageID)
-                            .channelId(channelId)
-                            .destinationIp(destIp)
-                            .build();
+                        .messageId(messageID)
+                        .channelId(channelId)
+                        .destinationIp(destIp)
+                        .build();
                     log.debug("** MessageDecoderTest CHANNEL_CONNECTION_REQUEST {}", pushMessageInfoDto);
                     out.add(pushMessageInfoDto);
                     break;
 
                 case PROCESS_STATE_REQUEST:
                     pushMessageInfoDto = PushMessageInfoDto.builder()
-                            .messageId(messageID)
-                            .channelId(channelId)
-                            .destinationIp(destIp)
-                            .build();
+                        .messageId(messageID)
+                        .channelId(channelId)
+                        .destinationIp(destIp)
+                        .build();
                     log.debug("** MessageDecoderTest  PROCESS_STATE_REQUEST {}", pushMessageInfoDto);
                     out.add(pushMessageInfoDto);
                     break;
@@ -206,12 +212,12 @@ public class NettyTcpJunitServer {
                     String data = new String(byteData, 0, byteData.length, PUSH_ENCODING);
 
                     pushMessageInfoDto = PushMessageInfoDto.builder()
-                            .messageId(messageID)
-                            .transactionId(transactionID)
-                            .channelId(channelId)
-                            .destinationIp(destIp)
-                            .data(data)
-                            .build();
+                        .messageId(messageID)
+                        .transactionId(transactionID)
+                        .channelId(channelId)
+                        .destinationIp(destIp)
+                        .data(data)
+                        .build();
 
                     log.debug("** MessageDecoderTest  COMMAND_REQUEST {}", pushMessageInfoDto);
 
@@ -250,12 +256,12 @@ public class NettyTcpJunitServer {
 
                 if (nettyTcpServer.responseProcessFlag.length() > 0) {
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
-                            .messageId(PROCESS_STATE_REQUEST + 1)
-                            .channelId(message.getChannelId())
-                            .transactionId(message.getTransactionId())
-                            .destinationIp(message.getDestinationIp())
-                            .data("@Short!^" + nettyTcpServer.responseProcessFlag) //Success 1 , Fail  0
-                            .build()
+                        .messageId(PROCESS_STATE_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data("@Short!^" + nettyTcpServer.responseProcessFlag) //Success 1 , Fail  0
+                        .build()
                     );
                 }
             } else if (message.getMessageId() == CHANNEL_CONNECTION_REQUEST) {
@@ -265,12 +271,12 @@ public class NettyTcpJunitServer {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 ctx.writeAndFlush(PushMessageInfoDto.builder()
-                        .messageId(CHANNEL_CONNECTION_REQUEST + 1)
-                        .channelId(message.getChannelId())
-                        .transactionId(message.getTransactionId())
-                        .destinationIp(message.getDestinationIp())
-                        .data("SC")
-                        .build()
+                    .messageId(CHANNEL_CONNECTION_REQUEST + 1)
+                    .channelId(message.getChannelId())
+                    .transactionId(message.getTransactionId())
+                    .destinationIp(message.getDestinationIp())
+                    .data("SC")
+                    .build()
                 );
             } else if ("normal".equals(nettyTcpServer.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
                 // Push 전송인 경우 response 결과를 임시 Map에 저장함.
@@ -279,22 +285,22 @@ public class NettyTcpJunitServer {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 String data = "SC{\n" +
-                        "\"response\" : {\n" +
-                        "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                        "\"push_id\" : \"@TransactionId\",\n" +
-                        "\"status_code\" : \"@StatusCode\"\n" +
-                        "}\n" +
-                        "}";
+                    "\"response\" : {\n" +
+                    "\"msg_id\" : \"PUSH_NOTI\",\n" +
+                    "\"push_id\" : \"@TransactionId\",\n" +
+                    "\"status_code\" : \"@StatusCode\"\n" +
+                    "}\n" +
+                    "}";
 
                 String sendData = data.replace("@TransactionId", message.getTransactionId())
-                        .replace("@StatusCode", nettyTcpServer.responseCode);
+                    .replace("@StatusCode", nettyTcpServer.responseCode);
                 PushMessageInfoDto dto = PushMessageInfoDto.builder()
-                        .messageId(COMMAND_REQUEST + 1)
-                        .channelId(message.getChannelId())
-                        .transactionId(message.getTransactionId())
-                        .destinationIp(message.getDestinationIp())
-                        .data(sendData)
-                        .build();
+                    .messageId(COMMAND_REQUEST + 1)
+                    .channelId(message.getChannelId())
+                    .transactionId(message.getTransactionId())
+                    .destinationIp(message.getDestinationIp())
+                    .data(sendData)
+                    .build();
                 log.debug(":: MessageHandlerTest channelWrite : COMMAND_REQUEST_ACK {}", dto);
                 ctx.writeAndFlush(dto);
             } else if ("abnormal".equals(nettyTcpServer.responseTestMode) && message.getMessageId() == COMMAND_REQUEST) {
@@ -304,14 +310,14 @@ public class NettyTcpJunitServer {
                 LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(SLEEP_MILLS));
 
                 String data = "SC{\n" +
-                        "\"response\" : {\n" +
-                        "\"msg_id\" : \"PUSH_NOTI\",\n" +
-                        "\"push_id\" : \"@TransactionId\",\n" +
-                        "\"status_code\" : \"@StatusCode\"\n" +
-                        "}\n" +
-                        "}";
+                    "\"response\" : {\n" +
+                    "\"msg_id\" : \"PUSH_NOTI\",\n" +
+                    "\"push_id\" : \"@TransactionId\",\n" +
+                    "\"status_code\" : \"@StatusCode\"\n" +
+                    "}\n" +
+                    "}";
                 String sendData = data.replace("@TransactionId", message.getTransactionId())
-                        .replace("@StatusCode", nettyTcpServer.responseCode);
+                    .replace("@StatusCode", nettyTcpServer.responseCode);
                 //pushMultiClient.receiveAsyncMessage(PushMultiClient.MsgType.RECIVED_MSG, message);
 
                 nettyTcpServer.responseCount++;
@@ -321,12 +327,12 @@ public class NettyTcpJunitServer {
                 //normal
                 if (nettyTcpServer.responseCount % modeValue == 1) {
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
-                            .messageId(COMMAND_REQUEST + 1)
-                            .channelId(message.getChannelId())
-                            .transactionId(message.getTransactionId())
-                            .destinationIp(message.getDestinationIp())
-                            .data(sendData)
-                            .build()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
                     );
                 } else if (nettyTcpServer.responseCount % modeValue == 2) {
                     // not response
@@ -334,21 +340,21 @@ public class NettyTcpJunitServer {
                     // delay time
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(500));
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
-                            .messageId(COMMAND_REQUEST + 1)
-                            .channelId(message.getChannelId())
-                            .transactionId(message.getTransactionId())
-                            .destinationIp(message.getDestinationIp())
-                            .data(sendData)
-                            .build()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
                     );
                 } else { //normal
                     ctx.writeAndFlush(PushMessageInfoDto.builder()
-                            .messageId(COMMAND_REQUEST + 1)
-                            .channelId(message.getChannelId())
-                            .transactionId(message.getTransactionId())
-                            .destinationIp(message.getDestinationIp())
-                            .data(sendData)
-                            .build()
+                        .messageId(COMMAND_REQUEST + 1)
+                        .channelId(message.getChannelId())
+                        .transactionId(message.getTransactionId())
+                        .destinationIp(message.getDestinationIp())
+                        .data(sendData)
+                        .build()
                     );
                 }
             }

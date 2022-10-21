@@ -17,7 +17,6 @@ public class InvalidOrdException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      */
     public InvalidOrdException(final String message) {
@@ -26,7 +25,6 @@ public class InvalidOrdException extends RuntimeException {
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -36,7 +34,6 @@ public class InvalidOrdException extends RuntimeException {
     }
 
     /**
-     *
      * @param cause
      */
     public InvalidOrdException(final Throwable cause) {

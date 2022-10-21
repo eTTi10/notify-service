@@ -63,11 +63,11 @@ spring:
     type: redis
   redis:
     cluster:
-      nodes: ["redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379"]
+      nodes: [ "redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379" ]
 
   #### Message Stream - Kafka
   kafka:
-    bootstrap-servers: b-1.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-2.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-3.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-5.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-msa.66adcz.c2.kafka.ap-northeast-2.amazonaws.com:9092
+    bootstrap-servers: b-2.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092
 
 
 
@@ -108,7 +108,7 @@ service:
 feign:
   client:
     config:
-      default:    # 전역 이름
+      default: # 전역 이름
         connectTimeout: 1000
         readTimeout: 1000
       pushannounce: # Push Announce

@@ -19,7 +19,6 @@ public class ParameterOutOfRangeException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param message
      */
     public ParameterOutOfRangeException(final String message) {
@@ -28,7 +27,6 @@ public class ParameterOutOfRangeException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param message
      * @param cause
      */
@@ -38,7 +36,6 @@ public class ParameterOutOfRangeException extends RuntimeException implements Pa
     }
 
     /**
-     *
      * @param cause
      */
     public ParameterOutOfRangeException(final Throwable cause) {

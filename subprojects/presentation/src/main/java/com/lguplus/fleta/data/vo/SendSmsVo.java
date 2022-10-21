@@ -1,15 +1,12 @@
 package com.lguplus.fleta.data.vo;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.dto.request.SendSmsRequestDto;
-import com.lguplus.fleta.exception.ParameterMissingException;
 import com.lguplus.fleta.validation.Groups;
-import lombok.Getter;
-import lombok.ToString;
-
 import javax.validation.GroupSequence;
 import javax.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @ToString
@@ -28,12 +25,12 @@ public class SendSmsVo {
     @ParamAlias("message")
     private String msg;
 
-    public SendSmsRequestDto convert(){
+    public SendSmsRequestDto convert() {
 
         return SendSmsRequestDto.builder()
-                .sCtn(getSCtn().replace("-", "").replace(".", ""))                .rCtn(getRCtn().replace("-", "").replace(".", ""))
-                .msg(getMsg())
-                .build();
+            .sCtn(getSCtn().replace("-", "").replace(".", "")).rCtn(getRCtn().replace("-", "").replace(".", ""))
+            .msg(getMsg())
+            .build();
     }
 
 }
