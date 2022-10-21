@@ -33,7 +33,6 @@ sonarqube{
     }
 }
 
-//bootJar { enabled = false }
 
 subprojects {
     apply plugin: 'java'
@@ -54,8 +53,10 @@ subprojects {
     }
 
     ext {
+        snippetsDir = file('build/generated-snippets')
         swaggerOutputDir = file("${buildDir}/swagger")
         htmlOutputDir = file("${buildDir}/docs/asciidoc")
+        restDocInDir = file("src/docs/asciidoc")
     }
 
     dependencies {
@@ -112,7 +113,7 @@ subprojects {
             csv.enabled true
 
             // 리포트 저장 경로 설정
-//            csv.destination file("$buildDir/jacoco.csv")
+            csv.destination file("$buildDir/JacocoReportDir/test/jacocoTestReport.csv")
 //            html.destination file("$buildDir/jacocoHtml")
 //            xml.destination file("$buildDir/jacoco.xml")
         }
@@ -191,6 +192,10 @@ subprojects {
 
     test {
         // Jacoco 실행 시, 지정한 Profile로 실행
+        if (project.name == "boot") {
+            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
+            finalizedBy 'asciidoctor'
+        }
         if (System.properties.containsKey('spring.profiles.active')) {
             String activeProfile = System.properties['spring.profiles.active']
             println "profile: $activeProfile"
@@ -202,18 +207,15 @@ subprojects {
         afterTest { desc, result ->
             logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
         }
-
-
-        if (project.name == "boot") {
-            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
-            finalizedBy 'asciidoctor'
-        }
+        outputs.dir snippetsDir
     }
 
     asciidoctor {
+        dependsOn test
         configurations 'asciidoctorExtensions'
-        sourceDir = swaggerOutputDir
-
+        if (project.name == "boot") {
+            sourceDir = swaggerOutputDir
+        }
         sources{
             include('**/*.adoc')
         }
@@ -224,6 +226,20 @@ subprojects {
                 toc                 : 'left',
                 toclevels           : 4
         baseDirFollowsSourceFile()
+    }
+
+    asciidoctor.doFirst {
+        delete file('src/main/resources/static/docs')
+    }
+
+    task copyDocument(type: Copy) {
+        dependsOn asciidoctor
+        from file("build/docs/asciidoc")
+        into file("src/main/resources/static/docs")
+    }
+
+    build {
+        dependsOn copyDocument
     }
 
     task convertDocs {
