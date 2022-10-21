@@ -240,4 +240,41 @@ class MusicShowDomainServiceTest {
 
         assertThat(resultEntity.getPushYn()).isEqualTo("N");
     }
+
+    @Test
+    void releasePush_inValidAlbumId() {
+
+        given(vodlookupClient.getAlbumProgramming(any(), any())).willReturn(null);
+
+        PushRequestDto requestDto = PushRequestDto.builder()
+            .saId("1000494369")
+            .stbMac("v010.0049.4369")
+            .albumId("M01198F334PPV00")
+            .build();
+
+        assertThrows(NoResultException.class, () -> domainService.releasePush(requestDto));
+    }
+
+
+    @Test
+    void releasePush_dataAlreadyExist() {
+        PushRequestDto requestDto = PushRequestDto.builder()
+            .saId("500055344423")
+            .stbMac("v000.5534.4423")
+            .albumId("M0118C3162PPV00")
+            .serviceType("C")
+            .pushYn("N")
+            .build();
+
+        given(vodlookupClient.getAlbumProgramming(any(), any())).willReturn(
+            List.of(AlbumProgrammingDto.builder()
+                .albumId("M0118C3162PPV00")
+                .build())
+        );
+
+        given(repository.getPushWithPkey(any())).willReturn(null);
+
+        assertThrows(NoResultException.class, () -> domainService.releasePush(requestDto));
+
+    }
 }

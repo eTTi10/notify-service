@@ -9,8 +9,6 @@ public interface MusicShowRepository {
 
     GetPushDto getPush(PushRequestDto requestDto);
 
-    Integer validAlbumId(String albumId);
-
     GetPushWithPKeyDto getPushWithPkey(PushRequestDto requestDto);
 
     PushTargetEntity insertPush(PushTargetEntity entity);

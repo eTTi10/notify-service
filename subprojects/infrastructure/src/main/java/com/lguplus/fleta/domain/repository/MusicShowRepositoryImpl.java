@@ -23,11 +23,6 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
     }
 
     @Override
-    public Integer validAlbumId(String albumId) {
-        return emRepository.validAlbumId(albumId);
-    }
-
-    @Override
     public GetPushWithPKeyDto getPushWithPkey(PushRequestDto requestDto) {
         return emRepository.getPushWithPkey(requestDto);
     }

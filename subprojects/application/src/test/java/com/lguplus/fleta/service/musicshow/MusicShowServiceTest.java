@@ -61,6 +61,7 @@ class MusicShowServiceTest {
             .build();
 
         assertDoesNotThrow(() -> service.postPush(requestDto));
+        assertThat(service.postPush(requestDto).getFlag()).isEqualTo("0000");
 
     }
 
@@ -74,6 +75,7 @@ class MusicShowServiceTest {
             .build();
 
         assertDoesNotThrow(() -> service.releasePush(requestDto));
+        assertThat(service.postPush(requestDto).getFlag()).isEqualTo("0000");
 
     }
 }

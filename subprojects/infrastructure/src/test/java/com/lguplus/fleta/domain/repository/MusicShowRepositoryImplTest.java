@@ -56,15 +56,6 @@ class MusicShowRepositoryImplTest {
     }
 
     @Test
-    void validAlbumId() {
-        given(emRepository.validAlbumId(any())).willReturn(1);
-
-        Integer count = repositoryImpl.validAlbumId("M01198F334PPV00");
-
-        assertThat(count).isEqualTo(1);
-    }
-
-    @Test
     void getPushWithPkey() {
         PushRequestDto requestDto = PushRequestDto.builder()
             .saId("1000494369")

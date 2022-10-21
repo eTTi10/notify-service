@@ -4,7 +4,6 @@ import com.lguplus.fleta.data.dto.GetPushResponseDto;
 import com.lguplus.fleta.data.dto.PostPushResponseDto;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
-import com.lguplus.fleta.exception.musicshow.MusicShowException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,26 +23,16 @@ public class MusicShowService {
     @Transactional
     public PostPushResponseDto postPush(PushRequestDto requestDto) {
         PostPushResponseDto dto = PostPushResponseDto.builder().build();
-        try {
-            musicShowDomainService.postPush(requestDto);
-            dto.setSuccessFlag();
-        } catch (MusicShowException e) {
-            dto.setFlag(e.getFlag());
-            dto.setMessage(e.getMessage());
-        }
+        musicShowDomainService.postPush(requestDto);
+        dto.setSuccessFlag();
         return dto;
     }
 
     @Transactional
     public PostPushResponseDto releasePush(PushRequestDto requestDto) {
         PostPushResponseDto dto = PostPushResponseDto.builder().build();
-        try {
-            musicShowDomainService.releasePush(requestDto);
-            dto.setSuccessFlag();
-        } catch (MusicShowException e) {
-            dto.setFlag(e.getFlag());
-            dto.setMessage(e.getMessage());
-        }
+        musicShowDomainService.releasePush(requestDto);
+        dto.setSuccessFlag();
         return dto;
     }
 }

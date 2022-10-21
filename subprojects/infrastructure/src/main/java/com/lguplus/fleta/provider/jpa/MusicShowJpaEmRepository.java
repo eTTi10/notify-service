@@ -30,31 +30,15 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository {
             + "     AND ALBUM_ID     = :album_id\n"
             + "     AND P_KEY        = MOD(TO_NUMBER(TO_CHAR(SEND_DT,'MM')),4)";
 
-        Query query = this.entityManager.createNativeQuery(sql)
+        Query query = entityManager.createNativeQuery(sql)
             .setParameter("sa_id", requestDto.getSaId())
             .setParameter("stb_mac", requestDto.getStbMac())
             .setParameter("service_type", requestDto.getServiceType())
             .setParameter("album_id", requestDto.getAlbumId());
 
-        return super.convertSingle(query, GetPushDto.class).orElse(null);
+        return convertSingle(query, GetPushDto.class).orElse(null);
     }
 
-    public Integer validAlbumId(String albumId) {
-
-        String sql = "SELECT\n"
-            + "TO_CHAR(COUNT(m.vod_contents_id)) \n"
-            + "FROM voduser.pt_vo_category_map_united m,\n"
-            + "     voduser.pt_vo_category_united c \n"
-            + "   WHERE c.vod_category_id = m.vod_category_id \n"
-            + "     AND c.vod_category_gb = 'NSC' \n"
-            + "     AND m.vod_contents_id = :album_id\n";
-
-        Query query = this.entityManager.createNativeQuery(sql)
-            .setParameter("album_id", albumId)
-            .setMaxResults(1);
-
-        return Integer.parseInt(super.convertSingle(query, String.class).orElse(null));
-    }
 
     public GetPushWithPKeyDto getPushWithPkey(PushRequestDto requestDto) {
 
@@ -84,7 +68,7 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository {
             );
         }
 
-        Query query = this.entityManager.createNativeQuery(sql.toString())
+        Query query = entityManager.createNativeQuery(sql.toString())
             .setParameter("sa_id", requestDto.getSaId())
             .setParameter("stb_mac", requestDto.getStbMac())
             .setParameter("service_type", requestDto.getServiceType())
@@ -93,7 +77,7 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository {
             query.setParameter("category_id", requestDto.getCategoryId());
         }
 
-        return super.convertSingle(query, GetPushWithPKeyDto.class).orElse(null);
+        return convertSingle(query, GetPushWithPKeyDto.class).orElse(null);
 
     }
 
@@ -103,8 +87,6 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository {
 
         Query query = this.entityManager.createNativeQuery(sql);
 
-        Integer a = super.convertSingle(query, Integer.class).orElse(null);
-
-        return super.convertSingle(query, Integer.class).orElse(null);
+        return convertSingle(query, Integer.class).orElse(null);
     }
 }
