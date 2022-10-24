@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = "뮤직공연 콘서트 LIVE 알람")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/mobile/videolte/musicshow/push")
+//@RequestMapping(value = "/mobile/videolte/musicshow/push")
+@RequestMapping(value = "/videolte/musicshow/push")
 public class MusicShowController {
 
     private final MusicShowService service;

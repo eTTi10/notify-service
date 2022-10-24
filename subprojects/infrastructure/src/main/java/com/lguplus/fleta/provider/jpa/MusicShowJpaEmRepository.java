@@ -83,10 +83,11 @@ public class MusicShowJpaEmRepository extends AbstractJpaEmRepository {
 
     public Integer getRegNoNextVal() {
 
-        String sql = "SELECT CAST(NEXTVAL('smartux.seq_pt_cm_push_target') AS INTEGER)";
+        String sql = "SELECT CAST(NEXTVAL('SMARTUX.SEQ_PT_CM_PUSH_TARGET') AS INTEGER)";
 
         Query query = this.entityManager.createNativeQuery(sql);
 
-        return convertSingle(query, Integer.class).orElse(null);
+        return (Integer) query.getSingleResult();
     }
+
 }

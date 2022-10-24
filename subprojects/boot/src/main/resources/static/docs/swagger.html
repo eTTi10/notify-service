@@ -539,15 +539,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
+<li><a href="#_music-show-inner-controller_resource">Music-show-inner-controller</a>
+<ul class="sectlevel3">
+<li><a href="#_getpushusingget_1">알람 여부 조회</a>
+<ul class="sectlevel4">
+<li><a href="#_parameters_8">Parameters</a></li>
+<li><a href="#_responses_8">Responses</a></li>
+<li><a href="#_example_http_request_8">Example HTTP request</a></li>
+<li><a href="#_example_http_response_8">Example HTTP response</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li><a href="#_sendpushcode_resource">SendPushCode</a>
 <ul class="sectlevel3">
 <li><a href="#_sendpushcodeusingpost">Code를 통한 푸시발송 요청</a>
 <ul class="sectlevel4">
 <li><a href="#_description_8">Description</a></li>
-<li><a href="#_parameters_8">Parameters</a></li>
-<li><a href="#_responses_8">Responses</a></li>
-<li><a href="#_example_http_request_8">Example HTTP request</a></li>
-<li><a href="#_example_http_response_8">Example HTTP response</a></li>
+<li><a href="#_parameters_9">Parameters</a></li>
+<li><a href="#_responses_9">Responses</a></li>
+<li><a href="#_example_http_request_9">Example HTTP request</a></li>
+<li><a href="#_example_http_response_9">Example HTTP response</a></li>
 </ul>
 </li>
 </ul>
@@ -557,10 +569,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_sendsmscodeusingpost">SMS 발송요청</a>
 <ul class="sectlevel4">
 <li><a href="#_description_9">Description</a></li>
-<li><a href="#_parameters_9">Parameters</a></li>
-<li><a href="#_responses_9">Responses</a></li>
-<li><a href="#_example_http_request_9">Example HTTP request</a></li>
-<li><a href="#_example_http_response_9">Example HTTP response</a></li>
+<li><a href="#_parameters_10">Parameters</a></li>
+<li><a href="#_responses_10">Responses</a></li>
+<li><a href="#_example_http_request_10">Example HTTP request</a></li>
+<li><a href="#_example_http_response_10">Example HTTP response</a></li>
 </ul>
 </li>
 </ul>
@@ -570,10 +582,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_requestuxsimplejoinsmsusingget">tvG 유플릭스 간편 가입 안내 SMS 요청</a>
 <ul class="sectlevel4">
 <li><a href="#_description_10">Description</a></li>
-<li><a href="#_parameters_10">Parameters</a></li>
-<li><a href="#_responses_10">Responses</a></li>
-<li><a href="#_example_http_request_10">Example HTTP request</a></li>
-<li><a href="#_example_http_response_10">Example HTTP response</a></li>
+<li><a href="#_parameters_11">Parameters</a></li>
+<li><a href="#_responses_11">Responses</a></li>
+<li><a href="#_example_http_request_11">Example HTTP request</a></li>
+<li><a href="#_example_http_response_11">Example HTTP response</a></li>
 </ul>
 </li>
 </ul>
@@ -583,28 +595,56 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_postdeviceinfousingpost">deviceinfo 등록</a>
 <ul class="sectlevel4">
 <li><a href="#_description_11">Description</a></li>
-<li><a href="#_parameters_11">Parameters</a></li>
-<li><a href="#_responses_11">Responses</a></li>
-<li><a href="#_example_http_request_11">Example HTTP request</a></li>
-<li><a href="#_example_http_response_11">Example HTTP response</a></li>
-</ul>
-</li>
-<li><a href="#_putdeviceinfousingput">deviceinfo 수정</a>
-<ul class="sectlevel4">
-<li><a href="#_description_12">Description</a></li>
 <li><a href="#_parameters_12">Parameters</a></li>
 <li><a href="#_responses_12">Responses</a></li>
 <li><a href="#_example_http_request_12">Example HTTP request</a></li>
 <li><a href="#_example_http_response_12">Example HTTP response</a></li>
 </ul>
 </li>
-<li><a href="#_deletedeviceinfousingdelete">deviceinfo 삭제</a>
+<li><a href="#_putdeviceinfousingput">deviceinfo 수정</a>
 <ul class="sectlevel4">
-<li><a href="#_description_13">Description</a></li>
+<li><a href="#_description_12">Description</a></li>
 <li><a href="#_parameters_13">Parameters</a></li>
 <li><a href="#_responses_13">Responses</a></li>
 <li><a href="#_example_http_request_13">Example HTTP request</a></li>
 <li><a href="#_example_http_response_13">Example HTTP response</a></li>
+</ul>
+</li>
+<li><a href="#_deletedeviceinfousingdelete">deviceinfo 삭제</a>
+<ul class="sectlevel4">
+<li><a href="#_description_13">Description</a></li>
+<li><a href="#_parameters_14">Parameters</a></li>
+<li><a href="#_responses_14">Responses</a></li>
+<li><a href="#_example_http_request_14">Example HTTP request</a></li>
+<li><a href="#_example_http_response_14">Example HTTP response</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_68819d7cc15900e3ee125464b076cc31">뮤직공연 콘서트 LIVE 알람</a>
+<ul class="sectlevel3">
+<li><a href="#_registerpushusingpost">알람 여부 등록</a>
+<ul class="sectlevel4">
+<li><a href="#_parameters_15">Parameters</a></li>
+<li><a href="#_responses_15">Responses</a></li>
+<li><a href="#_example_http_request_15">Example HTTP request</a></li>
+<li><a href="#_example_http_response_15">Example HTTP response</a></li>
+</ul>
+</li>
+<li><a href="#_getpushusingget">알람 여부 조회</a>
+<ul class="sectlevel4">
+<li><a href="#_parameters_16">Parameters</a></li>
+<li><a href="#_responses_16">Responses</a></li>
+<li><a href="#_example_http_request_16">Example HTTP request</a></li>
+<li><a href="#_example_http_response_16">Example HTTP response</a></li>
+</ul>
+</li>
+<li><a href="#_releasepushusingdelete">알람 여부 삭제</a>
+<ul class="sectlevel4">
+<li><a href="#_parameters_17">Parameters</a></li>
+<li><a href="#_responses_17">Responses</a></li>
+<li><a href="#_example_http_request_17">Example HTTP request</a></li>
+<li><a href="#_example_http_response_17">Example HTTP response</a></li>
 </ul>
 </li>
 </ul>
@@ -614,28 +654,28 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_insertlatestusingpost">최신회 알림 등록</a>
 <ul class="sectlevel4">
 <li><a href="#_description_14">Description</a></li>
-<li><a href="#_parameters_14">Parameters</a></li>
-<li><a href="#_responses_14">Responses</a></li>
-<li><a href="#_example_http_request_14">Example HTTP request</a></li>
-<li><a href="#_example_http_response_14">Example HTTP response</a></li>
+<li><a href="#_parameters_18">Parameters</a></li>
+<li><a href="#_responses_18">Responses</a></li>
+<li><a href="#_example_http_request_18">Example HTTP request</a></li>
+<li><a href="#_example_http_response_18">Example HTTP response</a></li>
 </ul>
 </li>
 <li><a href="#_getlatestlistusingget">최신회 알림 조회</a>
 <ul class="sectlevel4">
 <li><a href="#_description_15">Description</a></li>
-<li><a href="#_parameters_15">Parameters</a></li>
-<li><a href="#_responses_15">Responses</a></li>
-<li><a href="#_example_http_request_15">Example HTTP request</a></li>
-<li><a href="#_example_http_response_15">Example HTTP response</a></li>
+<li><a href="#_parameters_19">Parameters</a></li>
+<li><a href="#_responses_19">Responses</a></li>
+<li><a href="#_example_http_request_19">Example HTTP request</a></li>
+<li><a href="#_example_http_response_19">Example HTTP response</a></li>
 </ul>
 </li>
 <li><a href="#_deletelatestusingdelete">최신회 알림 삭제</a>
 <ul class="sectlevel4">
 <li><a href="#_description_16">Description</a></li>
-<li><a href="#_parameters_16">Parameters</a></li>
-<li><a href="#_responses_16">Responses</a></li>
-<li><a href="#_example_http_request_16">Example HTTP request</a></li>
-<li><a href="#_example_http_response_16">Example HTTP response</a></li>
+<li><a href="#_parameters_20">Parameters</a></li>
+<li><a href="#_responses_20">Responses</a></li>
+<li><a href="#_example_http_request_20">Example HTTP request</a></li>
+<li><a href="#_example_http_response_20">Example HTTP response</a></li>
 </ul>
 </li>
 </ul>
@@ -647,16 +687,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_a14119b2d44f23cdb11efd5ad072d59d">Code를 이용한 푸시 요청 응답결과 DTO</a></li>
 <li><a href="#_commonresponsedto">CommonResponseDto</a></li>
 <li><a href="#_08319173076e8a75bd2b58f2cd25d10a">GenericRecordsetResponseDto«최신회 알림조회»</a></li>
+<li><a href="#_getpushresponsedto">GetPushResponseDto</a></li>
 <li><a href="#_4d8a80533b155039618f3f337203eb5a">Http Push 응답결과 DTO</a></li>
 <li><a href="#_httppushannouncerequestvo">HttpPushAnnounceRequestVo</a></li>
+<li><a href="#_16092d92d989e9748f96245bbd13a4db">InnerResponseDto«GetPushResponseDto»</a></li>
 <li><a href="#_df4a9e9dad53d02dacb2fb33968383cf">InnerResponseDto«Http Push 응답결과 DTO»</a></li>
 <li><a href="#_675b31bdf7341365ce9326f20822d868">InnerResponseDto«PushClientResponseDto»</a></li>
 <li><a href="#_a5d70c0f55f957f85045720fe96f54a3">InnerResponseDto«PushClientResponseMultiDto»</a></li>
 <li><a href="#_innerresponseerrordto">InnerResponseErrorDto</a></li>
+<li><a href="#_a6650ddba5f856f252d14b512c86472c">InnerResponseResultDto«GetPushResponseDto»</a></li>
 <li><a href="#_358ba6a5b28e8addc944383ddb8d251b">InnerResponseResultDto«Http Push 응답결과 DTO»</a></li>
 <li><a href="#_def83a18a2485d5120cced1ef14aa1d7">InnerResponseResultDto«PushClientResponseDto»</a></li>
 <li><a href="#_8ca9cb956a091db81b953226b1a99ae9">InnerResponseResultDto«PushClientResponseMultiDto»</a></li>
 <li><a href="#_innerresponseresultpagedto">InnerResponseResultPageDto</a></li>
+<li><a href="#_postpushresponsedto">PostPushResponseDto</a></li>
 <li><a href="#_2010acc489c601d48cad3834887e32f8">Push (Multi) 요청 VO</a></li>
 <li><a href="#_1e004a6ae997d5d2237e70288d65d4fd">Push (공지) 요청 VO</a></li>
 <li><a href="#_a4a95f397fba5297e340fe4ce6eaeba9">Push (단건) 요청 VO</a></li>
@@ -713,6 +757,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Push Message 전송 서비스 : Push Service Controller</p>
 </li>
 <li>
+<p>music-show-inner-controller : Music Show Inner Controller</p>
+</li>
+<li>
 <p>sendPushCode : Push Controller</p>
 </li>
 <li>
@@ -723,6 +770,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li>
 <p>단말 정보 등록, 수정, 삭제 : Device Info Controller</p>
+</li>
+<li>
+<p>뮤직공연 콘서트 LIVE 알람 : Music Show Controller</p>
 </li>
 <li>
 <p>최신회 알림 조회 : Latest Controller</p>
@@ -1832,6 +1882,161 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
+<h3 id="_music-show-inner-controller_resource">Music-show-inner-controller</h3>
+<div class="paragraph">
+<p>Music Show Inner Controller</p>
+</div>
+<div class="sect3">
+<h4 id="_getpushusingget_1">알람 여부 조회</h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /notify/getMusicShowPush</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_8">Parameters</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>album_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 3&lt;br&gt;자리수: 15&lt;br&gt;설명: 앨범ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>sa_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>stb_mac</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br&gt;자리수: 20&lt;br&gt;설명: 가입자 STB MAC Address</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_8">Responses</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>200</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>OK</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_16092d92d989e9748f96245bbd13a4db">InnerResponseDto«GetPushResponseDto»</a></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_example_http_request_8">Example HTTP request</h5>
+<div class="sect5">
+<h6 id="_request_path_8">Request path</h6>
+<div class="listingblock">
+<div class="content">
+<pre>/notify/getMusicShowPush</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_example_http_response_8">Example HTTP response</h5>
+<div class="sect5">
+<h6 id="_response_200_8">Response 200</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+  "code" : "string",
+  "errors" : [ {
+    "code" : "string",
+    "detailMessage" : "string",
+    "message" : "string"
+  } ],
+  "message" : "string",
+  "result" : {
+    "data" : {
+      "push_yn" : "string",
+      "start_dt" : "string",
+      "flag" : "0000",
+      "message" : "성공"
+    },
+    "dataCount" : 0,
+    "dataPage" : {
+      "page" : 0,
+      "pageCount" : 0,
+      "rowSize" : 0
+    },
+    "dataType" : "string"
+  }
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
 <h3 id="_sendpushcode_resource">SendPushCode</h3>
 <div class="paragraph">
 <p>Push Controller</p>
@@ -1850,7 +2055,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_8">Parameters</h5>
+<h5 id="_parameters_9">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -1991,7 +2196,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_8">Responses</h5>
+<h5 id="_responses_9">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -2021,9 +2226,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_8">Example HTTP request</h5>
+<h5 id="_example_http_request_9">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_8">Request path</h6>
+<h6 id="_request_path_9">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/mims/sendPushCode?push_type=G|A&amp;reg_id=M00020202284&amp;reg_type=1&amp;sa_id=500058151453&amp;send_code=P001&amp;stb_mac=001c.627e.039c</pre>
@@ -2040,9 +2245,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_8">Example HTTP response</h5>
+<h5 id="_example_http_response_9">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_8">Response 200</h6>
+<h6 id="_response_200_9">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -2079,7 +2284,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_9">Parameters</h5>
+<h5 id="_parameters_10">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -2175,7 +2380,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_9">Responses</h5>
+<h5 id="_responses_10">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -2205,9 +2410,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_9">Example HTTP request</h5>
+<h5 id="_example_http_request_10">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_9">Request path</h6>
+<h6 id="_request_path_10">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/mims/sendSms?ctn=01051603997&amp;sa_id=M15030600001&amp;sms_cd=S001&amp;stb_mac=v150.3060.0001</pre>
@@ -2216,9 +2421,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_9">Example HTTP response</h5>
+<h5 id="_example_http_response_10">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_9">Response 200</h6>
+<h6 id="_response_200_10">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -2250,7 +2455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_10">Parameters</h5>
+<h5 id="_parameters_11">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -2451,7 +2656,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_10">Responses</h5>
+<h5 id="_responses_11">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -2481,9 +2686,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_10">Example HTTP request</h5>
+<h5 id="_example_http_request_11">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_10">Request path</h6>
+<h6 id="_request_path_11">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/smartux/gw/UXSimpleJoin.php?ctn=01055805424&amp;sa_id=500058151453&amp;stb_mac=001c.627e.039c</pre>
@@ -2492,9 +2697,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_10">Example HTTP response</h5>
+<h5 id="_example_http_response_11">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_10">Response 200</h6>
+<h6 id="_response_200_11">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">"string"</code></pre>
@@ -2520,201 +2725,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h5 id="_description_11">Description</h5>
 <div class="paragraph">
 <p>deviceinfo를 등록한다.</p>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_parameters_11">Parameters</h5>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 11.1111%;">
-<col style="width: 16.6666%;">
-<col style="width: 50%;">
-<col style="width: 22.2223%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">Type</th>
-<th class="tableblock halign-left valign-middle">Name</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>access_key</strong><br>
-<em>optional</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;설명: OpenAPI 개발자 Access Key</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>agent_type</strong><br>
-<em>required</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: agent_type&lt;br&gt; ex) G:GCM, A:APNS</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>cp_id</strong><br>
-<em>optional</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;설명: OpenAPI 개발자 CP ID</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>noti_type</strong><br>
-<em>optional</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: noti_type&lt;br&gt; ex) A:전체받기/ S:구독만받기 / N:푸시 안받기</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>sa_id</strong><br>
-<em>required</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>service_type</strong><br>
-<em>required</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: service_type &lt;br&gt; ex) H : HDTV / U : 유플릭스 / C : 뮤직공연 / R : VR / G : 골프 / D : 게임방송 / B : 프로야구 / K : 아이들나라</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>Query</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>stb_mac</strong><br>
-<em>optional</em></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>&lt;br&gt;자리수: 20&lt;br&gt;설명: 맥주소</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>string</p>
-</div></div></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_responses_11">Responses</h5>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 10%;">
-<col style="width: 70%;">
-<col style="width: 20%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-middle">HTTP Code</th>
-<th class="tableblock halign-left valign-middle">Description</th>
-<th class="tableblock halign-left valign-middle">Schema</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><strong>200</strong></p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p>OK</p>
-</div></div></td>
-<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
-<p><a href="#_successresponsedto">SuccessResponseDto</a></p>
-</div></div></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect4">
-<h5 id="_example_http_request_11">Example HTTP request</h5>
-<div class="sect5">
-<h6 id="_request_path_11">Request path</h6>
-<div class="listingblock">
-<div class="content">
-<pre>/mobile/hdtv/v1/push/deviceinfo?agent_type=G&amp;sa_id=500058151453&amp;service_type=H</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_example_http_response_11">Example HTTP response</h5>
-<div class="sect5">
-<h6 id="_response_200_11">Response 200</h6>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
-  "flag" : "0000",
-  "message" : "성공"
-}</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_putdeviceinfousingput">deviceinfo 수정</h4>
-<div class="literalblock">
-<div class="content">
-<pre>PUT /mobile/hdtv/v1/push/deviceinfo</pre>
-</div>
-</div>
-<div class="sect4">
-<h5 id="_description_12">Description</h5>
-<div class="paragraph">
-<p>deviceinfo를 수정한다.</p>
 </div>
 </div>
 <div class="sect4">
@@ -2786,7 +2796,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div></div></td>
 <td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
 <p><strong>noti_type</strong><br>
-<em>required</em></p>
+<em>optional</em></p>
 </div></div></td>
 <td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
 <p>&lt;br&gt;자리수: 1&lt;br&gt;설명: noti_type&lt;br&gt; ex) A:전체받기/ S:구독만받기 / N:푸시 안받기</p>
@@ -2879,7 +2889,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h6 id="_request_path_12">Request path</h6>
 <div class="listingblock">
 <div class="content">
-<pre>/mobile/hdtv/v1/push/deviceinfo?agent_type=G&amp;noti_type=N&amp;sa_id=500058151453&amp;service_type=H</pre>
+<pre>/mobile/hdtv/v1/push/deviceinfo?agent_type=G&amp;sa_id=500058151453&amp;service_type=H</pre>
 </div>
 </div>
 </div>
@@ -2888,6 +2898,201 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h5 id="_example_http_response_12">Example HTTP response</h5>
 <div class="sect5">
 <h6 id="_response_200_12">Response 200</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+  "flag" : "0000",
+  "message" : "성공"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_putdeviceinfousingput">deviceinfo 수정</h4>
+<div class="literalblock">
+<div class="content">
+<pre>PUT /mobile/hdtv/v1/push/deviceinfo</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_description_12">Description</h5>
+<div class="paragraph">
+<p>deviceinfo를 수정한다.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_13">Parameters</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>access_key</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;설명: OpenAPI 개발자 Access Key</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>agent_type</strong><br>
+<em>required</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: agent_type&lt;br&gt; ex) G:GCM, A:APNS</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>cp_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;설명: OpenAPI 개발자 CP ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>noti_type</strong><br>
+<em>required</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: noti_type&lt;br&gt; ex) A:전체받기/ S:구독만받기 / N:푸시 안받기</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>sa_id</strong><br>
+<em>required</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>service_type</strong><br>
+<em>required</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;자리수: 1&lt;br&gt;설명: service_type &lt;br&gt; ex) H : HDTV / U : 유플릭스 / C : 뮤직공연 / R : VR / G : 골프 / D : 게임방송 / B : 프로야구 / K : 아이들나라</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>stb_mac</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt;br&gt;자리수: 20&lt;br&gt;설명: 맥주소</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_13">Responses</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>200</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>OK</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_successresponsedto">SuccessResponseDto</a></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_example_http_request_13">Example HTTP request</h5>
+<div class="sect5">
+<h6 id="_request_path_13">Request path</h6>
+<div class="listingblock">
+<div class="content">
+<pre>/mobile/hdtv/v1/push/deviceinfo?agent_type=G&amp;noti_type=N&amp;sa_id=500058151453&amp;service_type=H</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_example_http_response_13">Example HTTP response</h5>
+<div class="sect5">
+<h6 id="_response_200_13">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -2913,7 +3118,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_13">Parameters</h5>
+<h5 id="_parameters_14">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -3024,7 +3229,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_13">Responses</h5>
+<h5 id="_responses_14">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -3054,9 +3259,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_13">Example HTTP request</h5>
+<h5 id="_example_http_request_14">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_13">Request path</h6>
+<h6 id="_request_path_14">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/mobile/hdtv/v1/push/deviceinfo?agent_type=G&amp;sa_id=500058151453&amp;service_type=H</pre>
@@ -3065,9 +3270,449 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_13">Example HTTP response</h5>
+<h5 id="_example_http_response_14">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_13">Response 200</h6>
+<h6 id="_response_200_14">Response 200</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+  "flag" : "0000",
+  "message" : "성공"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_68819d7cc15900e3ee125464b076cc31">뮤직공연 콘서트 LIVE 알람</h3>
+<div class="paragraph">
+<p>Music Show Controller</p>
+</div>
+<div class="sect3">
+<h4 id="_registerpushusingpost">알람 여부 등록</h4>
+<div class="literalblock">
+<div class="content">
+<pre>POST /videolte/musicshow/push</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_15">Parameters</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>album_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 4&lt;br&gt;자리수: 15&lt;br&gt;설명: 앨범ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>album_nm</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 5&lt;br&gt;자리수: &lt;br&gt;설명: 앨범명</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>category_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 3&lt;br&gt;자리수: 5&lt;br&gt;설명: 카테고리ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>sa_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>start_dt</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 6&lt;br &gt;자리수: 12&lt;br&gt;설명: 공연시작일시</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>stb_mac</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br&gt;자리수: 20&lt;br&gt;설명: 가입자 STB MAC Address</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_15">Responses</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>200</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>OK</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_postpushresponsedto">PostPushResponseDto</a></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_example_http_request_15">Example HTTP request</h5>
+<div class="sect5">
+<h6 id="_request_path_15">Request path</h6>
+<div class="listingblock">
+<div class="content">
+<pre>/videolte/musicshow/push</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_example_http_response_15">Example HTTP response</h5>
+<div class="sect5">
+<h6 id="_response_200_15">Response 200</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+  "flag" : "0000",
+  "message" : "성공"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_getpushusingget">알람 여부 조회</h4>
+<div class="literalblock">
+<div class="content">
+<pre>GET /videolte/musicshow/push</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_16">Parameters</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>album_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 3&lt;br&gt;자리수: 15&lt;br&gt;설명: 앨범ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>sa_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>stb_mac</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br&gt;자리수: 20&lt;br&gt;설명: 가입자 STB MAC Address</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_16">Responses</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>200</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>OK</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_getpushresponsedto">GetPushResponseDto</a></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_example_http_request_16">Example HTTP request</h5>
+<div class="sect5">
+<h6 id="_request_path_16">Request path</h6>
+<div class="listingblock">
+<div class="content">
+<pre>/videolte/musicshow/push</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_example_http_response_16">Example HTTP response</h5>
+<div class="sect5">
+<h6 id="_response_200_16">Response 200</h6>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
+  "push_yn" : "string",
+  "start_dt" : "string",
+  "flag" : "0000",
+  "message" : "성공"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_releasepushusingdelete">알람 여부 삭제</h4>
+<div class="literalblock">
+<div class="content">
+<pre>DELETE /videolte/musicshow/push</pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_parameters_17">Parameters</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 11.1111%;">
+<col style="width: 16.6666%;">
+<col style="width: 50%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Type</th>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>album_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 4&lt;br&gt;자리수: 15&lt;br&gt;설명: 앨범ID</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>sa_id</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br&gt;자리수: 12&lt;br&gt;설명:가입번호</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Query</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>stb_mac</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br&gt;자리수: 20&lt;br&gt;설명: 가입자 STB MAC Address</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_responses_17">Responses</h5>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 10%;">
+<col style="width: 70%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">HTTP Code</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>200</strong></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>OK</p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_postpushresponsedto">PostPushResponseDto</a></p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_example_http_request_17">Example HTTP request</h5>
+<div class="sect5">
+<h6 id="_request_path_17">Request path</h6>
+<div class="listingblock">
+<div class="content">
+<pre>/videolte/musicshow/push</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_example_http_response_17">Example HTTP response</h5>
+<div class="sect5">
+<h6 id="_response_200_17">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -3099,7 +3744,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_14">Parameters</h5>
+<h5 id="_parameters_18">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -3303,7 +3948,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_14">Responses</h5>
+<h5 id="_responses_18">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -3333,9 +3978,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_14">Example HTTP request</h5>
+<h5 id="_example_http_request_18">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_14">Request path</h6>
+<h6 id="_request_path_18">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/smartux/comm/latest?cat_id=T3021&amp;cat_name=놀라운 대회 스타킹&amp;ctn=01055805424&amp;reg_id=500058151453&amp;sa_id=500058151453&amp;stb_mac=001c.627e.039c</pre>
@@ -3344,9 +3989,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_14">Example HTTP response</h5>
+<h5 id="_example_http_response_18">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_14">Response 200</h6>
+<h6 id="_response_200_18">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -3372,7 +4017,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_15">Parameters</h5>
+<h5 id="_parameters_19">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -3492,7 +4137,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_15">Responses</h5>
+<h5 id="_responses_19">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -3522,9 +4167,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_15">Example HTTP request</h5>
+<h5 id="_example_http_request_19">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_15">Request path</h6>
+<h6 id="_request_path_19">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/smartux/comm/latest?ctn=01055805424&amp;sa_id=500058151453&amp;stb_mac=001c.627e.039c</pre>
@@ -3533,9 +4178,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_15">Example HTTP response</h5>
+<h5 id="_example_http_response_19">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_15">Response 200</h6>
+<h6 id="_response_200_19">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -3567,7 +4212,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_parameters_16">Parameters</h5>
+<h5 id="_parameters_20">Parameters</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 11.1111%;">
@@ -3687,7 +4332,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_responses_16">Responses</h5>
+<h5 id="_responses_20">Responses</h5>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 10%;">
@@ -3717,9 +4362,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect4">
-<h5 id="_example_http_request_16">Example HTTP request</h5>
+<h5 id="_example_http_request_20">Example HTTP request</h5>
 <div class="sect5">
-<h6 id="_request_path_16">Request path</h6>
+<h6 id="_request_path_20">Request path</h6>
 <div class="listingblock">
 <div class="content">
 <pre>/smartux/comm/latest?cat_id=T3021&amp;ctn=01055805424&amp;sa_id=500058151453&amp;stb_mac=001c.627e.039c</pre>
@@ -3728,9 +4373,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect4">
-<h5 id="_example_http_response_16">Example HTTP response</h5>
+<h5 id="_example_http_response_20">Example HTTP response</h5>
 <div class="sect5">
-<h6 id="_response_200_16">Response 200</h6>
+<h6 id="_response_200_20">Response 200</h6>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code data-lang="json" class="language-json hljs">{
@@ -3925,6 +4570,75 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect2">
+<h3 id="_getpushresponsedto">GetPushResponseDto</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 61.1111%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>flag</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br/&gt;자리수: 4&lt;br/&gt;설명: 성공여부 코드값<br>
+<strong>Example</strong> : <code>"0000"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>message</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br/&gt;자리수: 50&lt;br/&gt;설명: 결과 메시지<br>
+<strong>Example</strong> : <code>"성공"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>push_yn</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>"string"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>start_dt</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>"string"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
 <h3 id="_4d8a80533b155039618f3f337203eb5a">Http Push 응답결과 DTO</h3>
 <div class="paragraph">
 <p>Http Push 에서 사용하는 공통 응답결과 DTO</p>
@@ -4064,6 +4778,73 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div></div></td>
 <td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
 <p>string</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_16092d92d989e9748f96245bbd13a4db">InnerResponseDto«GetPushResponseDto»</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 61.1111%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>code</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>"string"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>errors</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>[ "<a href="#_innerresponseerrordto">InnerResponseErrorDto</a>" ]</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>&lt; <a href="#_innerresponseerrordto">InnerResponseErrorDto</a> &gt; array</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>message</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>"string"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>result</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <a href="#_a6650ddba5f856f252d14b512c86472c">InnerResponseResultDto«GetPushResponseDto»</a></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_a6650ddba5f856f252d14b512c86472c">InnerResponseResultDto«GetPushResponseDto»</a></p>
 </div></div></td>
 </tr>
 </tbody>
@@ -4326,6 +5107,73 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </table>
 </div>
 <div class="sect2">
+<h3 id="_a6650ddba5f856f252d14b512c86472c">InnerResponseResultDto«GetPushResponseDto»</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 61.1111%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>data</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <a href="#_getpushresponsedto">GetPushResponseDto</a></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_getpushresponsedto">GetPushResponseDto</a></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>dataCount</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>0</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>integer (int32)</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>dataPage</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <a href="#_innerresponseresultpagedto">InnerResponseResultPageDto</a></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><a href="#_innerresponseresultpagedto">InnerResponseResultPageDto</a></p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>dataType</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>Example</strong> : <code>"string"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>enum (SINGLE, LIST)</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
 <h3 id="_358ba6a5b28e8addc944383ddb8d251b">InnerResponseResultDto«Http Push 응답결과 DTO»</h3>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
@@ -4576,6 +5424,51 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div></div></td>
 <td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
 <p>integer (int32)</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_postpushresponsedto">PostPushResponseDto</h3>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 16.6666%;">
+<col style="width: 61.1111%;">
+<col style="width: 22.2223%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-middle">Name</th>
+<th class="tableblock halign-left valign-middle">Description</th>
+<th class="tableblock halign-left valign-middle">Schema</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>flag</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 1&lt;br/&gt;자리수: 4&lt;br/&gt;설명: 성공여부 코드값<br>
+<strong>Example</strong> : <code>"0000"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p><strong>message</strong><br>
+<em>optional</em></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>순번: 2&lt;br/&gt;자리수: 50&lt;br/&gt;설명: 결과 메시지<br>
+<strong>Example</strong> : <code>"성공"</code></p>
+</div></div></td>
+<td class="tableblock halign-left valign-middle"><div class="content"><div class="paragraph">
+<p>string</p>
 </div></div></td>
 </tr>
 </tbody>
@@ -5418,7 +6311,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="footer">
 <div id="footer-text">
 Version 1.1.0<br>
-Last updated 2022-10-18 14:38:09 +0900
+Last updated 2022-10-24 10:23:08 +0900
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css">

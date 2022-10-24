@@ -144,7 +144,7 @@ error:
               PlaylistNotExistsException: "2009"
               LastPlaylistFolderNotDeletableException: "2010"
             musicshow:
-              ParameterOutOfRangeException: "5010"
+              MusicShowParameterOutOfRangeException: "5010"
             database:
               DuplicateKeyException: "8000"
               DataAlreadyExistsException: "8001"

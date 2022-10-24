@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -107,12 +106,15 @@ class MusicShowJpaEmRepositoryTest {
     @Test
     void getRegNoNextVal() {
 
-        mockNativeQueryMethodOfEntityManager();
-        given(repository.getRegNoNextVal()).willReturn(1000);
+        when(em.createNativeQuery(anyString())).thenReturn(query);
+        when(query.getSingleResult()).thenReturn(1);
 
-        Integer regNoNextVal = this.repository.getRegNoNextVal();
+        Integer result = repository.getRegNoNextVal();
 
-        assertThat(regNoNextVal).isEqualTo(1000);
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(1);
+
     }
+
 
 }
