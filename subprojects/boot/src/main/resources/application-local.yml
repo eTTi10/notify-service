@@ -14,32 +14,17 @@ server:
 spring:
   datasource:
     writer:
-      jdbc-url: jdbc:log4jdbc:postgresql://rds-dev-iptv-dev-iptvrs-01.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/msa_mylgdb
-      username: wmsa_rw
-      password: WASM_RW!
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      username: postgres
+      password: devadmin!
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
-      jdbc-url: jdbc:log4jdbc:postgresql://rds-dev-iptv-dev-iptvrs-01.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/msa_mylgdb
-      username: wmsa_ro
-      password: WASM_RO!
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
+      username: postgres
+      password: devadmin!
       minimum-idle: 5
       maximum-pool-size: 5
-
-  #  datasource:
-#    writer:
-#      #DEV
-#      username: postgres
-#      password: devadmin!
-#      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-#      minimum-idle: 5
-#      maximum-pool-size: 5
-#    reader:
-#      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-#      username: postgres
-#      password: devadmin!
-#      minimum-idle: 5
-#      maximum-pool-size: 5
 
   jpa:
     database: postgresql

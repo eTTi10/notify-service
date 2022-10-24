@@ -2,6 +2,7 @@ package com.lguplus.fleta.api.inner.musicshow;
 
 import com.lguplus.fleta.data.dto.GetPushResponseDto;
 import com.lguplus.fleta.service.musicshow.MusicShowService;
+import io.swagger.annotations.Api;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Api(tags = "뮤직공연 콘서트 LIVE 알람 - Inner Api")
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest
 @ContextConfiguration(classes = {MusicShowInnerController.class})
@@ -42,15 +44,6 @@ class MusicShowInnerControllerTest {
         uriVars.add("album_id", "M0118C3162PPV00");
         return uriVars;
     }
-
-    MultiValueMap<String, String> getValidQueryParams02() {
-        MultiValueMap<String, String> uriVars = new LinkedMultiValueMap<>();
-        uriVars.add("sa_id", "1000494369123456");
-        uriVars.add("stb_mac", "v010.0049.");
-        uriVars.add("album_id", "M01198F334PPV00ㄱ");
-        return uriVars;
-    }
-
 
     @Test
     @DisplayName("정상 조회 테스트")
