@@ -5,7 +5,7 @@ import com.lguplus.fleta.data.dto.AlbumProgrammingDto;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
-import com.lguplus.fleta.data.entity.PushTargetEntity;
+import com.lguplus.fleta.data.entity.PushTarget;
 import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.repository.musicshow.MusicShowRepository;
 import java.sql.Timestamp;
@@ -82,7 +82,7 @@ class MusicShowDomainServiceTest {
 
     @Test
     void postPush_insert() {
-        PushTargetEntity resultEntity = PushTargetEntity.builder()
+        PushTarget resultEntity = PushTarget.builder()
             .saId("1000494369")
             .stbMac("v010.0049.4369")
             .albumId("M01198F334TEST")
@@ -105,7 +105,7 @@ class MusicShowDomainServiceTest {
             .sendDt("202201211214")
             .build();
 
-        PushTargetEntity entity = domainService.postPush(requestDto);
+        PushTarget entity = domainService.postPush(requestDto);
 
         assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
         assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
@@ -113,7 +113,7 @@ class MusicShowDomainServiceTest {
 
     @Test
     void postPush_delete_insert() {
-        PushTargetEntity resultEntity = PushTargetEntity.builder()
+        PushTarget resultEntity = PushTarget.builder()
             .saId("1000494369")
             .stbMac("v010.0049.4369")
             .albumId("M01198F334TEST")
@@ -144,15 +144,14 @@ class MusicShowDomainServiceTest {
             .sendDt("202201211214")
             .build();
 
-        PushTargetEntity entity = domainService.postPush(requestDto);
+        PushTarget entity = domainService.postPush(requestDto);
 
-        assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
         assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
     }
 
     @Test
     void postPush_update() {
-        PushTargetEntity resultEntity = PushTargetEntity.builder()
+        PushTarget resultEntity = PushTarget.builder()
             .saId("1000494369")
             .stbMac("v010.0049.4369")
             .albumId("M01198F334TEST")
@@ -183,9 +182,8 @@ class MusicShowDomainServiceTest {
             .sendDt("202201211214")
             .build();
 
-        PushTargetEntity entity = domainService.postPush(requestDto);
+        PushTarget entity = domainService.postPush(requestDto);
 
-        assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
         assertThat(entity.getAlbumId()).isEqualTo(requestDto.getAlbumId());
     }
 
@@ -213,7 +211,7 @@ class MusicShowDomainServiceTest {
             .pushYn("Y")
             .build();
 
-        PushTargetEntity entity = PushTargetEntity.builder()
+        PushTarget entity = PushTarget.builder()
             .pKey(getKeyDto.getPKey())
             .regNo(getKeyDto.getRegNo())
             .saId(getKeyDto.getSaId())
@@ -236,7 +234,7 @@ class MusicShowDomainServiceTest {
         given(repository.getPushWithPkey(any())).willReturn(getKeyDto);
         given(repository.insertPush(any())).willReturn(entity);
 
-        PushTargetEntity resultEntity = domainService.releasePush(requestDto);
+        PushTarget resultEntity = domainService.releasePush(requestDto);
 
         assertThat(resultEntity.getPushYn()).isEqualTo("N");
     }

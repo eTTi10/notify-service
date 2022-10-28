@@ -10,7 +10,6 @@ dependencies {
     testImplementation 'org.springframework.kafka:spring-kafka-test:2.7.7'
     testImplementation 'org.mockito:mockito-inline:3.9.0'
     //implementation 'io.netty:netty-transport-native-epoll:4.1.72.Final'
-    implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '2.7.21'
 }
 

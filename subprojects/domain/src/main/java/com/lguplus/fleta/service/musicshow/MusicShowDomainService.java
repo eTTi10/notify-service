@@ -6,7 +6,7 @@ import com.lguplus.fleta.data.dto.AlbumProgrammingDto;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
-import com.lguplus.fleta.data.entity.PushTargetEntity;
+import com.lguplus.fleta.data.entity.PushTarget;
 import com.lguplus.fleta.exception.NoResultException;
 import com.lguplus.fleta.exception.subscription.SubscriberAlreadyExistsException;
 import com.lguplus.fleta.repository.musicshow.MusicShowRepository;
@@ -32,133 +32,60 @@ public class MusicShowDomainService {
         return musicShowRepository.getPush(requestDto);
     }
 
-    public PushTargetEntity postPush(PushRequestDto requestDto) {
-
-        PushTargetEntity resultEntity;
+    public PushTarget postPush(PushRequestDto requestDto) {
 
         List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming(MusicShowConstants.CATEGORY_TYPE_MOBILE, List.of(requestDto.getAlbumId()));
 
-        if (validAlbumList == null || validAlbumList.size() < 1) {
+        if (validAlbumList == null || validAlbumList.isEmpty()) {
             throw new NoResultException();
         }
 
         GetPushWithPKeyDto getKeyDto = musicShowRepository.getPushWithPkey(requestDto);
-        Integer regNo = musicShowRepository.getRegNoNextVal();
 
         if (getKeyDto == null) {
-            //insert
-            PushTargetEntity entity = PushTargetEntity.builder()
-                .pKey(CommonUtil.generatorPkey(requestDto.getSendDt()))
-                .regNo(regNo)
-                .saId(requestDto.getSaId())
-                .stbMac(requestDto.getStbMac())
-                .albumId(requestDto.getAlbumId())
-                .categoryId(requestDto.getCategoryId())
-                .serviceType(requestDto.getServiceType())
-                .msg(requestDto.getMsg())
-                .pushYn(MusicShowConstants.PUSH_YN_Y) //기존 oracle에서 default값
-                .resultCode(MusicShowConstants.RESULT_CODE_DEFAULT) //기존 oracle에서 default값
-                .regDt(Timestamp.valueOf(LocalDateTime.now())) //기존 oracle에서 default값
-                .sendDt(convertFormat(requestDto.getSendDt()))
-                .build();
-            resultEntity = musicShowRepository.insertPush(entity);
-        } else {
-            if (StringUtils.equals(getKeyDto.getPushYn(), requestDto.getPushYn())) {
-                throw new SubscriberAlreadyExistsException();
-            } else {
-                if (getKeyDto.getPKey() != CommonUtil.generatorPkey(requestDto.getSendDt())) {
-                    //deelete
-                    PushTargetEntity entity = PushTargetEntity.builder()
-                        .pKey(getKeyDto.getPKey())
-                        .saId(getKeyDto.getSaId())
-                        .stbMac(getKeyDto.getStbMac())
-                        .albumId(getKeyDto.getAlbumId())
-                        .serviceType(getKeyDto.getServiceType())
-                        .build();
-                    musicShowRepository.deletePush(entity);
-                    //insert
-                    PushTargetEntity entity2 = PushTargetEntity.builder()
-                        .pKey(CommonUtil.generatorPkey(requestDto.getSendDt()))
-                        .regNo(regNo)
-                        .saId(requestDto.getSaId())
-                        .stbMac(requestDto.getStbMac())
-                        .albumId(requestDto.getAlbumId())
-                        .categoryId(requestDto.getCategoryId())
-                        .serviceType(requestDto.getServiceType())
-                        .msg(requestDto.getMsg())
-                        .pushYn(MusicShowConstants.PUSH_YN_Y) //기존 oracle에서 default값
-                        .resultCode(MusicShowConstants.RESULT_CODE_DEFAULT) //기존 oracle에서 default값
-                        .regDt(Timestamp.valueOf(LocalDateTime.now())) //기존 oracle에서 default값
-                        .sendDt(convertFormat(requestDto.getSendDt()))
-                        .build();
-                    resultEntity = musicShowRepository.insertPush(entity2);
-                } else {
-                    //update
-                    PushTargetEntity entity = PushTargetEntity.builder()
-                        .pKey(getKeyDto.getPKey())
-                        .regNo(getKeyDto.getRegNo())
-                        .saId(getKeyDto.getSaId())
-                        .stbMac(getKeyDto.getStbMac())
-                        .albumId(getKeyDto.getAlbumId())
-                        .categoryId(getKeyDto.getCategoryId())
-                        .serviceType(getKeyDto.getServiceType())
-                        .msg(getKeyDto.getMsg())
-                        .pushYn(MusicShowConstants.PUSH_YN_Y) //const 변경
-                        .resultCode(getKeyDto.getResultCode())
-                        .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
-                        .sendDt(requestDto.getSendDt() != null ? convertFormat(requestDto.getSendDt()) : null)
-                        .modDt(Timestamp.valueOf(LocalDateTime.now()))
-                        .build();
-                    resultEntity = musicShowRepository.insertPush(entity);
-                }
-            }
+            return insertPush(requestDto);
         }
-        return resultEntity;
+
+        if (StringUtils.equals(getKeyDto.getPushYn(), requestDto.getPushYn())) {
+            throw new SubscriberAlreadyExistsException();
+        }
+
+        if (!getKeyDto.getPKey().equals(CommonUtil.generatorPkey(requestDto.getSendDt()))) {
+            deletePush(getKeyDto);
+            return insertPush(requestDto);
+        } else {
+            return updatePush(requestDto, getKeyDto, MusicShowConstants.PUSH_YN_Y);
+        }
+
     }
 
-    public PushTargetEntity releasePush(PushRequestDto requestDto) {
-
-        PushTargetEntity resultEntity;
+    public PushTarget releasePush(PushRequestDto requestDto) {
 
         List<AlbumProgrammingDto> validAlbumList = vodlookupClient.getAlbumProgramming(MusicShowConstants.CATEGORY_TYPE_MOBILE, List.of(requestDto.getAlbumId()));
 
-        if (validAlbumList == null || validAlbumList.size() < 1) {
+        if (validAlbumList == null || validAlbumList.isEmpty()) {
             throw new NoResultException();
         }
 
         GetPushWithPKeyDto getKeyDto = musicShowRepository.getPushWithPkey(requestDto);
 
-        if (getKeyDto != null) {
-            if (StringUtils.equals(getKeyDto.getPushYn(), requestDto.getPushYn())) {
-                throw new SubscriberAlreadyExistsException();
-            } else {
-                //update
-                PushTargetEntity entity = PushTargetEntity.builder()
-                    .pKey(getKeyDto.getPKey())
-                    .regNo(getKeyDto.getRegNo())
-                    .saId(getKeyDto.getSaId())
-                    .stbMac(getKeyDto.getStbMac())
-                    .albumId(getKeyDto.getAlbumId())
-                    .categoryId(getKeyDto.getCategoryId())
-                    .serviceType(getKeyDto.getServiceType())
-                    .msg(getKeyDto.getMsg())
-                    .pushYn(MusicShowConstants.PUSH_YN_N)
-                    .resultCode(getKeyDto.getResultCode())
-                    .regDt(getKeyDto.getRegDt() != null ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
-                    .sendDt(getKeyDto.getStartDt() != null ? convertFormat(getKeyDto.getStartDt()) : null)
-                    .modDt(Timestamp.valueOf(LocalDateTime.now()))
-                    .build();
-
-                resultEntity = musicShowRepository.insertPush(entity);
-            }
-        } else {
+        if (getKeyDto == null) {
             throw new NoResultException();
         }
 
-        return resultEntity;
+        if (StringUtils.equals(getKeyDto.getPushYn(), requestDto.getPushYn())) {
+            throw new SubscriberAlreadyExistsException();
+        } else {
+            return updatePush(requestDto, getKeyDto, MusicShowConstants.PUSH_YN_N);
+        }
+
     }
 
     public Timestamp convertFormat(String sendDt) {
+
+        if (StringUtils.isBlank(sendDt))
+            return null;
+
         SimpleDateFormat fromFormat = new SimpleDateFormat("yyyyMMddhhmm");
         SimpleDateFormat toFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.s");
 
@@ -173,4 +100,57 @@ public class MusicShowDomainService {
         return Timestamp.valueOf(toDate);
     }
 
+    public PushTarget insertPush(PushRequestDto requestDto) {
+        PushTarget entity = PushTarget.builder()
+            .pKey(CommonUtil.generatorPkey(requestDto.getSendDt()))
+            .regNo(musicShowRepository.getRegNoNextVal())
+            .saId(requestDto.getSaId())
+            .stbMac(requestDto.getStbMac())
+            .albumId(requestDto.getAlbumId())
+            .categoryId(requestDto.getCategoryId())
+            .serviceType(requestDto.getServiceType())
+            .msg(requestDto.getMsg())
+            .pushYn(MusicShowConstants.PUSH_YN_Y) //기존 oracle에서 default값
+            .resultCode(MusicShowConstants.RESULT_CODE_DEFAULT) //기존 oracle에서 default값
+            .regDt(Timestamp.valueOf(LocalDateTime.now())) //기존 oracle에서 default값
+            .sendDt(convertFormat(requestDto.getSendDt()))
+            .build();
+        return musicShowRepository.insertPush(entity);
+    }
+
+    public PushTarget updatePush(PushRequestDto requestDto, GetPushWithPKeyDto getKeyDto, String pushYn) {
+        String sendDt = requestDto.getSendDt();
+
+        if (pushYn.equals(MusicShowConstants.PUSH_YN_N))
+            sendDt = getKeyDto.getStartDt();
+
+        PushTarget entity = PushTarget.builder()
+            .pKey(getKeyDto.getPKey())
+            .regNo(getKeyDto.getRegNo())
+            .saId(getKeyDto.getSaId())
+            .stbMac(getKeyDto.getStbMac())
+            .albumId(getKeyDto.getAlbumId())
+            .categoryId(getKeyDto.getCategoryId())
+            .serviceType(getKeyDto.getServiceType())
+            .msg(getKeyDto.getMsg())
+            .pushYn(pushYn)
+            .resultCode(getKeyDto.getResultCode())
+            .regDt(StringUtils.isNotBlank(getKeyDto.getRegDt()) ? Timestamp.valueOf(getKeyDto.getRegDt()) : null)
+            .sendDt(convertFormat(sendDt))
+            .modDt(Timestamp.valueOf(LocalDateTime.now()))
+            .build();
+
+        return musicShowRepository.insertPush(entity);
+    }
+
+    public void deletePush(GetPushWithPKeyDto getKeyDto) {
+        PushTarget entity = PushTarget.builder()
+            .pKey(getKeyDto.getPKey())
+            .saId(getKeyDto.getSaId())
+            .stbMac(getKeyDto.getStbMac())
+            .albumId(getKeyDto.getAlbumId())
+            .serviceType(getKeyDto.getServiceType())
+            .build();
+        musicShowRepository.deletePush(entity);
+    }
 }

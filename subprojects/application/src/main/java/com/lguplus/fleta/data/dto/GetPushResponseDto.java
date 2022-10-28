@@ -4,16 +4,11 @@ import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
+import static com.lguplus.fleta.data.constant.CommonResponseConstants.*;
 
 @SuperBuilder
 @Getter
 public class GetPushResponseDto extends SuccessResponseDto {
-
-    public static final String COLSEP = "!^"; // 열 분리자 -> constants로 변경 필요
-
-    private static final String SUCCESS_FLAG = "0000";
-
-    private static final String SUCCESS_MESSAGE = "성공";
 
     /*
      * 푸시등록여부

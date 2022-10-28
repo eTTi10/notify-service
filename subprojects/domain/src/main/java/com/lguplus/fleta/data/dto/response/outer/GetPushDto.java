@@ -12,6 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetPushDto {
+
     private String albumId;
 
     private String pushYn;

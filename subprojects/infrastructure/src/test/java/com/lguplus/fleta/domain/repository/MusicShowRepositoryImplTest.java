@@ -3,7 +3,7 @@ package com.lguplus.fleta.domain.repository;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
-import com.lguplus.fleta.data.entity.PushTargetEntity;
+import com.lguplus.fleta.data.entity.PushTarget;
 import com.lguplus.fleta.provider.jpa.MusicShowJpaEmRepository;
 import com.lguplus.fleta.provider.jpa.MusicShowJpaRepository;
 import java.sql.Timestamp;
@@ -77,7 +77,7 @@ class MusicShowRepositoryImplTest {
     @Test
     void insertPush() {
 
-        PushTargetEntity entity = PushTargetEntity.builder()
+        PushTarget entity = PushTarget.builder()
             .pKey(0)
             .saId("500055344423")
             .regNo(11843)
@@ -93,7 +93,7 @@ class MusicShowRepositoryImplTest {
 
         given(jpaRepository.save(any())).willReturn(entity);
 
-        PushTargetEntity resultEntity = repositoryImpl.insertPush(entity);
+        PushTarget resultEntity = repositoryImpl.insertPush(entity);
 
         assertThat(resultEntity.getPushYn()).isEqualTo("Y");
     }
@@ -101,7 +101,7 @@ class MusicShowRepositoryImplTest {
     @Test
     void deletePush() {
 
-        PushTargetEntity entity = PushTargetEntity.builder()
+        PushTarget entity = PushTarget.builder()
             .pKey(0)
             .saId("500055344423")
             .regNo(11843)
@@ -117,7 +117,7 @@ class MusicShowRepositoryImplTest {
 
         given(jpaRepository.save(any())).willReturn(entity);
 
-        PushTargetEntity resultEntity = repositoryImpl.insertPush(entity);
+        PushTarget resultEntity = repositoryImpl.insertPush(entity);
 
         assertThat(resultEntity.getPushYn()).isEqualTo("N");
     }

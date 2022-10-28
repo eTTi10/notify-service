@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Entity
 @Table(name = "pt_cm_push_target", schema = "smartux")
-public class PushTargetEntity implements Serializable {
+public class PushTarget implements Serializable {
 
     @Column(name = "p_key")
     private Integer pKey;

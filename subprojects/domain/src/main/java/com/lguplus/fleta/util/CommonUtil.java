@@ -10,18 +10,10 @@ public class CommonUtil {
      */
     public static Integer generatorPkey(String sendDt) {
         if (StringUtils.isNotBlank(sendDt) && sendDt.length() == 12) {
-            String p_key = sendDt.substring(4, 6);
-            Integer ipkey = Integer.parseInt(p_key) % 4;
-            return ipkey;
+            String sendMonth = sendDt.substring(4, 6);
+            return Integer.parseInt(sendMonth) % 4;
         }
         return null;
     }
 
-    public static String checkNullStr(String str) {
-        if ((str == null) || (str.trim().equals("")) || (str.trim().equalsIgnoreCase("null")) || (str.trim().length() == 0) || (str.equalsIgnoreCase("undefined"))) {
-            return "";
-        } else {
-            return str.trim();
-        }
-    }
 }

@@ -3,7 +3,7 @@ package com.lguplus.fleta.domain.repository;
 import com.lguplus.fleta.data.dto.request.outer.PushRequestDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushDto;
 import com.lguplus.fleta.data.dto.response.outer.GetPushWithPKeyDto;
-import com.lguplus.fleta.data.entity.PushTargetEntity;
+import com.lguplus.fleta.data.entity.PushTarget;
 import com.lguplus.fleta.provider.jpa.MusicShowJpaEmRepository;
 import com.lguplus.fleta.provider.jpa.MusicShowJpaRepository;
 import com.lguplus.fleta.repository.musicshow.MusicShowRepository;
@@ -28,12 +28,12 @@ public class MusicShowRepositoryImpl implements MusicShowRepository {
     }
 
     @Override
-    public PushTargetEntity insertPush(PushTargetEntity entity) {
+    public PushTarget insertPush(PushTarget entity) {
         return jpaRepository.save(entity);
     }
 
     @Override
-    public void deletePush(PushTargetEntity entity) {
+    public void deletePush(PushTarget entity) {
         jpaRepository.deleteBypKeyAndSaIdAndStbMacAndAlbumIdAndServiceType(entity.getPKey(), entity.getSaId(), entity.getStbMac(), entity.getAlbumId(), entity.getServiceType());
     }
 

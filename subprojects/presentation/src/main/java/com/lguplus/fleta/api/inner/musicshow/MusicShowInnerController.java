@@ -9,14 +9,14 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(value = "/notify")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MusicShowInnerController {
 
     private final MusicShowService service;
@@ -31,9 +31,7 @@ public class MusicShowInnerController {
     public InnerResponseDto<GetPushResponseDto> getPush(@Valid PushRequestVo requestVo) {
         PushRequestDto requestDto = requestVo.makeRefinedGetRequest();
 
-        GetPushResponseDto responseDto = service.getPush(requestDto);
-
-        return InnerResponseDto.of(responseDto);
+        return InnerResponseDto.of(service.getPush(requestDto));
     }
 
 }
