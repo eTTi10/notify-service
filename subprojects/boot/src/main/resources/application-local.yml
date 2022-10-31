@@ -14,10 +14,9 @@ server:
 spring:
   datasource:
     writer:
-      #DEV
+      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
       username: postgres
       password: devadmin!
-      jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
