@@ -17,7 +17,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test boot module and Generate Docs with Gradle
-        run: ./gradlew :boot:test
+        run: ./gradlew :boot:test --tests SwaggerTest -Dspring.profiles.active=test
 
       - name: Convert swagger.html to swaggerFinal.html
         run: |
