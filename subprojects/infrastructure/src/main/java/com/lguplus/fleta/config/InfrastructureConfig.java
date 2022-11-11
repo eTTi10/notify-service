@@ -30,7 +30,6 @@ public class InfrastructureConfig {
 
     @Bean(WDS)
     public DataSource writerDataSource() {
-        log.debug(">>> hikariConfigProperties: {}", this.hikariConfigProperties.toString());
         return this.hikariConfigProperties.getWriterDataSource();
     }
 

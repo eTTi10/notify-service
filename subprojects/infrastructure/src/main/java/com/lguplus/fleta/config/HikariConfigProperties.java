@@ -1,20 +1,25 @@
 package com.lguplus.fleta.config;
 
+import com.lguplus.fleta.config.encryption.JasyptUtils;
+
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Properties;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.stereotype.Component;
 
+import java.util.Properties;
+
 @Setter
 @ToString
 @Component
 @ConfigurationProperties("spring.datasource.hikari")
+@RequiredArgsConstructor
 public class HikariConfigProperties {
+
+    private final JasyptUtils jasyptUtils;
 
     private Long connectionTimeout;
     private Long validationTimeout;
@@ -46,8 +51,8 @@ public class HikariConfigProperties {
     private HikariDataSource getHikariDataSource(String username, String password) {
         HikariDataSource hds = DataSourceBuilder.create()
             .type(HikariDataSource.class)
-            .username(username)
-            .password(password)
+            .username(this.jasyptUtils.decryptInOnlyLocalEnv(username))
+            .password(this.jasyptUtils.decryptInOnlyLocalEnv(password))
             .build();
 
         hds.setConnectionTimeout(this.connectionTimeout);

@@ -15,14 +15,14 @@ spring:
   datasource:
     writer:
       jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      username: postgres
-      password: devadmin!
+      username: ENC(O200GY14sW9KJ6kZAqzpxH48z2oqQWRNmi5jDzKa/rGkQrgMNAHnSN14yUR5c+Af)
+      password: ENC(bInqnTHoQZ1thEwxF0t0LCavzB25y3dbkehsd87sVoLfvEcesKN3n+mSd0dr/hRQ)
       minimum-idle: 5
       maximum-pool-size: 5
     reader:
       jdbc-url: jdbc:postgresql://aurora-dev-p18.cluster-ro-c2as9ee4bg3m.ap-northeast-2.rds.amazonaws.com:5432/notify_mylgdb
-      username: postgres
-      password: devadmin!
+      username: ENC(bsVTU6HilFT0iZBi4jdIAAnqkpttV3UaG4NI2yvS6xKGkNuUzNV2Dsh54BvAhj64)
+      password: ENC(yJywFK8Os/0byQiFx+YBkpipAeGdLWcPClqKwLvqKR1eljcqUufovSYRf36FL4H6)
       minimum-idle: 5
       maximum-pool-size: 5
 

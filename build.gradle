@@ -10,6 +10,11 @@ plugins {
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
 
+ext {
+    set("springCloudVersion", "2020.0.6")
+    set("querydslVersion", "5.0.0")
+}
+
 bootJar { enabled = false }
 
 
@@ -19,20 +24,6 @@ allprojects {
         mavenCentral()
     }
 }
-
-sonarqube{
-    properties {
-        property 'sonar.host.url', 'http://a3b3246d677004387a382e258f515715-86a3a782fd055d12.elb.ap-northeast-2.amazonaws.com'
-        property 'sonar.login','411e89fdfa7f856077b41c03ff6bfcefcff1239a'
-        property 'sonar.projectKey','notify'
-        property 'sonar.sources', 'src'
-        property 'sonar.language', 'java'
-        property 'sonar.coverage.exclusions', 'subprojects/boot/**, **/data/**, **/config/**, **/filter/**, **/interceptor/**, **/advice/**, **/exception/**'
-        property 'sonar.exclusions', '**/test/**,  **/*Doc*.java, **/resources/**, **/external/**'
-
-    }
-}
-
 
 subprojects {
     apply plugin: 'java'
@@ -52,6 +43,12 @@ subprojects {
         }
     }
 
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+        }
+    }
+
     ext {
         snippetsDir = file('build/generated-snippets')
         swaggerOutputDir = file("${buildDir}/swagger")
@@ -60,10 +57,10 @@ subprojects {
     }
 
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web:2.5.6'
-        implementation 'org.springframework.boot:spring-boot-starter-aop:2.5.5'
-        implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-aop'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
 
         implementation 'io.github.swagger2markup:swagger2markup:1.3.3'
         asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
@@ -74,7 +71,9 @@ subprojects {
         compileOnly 'org.projectlombok:lombok'
         annotationProcessor 'org.projectlombok:lombok'
 
-        testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
+        annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
 
@@ -91,7 +90,6 @@ subprojects {
         // 관련) MIMEConfig, import org.jvnet.mimepull.*
         implementation group: 'org.jvnet.mimepull', name: 'mimepull', version: '1.9.4'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
 
     jacoco {
@@ -352,4 +350,17 @@ task printVersion {
         // println subprojects[0].version
         println project(':boot').version
     }
+}
+
+clean {
+    delete file('subprojects/boot/out')
+    delete file('subprojects/presentation/out')
+    delete file('subprojects/application/out')
+    delete file('subprojects/domain/out')
+    delete file('subprojects/infrastructure/out')
+    delete file('subprojects/boot/src/main/generated')
+    delete file('subprojects/presentation/src/main/generated')
+    delete file('subprojects/application/src/main/generated')
+    delete file('subprojects/domain/src/main/generated')
+    delete file('subprojects/infrastructure/src/main/generated')
 }

@@ -1,9 +1,5 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.5'
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.5'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml'
     implementation 'oro:oro:2.0.8'
-}
-
-test {
-    useJUnitPlatform()
 }
