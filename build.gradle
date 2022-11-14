@@ -1,6 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.6'
@@ -15,7 +12,6 @@ bootJar { enabled = false }
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
     }
 }
@@ -54,8 +50,6 @@ subprojects {
 
     ext {
         snippetsDir = file('build/generated-snippets')
-        swaggerOutputDir = file("${buildDir}/swagger")
-        htmlOutputDir = file("${buildDir}/docs/asciidoc")
         restDocInDir = file("src/docs/asciidoc")
     }
 
@@ -65,7 +59,6 @@ subprojects {
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-        implementation 'io.github.swagger2markup:swagger2markup:1.3.3'
         asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         implementation "io.springfox:springfox-swagger2:2.9.2"
         implementation "io.springfox:springfox-swagger-ui:2.9.2"
@@ -192,10 +185,6 @@ subprojects {
 
     test {
         // Jacoco 실행 시, 지정한 Profile로 실행
-        if (project.name == "boot") {
-            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
-            finalizedBy 'asciidoctor'
-        }
         if (System.properties.containsKey('spring.profiles.active')) {
             String activeProfile = System.properties['spring.profiles.active']
             println "profile: $activeProfile"
@@ -213,9 +202,6 @@ subprojects {
     asciidoctor {
         dependsOn test
         configurations 'asciidoctorExtensions'
-        if (project.name == "boot") {
-            sourceDir = swaggerOutputDir
-        }
         sources{
             include('**/*.adoc')
         }
@@ -240,34 +226,6 @@ subprojects {
 
     build {
         dependsOn copyDocument
-    }
-
-    task convertDocs {
-        doFirst {
-            String outputDir = htmlOutputDir
-            boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
-
-            if (!factor) {
-                println "Found swagger.html: start to converting works."
-                BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(outputDir + "/swagger.html"))
-                BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir + "/swaggerFinal.html"))
-
-                bufferedReader.lines().forEach(line -> {
-                    line = line.replaceAll("&lt;", "<").replaceAll("&gt;", ">")
-
-                    try {
-                        writer.write(line)
-                        writer.newLine()
-                    } catch (IOException e) {
-                        throw new RuntimeException(e)
-                    }
-                })
-                writer.flush()
-                writer.close()
-            } else {
-                println "can't convert swagger.html: the file is not exist."
-            }
-        }
     }
 
     testlogger {
