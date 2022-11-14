@@ -3,16 +3,13 @@ package com.lguplus.fleta.service.send;
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
-import com.lguplus.fleta.data.dto.SaIdDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
-import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
-import com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException;
 import com.lguplus.fleta.exception.push.PushEtcException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
@@ -25,7 +22,6 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -205,7 +201,14 @@ class PushDomainServiceTest {
                 "apns.payload.body", "",
                 "apns.payload.item", "",
                 "param.list", "svc_id|name|service_type|ctn|intent_url|link_flag",
-                ", pos.send", ""));
+                ", pos.send", ""),
+            "termsAgree", Map.of(
+                    "gcm.payload.body", "\"result\":{\"noti_type\":\"SERVICE_AGREE\",\"service_push_status\":\"[+service_push_status]\"}",
+                    "apns.payload.body", "\"body\":\"알림 설정이 변경되었습니다\"",
+                    "apns.payload.item", "cm!^SERVICE_AGREE|[+service_push_status]",
+                    "param.list", "service_push_status",
+                    ", pos.send", "")
+        );
     }
 
 
@@ -707,6 +710,35 @@ class PushDomainServiceTest {
             .build();
 
         assertDoesNotThrow(() -> pushDomainService.sendPushCode(sendPushCodeRequestDto));
+    }
+
+
+    @Test
+    @DisplayName("단말 종류에 따른 push requestDto 조립이 정상적으로 되는지 확인")
+    void getPushServiceInfo() {
+        //given
+        doReturn(Optional.of(serviceTargetMap.get("default"))).when(sendPushCodeProps).findMapByServiceType("default");
+        doReturn(Optional.of(sendCodeMap.get("termsAgree"))).when(sendPushCodeProps).findMapBySendCode("termsAgree");
+
+        HttpPushSingleRequestDto pushRequestDto = HttpPushSingleRequestDto.builder()
+                .pushType("G")
+                .users(List.of("M14080700169"))
+                .items(List.of("\"cm!^SERVICE_AGREE|Y\""))
+                .message("\"body\":\"알림 설정이 변경되었습니다\"")
+                .serviceId("30011")
+                .applicationId("lguplushdtvgcm")
+                .build();
+
+        HttpPushRequestDto httpPushRequestDto = HttpPushRequestDto.builder()
+                .saId("M14080700169")
+                .reserve(Map.of("service_push_status", "\"Y\""))
+                .items(List.of(""))
+                .sendCode("termsAgree")
+                .serviceType("H")
+                .build();
+
+        HttpPushSingleRequestDto pushServiceInfo = pushDomainService.getPushServiceInfo(httpPushRequestDto, "G");
+        assertThat(pushServiceInfo.getUsers().get(0)).isEqualTo("M14080700169");
     }
 
 }

@@ -316,10 +316,6 @@ project(':application') {
         implementation project(':infrastructure')
     }
     bootJar { enabled = false }
-    test {
-        exclude '**/*'
-        useJUnitPlatform()
-    }
 }
 
 project(':domain') {
@@ -327,10 +323,6 @@ project(':domain') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
-    test {
-        exclude '**/*'
-        useJUnitPlatform()
-    }
 }
 
 project(':infrastructure') {
@@ -339,10 +331,6 @@ project(':infrastructure') {
         testImplementation project(':boot')
     }
     bootJar { enabled = false }
-    test {
-        exclude '**/*'
-        useJUnitPlatform()
-    }
 }
 
 task printVersion {

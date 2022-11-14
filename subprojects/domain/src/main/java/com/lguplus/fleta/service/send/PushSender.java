@@ -7,6 +7,7 @@ import com.lguplus.fleta.data.dto.SaIdDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.PushServiceResultDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
@@ -479,12 +480,6 @@ public class PushSender {
 
         checkGCMBody(pushInfoMap);
 
-        //serviceType 에 따라 다른 appId와 serviceId를 가져오며 serviceType 이 빈 값이거나 H 일경우  default 값을 셋팅한다
-        Map<String, String> appInfoDefaultMap = getAppDefaultMap();
-
-        //serviceType에 따라 다른 appId와 serviceId를 가져온다
-        Map<String, String> appInfoMap = sendPushCodeProps.findMapByServiceType(serviceTarget).orElse(Map.of());
-
         String serviceId = getServiceId(serviceTarget,pushType);
         String applicationId = getApplicationId(serviceTarget,pushType);
         String payload = pushInfoMap.get(KEY_GCM_PAYLOAD_BODY);
@@ -520,6 +515,54 @@ public class PushSender {
         return PushRequestSingleDto.builder().applicationId(extraApplicationId).serviceId(extraServiceId).pushType("L").message(payload).regId(registrationId).items(itemsExtra).build();
     }
 
+
+    /**
+     * httpSingle 푸시 전문 조립
+     */
+    public HttpPushSingleRequestDto getPushRequestDto(HttpPushRequestDto httpPushDeviceRequestDto, String agentType){
+        Map<String, String> paramMap = httpPushDeviceRequestDto.getReserve();
+        String applicationId = "";
+        String serviceId = "";
+        String payload = "";
+        List<String> items = httpPushDeviceRequestDto.getItems();
+
+        Map<String, String> mapBySendCode = sendPushCodeProps.findMapBySendCode(httpPushDeviceRequestDto.getSendCode()).orElse(Map.of());
+        checkGCMBody(mapBySendCode);
+        String paramList = mapBySendCode.get(KEY_PARAM_LIST);
+        String[] pushParams = paramList.split("\\|");
+        int paramSize = pushParams.length;
+
+        //serviceType에 따라 다른 appId와 serviceId를 가져온다
+        String serviceType = httpPushDeviceRequestDto.getServiceType().equals("H") ? "default" : httpPushDeviceRequestDto.getServiceType();
+        Map<String, String> mapByApplicationInfo = sendPushCodeProps.findMapByServiceType(serviceType).orElse(Map.of());
+
+        if(agentType.equals("G")){
+            payload = mapBySendCode.get(KEY_GCM_PAYLOAD_BODY);
+            payload = replacePayload(paramMap, pushParams, paramSize, payload);
+            applicationId = mapByApplicationInfo.get(KEY_GCM_APPID);
+            serviceId = mapByApplicationInfo.get(KEY_GCM_SERVICE_ID);
+        }else if(agentType.equals("A")){
+            payload = mapBySendCode.get(KEY_APNS_PAYLOAD_BODY);
+            String payloadItem = mapBySendCode.get(KEY_APNS_PAYLOAD_ITEM);
+            payloadItem = replacePayload(paramMap, pushParams, paramSize, payloadItem);
+
+//            APNS 일 경우 items 의 맨 앞에 payloadItem 을 끼워 넣는다.
+            items.add(0, payloadItem);
+
+            applicationId = mapByApplicationInfo.get(KEY_APNS_APPID);
+            serviceId = mapByApplicationInfo.get(KEY_APNS_SERVICE_ID);
+        }
+
+        return HttpPushSingleRequestDto.builder()
+                .applicationId(applicationId)
+                .serviceId(serviceId)
+                .pushType(agentType)
+                .message(payload)
+                .items(items)
+                .users(List.of(httpPushDeviceRequestDto.getSaId()))
+                .build();
+    }
+
     private String replacePayload(Map<String, String> paramMap, String[] pushParams, int paramSize, String payload) {
         for (int index = 0; index < paramSize; index++) {
             try {
@@ -530,6 +573,8 @@ public class PushSender {
         }
         return payload;
     }
+
+
 
     /**
      * sendCode 체크

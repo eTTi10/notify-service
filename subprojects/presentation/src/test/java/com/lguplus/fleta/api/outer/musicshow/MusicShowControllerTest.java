@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("MusicShowController 테스트 ")
 class MusicShowControllerTest {
 
-    private static final String URL_TEMPLATE = "/videolte/musicshow/push";
+    private static final String URL_TEMPLATE = "/mobile/videolte/musicshow/push";
 
     @Autowired
     private MockMvc mockMvc;
