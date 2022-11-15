@@ -4,14 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Configuration
 @RequiredArgsConstructor
@@ -35,14 +38,13 @@ public class DataSourceConfig {
     @Bean
     @DependsOn({WDS, RDS})
     public DataSource routingDataSource(@Qualifier(WDS) DataSource writerDataSource, @Qualifier(RDS) DataSource readDataSource) {
-        Map<Object, Object> datasourceMap = new HashMap<>();
-        datasourceMap.put("writer", writerDataSource);
-        datasourceMap.put("reader", readDataSource);
+        Map<Object, Object> targetDataSources = new HashMap<>();
+        targetDataSources.put(TargetDataSource.WRITE, writerDataSource);
+        targetDataSources.put(TargetDataSource.READ, readDataSource);
 
         CustomRoutingDataSource routingDataSource = new CustomRoutingDataSource();
-        routingDataSource.setTargetDataSources(datasourceMap);
+        routingDataSource.setTargetDataSources(targetDataSources);
         routingDataSource.setDefaultTargetDataSource(writerDataSource);
-
         return routingDataSource;
     }
 
@@ -60,4 +62,18 @@ public class DataSourceConfig {
         return transactionManager;
     }
 
+    enum TargetDataSource {
+        WRITE, READ
+    }
+
+    @Slf4j
+    static class CustomRoutingDataSource extends AbstractRoutingDataSource {
+
+        @Override
+        protected Object determineCurrentLookupKey() {
+            boolean readOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
+            log.debug(">>> readOnly: {}", readOnly);
+            return readOnly ? TargetDataSource.READ : TargetDataSource.WRITE;
+        }
+    }
 }
