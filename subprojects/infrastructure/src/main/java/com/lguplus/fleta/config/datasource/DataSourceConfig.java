@@ -1,0 +1,63 @@
+package com.lguplus.fleta.config.datasource;
+
+import java.util.HashMap;
+import java.util.Map;
+import javax.sql.DataSource;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+@RequiredArgsConstructor
+public class DataSourceConfig {
+
+    private static final String WDS = "writerDataSource";
+    private static final String RDS = "readerDataSource";
+
+    private final HikariConfigProperties hikariConfigProperties;
+
+    @Bean(WDS)
+    public DataSource writerDataSource() {
+        return this.hikariConfigProperties.getWriterDataSource();
+    }
+
+    @Bean(RDS)
+    public DataSource readDataSource() {
+        return this.hikariConfigProperties.getReaderDataSource();
+    }
+
+    @Bean
+    @DependsOn({WDS, RDS})
+    public DataSource routingDataSource(@Qualifier(WDS) DataSource writerDataSource, @Qualifier(RDS) DataSource readDataSource) {
+        Map<Object, Object> datasourceMap = new HashMap<>();
+        datasourceMap.put("writer", writerDataSource);
+        datasourceMap.put("reader", readDataSource);
+
+        CustomRoutingDataSource routingDataSource = new CustomRoutingDataSource();
+        routingDataSource.setTargetDataSources(datasourceMap);
+        routingDataSource.setDefaultTargetDataSource(writerDataSource);
+
+        return routingDataSource;
+    }
+
+    @Primary
+    @Bean
+    @DependsOn("routingDataSource")
+    public DataSource lazyConnectionDataSource(DataSource routingDataSource) {
+        return new LazyConnectionDataSourceProxy(routingDataSource);
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(@Qualifier("lazyConnectionDataSource") DataSource lazyConnectionDataSource) {
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setDataSource(lazyConnectionDataSource);
+        return transactionManager;
+    }
+
+}

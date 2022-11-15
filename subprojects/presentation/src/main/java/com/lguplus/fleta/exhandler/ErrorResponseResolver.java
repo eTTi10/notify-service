@@ -16,6 +16,7 @@ import javax.validation.metadata.ConstraintDescriptor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
@@ -62,7 +63,7 @@ public class ErrorResponseResolver {
      */
     public ErrorResponseResolver(final StandardEnvironment environment) {
 
-        final PropertiesPropertySource propertySource = (PropertiesPropertySource)
+        final MapPropertySource propertySource = (MapPropertySource)
             environment.getPropertySources().get("errors");
         if (propertySource == null) {
             throw new IllegalStateException("Error properties file not found.");

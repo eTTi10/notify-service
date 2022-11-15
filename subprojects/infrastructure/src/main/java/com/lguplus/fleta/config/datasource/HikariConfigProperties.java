@@ -1,6 +1,4 @@
-package com.lguplus.fleta.config;
-
-import com.lguplus.fleta.config.encryption.JasyptUtils;
+package com.lguplus.fleta.config.datasource;
 
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.*;
@@ -16,10 +14,7 @@ import java.util.Properties;
 @ToString
 @Component
 @ConfigurationProperties("spring.datasource.hikari")
-@RequiredArgsConstructor
 public class HikariConfigProperties {
-
-    private final JasyptUtils jasyptUtils;
 
     private Long connectionTimeout;
     private Long validationTimeout;
@@ -48,21 +43,6 @@ public class HikariConfigProperties {
     @Value("${spring.datasource.reader.maximum-pool-size:10}")
     private Integer readerMaxPoolSize;
 
-    private HikariDataSource getHikariDataSource(String username, String password) {
-        HikariDataSource hds = DataSourceBuilder.create()
-            .type(HikariDataSource.class)
-            .username(this.jasyptUtils.decryptInOnlyLocalEnv(username))
-            .password(this.jasyptUtils.decryptInOnlyLocalEnv(password))
-            .build();
-
-        hds.setConnectionTimeout(this.connectionTimeout);
-        hds.setValidationTimeout(this.validationTimeout);
-        hds.setLeakDetectionThreshold(this.leakDetectionThreshold);
-        hds.setDataSourceProperties(dataSourceProperties);
-
-        return hds;
-    }
-
     public HikariDataSource getWriterDataSource() {
         HikariDataSource hds = this.getHikariDataSource(this.writerUsername, this.writerPassword);
         hds.setJdbcUrl(this.writerJdbcUrl);
@@ -82,6 +62,21 @@ public class HikariConfigProperties {
         hds.setJdbcUrl(this.readerJdbcUrl);
         hds.setMinimumIdle(this.readerMinIdle);
         hds.setMaximumPoolSize(this.readerMaxPoolSize);
+        return hds;
+    }
+
+    private HikariDataSource getHikariDataSource(String username, String password) {
+        HikariDataSource hds = DataSourceBuilder.create()
+            .type(HikariDataSource.class)
+            .username(username)
+            .password(password)
+            .build();
+
+        hds.setConnectionTimeout(this.connectionTimeout);
+        hds.setValidationTimeout(this.validationTimeout);
+        hds.setLeakDetectionThreshold(this.leakDetectionThreshold);
+        hds.setDataSourceProperties(dataSourceProperties);
+
         return hds;
     }
 
