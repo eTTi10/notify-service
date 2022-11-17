@@ -2,7 +2,11 @@ name: docsCI
 
 on:
   push:
-    branches: [ develop ]
+    branches: develop
+    paths-ignore:
+      - '.github/**'
+      - '.gitignore'
+      - 'README.md'
 
 env:
   PROFILE_PATH: subprojects/boot/src/main/resources/application-test.yml
