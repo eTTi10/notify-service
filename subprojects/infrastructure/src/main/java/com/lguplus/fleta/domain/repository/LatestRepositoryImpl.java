@@ -59,7 +59,7 @@ public class LatestRepositoryImpl implements LatestRepository {
             rDate(new Date()).
             categoryGb(latestRequestDto.getCategoryGb()).
             build();
-        return latestJpaRepository.save(entity);
+        return latestJpaRepository.saveAndFlush(entity);
     }
 
 }
