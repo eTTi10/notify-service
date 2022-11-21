@@ -25,7 +25,7 @@ public class HttpPushRequestVo {
 
     @NotBlank
     @JsonProperty("sa_id")
-    @ApiModelProperty(position = 2, example = "1000000871", value = "가입자 번호")
+    @ApiModelProperty(position = 2, example = "\"1000000871\"", value = "가입자 번호", dataType = "string")
     private String saId;
 
     @NotBlank
@@ -33,14 +33,13 @@ public class HttpPushRequestVo {
     @ApiModelProperty(position = 3, example = "termsAgree", value = "push.yml에 미리정의되어있는 값")
     private String sendCode;
 
-//    @NotBlank
     @JsonProperty("items")
     @ApiModelProperty(position = 5, example = "[\"badge!^1\", \"sound!^ring.caf\", \"cm!^aaaa\"]", value = "추가할 항목(name!^value)")
     private List<String> items;
 
-//    @NotBlank
+    @NotEmpty
     @JsonProperty("reserve")
-    @ApiModelProperty(position = 6, example = "service_push_status=Y", value = "push.yml에 미리정의되어있는 paramList 값")
+    @ApiModelProperty(position = 6, example = "{\"service_push_status\":\"Y\"}", value = "push.yml에 미리정의되어있는 paramList 값")
     private Map<String, String> reserve;
 
 
