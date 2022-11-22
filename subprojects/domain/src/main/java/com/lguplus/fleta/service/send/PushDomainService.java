@@ -2,6 +2,8 @@ package com.lguplus.fleta.service.send;
 
 import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.outer.SendPushCodeRequestDto;
 import com.lguplus.fleta.data.dto.response.SendPushResponseDto;
 import com.lguplus.fleta.properties.SendPushCodeProps;
@@ -45,4 +47,11 @@ public class PushDomainService {
         return pushSender.sendPushCode(sendPushCodeRequestDto);
     }
 
+
+    public HttpPushSingleRequestDto getPushServiceInfo(HttpPushRequestDto httpPushRequestDto, String agentType) {
+        PushSender pushSender = new PushSender(httpSinglePushDomainService
+                , pushSingleDomainService, personalizationDomainClient, subscriberDomainClient
+                , sendPushCodeProps, fcmExtraSend, extraServiceId, extraApplicationId);
+        return pushSender.getPushRequestDto(httpPushRequestDto, agentType);
+    }
 }

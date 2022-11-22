@@ -148,6 +148,7 @@ error:
             database:
               DuplicateKeyException: "8000"
               DataAlreadyExistsException: "8001"
+              DataNotExistsInnerException: "8002"
               DataNotExistsException: "8002"
               DatabaseException: "8999"
     java:

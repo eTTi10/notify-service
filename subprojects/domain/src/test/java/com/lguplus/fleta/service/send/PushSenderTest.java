@@ -4,6 +4,7 @@ import com.lguplus.fleta.client.PersonalizationDomainClient;
 import com.lguplus.fleta.client.SubscriberDomainClient;
 import com.lguplus.fleta.data.dto.RegIdDto;
 import com.lguplus.fleta.data.dto.SaIdDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestItemDto;
 import com.lguplus.fleta.data.dto.request.inner.PushRequestSingleDto;
@@ -17,21 +18,23 @@ import com.lguplus.fleta.exception.push.PushEtcException;
 import com.lguplus.fleta.properties.SendPushCodeProps;
 import com.lguplus.fleta.service.httppush.HttpSinglePushDomainService;
 import com.lguplus.fleta.service.push.PushSingleDomainService;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
+
 import lombok.extern.slf4j.Slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doReturn;
@@ -47,6 +50,8 @@ class PushSenderTest {
 
     HttpPushSingleRequestDto httpPushSingleRequestDto;
     SendPushCodeRequestDto sendPushCodeRequestDto;
+
+    HttpPushRequestDto httpPushRequestDto;
 
     HttpPushResponseDto httpPushResponseDto;
 
@@ -116,6 +121,15 @@ class PushSenderTest {
             .message(sMessage)
             .build();
 
+        List<String> itemList = new ArrayList<>();
+        httpPushRequestDto = HttpPushRequestDto.builder()
+                .saId("M14080700169")
+                .reserve(Map.of("service_push_status", "\"Y\""))
+                .items(itemList)
+                .sendCode("termsAgree")
+                .serviceType("H")
+                .build();
+
         serviceTargetMap = Map.of(
             "default", Map.of(
                 "gcm.appid", "hdtv_GCM01",
@@ -148,7 +162,9 @@ class PushSenderTest {
                 "gcm.appid", "smart_uxapp_fcm",
                 "gcm.serviceid", "30128",
                 "apns.appid", "smart_uxapp_fcm",
-                "apns.serviceid", "30128"));
+                "apns.serviceid", "30128"),
+                "empty", Collections.emptyMap(),
+                "H", Collections.emptyMap());
 
         sendCodeMap = Map.of(
             "P001", Map.of(
@@ -201,11 +217,18 @@ class PushSenderTest {
                 "param.list", "album_id|album_series|cate_series|name|duration|playtime|service_type|ctn|intent_url|link_flag",
                 "pos.send", ""),
             "T003", Map.of(
-                "gcm.payload.body", "\"result\":{\"noti_type\":\"FUP\",\"cont_type\":\"REAL\",\"svc_id\":\"[+svc_id]\",\"name\":\"[+name]\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"data\":{\"LINK_FLAG\":\"[+link_flag]\", \"intent_url\":\"[+intent_url]\"}}",
-                "apns.payload.body", "",
-                "apns.payload.item", "",
-                "param.list", "svc_id|name|service_type|ctn|intent_url|link_flag",
-                ", pos.send", ""));
+               "gcm.payload.body", "\"result\":{\"noti_type\":\"FUP\",\"cont_type\":\"REAL\",\"svc_id\":\"[+svc_id]\",\"name\":\"[+name]\",\"service_type\":\"[+service_type]\",\"ctn\":\"[+ctn]\",\"data\":{\"LINK_FLAG\":\"[+link_flag]\", \"intent_url\":\"[+intent_url]\"}}",
+               "apns.payload.body", "",
+               "apns.payload.item", "",
+               "param.list", "svc_id|name|service_type|ctn|intent_url|link_flag",
+               ", pos.send", ""),
+             "termsAgree", Map.of(
+                "gcm.payload.body", "\"result\":{\"noti_type\":\"SERVICE_AGREE\",\"service_push_status\":\"[+service_push_status]\"}",
+                "apns.payload.body", "\"body\":\"알림 설정이 변경되었습니다\"",
+                "apns.payload.item", "cm!^SERVICE_AGREE|[+service_push_status]",
+                "param.list", "service_push_status",
+                ", pos.send", "")
+        );
     }
 
 
@@ -740,6 +763,20 @@ class PushSenderTest {
     }
 
     @Test
+    @DisplayName("InvalidSendPushCodeException 처리가 잘되는 지 테스트")
+    void checkInvalidSendPushCode_case() {
+
+        //given
+        Map<String, String> pushInfoMap = new HashMap<>();
+        pushInfoMap.put("gcm.payload", "tesst");
+
+        Exception exception = assertThrows(InvalidSendPushCodeException.class, () -> {
+            pushSender.checkGCMBody(pushInfoMap);
+        });
+        assertThat(exception.getClass().getName()).isEqualTo("com.lguplus.fleta.exception.httppush.InvalidSendPushCodeException");
+    }
+
+    @Test
     @DisplayName("pushType이 APNS일 경우 requestDto조립 테스트")
     void getApnsRequestDto() {
 
@@ -935,4 +972,38 @@ class PushSenderTest {
 
         assertDoesNotThrow(() -> pushSender.sendPushCode(sendPushCodeRequestDto));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "G, default",
+            "G, empty",
+            "A, default",
+            "A, empty",
+    })
+    void getPushRequestDto(String agentType, String serviceType) {
+        ReflectionTestUtils.setField(httpPushRequestDto, "serviceType", serviceType);
+
+        //given
+        doReturn(Optional.of(serviceTargetMap.get(serviceType))).when(sendPushCodeProps).findMapByServiceType(serviceType);
+        doReturn(Optional.of(sendCodeMap.get("termsAgree"))).when(sendPushCodeProps).findMapBySendCode("termsAgree");
+
+        //when
+        HttpPushSingleRequestDto pushServiceRequestDto = pushSender.getPushRequestDto(httpPushRequestDto, agentType);
+
+        assertThat(pushServiceRequestDto.getUsers().get(0)).isEqualTo("M14080700169");
+    }
+
+    @Test
+    void getPushRequestDto_case2() {
+        //given
+        doReturn(Optional.of(serviceTargetMap.get("default"))).when(sendPushCodeProps).findMapByServiceType("default");
+        doReturn(Optional.of(sendCodeMap.get("termsAgree"))).when(sendPushCodeProps).findMapBySendCode("termsAgree");
+
+        //when
+        HttpPushSingleRequestDto pushServiceRequestDto = pushSender.getPushRequestDto(httpPushRequestDto, "Q");
+
+        assertThat(pushServiceRequestDto.getUsers().get(0)).isEqualTo("M14080700169");
+    }
+
+
 }

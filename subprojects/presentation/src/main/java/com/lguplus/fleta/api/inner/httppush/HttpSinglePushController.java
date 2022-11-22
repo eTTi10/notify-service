@@ -1,9 +1,11 @@
 package com.lguplus.fleta.api.inner.httppush;
 
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
+import com.lguplus.fleta.data.dto.request.inner.HttpPushRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
 import com.lguplus.fleta.data.dto.response.inner.InnerResponseDto;
 import com.lguplus.fleta.data.mapper.HttpPushSingleMapper;
+import com.lguplus.fleta.data.vo.HttpPushRequestVo;
 import com.lguplus.fleta.data.vo.HttpPushSingleRequestVo;
 import com.lguplus.fleta.service.httppush.HttpSinglePushService;
 import io.swagger.annotations.Api;
@@ -51,6 +53,20 @@ public class HttpSinglePushController {
 
         // 성공
         return InnerResponseDto.of(httpSinglePushService.requestHttpPushSingle(httpPushSingleRequestDto));
+    }
+
+    /**
+     * 단말 정보 조회 및 푸시 등록
+     * @param request
+     * @return
+     */
+    @ApiOperation(value = "단말 정보 조회 및 푸시 등록", notes = "단말 정보 조회 후 푸시를 등록한다")
+    @PostMapping(value = "/httppush/getdeviceinfosAndsingle")
+    public InnerResponseDto<HttpPushResponseDto> getDeviceInfosAndPushRequest(@RequestBody @Valid HttpPushRequestVo request) {
+        log.debug("HttpSinglePushController.getDeviceInfosAndPushRequest - {}:{}", "getDeviceInfosAndPushRequest", request);
+        HttpPushRequestDto requestDto = request.convert();
+
+        return InnerResponseDto.of(httpSinglePushService.getDeviceInfosAndPushRequest(requestDto));
     }
 
 }

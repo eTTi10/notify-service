@@ -15,19 +15,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 @WebMvcTest
 @ContextConfiguration(classes = {HttpSinglePushController.class
     , ArgumentResolverConfig.class
@@ -71,6 +71,41 @@ class HttpSinglePushControllerTest {
             .andExpect(status().isOk())
             .andDo(print())
             .andReturn();
+
+        String response = mvcResult.getResponse().getContentAsString();
+
+        // then
+        assertThat(response).contains(SUCCESS_CODE);    // 성공 코드가 있는지 확인
+    }
+
+    @Test
+    @DisplayName("단말 정보 조회 및 푸시 성공 정상 케이스")
+    void testGetDeviceInfosAndPushRequest() throws Exception {
+        // given
+        HttpPushResponseDto httpPushResponseDto = HttpPushResponseDto.builder().build();
+
+        given(httpSinglePushService.getDeviceInfosAndPushRequest(any())).willReturn(httpPushResponseDto);
+
+        Map<String, Object> queryParams = new HashMap<>();
+
+        Map<String, String> paramsList = new HashMap<>();
+        paramsList.put("service_push_status", "\"Y\"");
+
+        queryParams.put("service_type", "H");
+        queryParams.put("sa_id", "M14080700169");
+        queryParams.put("send_code", "termsAgree");
+        queryParams.put("items", List.of("\"badge!^1\""));
+        queryParams.put("reserve", paramsList);
+
+        String requestContent = objectMapper.writeValueAsString(queryParams);
+
+        MvcResult mvcResult = mockMvc.perform(post("/notify/httppush/getdeviceinfosAndsingle")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("UTF-8")
+                        .content(requestContent)
+                ).andExpect(status().isOk())
+                .andReturn();
 
         String response = mvcResult.getResponse().getContentAsString();
 

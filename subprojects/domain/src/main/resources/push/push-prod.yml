@@ -113,49 +113,50 @@ push:
   # LGUPUSH_OLD : LGUPUSH 초기버전 연동
   ########################
   service:
-    - id: "00007"
+    - id: "20002"
       name: MIMS(IPTV)
       type: LGUPUSH_OLD
       password: smartux
-    - id: "30022"
+    - id: "20019"
       name: 세컨드TV
-      password: lguplussecondtv
-    - id: "30011"
+      password: 2ndtv_GCM1
+    - id: "20014"
       name: HDTV Android
-      password: lguplushdtvgcm
-    - id: "30021"
+      password: hdtv_GCM01
+    - id: "30005"
       name: HDTV iOS
-      password: lguplushdtvapns
-    - id: "30015"
+      password: hdtv_APNS1
+    - id: "20015"
       name: UFLIX Android
-      password: lguplusuflix
-    - id: "30024"
+      password: ucine_GCM1
+    - id: "30006"
       name: UFLIX iOS
-      password: lguplusuflixapns
+      password: uflix_APNS
     - id: "21009"
       name: 프로야구 Android
       password: baseball_FCM1
     - id: "30043"
       name: 프로야구 IOS
       password: baseball_APNS1
-    - id: "30105"
+    - id: "20057"
       name: GOLF Android
-      password: ugolf_GCM
-    - id: "30106"
+      password: Ugolf_GCM1
+    - id: "30035"
       name: GOLF iOS
-      password: ugolf_APNS
-    - id: "30104"
+      password: Ugolf_APNS1
+    - id: "20056"
       name: 뮤직공연 Android
-      password: musicshow_gcm
-    - id: "30107"
+      password: liveU_GCM1
+    - id: "30034"
       name: 뮤직공연 iOS
-      password: musicshow_apns
-    - id: "30112"
+      password: liveU_APNS1
+    - id: "20063"
       name: VR Android
-      password: uvrapp_gcm
-    - id: "30125"
-      name: GAME Android
-      password: lguplus_game_live
+      password: uVR_GCM1
+# 서비스 종료
+#    - id: "30125"
+#      name: GAME Android
+#      password: lguplus_game_live
     - id: "21006"
       name: Push Module work_2020.03.04
       password: UTVseamless_FCM1
@@ -165,9 +166,9 @@ push:
     - id: "30044"
       name: 아이들나라 IOS
       password: mobilekids_APNS1
-    - id: "30128"
-      name: FCM
-      password: smart_uxapp_fcm
+    - id: "30046"
+      name: VR IOS
+      password: uVR_APNS1
 
   # FCM POS추가발송대상
   fcm:
@@ -189,8 +190,6 @@ push:
           item: "cm!^PA_TM|[+address]|[+unumber]|[+req_date]|[+ctn]|[+trans_id]"
       param:
         list: "address|unumber|req_date|ctn|trans_id"
-      pos:
-        send: Y
     ###### U+tv -> 모바일tv VOD 이어보기 정보 알림 ######
     - sendcode: P002
       gcm:
@@ -202,8 +201,6 @@ push:
           item: "cm!^MFUP|VOD|[+album_id]|[+link_flag]|[+name]|[+reqtime]|[+playtime]|[+intent_url]"
       param:
         list: "album_id|link_flag|name|reqtime|playtime|intent_url"
-      pos:
-        send: N
     ###### 모바일앱으로 실시간 이어보기 ######
     - sendcode: P003
       gcm:
@@ -219,24 +216,24 @@ push:
     - sendcode: C001
       gcm:
         payload:
-          body: "\"result\":{\"noti_type\":\"PA_COMPL\",\"service_type\":\"[+service_type]\"}"
+          body: "\"result\":{\"noti_type\":\"PA_COMPL\",\"service_type\":\"[+service_type]\",\"link\":\"[+link]\",\"profile_id\":\"[+profile_id]\"}"
       apns:
         payload:
           body: "\"body\":\"U+tv와 연결했습니다\""
-          item: "cm!^PA_COMPL|[+service_type]"
+          item: "cm!^PA_COMPL|[+service_type]|[+link]|[+profile_id]"
       param:
-        list: "service_type"
+        list: "service_type|link|profile_id"
     ###### 요청 앱으로 페어링 연결 해제 푸시 발송 ######
     - sendcode: C002
       gcm:
         payload:
-          body: "\"result\":{\"noti_type\":\"PA_CLEAR\",\"service_type\":\"[+service_type]\"}"
+          body: "\"result\":{\"noti_type\":\"PA_CLEAR\",\"service_type\":\"[+service_type]\",\"profile_clear\":\"[+profile_clear]\"}"
       apns:
         payload:
           body: "\"body\":\"U+tv와 연결을 해제했습니다\""
-          item: "cm!^PA_CLEAR|[+service_type]"
+          item: "cm!^PA_CLEAR|[+service_type]|[+profile_clear]"
       param:
-        list: "service_type"
+        list: "service_type|profile_clear"
     ###### U+tv로 페어링 알림(FCM) ######
     - sendcode: C003
       gcm:
@@ -283,56 +280,67 @@ push:
           item: ""
       param:
         list: "svc_id|name|service_type|ctn|intent_url|link_flag"
+    ###### 모바일 서비스 동의 PUSH ######
+    - sendcode: termsAgree
+      gcm:
+        payload:
+          body: "\"result\":{\"noti_type\":\"SERVICE_AGREE\",\"service_push_status\":\"[+service_push_status]\"}"
+      apns:
+        payload:
+          body: "\"body\":\"알림 설정이 변경되었습니다\""
+          item: "cm!^SERVICE_AGREE|[+service_push_status]"
+      param:
+        list: "service_push_status"
 
   serviceTargets:
     # 모바일tv(디폴트)
     - serviceTarget: default
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: hdtv_GCM01
+        serviceid: "20014"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
+        appid: hdtv_APNS1
+        serviceid: "30005"
     # 프로야구
     - serviceTarget: B
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: baseball_FCM1
+        serviceid: "21009"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
+        appid: baseball_APNS1
+        serviceid: "30043"
     # 아이들나라
     - serviceTarget: K
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: mobilekids_FCM1
+        serviceid: "21011"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
+        appid: mobilekids_APNS1
+        serviceid: "30044"
     # 골프
     - serviceTarget: O
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: Ugolf_GCM1
+        serviceid: "20057"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
+        appid: Ugolf_APNS1
+        serviceid: "30035"
     # 아이돌Live
     - serviceTarget: C
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: liveU_GCM1
+        serviceid: "20056"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
-      pos:
-        appid: smartuxapp
-        serviceid: "30107"
+        appid: liveU_APNS1
+        serviceid: "30034"
     # FCM푸시
     - serviceTarget: TV
       gcm:
-        appid: lguplushdtvgcm
-        serviceid: "30011"
+        appid: UTVseamless_FCM1
+        serviceid: "21006"
       apns:
-        appid: musicshow_apns
-        serviceid: "30107"
+        appid: UTVseamless_FCM1
+        serviceid: "21006"
+
+
+
