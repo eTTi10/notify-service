@@ -1,0 +1,22 @@
+apply plugin: 'checkstyle'
+
+checkstyle {
+    toolVersion = '9.3'
+    maxWarnings = 0
+    maxErrors = 0
+    showViolations = true
+    ignoreFailures = true // checkstyle 경고/에러 발생 시 빌드 실패 제외
+
+    configFile = rootProject.file('config/checkstyle/google-uplus-checks.xml')
+}
+
+checkstyleTest {
+    enabled = false
+}
+
+tasks.withType(Checkstyle) {
+    reports {
+        xml.required = false
+        html.required = true
+    }
+}
