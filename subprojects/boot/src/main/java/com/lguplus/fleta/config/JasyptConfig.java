@@ -1,4 +1,4 @@
-package com.lguplus.fleta.config.encryption;
+package com.lguplus.fleta.config;
 
 import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;

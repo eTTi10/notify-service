@@ -1,9 +1,13 @@
 package com.lguplus.fleta.interceptor;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -15,6 +19,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class LogInterceptor implements HandlerInterceptor {
 
     public static final String RESPONSE_TIME = "responseTime";
+    public static final List<String> LOG_HEADER_NAMES = List.of(HttpHeaders.ACCEPT, HttpHeaders.USER_AGENT);
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -61,9 +66,11 @@ public class LogInterceptor implements HandlerInterceptor {
     }
 
     private void logRequestHeaderInfo(HttpServletRequest request) {
-        String accept = request.getHeader("accept");
-        String userAgent = request.getHeader("user-agent");
-        log.info("[Request Headers] [Accept: {}][UserAgent: {}]", accept, userAgent);
+        if (!LOG_HEADER_NAMES.isEmpty()) {
+            Map<String, String> headerNameValueMap = LOG_HEADER_NAMES.stream()
+                .collect(LinkedHashMap::new, (map, name) -> map.put(name, request.getHeader(name)), LinkedHashMap::putAll);
+            log.info("[Request Headers] {}", headerNameValueMap);
+        }
     }
 
     @Override
