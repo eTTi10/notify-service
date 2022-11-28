@@ -1,0 +1,76 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = '0.8.7'
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled true
+        xml.enabled true
+        csv.enabled false
+    }
+
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "com/lguplus/fleta/data/*",
+                    "com/lguplus/fleta/config/*",
+                    "com/lguplus/fleta/exception/*",
+                    "com/lguplus/fleta/filter/*",
+                    "com/lguplus/fleta/interceptor/*",
+                    "com/lguplus/fleta/advice/*",
+                    "com/lguplus/fleta/api/inner/SecTest*",
+                    "com/lguplus/fleta/scheduler/*"
+            ])
+        }))
+    }
+
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+
+task testCoverage(type: Test) {
+    group 'verification'
+    description 'Runs the unit tests with coverage'
+
+    dependsOn(':test',
+            ':jacocoTestReport',
+            ':jacocoTestCoverageVerification')
+
+    tasks['jacocoTestReport'].mustRunAfter(tasks['test'])
+    tasks['jacocoTestCoverageVerification'].mustRunAfter(tasks['jacocoTestReport'])
+}
+
+test {
+    if (System.properties.containsKey('spring.profiles.active')) {
+        String activeProfile = System.properties['spring.profiles.active']
+        println "profile: $activeProfile"
+        systemProperty "spring.profiles.active", activeProfile
+    }
+
+    useJUnitPlatform()
+    ignoreFailures = true
+    finalizedBy 'jacocoTestReport'
+    afterTest { desc, result ->
+        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+    }
+}
+
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses true
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams true
+    showSkippedStandardStreams true
+    showFailedStandardStreams true
+    logLevel 'info'
+}
