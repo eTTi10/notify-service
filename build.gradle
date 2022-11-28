@@ -1,6 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.5.6'
@@ -9,6 +6,7 @@ plugins {
     id "org.sonarqube" version "3.3"
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
 }
+apply from: "$rootDir/code-quality/allCoverage.gradle"
 
 ext {
     set("springCloudVersion", "2020.0.6")
@@ -20,7 +18,6 @@ bootJar { enabled = false }
 
 allprojects {
     repositories {
-        jcenter()
         mavenCentral()
     }
 }
@@ -29,8 +26,9 @@ subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'jacoco'
     apply plugin: 'org.asciidoctor.jvm.convert'
+    apply from: "$rootDir/code-quality/moduleCoverage.gradle"
+    apply from: "$rootDir/code-quality/checkStyle.gradle"
 
     group = 'com.lguplus.fleta'
     version = '1.1.0'
@@ -51,8 +49,6 @@ subprojects {
 
     ext {
         snippetsDir = file('build/generated-snippets')
-        swaggerOutputDir = file("${buildDir}/swagger")
-        htmlOutputDir = file("${buildDir}/docs/asciidoc")
         restDocInDir = file("src/docs/asciidoc")
     }
 
@@ -62,7 +58,6 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'net.rakugakibox.util:yaml-resource-bundle:1.1'
 
-        implementation 'io.github.swagger2markup:swagger2markup:1.3.3'
         asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         implementation "io.springfox:springfox-swagger2:2.9.2"
         implementation "io.springfox:springfox-swagger-ui:2.9.2"
@@ -92,128 +87,10 @@ subprojects {
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     }
 
-    jacoco {
-        toolVersion = '0.8.7'
-
-        // 테스트 결과 리포트 저장 경로 설정
-        reportsDir = file("$buildDir/JacocoReportDir")
-//        reportsDirectory = layout.buildDirectory.dir('../documents/coverage/jacoco')
-//        default  "${project.reporting.baseDir}/jacoco"
-//        reportsDir = file("$buildDir/customJacocoReportDir")
-    }
-
-    // JaCoCo Task
-    jacocoTestReport {
-        reports {
-            // 리포트 활성화
-            html.enabled true
-            xml.enabled true
-            csv.enabled true
-
-            // 리포트 저장 경로 설정
-            csv.destination file("$buildDir/JacocoReportDir/test/jacocoTestReport.csv")
-//            html.destination file("$buildDir/jacocoHtml")
-//            xml.destination file("$buildDir/jacoco.xml")
-        }
-
-        afterEvaluate {
-            classDirectories.setFrom(files(classDirectories.files.collect {
-                fileTree(dir: it, exclude: [
-                        "com/lguplus/fleta/advice/*",
-                        "com/lguplus/fleta/config/*",
-                        "com/lguplus/fleta/data/*",
-                        "com/lguplus/fleta/exception/*",
-                        "com/lguplus/fleta/filter/*",
-                        "com/lguplus/fleta/interceptor/*",
-                        "com/lguplus/fleta/provider/external/*",
-                        "com.lguplus.fleta.**Application**",
-                        "com.lguplus.fleta.**Config**"
-                ])
-            }))
-        }
-
-        finalizedBy 'jacocoTestCoverageVerification'
-    }
-
-    jacocoTestCoverageVerification {
-        violationRules {
-            rule {
-                // Jacoco Rule 활성화
-                enabled = true
-
-                // 룰 체크 단위
-                element = 'CLASS' // Option: BUNDLE(default), PACKAGE, CLASS, SOURCEFILE, METHOD
-
-                // Method 커버리지
-                limit {
-                    counter = 'METHOD' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
-                    value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
-                    minimum = 1.00
-                }
-
-                // Branch 커버리지
-                limit {
-                    counter = 'BRANCH' // Option: INSTRUCTION(default), LINE, BRANCH, CLASS, METHOD, COMPLEXITY
-                    value = 'COVEREDRATIO' // Option: COVEREDRATIO(default), TOTALCOUNT, MISSEDCOUNT, COVEREDCOUNT, MISSEDRATIO
-                    minimum = 0.60
-                }
-
-                // 커버리지 체크 제외 클래스
-                excludes = [
-                        'com.lguplus.fleta.advice.*',
-                        'com.lguplus.fleta.config.*',
-                        'com.lguplus.fleta.data.*',
-                        'com.lguplus.fleta.exception.*',
-                        'com.lguplus.fleta.filter.*',
-                        'com.lguplus.fleta.interceptor.*',
-                        'com.lguplus.fleta.exhandler.*',
-                        'com.lguplus.fleta.validation.*',
-                        "com.lguplus.fleta.provider.external.*",
-                        "com.lguplus.fleta.**Application**",
-                        "com.lguplus.fleta.**Config**"
-                ]
-            }
-        }
-    }
-
-    task testCoverage(type: Test) {
-        group 'verification'
-        description 'Runs the unit tests with coverage'
-
-        dependsOn(':test',
-                ':jacocoTestReport',
-                ':jacocoTestCoverageVerification')
-
-        tasks['jacocoTestReport'].mustRunAfter(tasks['test'])
-        tasks['jacocoTestCoverageVerification'].mustRunAfter(tasks['jacocoTestReport'])
-    }
-
-    test {
-        // Jacoco 실행 시, 지정한 Profile로 실행
-        if (project.name == "boot") {
-            systemProperty 'io.springfox.staticdocs.outputDir', swaggerOutputDir
-            finalizedBy 'asciidoctor'
-        }
-        if (System.properties.containsKey('spring.profiles.active')) {
-            String activeProfile = System.properties['spring.profiles.active']
-            println "profile: $activeProfile"
-            systemProperty "spring.profiles.active", activeProfile
-        }
-        useJUnitPlatform()
-        ignoreFailures = false
-        finalizedBy 'jacocoTestReport'
-        afterTest { desc, result ->
-            logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
-        }
-        outputs.dir snippetsDir
-    }
 
     asciidoctor {
         dependsOn test
         configurations 'asciidoctorExtensions'
-        if (project.name == "boot") {
-            sourceDir = swaggerOutputDir
-        }
         sources{
             include('**/*.adoc')
         }
@@ -240,52 +117,6 @@ subprojects {
         dependsOn copyDocument
     }
 
-    task convertDocs {
-        doFirst {
-            String outputDir = htmlOutputDir
-            boolean factor = Files.notExists(Paths.get(outputDir + "/swagger.html"))
-
-            if (!factor) {
-                println "Found swagger.html: start to converting works."
-                BufferedReader bufferedReader = Files.newBufferedReader(Paths.get(outputDir + "/swagger.html"))
-                BufferedWriter writer = Files.newBufferedWriter(Paths.get(outputDir + "/swaggerFinal.html"))
-
-                bufferedReader.lines().forEach(line -> {
-                    line = line.replaceAll("&lt;", "<").replaceAll("&gt;", ">")
-
-                    try {
-                        writer.write(line)
-                        writer.newLine()
-                    } catch (IOException e) {
-                        throw new RuntimeException(e)
-                    }
-                })
-                writer.flush()
-                writer.close()
-            } else {
-                println "can't convert swagger.html: the file is not exist."
-            }
-        }
-    }
-
-    testlogger {
-        theme 'mocha'
-        showExceptions true
-        showStackTraces true
-        showFullStackTraces false
-        showCauses true
-        slowThreshold 2000
-        showSummary true
-        showSimpleNames false
-        showPassed true
-        showSkipped true
-        showFailed true
-        showStandardStreams false
-        showPassedStandardStreams true
-        showSkippedStandardStreams true
-        showFailedStandardStreams true
-        logLevel 'info'
-    }
 }
 
 project(':boot') {

@@ -1,0 +1,74 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion '0.8.7'
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+}
+
+project.afterEvaluate {
+
+    tasks.create(name: "allCoverage", type: JacocoReport) {
+
+        group = "Reporting"
+        description = "Generate overall Jacoco coverage report for the debug build."
+
+        reports {
+            html.enabled(true)
+            xml.enabled(true)
+            csv.enabled(true)
+        }
+
+        def excludes = [
+                "com/lguplus/fleta/data/*",
+                "com/lguplus/fleta/config/*",
+                "com/lguplus/fleta/exception/*",
+                "com/lguplus/fleta/filter/*",
+                "com/lguplus/fleta/interceptor/*",
+                "com/lguplus/fleta/advice/*",
+                "com/lguplus/fleta/api/inner/SecTest*",
+                "com/lguplus/fleta/scheduler/*"
+        ]
+
+        def jClasses = subprojects.collect { proj ->
+            "${proj.buildDir}/classes"
+        }
+        def javaClasses = jClasses.collect { path ->
+            fileTree(dir: path, excludes: excludes)
+        }
+
+        classDirectories.from = files([javaClasses])
+        def sources = subprojects.collect { proj ->
+            ["${proj.projectDir}/src/main/java", "${proj.projectDir}/src/debug/java"]
+        }.flatten()
+
+        sourceDirectories.from = files(sources)
+
+        def executions = subprojects.findAll { proj ->
+            def path = "${proj.buildDir}/jacoco/test.exec"
+            (new File(path)).exists()
+        }.collect { proj ->
+            "${proj.buildDir}/jacoco/test.exec"
+        }
+
+        executionData.from = files(executions)
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarqube.releng.ciptv.uplus.co.kr"
+        property "sonar.login", "${sonarqube_token}"
+        property "sonar.projectKey", "com.lguplus.notify"
+        property "sonar.projectName", "Notify"
+        property "sonar.sources", "src"
+        property "sonar.language", "java"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.exclusions", "**/src/test/**/*"
+        property "sonar.test.exclusions", "**/src/test/**/*"
+        property "sonar.coverage.exclusions", "**/*Test*.*"
+        property "sonar.coverage.jacoco.xmlReportPaths", "${buildDir}/reports/allCoverage/allCoverage.xml"
+    }
+}

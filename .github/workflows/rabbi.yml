@@ -3,6 +3,9 @@ name: rabbi
 on:
   push:
     branches: [ develop, feature/deviceinfoDocs ]
+    paths-ignore:
+      - '.gitignore'
+      - 'README.md'
 
 jobs:
   test:

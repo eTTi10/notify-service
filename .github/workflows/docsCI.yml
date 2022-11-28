@@ -2,7 +2,15 @@ name: docsCI
 
 on:
   push:
-    branches: [ develop ]
+    branches: develop
+    paths-ignore:
+      - '.gitignore'
+      - 'README.md'
+
+env:
+  PROFILE_PATH: subprojects/boot/src/main/resources/application-test.yml
+  AWS_REGION: ap-northeast-2
+  SHR_ROLE_NAME: dev-role-share-iptv-relengd-eks-self_hosted_runner
 
 jobs:
   test:
@@ -13,22 +21,51 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
+      - name: Dependency > Install AWS CLI 2
+        run: |
+          mkdir temp && cd temp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip && sudo ./aws/install
+          echo [INFO] "Installed AWS CLI Version: $(aws --version)"
+
+      - name: Dependency > Configure for AWS CLI 2 > Assume Role - using ServiceAccount
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
+          role-to-assume: ${{ env.SHR_ROLE_NAME }}
+          web-identity-token-file: /var/run/secrets/eks.amazonaws.com/serviceaccount/token
+
+      - name: aws secrets manager
+        run: |
+          SECRET=$(aws secretsmanager get-secret-value \
+                      --secret-id secrets-share-iptv-relengd-microservices-ci-common \
+                      --output json \
+                      | jq -r '.SecretString')
+          
+          LIST=$(cat ${{ env.PROFILE_PATH }} | grep -o '<<.[^>]*>>' || true)
+          for KEY in $LIST
+          do
+            KEY=${KEY#<<}
+            KEY=${KEY%>>}
+            VALUE=$(echo $SECRET | jq -r ".$KEY")
+            sed -i \
+                -e "s/<<$KEY>>/$VALUE/g" \
+                ${{ env.PROFILE_PATH }}
+          
+            echo "[INFO] changed: <<$KEY>>"
+          done          
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Test boot module and Generate Docs with Gradle
-        run: ./gradlew :boot:test
-
-      - name: Convert swagger.html to swaggerFinal.html
-        run: |
-          ./gradlew :boot:convertDocs
-          rm subprojects/boot/build/docs/asciidoc/swagger.html
+        run: ./gradlew :boot:test --tests SwaggerTest -Dspring.profiles.active=test
 
       - name: Copy document files
         run: |
           mkdir -p docs
           cp subprojects/boot/build/swagger/swagger.json docs/swagger.json
-          cp subprojects/boot/build/docs/asciidoc/swaggerFinal.html docs/index.html
 
       - name: Pushes docs to docs repository
         uses: cpina/github-action-push-to-another-repository@main
@@ -42,3 +79,4 @@ jobs:
           destination-repository-name: 'rabbi'
           user-email: gooah@lguplus.co.kr
           target-branch: main
+          

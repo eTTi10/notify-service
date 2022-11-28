@@ -24,12 +24,12 @@ public class Swagger2Config {
     private static final String API_DESCRIPTION = "API 명세서(스펙)";
 
     @Value("${spring.application.name}")
-    private String API_NAME;
+    private String applicationName;
 
     /**
      * localhost:8080/swagger-ui.html
      *
-     * @return
+     * @return new Docket
      */
     @Bean
     public Docket api() {
@@ -61,9 +61,9 @@ public class Swagger2Config {
 
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title(API_NAME)
+                .title(applicationName)
                 .version(API_VERSION)
-                .description(API_CLASSIFICATION + ": " + API_NAME + " 서비스 " + API_DESCRIPTION)
+                .description(API_CLASSIFICATION + ": " + applicationName + " 서비스 " + API_DESCRIPTION)
                 .build();
     }
 }
