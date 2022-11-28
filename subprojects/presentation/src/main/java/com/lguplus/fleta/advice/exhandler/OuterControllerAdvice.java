@@ -43,14 +43,19 @@ public class OuterControllerAdvice {
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /smartux/comm/latest",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /smartux/comm/latest",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/v1/push/deviceinfo",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/v1/push/deviceinfo",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("PUT /mobile/hdtv/v1/push/deviceinfo",
-                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
-
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET/videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST/videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE/videolte/musicshow/push",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
 
@@ -88,7 +93,7 @@ public class OuterControllerAdvice {
      */
     @ExceptionHandler(UndefinedException.class)
     public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
-                                                                 final UndefinedException ex) {
+        final UndefinedException ex) {
         log.info(ex.getMessage(), ex);
         return ResponseEntity.ok().body(ErrorResponseDto.builder().flag("9999").message("기타 오류").build());
     }

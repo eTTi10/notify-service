@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.BadSqlGrammarException;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -52,14 +54,14 @@ public class LatestDomainService {
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
         List<LatestEntity> checks = latestRepository.getLatestCheckList(latestRequestDto);
-        LatestCheckDto resultLatestCheckDto = LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
 
-        if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
-            throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
-        } else if (MAX_COUNT < checks.size()) {
+        if (MAX_COUNT < checks.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
+        } else if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
+            throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
         }
-        return resultLatestCheckDto;
+
+        return LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
     }
 
     /**
@@ -88,7 +90,7 @@ public class LatestDomainService {
         getLatestCheckList(latestRequestDto);
         try {
             latestRepository.insertLatest(latestRequestDto);
-        } catch (BadSqlGrammarException e) {
+        } catch (BadSqlGrammarException | UncategorizedSQLException | DataIntegrityViolationException e) {
             throw new DatabaseException();//8999 DB에러
         } catch (Exception e) {
             throw new ExtRuntimeException();

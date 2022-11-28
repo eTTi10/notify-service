@@ -11,7 +11,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +33,7 @@ public class PushConfig {
 
     public PushConfig(final StandardEnvironment environment) {
 
-        final PropertiesPropertySource propertySource = (PropertiesPropertySource)
+        final MapPropertySource propertySource = (MapPropertySource)
             environment.getPropertySources().get("push");
         if (propertySource == null) {
             throw new IllegalStateException("Error properties file not found.");

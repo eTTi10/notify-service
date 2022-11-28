@@ -1,15 +1,4 @@
-plugins {
-}
-
 dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.17.3'
     implementation 'org.redisson:redisson-spring-data-25:3.17.3'
-}
-
-test {
-    useJUnitPlatform()
-}
-
-repositories {
-    mavenCentral()
 }

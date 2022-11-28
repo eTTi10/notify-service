@@ -143,9 +143,12 @@ error:
               NoPlaylistToDeleteException: "2008"
               PlaylistNotExistsException: "2009"
               LastPlaylistFolderNotDeletableException: "2010"
+            musicshow:
+              MusicShowParameterOutOfRangeException: "5010"
             database:
               DuplicateKeyException: "8000"
               DataAlreadyExistsException: "8001"
+              DataNotExistsInnerException: "8002"
               DataNotExistsException: "8002"
               DatabaseException: "8999"
     java:
