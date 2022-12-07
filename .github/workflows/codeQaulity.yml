@@ -1,8 +1,8 @@
 name: codeQaulity
 
 on:
-  pull_request:
-    branches: [ develop, release/*, main ]
+  push:
+    branches: feature/sonar_badge
 
   JaCoCo:
     if: ${{ github.base_ref == 'develop' }}
