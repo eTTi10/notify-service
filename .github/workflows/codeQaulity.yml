@@ -3,7 +3,7 @@ name: codeQaulity
 on:
   push:
     branches: feature/sonar_badge
-
+jobs:
   JaCoCo:
     if: ${{ github.base_ref == 'develop' }}
     runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
