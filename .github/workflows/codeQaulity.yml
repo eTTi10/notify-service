@@ -1,8 +1,8 @@
-name: codeQaulity
+name: codeQuality
 
 on:
   push:
-    branches: feature/sonar_badge
+    branches: [ feature/sonar_badge ]
 jobs:
   JaCoCo:
     if: ${{ github.base_ref == 'develop' }}
