@@ -1,11 +1,11 @@
 name: codeQuality
 
 on:
-  push:
-    branches: [ feature/sonar_badge ]
+  pull_request:
+    branches: [ develop, release/*, main ]
 jobs:
   JaCoCo:
-#    if: ${{ github.base_ref == 'develop' }}
+    if: ${{ github.base_ref == 'develop' }}
     runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
     steps:
       - name: Get app name from repo
