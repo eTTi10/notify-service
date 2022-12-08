@@ -1,9 +1,9 @@
-name: codeQaulity
+name: codeQuality
 
 on:
   pull_request:
     branches: [ develop, release/*, main ]
-
+jobs:
   JaCoCo:
     if: ${{ github.base_ref == 'develop' }}
     runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
