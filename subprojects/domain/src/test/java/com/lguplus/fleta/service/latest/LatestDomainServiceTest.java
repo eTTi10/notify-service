@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
@@ -142,7 +142,7 @@ class LatestDomainServiceTest {
     @Test
     @DisplayName("조회 정상적으로 리스트 데이터를 수신하는지 확인")
     void getLatestList() {
-        LatestEntity rs1 = LatestEntity.builder()
+        Latest rs1 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
@@ -152,7 +152,7 @@ class LatestDomainServiceTest {
             .rDate(new Date())
             .categoryGb("")
             .build();
-        List<LatestEntity> list = List.of(rs1);
+        List<Latest> list = List.of(rs1);
 
         // Mock Method
         given(latestRepository.getLatestList(any())).willReturn(list);
@@ -179,8 +179,8 @@ class LatestDomainServiceTest {
         // Mock Method
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestEntity rs1 = LatestEntity.builder().build();
-        List<LatestEntity> list = List.of();
+        Latest rs1 = Latest.builder().build();
+        List<Latest> list = List.of();
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         LatestRequestDto latestRequestDto = LatestRequestDto.builder()
@@ -200,21 +200,21 @@ class LatestDomainServiceTest {
         // --------- Mock Method 강제 에러 연출 ---------
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestEntity rs1 = LatestEntity.builder()
+        Latest rs1 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3021")
             .build();
 
-        LatestEntity rs2 = LatestEntity.builder()
+        Latest rs2 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3021")
             .build();
 
-        List<LatestEntity> list = List.of(rs1, rs2);
+        List<Latest> list = List.of(rs1, rs2);
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 
         // Mock Object
@@ -240,49 +240,49 @@ class LatestDomainServiceTest {
         */
         LatestCheckDto checkDto = LatestCheckDto.builder().build();
 
-        LatestEntity rs1 = LatestEntity.builder()
+        Latest rs1 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3021")
             .build();
 
-        LatestEntity rs2 = LatestEntity.builder()
+        Latest rs2 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3022")
             .build();
 
-        LatestEntity rs3 = LatestEntity.builder()
+        Latest rs3 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3023")
             .build();
 
-        LatestEntity rs4 = LatestEntity.builder()
+        Latest rs4 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3024")
             .build();
 
-        LatestEntity rs5 = LatestEntity.builder()
+        Latest rs5 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3025")
             .build();
 
-        LatestEntity rs6 = LatestEntity.builder()
+        Latest rs6 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .catId("T3026")
             .build();
 
-        List<LatestEntity> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
+        List<Latest> list = List.of(rs1, rs2, rs3, rs4, rs5, rs6);
 
         given(latestRepository.getLatestCheckList(any())).willReturn(list);
 

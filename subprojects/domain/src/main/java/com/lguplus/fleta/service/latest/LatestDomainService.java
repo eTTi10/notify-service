@@ -3,7 +3,7 @@ package com.lguplus.fleta.service.latest;
 import com.lguplus.fleta.data.dto.LatestCheckDto;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import com.lguplus.fleta.data.mapper.LatestMapper;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
 import com.lguplus.fleta.exception.ExtRuntimeException;
@@ -36,7 +36,7 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public List<LatestDto> getLatestList(LatestRequestDto latestRequestDto) {
-        List<LatestEntity> records = latestRepository.getLatestList(latestRequestDto);
+        List<Latest> records = latestRepository.getLatestList(latestRequestDto);
         List<LatestDto> resultList = new ArrayList<>();
         records.forEach(e -> {
             LatestDto item = latestMapper.toDto(e);
@@ -53,7 +53,7 @@ public class LatestDomainService {
      * @return 최신회 정보조회 결과
      */
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
-        List<LatestEntity> checks = latestRepository.getLatestCheckList(latestRequestDto);
+        List<Latest> checks = latestRepository.getLatestCheckList(latestRequestDto);
 
         if (MAX_COUNT <= checks.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
