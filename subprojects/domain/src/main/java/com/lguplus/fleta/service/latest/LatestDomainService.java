@@ -47,7 +47,7 @@ public class LatestDomainService {
 
 
     /**
-     * 최대증록개수, 중복체크를 위한 리스트출력
+     * 최대등록개수, 중복체크를 위한 리스트출력
      *
      * @param latestRequestDto 최신회 정보조회를 위한 DTO
      * @return 최신회 정보조회 결과
@@ -55,7 +55,7 @@ public class LatestDomainService {
     public LatestCheckDto getLatestCheckList(LatestRequestDto latestRequestDto) {
         List<LatestEntity> checks = latestRepository.getLatestCheckList(latestRequestDto);
 
-        if (MAX_COUNT < checks.size()) {
+        if (MAX_COUNT <= checks.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
         } else if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
             throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
