@@ -46,7 +46,7 @@ public class LatestPostRequestVo {
     private String categoryGb;
 
     public String getCategoryGb() {
-        if (StringUtils.isEmpty(categoryGb)) {
+        if (StringUtils.isBlank(categoryGb)) {
             return "I20";
         }
         return categoryGb;
