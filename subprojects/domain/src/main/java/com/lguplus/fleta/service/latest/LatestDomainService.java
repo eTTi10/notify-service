@@ -56,9 +56,9 @@ public class LatestDomainService {
         List<Latest> checks = latestRepository.getLatestCheckList(latestRequestDto);
 
         if (MAX_COUNT <= checks.size()) {
-            throw new ExceedMaxRequestException("최대 등록 갯수 초과");//최대값 초과 1201
+            throw new ExceedMaxRequestException("최대 등록 갯수 초과");
         } else if (checks.stream().anyMatch(item -> item.getCatId().equals(latestRequestDto.getCatId()))) {
-            throw new DataAlreadyExistsException("기존 데이터 존재");//8001;//중복
+            throw new DataAlreadyExistsException("기존 데이터 존재");
         }
 
         return LatestCheckDto.builder().code(LatestCheckDto.SUCCESS_CODE).build();
@@ -74,7 +74,7 @@ public class LatestDomainService {
         int deleteCount = latestRepository.deleteLatest(latestRequestDto);
 
         if (0 >= deleteCount) {
-            throw new DeleteNotFoundException("삭제대상 없음");//1410
+            throw new DeleteNotFoundException("삭제대상 없음");
         } else {
             return deleteCount;
         }
@@ -91,7 +91,7 @@ public class LatestDomainService {
         try {
             latestRepository.insertLatest(latestRequestDto);
         } catch (BadSqlGrammarException | UncategorizedSQLException | DataIntegrityViolationException e) {
-            throw new DatabaseException();//8999 DB에러
+            throw new DatabaseException();
         } catch (Exception e) {
             throw new ExtRuntimeException();
         }
