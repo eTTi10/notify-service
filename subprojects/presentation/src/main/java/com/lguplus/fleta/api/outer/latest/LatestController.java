@@ -38,7 +38,7 @@ public class LatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "sa_id", value = "순번: 1<br/>자리수: 12<br/>설명:가입번호", example = "500058151453"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "stb_mac", value = "순번: 2<br/>자리수: 20<br/>설명: 맥주소", example = "001c.627e.039c"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "ctn", value = "순번: 3<br/>자리수: 11<br/>전화번호 or 단말 맥 어드레스<br/>ex) S001, S002", example = "01055805424"),
-        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "cat_id", value = "순번: 4<br/>자리수: 5<br/>설명: 카테고리 아이디", example = "T3021")})
+        @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "cat_id", value = "순번: 4<br/>자리수: 5<br/>설명: 카테고리 아이디, 특정 카테고리 아이디만 조회하고 싶을 경우 입력한다", example = "T3021")})
     @GetMapping(value = "/smartux/comm/latest")
     public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
         LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
