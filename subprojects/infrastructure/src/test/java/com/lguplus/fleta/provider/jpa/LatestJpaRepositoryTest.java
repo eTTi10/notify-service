@@ -1,7 +1,7 @@
 package com.lguplus.fleta.provider.jpa;
 
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import com.lguplus.fleta.domain.repository.LatestRepositoryImpl;
 import com.lguplus.fleta.repository.latest.LatestRepository;
 import java.text.DateFormat;
@@ -87,7 +87,7 @@ class LatestJpaRepositoryTest {
             .ctn(CTN)
             .catId(CAT_ID)
             .build();
-        List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto);
+        List<Latest> responseList = latestRepositoryImpl.getLatestList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size()).isLessThan(2).isNotNegative();
 
@@ -104,7 +104,7 @@ class LatestJpaRepositoryTest {
             .ctn(CTN)
             .catId("")
             .build();
-        List<LatestEntity> responseList = latestRepositoryImpl.getLatestList(latestRequestDto2);
+        List<Latest> responseList = latestRepositoryImpl.getLatestList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size()).isNotNegative();
 
@@ -123,7 +123,7 @@ class LatestJpaRepositoryTest {
             .mac("1111.2222.3333")
             .ctn("01011112222")
             .build();
-        List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto);
+        List<Latest> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto);
         // 결과값은 0건 또는 1건
         assertThat(responseList.size()).isLessThan(2).isNotNegative();
 
@@ -139,7 +139,7 @@ class LatestJpaRepositoryTest {
             .mac("001c.627e.039c")
             .ctn("01055805424")
             .build();
-        List<LatestEntity> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto2);
+        List<Latest> responseList = latestRepositoryImpl.getLatestCheckList(latestRequestDto2);
         //결과값은 0건이거나 1건 이상이다.
         assertThat(responseList.size()).isNotNegative();
 

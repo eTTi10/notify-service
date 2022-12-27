@@ -2,7 +2,7 @@ package com.lguplus.fleta.service.latest;
 
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +33,7 @@ class LatestServiceTest {
     @BeforeEach
     void getLatestListBefore() {
 
-        LatestEntity rs1 = LatestEntity.builder()
+        Latest rs1 = Latest.builder()
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01055805424")
@@ -44,7 +44,7 @@ class LatestServiceTest {
             .categoryGb("")
             .build();
 
-        List<LatestEntity> rs = List.of(rs1);
+        List<Latest> rs = List.of(rs1);
         List<LatestDto> resultList = new ArrayList<LatestDto>();
 
         rs.forEach(e -> {
