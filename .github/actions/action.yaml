@@ -1,0 +1,75 @@
+name: CI Build & Upload ECR
+description: CI Build & Upload ECR
+
+outputs:
+  appName:
+    description: "Image name"
+    value: ${{ steps.output.outputs.APP_NAME }}
+  imageTag:
+    description: "Image tag"
+    value: ${{ steps.output.outputs.TAG }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Set env
+      shell: bash
+      run: echo "APP_NAME=$(basename ${{ github.repository }} | sed 's/-service$//g')" >> $GITHUB_ENV
+
+    - uses: actions/setup-java@v3
+      with:
+        distribution: 'corretto'
+        java-version: '11'
+        cache: 'gradle'
+
+    - name: Set Tag
+      shell: bash
+      run: |
+        VERSION=$(./gradlew -q printVersion)
+        DATE_TIME=$(TZ=Asia/Seoul date "+%y%m%d.%H%M")
+        COMMIT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)
+        
+        echo "TAG=$VERSION-$COMMIT_SHA-$DATE_TIME" >> $GITHUB_ENV
+
+    - name: Dependency > Install AWS CLI 2
+      shell: bash
+      run: |
+        mkdir temp && cd temp && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip -q awscliv2.zip && sudo ./aws/install
+        echo "Installed AWS CLI Version: $(aws --version)"
+
+    - name: Build > Login Amazon ECR
+      id: ecr-login
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Grant execute permission for gradlew
+      shell: bash
+      run: chmod +x gradlew
+
+    - name: Build
+      shell: bash
+      run: ./gradlew -x test build --no-daemon
+
+    - name: Build > Docker
+      shell: bash
+      run: |
+        docker build -t ${{ steps.ecr-login.outputs.registry }}/${{ env.APP_NAME }}:${{ env.TAG }} \
+                     -t ${{ steps.ecr-login.outputs.registry }}/${{ env.APP_NAME }}:latest .
+
+    - name: Push > Upload to ECR
+      shell: bash
+      run: |
+        docker push ${{ steps.ecr-login.outputs.registry }}/${{ env.APP_NAME }}:${{ env.TAG }}
+        docker push ${{ steps.ecr-login.outputs.registry }}/${{ env.APP_NAME }}:latest
+
+    - name: Remove docker image
+      shell: bash
+      run: docker rmi ${{ steps.ecr-login.outputs.registry }}/${{ env.APP_NAME }}:${{ env.TAG }}
+
+    - name: output
+      id: output
+      shell: bash
+      run: |
+        echo TAG=${{ env.TAG }} >> $GITHUB_OUTPUT
+        echo APP_NAME=${{ env.APP_NAME }} >> $GITHUB_OUTPUT
