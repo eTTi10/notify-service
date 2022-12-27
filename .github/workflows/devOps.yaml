@@ -171,58 +171,50 @@ jobs:
           docker rmi $IMAGE_NAME:$TAG
           docker rmi $IMAGE_NAME:latest
 
-
-# ============================================================================
-#                          Deploy on eks via helm
-# ============================================================================
-      
-      - name: checkout helm
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.HELM_REF }}
-          repository: ${{ env.HELM_REPO_NAME }}
-          token: ${{ env.TOKEN }}
-          path: helm
-
-      - name: Set git configuration
-        working-directory: ./helm
-        run: |
-          echo "COMMIT_URI=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}" >> $GITHUB_ENV
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-
-      - name: Update dev values
-        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
+      - name: helm chart dev version tagging
         if: ${{ github.ref_name == 'develop' }}
-        run: |
-          yq eval -i '.image.version = "${{ env.TAG }}"' dev-values.yaml
-          yq eval -i '.image.version = "${{ env.TAG }}"' stp-values.yaml 
-
-      - name: Update stg values
-        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
-        if: ${{ startsWith(github.ref_name, 'release/') }}
-        run: yq eval -i '.image.version = "${{ env.TAG }}"' stg-values.yaml
-
-      - name: Update prd values
-        working-directory: helm/${{ env.CHART_PATH }}/app-charts/${{ env.SERVICE_NAME }}
-        if: ${{ github.ref_name == 'main' }}
-        run: |
-          yq eval -i '.image.version = "${{ env.TAG }}"' shd-values.yaml
-          yq eval -i '.image.version = "${{ env.TAG }}"' prd-values.yaml 
-
-      - name: Push helm
-        uses: nick-fields/retry@v2.7.0
+        uses: peter-evans/repository-dispatch@v2
         with:
-          retry_on: error
-          timeout_seconds: 30
-          max_attempts: 3
-          command: |
-            cd ./helm
-            git add .
-            git commit -m "Update from ${{ env.COMMIT_URI }}" | true
-            git fetch origin ${{ env.HELM_REF }}
-            git rebase origin/${{ env.HELM_REF }}
-            git push
+          token:  ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ env.SERVICE_NAME }}", "app_version": "${{ env.TAG }}", "deploy_env": "dev"}'
+
+      - name: helm chart stp version tagging
+        if: ${{ github.ref_name == 'develop' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ env.SERVICE_NAME }}", "app_version": "${{ env.TAG }}", "deploy_env": "stp"}'
+
+      - name: helm chart stg version tagging
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ env.SERVICE_NAME }}", "app_version": "${{ env.TAG }}", "deploy_env": "stg"}'
+
+      - name: helm chart shd version tagging
+        if: ${{ github.ref_name == 'main' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ env.SERVICE_NAME }}", "app_version": "${{ env.TAG }}", "deploy_env": "shd"}'
+
+      - name: helm chart prd version tagging
+        if: ${{ github.ref_name == 'main' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ env.SERVICE_NAME }}", "app_version": "${{ env.TAG }}", "deploy_env": "prd"}'
 
       - name: slack message
         if: always()
