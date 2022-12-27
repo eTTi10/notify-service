@@ -15,14 +15,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
 @Entity
 @Table(name = "SMARTUX.PT_UX_LATEST")
 @IdClass(LatestId.class)
-public class LatestEntity implements Serializable {
+public class Latest implements Serializable {
 
     @Id
     @Column(name = "sa_id")

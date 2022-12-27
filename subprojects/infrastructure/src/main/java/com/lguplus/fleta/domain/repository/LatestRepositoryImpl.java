@@ -1,7 +1,7 @@
 package com.lguplus.fleta.domain.repository;
 
 import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import com.lguplus.fleta.provider.jpa.LatestJpaRepository;
 import com.lguplus.fleta.repository.latest.LatestRepository;
 import java.util.Date;
@@ -18,7 +18,7 @@ public class LatestRepositoryImpl implements LatestRepository {
     private final LatestJpaRepository latestJpaRepository;
 
     @Override
-    public List<LatestEntity> getLatestList(LatestRequestDto latestRequestDto) {
+    public List<Latest> getLatestList(LatestRequestDto latestRequestDto) {
         return latestJpaRepository.findBySaIdAndMacAndCtnAndCatIdOrCatIdIsNull(
             latestRequestDto.getSaId(),
             latestRequestDto.getMac(),
@@ -29,7 +29,7 @@ public class LatestRepositoryImpl implements LatestRepository {
 
 
     @Override
-    public List<LatestEntity> getLatestCheckList(LatestRequestDto latestRequestDto) {
+    public List<Latest> getLatestCheckList(LatestRequestDto latestRequestDto) {
         return latestJpaRepository.findBySaIdAndMacAndCtn(
             latestRequestDto.getSaId(),
             latestRequestDto.getMac(),
@@ -48,8 +48,8 @@ public class LatestRepositoryImpl implements LatestRepository {
     }
 
     @Override
-    public LatestEntity insertLatest(LatestRequestDto latestRequestDto) {
-        LatestEntity entity = LatestEntity.builder().
+    public Latest insertLatest(LatestRequestDto latestRequestDto) {
+        Latest entity = Latest.builder().
             saId(latestRequestDto.getSaId()).
             mac(latestRequestDto.getMac()).
             ctn(latestRequestDto.getCtn()).

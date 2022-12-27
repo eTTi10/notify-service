@@ -5,7 +5,7 @@ import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
-import com.lguplus.fleta.data.entity.LatestEntity;
+import com.lguplus.fleta.data.entity.Latest;
 import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
 import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
 import com.lguplus.fleta.service.latest.LatestService;
@@ -66,14 +66,14 @@ class LatestControllerTest {
     @BeforeEach
     void getLatestListBefore() throws Exception {
 
-        LatestEntity rs1 = LatestEntity.builder()
+        Latest rs1 = Latest.builder()
             .saId(SA_ID).mac(MAC)
             .ctn(CTN).catId(CAT_ID)
             .regId(REG_ID).catName(CAT_NAME)
             .rDate(new Date()).categoryGb(CATEGORY_GB)
             .build();
 
-        List<LatestEntity> rs = List.of(rs1);
+        List<Latest> rs = List.of(rs1);
         List<LatestDto> resultList = new ArrayList<LatestDto>();
 
         rs.forEach(e -> {

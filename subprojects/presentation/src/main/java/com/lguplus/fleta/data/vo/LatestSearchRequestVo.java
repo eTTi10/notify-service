@@ -10,7 +10,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
-@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, LatestSearchRequestVo.class})
+@GroupSequence({Groups.C1.class, Groups.C2.class, Groups.C3.class, LatestSearchRequestVo.class})
 public class LatestSearchRequestVo {
 
     @ParamAlias("sa_id")
@@ -26,7 +26,6 @@ public class LatestSearchRequestVo {
     private String ctn;
 
     @ParamAlias("cat_id")
-    @NotBlank(message = "cat_id 파라미터값이 전달이 안됨", groups = Groups.C4.class)
     private String catId;
 
     public LatestRequestDto convert() {
