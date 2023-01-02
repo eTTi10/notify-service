@@ -12,10 +12,18 @@ import org.springframework.data.repository.query.Param;
 public interface MobileLatestJpaRepository extends JpaRepository<MobileLatest, LatestId> {
 
     @Modifying(clearAutomatically = true)
-    @Query(value = "SELECT latest FROM MobileLatest latest "
+    @Query(value = "SELECT latest.catId FROM MobileLatest latest "
         + "WHERE latest.saId = :#{#requestDto.saId} "
         + "AND latest.mac = :#{#requestDto.mac} "
         + "AND latest.serviceType = :#{#requestDto.serviceType} "
         + "GROUP BY latest.catId")
-    List<MobileLatest> getLatestCountList(@Param("requestDto") MobileLatestRequestDto requestDto);
+    List<String> getLatestCountList(@Param("requestDto") MobileLatestRequestDto requestDto);
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "DELETE FROM MobileLatest latest "
+        + "WHERE latest.saId = :#{#requestDto.getSaId} "
+        + "AND latest.mac = :#{#requestDto.mac} "
+        + "AND latest.catId = :#{#requestDto.catId} "
+        + "AND latest.serviceType = :#{#requestDto.serviceType} ")
+    int deleteLatest(@Param("requestDto") MobileLatestRequestDto requestDto);
 }

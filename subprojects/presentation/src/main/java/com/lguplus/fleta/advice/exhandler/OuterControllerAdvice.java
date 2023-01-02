@@ -58,6 +58,13 @@ public class OuterControllerAdvice {
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/v1/latest",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mobile/hdtv/comm/latest",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/v1/latest",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("DELETE /mobile/hdtv/comm/latest",
+            new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+
         UNCONVERTIBLE_ERROR_CODE_PATTERNS.put("POST /mims/sendPushCode", List.of("^[^5].*$"));
     }
 

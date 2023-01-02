@@ -13,9 +13,9 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 @Getter
-@GroupSequence({Groups.R1.class, Groups.R2.class, Groups.C1.class, Groups.C2.class, Groups.C3.class, Groups.C4.class, Groups.C5.class,
-    Groups.C6.class, Groups.C7.class, Groups.C8.class, Groups.C9.class, MobileLatestPostRequestVo.class})
-public class MobileLatestPostRequestVo {
+@GroupSequence({Groups.R1.class, Groups.R2.class, Groups.C1.class, Groups.C2.class, Groups.C3.class,
+    Groups.C4.class, Groups.C5.class, Groups.C6.class, Groups.C7.class, MobileLatestDeleteRequestVo.class})
+public class MobileLatestDeleteRequestVo {
 
     @NotBlank(message = "sa_id 파라미터값이 전달이 안됨", groups = Groups.R1.class)
     @Size(max = 12, message = "요청 정보 허용 범위 초과(sa_id - 12 자리 이하)", payload = ParameterLengthOverLimitException.class, groups = Groups.C1.class)
@@ -38,14 +38,6 @@ public class MobileLatestPostRequestVo {
     @ParamAlias("cat_id")
     private String catId;
 
-    @NotBlank(message = "cat_name 파라미터값이 전달이 안됨", groups = Groups.C8.class)
-    @ParamAlias("cat_name")
-    private String catName;
-
-    @NotBlank(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C9.class)
-    @ParamAlias("reg_id")
-    private String regId;
-
     @ParamAlias("service_type")
     private String serviceType;
 
@@ -62,8 +54,6 @@ public class MobileLatestPostRequestVo {
             .mac(this.getMac())
             .ctn(this.getCtn())
             .catId(this.getCatId())
-            .catName(this.getCatName())
-            .regId(this.getRegId())
             .serviceType(this.getServiceType())
             .build();
     }

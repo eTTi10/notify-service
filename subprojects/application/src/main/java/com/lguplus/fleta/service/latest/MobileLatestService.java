@@ -16,4 +16,9 @@ public class MobileLatestService {
     public void insertLatest(MobileLatestRequestDto requestDto) {
         mobileLatestDomainService.insertLatest(requestDto);
     }
+
+    @Transactional
+    public void deleteLatest(MobileLatestRequestDto requestDto) {
+        mobileLatestDomainService.deleteLatest(requestDto);
+    }
 }

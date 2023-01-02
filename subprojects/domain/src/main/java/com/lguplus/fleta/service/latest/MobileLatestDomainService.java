@@ -1,10 +1,10 @@
 package com.lguplus.fleta.service.latest;
 
 import com.lguplus.fleta.data.dto.request.outer.MobileLatestRequestDto;
-import com.lguplus.fleta.data.entity.MobileLatest;
 import com.lguplus.fleta.exception.ExceedMaxRequestException;
-import com.lguplus.fleta.exception.ExtRuntimeException;
+import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
+import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.repository.latest.MobileLatestRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +19,15 @@ public class MobileLatestDomainService {
 
     private final MobileLatestRepository mobileLatestRepository;
 
+    public void deleteLatest(MobileLatestRequestDto requestDto) {
+
+        int deleteCount = mobileLatestRepository.deleteLatest(requestDto);
+
+        if (deleteCount <= 0) {
+            throw new DeleteNotFoundException("삭제대상 없음");
+        }
+    }
+
     public void insertLatest(MobileLatestRequestDto requestDto) {
 
         checkLatestCountList(requestDto);
@@ -26,19 +35,17 @@ public class MobileLatestDomainService {
         try {
             mobileLatestRepository.insertLatest(requestDto);
         } catch (Exception e) {
-            // todo : BadSqlGrammarException | UncategorizedSQLException | DataIntegrityViolationException 일 때
-            // todo : throw new DatabaseException();
-            throw new ExtRuntimeException();
+            throw new UndefinedException();
         }
     }
 
     private void checkLatestCountList(MobileLatestRequestDto requestDto) {
 
-        List<MobileLatest> latestCountList = mobileLatestRepository.getLatestCountList(requestDto);
+        List<String> latestCountList = mobileLatestRepository.getLatestCountList(requestDto);
 
         if (MAX_COUNT <= latestCountList.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");
-        } else if (latestCountList.stream().anyMatch(item -> item.getCatId().equals(requestDto.getCatId()))) {
+        } else if (latestCountList.stream().anyMatch(item -> item.equals(requestDto.getCatId()))) {
             throw new DataAlreadyExistsException("기존 데이터 존재");
         }
     }

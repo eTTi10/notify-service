@@ -16,7 +16,7 @@ public class MobileLatestRepositoryImpl implements MobileLatestRepository {
 
 
     @Override
-    public List<MobileLatest> getLatestCountList(MobileLatestRequestDto requestDto) {
+    public List<String> getLatestCountList(MobileLatestRequestDto requestDto) {
         return mobileLatestJpaRepository.getLatestCountList(requestDto);
     }
 
@@ -33,5 +33,10 @@ public class MobileLatestRepositoryImpl implements MobileLatestRepository {
             .build();
 
         return mobileLatestJpaRepository.saveAndFlush(entity);
+    }
+
+    @Override
+    public int deleteLatest(MobileLatestRequestDto requestDto) {
+        return mobileLatestJpaRepository.deleteLatest(requestDto);
     }
 }

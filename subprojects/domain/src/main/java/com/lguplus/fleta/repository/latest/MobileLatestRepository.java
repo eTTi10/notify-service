@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface MobileLatestRepository {
 
-    List<MobileLatest> getLatestCountList(MobileLatestRequestDto requestDto);
+    List<String> getLatestCountList(MobileLatestRequestDto requestDto);
 
     MobileLatest insertLatest(MobileLatestRequestDto requestDto);
+
+    int deleteLatest(MobileLatestRequestDto requestDto);
 }
