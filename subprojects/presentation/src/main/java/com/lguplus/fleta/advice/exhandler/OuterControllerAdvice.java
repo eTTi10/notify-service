@@ -93,6 +93,13 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
         final BindException ex) {
         log.info(ex.getMessage(), ex);
+
+        final String uri = request.getMethod() + " " + request.getRequestURI();
+
+        if ((uri.equals("POST /mobile/hdtv/v1/latest") || uri.equals("POST /mobile/hdtv/comm/latest"))
+            && ex.hasFieldErrors("ctn")) {
+            return ResponseEntity.ok().body(ErrorResponseDto.builder().flag("9999").message("기타 오류").build());
+        }
         return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
     }
 
