@@ -33,7 +33,7 @@ class MobileLatestServiceTest {
             .mac("001c.627e.039c")
             .build();
 
-        assertDoesNotThrow(() -> mobileLatestDomainService.insertLatest(requestDto));
+        assertDoesNotThrow(() -> mobileLatestService.insertLatest(requestDto));
     }
 
     @Test
@@ -46,6 +46,6 @@ class MobileLatestServiceTest {
             .mac("001c.627e.039c")
             .build();
 
-        assertDoesNotThrow(() -> mobileLatestDomainService.deleteLatest(requestDto));
+        assertDoesNotThrow(() -> mobileLatestService.deleteLatest(requestDto));
     }
 }
