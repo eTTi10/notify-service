@@ -9,6 +9,7 @@ import com.lguplus.fleta.repository.latest.MobileLatestRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @RequiredArgsConstructor
 @Component
@@ -43,9 +44,14 @@ public class MobileLatestDomainService {
 
         List<String> latestCountList = mobileLatestRepository.getLatestCountList(requestDto);
 
+        if (CollectionUtils.isEmpty(latestCountList)) {
+            return;
+        }
+
         if (MAX_COUNT <= latestCountList.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");
-        } else if (latestCountList.stream().anyMatch(item -> item.equals(requestDto.getCatId()))) {
+        }
+        if (latestCountList.stream().anyMatch(item -> item.equals(requestDto.getCatId()))) {
             throw new DataAlreadyExistsException("기존 데이터 존재");
         }
     }

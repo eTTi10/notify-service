@@ -6,6 +6,7 @@ import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exception.database.DataAlreadyExistsException;
 import com.lguplus.fleta.exception.latest.DeleteNotFoundException;
 import com.lguplus.fleta.repository.latest.MobileLatestRepository;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -49,6 +50,24 @@ class MobileLatestDomainServiceTest {
 
     @Test
     @Order(2)
+    void testInsertLatest_emptyList() {
+
+        MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
+            .saId("500058151453")
+            .mac("001c.627e.039c")
+            .ctn("01012345678")
+            .catId("T3021")
+            .catName("놀라운 대회 스타킹")
+            .regId("500058151453")
+            .build();
+
+        doReturn(Collections.emptyList()).when(mobileLatestRepository).getLatestCountList(any());
+
+        assertDoesNotThrow(() -> mobileLatestDomainService.insertLatest(requestDto));
+    }
+
+    @Test
+    @Order(3)
     void testInsertLatest_Exception() {
 
         MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
@@ -66,7 +85,7 @@ class MobileLatestDomainServiceTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void testInsertLatest_ExceedMaxRequestException() {
 
         MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
@@ -84,7 +103,7 @@ class MobileLatestDomainServiceTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     void testInsertLatest_DataAlreadyExistsException() {
 
         MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
@@ -102,7 +121,25 @@ class MobileLatestDomainServiceTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
+    void testInsertLatest_NoException() {
+
+        MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
+            .saId("500058151453")
+            .mac("001c.627e.039c")
+            .ctn("01012345678")
+            .catId("T3021")
+            .catName("놀라운 대회 스타킹")
+            .regId("500058151453")
+            .build();
+
+        doReturn(List.of("T3023")).when(mobileLatestRepository).getLatestCountList(any());
+
+        assertDoesNotThrow(() -> mobileLatestDomainService.insertLatest(requestDto));
+    }
+
+    @Test
+    @Order(7)
     void testDeleteLatest() {
 
         MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
@@ -120,7 +157,7 @@ class MobileLatestDomainServiceTest {
     }
 
     @Test
-    @Order(6)
+    @Order(8)
     void testDeleteLatest_DeleteNotFoundException() {
 
         MobileLatestRequestDto requestDto = MobileLatestRequestDto.builder()
