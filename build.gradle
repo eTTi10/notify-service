@@ -127,6 +127,11 @@ project(':boot') {
         implementation project(':infrastructure')
     }
 
+        bootJar {
+        archiveFileName = 'application.jar'
+    }
+
+
 //    test {
 //        exclude '**/*'
 //        useJUnitPlatform()

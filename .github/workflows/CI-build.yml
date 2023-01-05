@@ -1,0 +1,87 @@
+name: Build
+
+on:
+  push:
+    branches: [ develop, release/*, main ]
+    paths-ignore:
+      - '.github/**'
+      - '.gitignore'
+      - 'README.md'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: [ 'self-hosted', 'shared-eks', 'repo' ]
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+
+      - name: Set dev env
+        if: ${{ github.ref_name == 'develop' }}
+        run: echo "SLACK_WEB_HOOK=${{ secrets.SLACK_DEV_WEBHOOK }}" >> $GITHUB_ENV
+
+      - name: Set stg env
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        run: echo "SLACK_WEB_HOOK=${{ secrets.SLACK_STG_WEBHOOK }}" >> $GITHUB_ENV
+
+      - name: Set prd env
+        if: ${{ github.ref_name == 'main' }}
+        run: echo "SLACK_WEB_HOOK=${{ secrets.SLACK_PROD_WEBHOOK }}" >> $GITHUB_ENV
+
+      - name: Build and ECR Upload
+        id: build
+        uses: ./.github/actions/common-build
+
+      - name: helm chart dev version tagging
+        if: ${{ github.ref_name == 'develop' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token:  ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ steps.build.outputs.appName }}", "app_version": "${{ steps.build.outputs.imageTag }}", "deploy_env": "dev"}'
+
+      - name: helm chart stp version tagging
+        if: ${{ github.ref_name == 'develop' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ steps.build.outputs.appName }}", "app_version": "${{ steps.build.outputs.imageTag }}", "deploy_env": "stp"}'
+
+      - name: helm chart stg version tagging
+        if: ${{ startsWith(github.ref_name, 'release/') }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ steps.build.outputs.appName }}", "app_version": "${{ steps.build.outputs.imageTag }}", "deploy_env": "stg"}'
+
+      - name: helm chart shd version tagging
+        if: ${{ github.ref_name == 'main' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ steps.build.outputs.appName }}", "app_version": "${{ steps.build.outputs.imageTag }}", "deploy_env": "shd"}'
+
+      - name: helm chart prd version tagging
+        if: ${{ github.ref_name == 'main' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.ACTIONS_SECRET }}
+          repository: LGUPLUS-IPTV-MSA/helm-charts
+          event-type: app_image_update
+          client-payload: '{"app_name": "${{ steps.build.outputs.appName }}", "app_version": "${{ steps.build.outputs.imageTag }}", "deploy_env": "prd"}'
+
+      - name: slack message
+        if: always()
+        uses: nooose/custom-slack-message@master
+        with:
+          type: build
+          token: ${{ secrets.ACTIONS_SECRET }}
+          slack_webhook: ${{ env.SLACK_WEB_HOOK }}
+          slack_color: ${{ job.status }}
