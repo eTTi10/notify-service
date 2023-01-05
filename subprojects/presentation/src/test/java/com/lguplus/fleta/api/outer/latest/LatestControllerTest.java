@@ -1,13 +1,10 @@
 package com.lguplus.fleta.api.outer.latest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lguplus.fleta.config.ArgumentResolverConfig;
 import com.lguplus.fleta.config.MessageConverterConfig;
 import com.lguplus.fleta.data.dto.LatestDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.entity.Latest;
-import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
-import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
 import com.lguplus.fleta.service.latest.LatestService;
 import java.util.ArrayList;
 import java.util.Date;
@@ -56,12 +53,6 @@ class LatestControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private LatestService latestService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @MockBean
-    private LatestSearchRequestMapper latestSearchRequestMapper;
-    @MockBean
-    private LatestPostRequestMapper latestPostRequestMapper;
 
     @BeforeEach
     void getLatestListBefore() throws Exception {
