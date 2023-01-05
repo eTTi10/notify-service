@@ -1,12 +1,10 @@
 package com.lguplus.fleta.api.outer.latest;
 
 import com.lguplus.fleta.data.dto.LatestDto;
-import com.lguplus.fleta.data.dto.request.outer.LatestRequestDto;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.GenericRecordsetResponseDto;
 import com.lguplus.fleta.data.dto.response.SuccessResponseDto;
-import com.lguplus.fleta.data.mapper.LatestPostRequestMapper;
-import com.lguplus.fleta.data.mapper.LatestSearchRequestMapper;
+import com.lguplus.fleta.data.vo.LatestDeleteRequestVo;
 import com.lguplus.fleta.data.vo.LatestPostRequestVo;
 import com.lguplus.fleta.data.vo.LatestSearchRequestVo;
 import com.lguplus.fleta.service.latest.LatestService;
@@ -28,9 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class LatestController {
 
-    private final LatestSearchRequestMapper latestSearchRequestMapper;
-    private final LatestPostRequestMapper latestPostRequestMapper;
-
     private final LatestService latestService;
 
     @ApiOperation(value = "최신회 알림 조회", notes = "최신회 알림을 조회한다.")
@@ -40,9 +35,8 @@ public class LatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "ctn", value = "순번: 3<br/>자리수: 11<br/>전화번호 or 단말 맥 어드레스<br/>ex) S001, S002", example = "01055805424"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "cat_id", value = "순번: 4<br/>자리수: 5<br/>설명: 카테고리 아이디, 특정 카테고리 아이디만 조회하고 싶을 경우 입력한다", example = "T3021")})
     @GetMapping(value = "/smartux/comm/latest")
-    public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo vo) {
-        LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
-        return latestService.getLatestList(latestRequestDto);
+    public GenericRecordsetResponseDto<LatestDto> getLatestList(@Valid LatestSearchRequestVo request) {
+        return latestService.getLatestList(request.convert());
     }
 
     @ApiOperation(value = "최신회 알림 삭제", notes = "최신회 알림을 삭제한다.")
@@ -52,9 +46,8 @@ public class LatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "ctn", value = "순번: 3<br/>자리수: 11<br/>전화번호 or 단말 맥 어드레스<br/>ex) S001, S002", example = "01055805424"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "cat_id", value = "순번: 4<br/>자리수: 5<br/>설명: 카테고리 아이디", example = "T3021")})
     @DeleteMapping("/smartux/comm/latest")
-    public CommonResponseDto deleteLatest(@Valid LatestSearchRequestVo vo) {
-        LatestRequestDto latestRequestDto = latestSearchRequestMapper.toDto(vo);
-        latestService.deleteLatest(latestRequestDto);
+    public CommonResponseDto deleteLatest(@Valid LatestDeleteRequestVo request) {
+        latestService.deleteLatest(request.convert());
         return SuccessResponseDto.builder().build();
     }
 
@@ -69,9 +62,8 @@ public class LatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "category_gb", value = "순번: 7<br/>자리수: 3<br/>설명: 카테고리 구분 - 디폴트 I20", example = "I20")
     })
     @PostMapping("/smartux/comm/latest")
-    public CommonResponseDto insertLatest(@Valid LatestPostRequestVo vo) {
-        LatestRequestDto latestRequestDto = latestPostRequestMapper.toDto(vo);
-        latestService.insertLatest(latestRequestDto);
+    public CommonResponseDto insertLatest(@Valid LatestPostRequestVo request) {
+        latestService.insertLatest(request.convert());
         return SuccessResponseDto.builder().build();
     }
 }
