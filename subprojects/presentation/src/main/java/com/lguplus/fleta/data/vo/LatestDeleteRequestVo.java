@@ -23,7 +23,6 @@ public class LatestDeleteRequestVo {
 
     @ParamAlias("ctn")
     @NotBlank(message = "ctn 파라미터값이 전달이 안됨", groups = Groups.C3.class)
-    //숫자판별 @Positive(message = "[전화번호 or 단말 맥 어드레스]의 입력형식이 올바르지 않습니다.")
     private String ctn;
 
     @ParamAlias("cat_id")

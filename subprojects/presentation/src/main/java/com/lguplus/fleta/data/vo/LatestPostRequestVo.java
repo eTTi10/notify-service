@@ -34,13 +34,13 @@ public class LatestPostRequestVo {
     @NotBlank(message = "cat_id 파라미터값이 전달이 안됨", groups = Groups.C4.class)
     private String catId;
 
-    @ParamAlias("reg_id") //Push 할 Reg ID
-    @NotBlank(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C5.class)
-    private String regId;
-
     @ParamAlias("cat_name") //카테고리명
-    @NotBlank(message = "cat_name 파라미터값이 전달이 안됨", groups = Groups.C6.class)
+    @NotBlank(message = "cat_name 파라미터값이 전달이 안됨", groups = Groups.C5.class)
     private String catName;
+
+    @ParamAlias("reg_id") //Push 할 Reg ID
+    @NotBlank(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C6.class)
+    private String regId;
 
     @ParamAlias("category_gb") //카테고리 구분
     private String categoryGb;
