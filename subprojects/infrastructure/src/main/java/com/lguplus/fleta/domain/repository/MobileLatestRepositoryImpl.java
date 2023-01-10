@@ -26,9 +26,9 @@ public class MobileLatestRepositoryImpl implements MobileLatestRepository {
             .saId(requestDto.getSaId())
             .mac(requestDto.getMac())
             .ctn(requestDto.getCtn())
-            .catId(requestDto.getCatId())
-            .regId(requestDto.getRegId())
-            .catName(requestDto.getCatName())
+            .catId(requestDto.getCategoryId())
+            .regId(requestDto.getRegistrantId())
+            .catName(requestDto.getCategoryName())
             .serviceType(requestDto.getServiceType())
             .build();
 

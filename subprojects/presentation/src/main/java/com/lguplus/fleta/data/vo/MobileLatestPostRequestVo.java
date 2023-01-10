@@ -2,7 +2,6 @@ package com.lguplus.fleta.data.vo;
 
 import com.lguplus.fleta.data.annotation.ParamAlias;
 import com.lguplus.fleta.data.dto.request.outer.MobileLatestRequestDto;
-import com.lguplus.fleta.exception.EtcException;
 import com.lguplus.fleta.exception.ParameterLengthOverLimitException;
 import com.lguplus.fleta.exception.ParameterTypeMismatchException;
 import com.lguplus.fleta.validation.Groups;
@@ -41,15 +40,15 @@ public class MobileLatestPostRequestVo {
     @Size(max = 5, message = "요청 정보 허용 범위 초과(cat_id - 5 자리 이하)", payload = ParameterLengthOverLimitException.class, groups = Groups.C10.class)
     @Size(min = 2, message = "요청 정보 허용 범위 초과(cat_id - 1자리 입력 불가)", payload = ParameterLengthOverLimitException.class, groups = Groups.C11.class)
     @ParamAlias("cat_id")
-    private String catId;
+    private String categoryId;
 
     @NotBlank(message = "cat_name 파라미터값이 전달이 안됨", groups = Groups.C12.class)
     @ParamAlias("cat_name")
-    private String catName;
+    private String categoryName;
 
     @NotBlank(message = "reg_id 파라미터값이 전달이 안됨", groups = Groups.C13.class)
     @ParamAlias("reg_id")
-    private String regId;
+    private String registrantId;
 
     @ParamAlias("service_type")
     private String serviceType;
@@ -66,9 +65,9 @@ public class MobileLatestPostRequestVo {
             .saId(this.getSaId())
             .mac(this.getMac())
             .ctn(this.getCtn())
-            .catId(this.getCatId())
-            .catName(this.getCatName())
-            .regId(this.getRegId())
+            .categoryId(this.getCategoryId())
+            .categoryName(this.getCategoryName())
+            .registrantId(this.getRegistrantId())
             .serviceType(this.getServiceType())
             .build();
     }

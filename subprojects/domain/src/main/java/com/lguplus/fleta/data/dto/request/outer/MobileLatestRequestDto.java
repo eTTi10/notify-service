@@ -13,11 +13,11 @@ public class MobileLatestRequestDto {
 
     private String ctn;
 
-    private String catId;
+    private String categoryId;
 
-    private String catName;
+    private String categoryName;
 
-    private String regId;
+    private String registrantId;
 
     private String serviceType;
 }

@@ -30,9 +30,9 @@ class MobileLatestRepositoryImplTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .regId("500058151453")
-            .catName("놀라운 대회 스타킹")
+            .categoryId("T3021")
+            .registrantId("500058151453")
+            .categoryName("놀라운 대회 스타킹")
             .serviceType("V")
             .build();
 
@@ -60,9 +60,9 @@ class MobileLatestRepositoryImplTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .regId("500058151453")
-            .catName("놀라운 대회 스타킹")
+            .categoryId("T3021")
+            .registrantId("500058151453")
+            .categoryName("놀라운 대회 스타킹")
             .serviceType("V")
             .build();
 
@@ -80,9 +80,9 @@ class MobileLatestRepositoryImplTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .regId("500058151453")
-            .catName("놀라운 대회 스타킹")
+            .categoryId("T3021")
+            .registrantId("500058151453")
+            .categoryName("놀라운 대회 스타킹")
             .serviceType("V")
             .build();
 

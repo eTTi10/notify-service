@@ -39,7 +39,7 @@ public class MobileLatestDeleteRequestVo {
     @Size(max = 5, message = "요청 정보 허용 범위 초과(cat_id - 5 자리 이하)", payload = ParameterLengthOverLimitException.class, groups = Groups.C9.class)
     @Size(min = 2, message = "요청 정보 허용 범위 초과(cat_id - 1자리 입력 불가)", payload = ParameterLengthOverLimitException.class, groups = Groups.C10.class)
     @ParamAlias("cat_id")
-    private String catId;
+    private String categoryId;
 
     @ParamAlias("service_type")
     private String serviceType;
@@ -56,7 +56,7 @@ public class MobileLatestDeleteRequestVo {
             .saId(this.getSaId())
             .mac(this.getMac())
             .ctn(this.getCtn())
-            .catId(this.getCatId())
+            .categoryId(this.getCategoryId())
             .serviceType(this.getServiceType())
             .build();
     }

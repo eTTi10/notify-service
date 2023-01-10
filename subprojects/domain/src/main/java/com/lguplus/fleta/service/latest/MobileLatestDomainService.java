@@ -51,7 +51,7 @@ public class MobileLatestDomainService {
         if (MAX_COUNT <= latestCountList.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");
         }
-        if (latestCountList.stream().anyMatch(item -> item.equals(requestDto.getCatId()))) {
+        if (latestCountList.stream().anyMatch(item -> item.equals(requestDto.getCategoryId()))) {
             throw new DataAlreadyExistsException("기존 데이터 존재");
         }
     }

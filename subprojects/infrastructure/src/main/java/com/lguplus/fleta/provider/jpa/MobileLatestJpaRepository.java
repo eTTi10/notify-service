@@ -23,7 +23,7 @@ public interface MobileLatestJpaRepository extends JpaRepository<MobileLatest, L
     @Query(value = "DELETE FROM MobileLatest latest "
         + "WHERE latest.saId = :#{#requestDto.getSaId} "
         + "AND latest.mac = :#{#requestDto.mac} "
-        + "AND latest.catId = :#{#requestDto.catId} "
+        + "AND latest.catId = :#{#requestDto.categoryId} "
         + "AND latest.serviceType = :#{#requestDto.serviceType} ")
     int deleteLatest(@Param("requestDto") MobileLatestRequestDto requestDto);
 }

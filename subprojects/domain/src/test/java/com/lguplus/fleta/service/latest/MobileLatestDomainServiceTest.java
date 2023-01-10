@@ -40,9 +40,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         assertDoesNotThrow(() -> mobileLatestDomainService.insertLatest(requestDto));
@@ -56,9 +56,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(Collections.emptyList()).when(mobileLatestRepository).getLatestCountList(any());
@@ -74,9 +74,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doThrow(new RuntimeException("기타 오류")).when(mobileLatestRepository).insertLatest(any());
@@ -92,9 +92,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(List.of("T3023", "T3024", "T3025", "T3026", "T3027")).when(mobileLatestRepository).getLatestCountList(any());
@@ -110,9 +110,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(List.of("T3021")).when(mobileLatestRepository).getLatestCountList(any());
@@ -128,9 +128,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(List.of("T3023")).when(mobileLatestRepository).getLatestCountList(any());
@@ -146,9 +146,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(1).when(mobileLatestRepository).deleteLatest(any());
@@ -164,9 +164,9 @@ class MobileLatestDomainServiceTest {
             .saId("500058151453")
             .mac("001c.627e.039c")
             .ctn("01012345678")
-            .catId("T3021")
-            .catName("놀라운 대회 스타킹")
-            .regId("500058151453")
+            .categoryId("T3021")
+            .categoryName("놀라운 대회 스타킹")
+            .registrantId("500058151453")
             .build();
 
         doReturn(0).when(mobileLatestRepository).deleteLatest(any());
