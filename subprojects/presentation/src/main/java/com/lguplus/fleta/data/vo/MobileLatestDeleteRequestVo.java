@@ -45,10 +45,7 @@ public class MobileLatestDeleteRequestVo {
     private String serviceType;
 
     public String getServiceType() {
-        if (StringUtils.isBlank(serviceType)) {
-            return "V";
-        }
-        return serviceType.toUpperCase();
+        return StringUtils.defaultIfBlank(serviceType, "V").toUpperCase();
     }
 
     public MobileLatestRequestDto convert() {

@@ -23,7 +23,7 @@ public class MobileLatestDomainService {
 
         int deleteCount = mobileLatestRepository.deleteLatest(requestDto);
 
-        if (deleteCount <= 0) {
+        if (deleteCount == 0) {
             throw new DeleteNotFoundException("삭제대상 없음");
         }
     }
@@ -35,7 +35,7 @@ public class MobileLatestDomainService {
         try {
             mobileLatestRepository.insertLatest(requestDto);
         } catch (Exception e) {
-            throw new UndefinedException();
+            throw new UndefinedException("기타 오류");
         }
     }
 
@@ -46,7 +46,7 @@ public class MobileLatestDomainService {
         if (MAX_COUNT <= latestCountList.size()) {
             throw new ExceedMaxRequestException("최대 등록 갯수 초과");
         }
-        if (latestCountList.stream().anyMatch(categoryId -> categoryId.equals(requestDto.getCategoryId()))) {
+        if (latestCountList.contains(requestDto.getCategoryId())) {
             throw new DataAlreadyExistsException("기존 데이터 존재");
         }
     }
