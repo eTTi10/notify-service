@@ -142,6 +142,7 @@ class MobileLatestControllerTest {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.add("sa_id", "500058151453");
         queryParams.add("stb_mac", "001c.627e.039c");
+        queryParams.add("ctn", "01012345678");
         queryParams.add("cat_id", "T3021");
 
         MvcResult mvcResult = mvc.perform(delete(COMM_URL)
@@ -184,6 +185,7 @@ class MobileLatestControllerTest {
         MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
         queryParams.add("sa_id", "500058151453");
         queryParams.add("stb_mac", "001c.627e.039c");
+        queryParams.add("ctn", "01012345678");
         queryParams.add("cat_id", "T3021");
 
         MvcResult mvcResult = mvc.perform(delete(COMM_URL)
