@@ -19,6 +19,12 @@ bootJar { enabled = false }
 allprojects {
     repositories {
         mavenCentral()
+        maven {
+            url "https://raw.githubusercontent.com/iptv-devops/maven-repository/main"
+            metadataSources {
+                gradleMetadata()
+            }
+        }
     }
 }
 

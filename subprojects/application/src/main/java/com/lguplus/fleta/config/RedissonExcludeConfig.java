@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-@Profile("test")
+@Profile("tst")
 @EnableAutoConfiguration(exclude = RedissonAutoConfiguration.class)
 @Configuration
 public class RedissonExcludeConfig {

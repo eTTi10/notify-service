@@ -2,12 +2,6 @@
 #### Server
 server:
   port: 8080
-  servlet:
-    encoding:
-      charset: UTF-8
-      force: true
-
-
 
 ############################################
 ####  Spring
@@ -26,47 +20,32 @@ spring:
       minimum-idle: 5
       maximum-pool-size: 5
 
-  jpa:
-    database: postgresql
-    hibernate:
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: true
-
-  #### Cache - Redis
-  cache:
-    type: redis
-  redis:
-    cluster:
-      nodes: [ "redis-dev-iptv-dev-msa-01-0001-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379", "redis-dev-iptv-dev-msa-01-0002-001.b4rwjf.0001.apn2.cache.amazonaws.com:6379" ]
-
-  #### Message Stream - Kafka
-  kafka:
-    bootstrap-servers: b-2.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-6.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092,b-4.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com:9092
-
-
+  ## Cache - Redis
+  redis.cluster.nodes: redis-dev-iptv-dev-msa-01.b4rwjf.clustercfg.apn2.cache.amazonaws.com:6379
 
 ############################################
-####  Logging
+#### Logging
 logging:
   level:
     com.lguplus.fleta: DEBUG
-    org.hibernate:
-      SQL: DEBUG
-#      type: DEBUG
-#      type.descriptor.sql: DEBUG
+    org:
+      hibernate:
+        SQL: DEBUG
+        type.descriptor.sql:
+          BasicBinder: TRACE
+          BasicExtractor: OFF
+  pattern.level: "%5p [${spring.application.name}][%X{saId:-}][%X{stbMac:-}]"
 
 
+  #### Message Stream - Kafka
+  kafka:
+    bootstrap-servers:
+      - b-1.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
+      - b-2.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
+      - b-3.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
+      - b-4.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
+      - b-5.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
+      - b-6.msk-dev-iptv-dev.b1moez.c2.kafka.ap-northeast-2.amazonaws.com
 
 ############################################
 #### Other Domain Application Service
