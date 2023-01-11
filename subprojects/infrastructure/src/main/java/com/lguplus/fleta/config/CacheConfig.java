@@ -30,7 +30,7 @@ public class CacheConfig extends CachingConfigurerSupport {
     /**
      * No CacheManager Bean
      */
-    @Profile("test")
+    @Profile("tst")
     @Bean
     public CacheManager noRedisCacheManager() {
         log.debug(">>> Redis Cache 미적용");
@@ -40,7 +40,7 @@ public class CacheConfig extends CachingConfigurerSupport {
     /**
      * CacheManager Bean
      */
-    //    @Profile("!test")
+    //    @Profile("!tst")
     @Profile({"local", "dev", "devstp", "shd", "prod"})
     @Bean
     public CacheManager redisCacheManager(RedisConnectionFactory redisConnectionFactory) {

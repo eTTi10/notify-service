@@ -20,7 +20,7 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-@Profile("!test")
+@Profile("!tst")
 @Configuration
 @RequiredArgsConstructor
 public class DataSourceConfig {

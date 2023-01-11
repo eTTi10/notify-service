@@ -1,104 +1,36 @@
-############################################
-#### Server
-server:
-  port: 8080
-  shutdown: graceful
-  tomcat:
-    threads:
-      max: 200
-      min-spare: 150
-    accept-count: 10
+spring.profiles.active: local
 
-############################################
-####  Spring
+
+
+### 로컬 환경
+---
 spring:
-  #### Open Tracing
-  zipkin:
-    enabled: false
-    baseUrl: http://localhost:9411/
+  config:
+    activate.on-profile: local
+    import: optional:configserver:${CONFIG_SERVER:https://dev-arishem.releng.ciptv.uplus.co.kr/}
 
-  application:
-    name: notify
-    name-abbr: NY
-  lifecycle:
-    timeout-per-shutdown-phase: 1m
-  profiles:
-    active: local
 
-  #### Message Source
+
+### 로컬 외 환경
+---
+spring:
+  config:
+    activate.on-profile: tst,dev,stp,stg,shd,prd
+    import: optional:configserver:${CONFIG_SERVER:http://arishem.up.internal:80/}
+
+
+
+### 로컬 & 로컬 외 환경 공통
+---
+spring:
+  application.name: notify
+  cloud.config:
+    fail-fast: true
+    name: ${spring.application.name},push,mmsagent,smsagent
+    profile: ${spring.profiles.active}
+    searchPaths:
+      - '{application}'
+      - '{application}/*'
   messages:
     basename: messages/response
     encoding: utf-8
-
-  #### Open Tracing
-  #  zipkin:
-  #    baseUrl: http://localhost:9411/
-
-  #### Data Source
-  datasource:
-    reader:
-      maximum-pool-size: 25
-      minimum-idle: 25
-    writer:
-      maximum-pool-size: 25
-      minimum-idle: 25
-
-    hikari:
-      connection-timeout: 5000
-      validation-timeout: 20000
-      leak-detection-threshold: 10000
-      max-lifetime: 60000
-      data-source-properties:
-        cachePrepStmts: true
-        prepStmtCacheSize: 250
-        prepStmtCacheSqlLimit: 2048
-        useServerPrepStmts: true
-
-  #### JPA
-  jpa:
-    database: postgresql
-    open-in-view: false
-    hibernate:
-      naming:
-        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
-      use-new-id-generator-mappings: false
-    properties:
-      hibernate:
-        temp:
-          use_jdbc_metadata_defaults: false
-        format_sql: false
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: false
-
-############################################
-####  Logging
-logging:
-  level:
-    root: info
-    #org.apache.kafka: warn
-  pattern:
-    level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}][%X{saId:-}][%X{stbMac:-}]"
-
-############################################
-## Actuator
-management:
-  endpoint:
-    health:
-      enabled: true
-
-############################################
-#### FeignClient
-feign:
-  client:
-    config:
-      default:
-        connectTimeout: 2000
-        readTimeout: 2000
-        loggerLevel: NONE
-  httpclient:
-    enabled: true
-    connection-timeout: 2900
-    max-connections: 100

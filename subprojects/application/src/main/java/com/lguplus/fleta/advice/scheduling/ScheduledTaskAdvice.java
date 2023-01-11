@@ -16,7 +16,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-@Profile("!test")
+@Profile("!tst")
 @Slf4j
 @Aspect
 @Component
