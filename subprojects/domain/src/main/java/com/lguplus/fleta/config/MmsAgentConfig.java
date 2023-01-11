@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
  * MMSAgent 설정 파일
  */
 @Configuration
-//@PropertySource(value = "classpath:mmsagent/mmsagent-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
-@PropertySource(value = "classpath:mmsagent/mmsagent-test.yml", factory = YamlPropertySourceFactory.class)
+@PropertySource(value = "classpath:mmsagent/mmsagent-${spring.profiles.active}.yml", factory = YamlPropertySourceFactory.class)
+//@PropertySource(value = "classpath:mmsagent/mmsagent-test.yml", factory = YamlPropertySourceFactory.class)
 @Component
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "mmsroot")
