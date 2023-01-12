@@ -36,7 +36,7 @@ public class MobileLatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "reg_id", value = "순번: 6<br/>자리수: 64<br/>설명: PUSH할 REG ID", example = "500058151453"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "service_type", value = "순번: 7<br/>자리수: 1<br/>설명: 서비스 타입<br/>ex) NULL OR V : 모바일tv, R : VR", example = "V"),
     })
-    @PostMapping(value = {"/v1/latest", "comm/latest"})
+    @PostMapping(value = {"/v1/latest", "/comm/latest"})
     public CommonResponseDto insertLatest(@Valid MobileLatestPostRequestVo request) {
         mobileLatestService.insertLatest(request.convert());
         return SuccessResponseDto.builder().build();
@@ -50,7 +50,7 @@ public class MobileLatestController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "cat_id", value = "순번: 4<br/>자리수: 5<br/>설명: 카테고리 ID", example = "T3021"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "service_type", value = "순번: 5<br/>자리수: 1<br/>설명: 서비스 타입<br/>ex) NULL OR V : 모바일tv, R : VR", example = "V"),
     })
-    @DeleteMapping(value = {"/v1/latest", "comm/latest"})
+    @DeleteMapping(value = {"/v1/latest", "/comm/latest"})
     public CommonResponseDto deleteLatest(@Valid MobileLatestDeleteRequestVo request) {
         mobileLatestService.deleteLatest(request.convert());
         return SuccessResponseDto.builder().build();
