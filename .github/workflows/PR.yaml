@@ -97,3 +97,12 @@ jobs:
           FOLDER: report
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: "Add Badge and report by Action"
+          
+      - name: Archive code coverage results
+        run: tar -zcvf jacoco-reports.zip -C build/reports/jacoco/allCoverage html
+
+      - name: Upload code coverage results
+        uses: actions/upload-artifact@v3
+        with:
+          name: jacoco-reports
+          path: jacoco-reports.zip
