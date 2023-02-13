@@ -6,10 +6,8 @@ import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
 import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +32,8 @@ public class OuterControllerAdvice {
 
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendSms",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
+//        CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendMms",
+//                new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("POST /mims/sendPushCode",
             new CustomErrorResponseConverter(ErrorResponseVo.class, builderName));
         CUSTOM_ERROR_RESPONSE_CONVERTERS.put("GET /smartux/UXSimpleJoin.php",
@@ -143,6 +143,14 @@ public class OuterControllerAdvice {
         if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
+        }
+        if (uri.equals("POST /mims/sendMms") && Objects.equals(response.getMessage(), "필수 요청 정보 누락(ctn 가 Null 혹은 빈값 입니다.)")){
+            ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag("5000").message(response.getMessage()).build();
+            return errorResponseVo;
+        }
+        if (uri.equals("POST /mims/sendMms") && Objects.equals(response.getMessage(), "필수 요청 정보 누락(mms_cd 가 Null 혹은 빈값 입니다.)")){
+            ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag("5000").message(response.getMessage()).build();
+            return errorResponseVo;
         }
         final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
         if (converter == null) {

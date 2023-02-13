@@ -33,8 +33,8 @@ public class MmsController {
         @ApiImplicitParam(paramType = "query", dataType = "string", required = true, name = "ctn", value = "순번: 4<br/>자리수: 20<br/>설명: 발송대상 번호", example = "01051603997"),
         @ApiImplicitParam(paramType = "query", dataType = "string", required = false, name = "replacement", value = "순번: 5<br/>자리수: 100<br/>설명: 대체문구", example = "예) 김철수|냉장고")})
     @PostMapping("/mims/sendMms")
-    public SuccessResponseDto sendMms(@Valid SendMmsVo vo) {
-        SendMmsRequestDto sendMmsRequestDto = sendMmsRequestMapper.toDto(vo);
+    public SuccessResponseDto sendMms(@Valid SendMmsVo sendMmsVo) {
+        SendMmsRequestDto sendMmsRequestDto = sendMmsRequestMapper.toDto(sendMmsVo);
         return smsService.sendMms(sendMmsRequestDto);
     }
 

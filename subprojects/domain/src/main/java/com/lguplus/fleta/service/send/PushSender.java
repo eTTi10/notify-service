@@ -82,7 +82,7 @@ public class PushSender {
         checkGCMBody(sendCodeMap);
 
         /*FCM POS 추가발송 설정값 체크*/
-        String extraSendYn = StringUtils.defaultIfEmpty(sendCodeMap.get("pos.send"), fcmExtraSend);
+        String extraSendYn = StringUtils.defaultIfEmpty(sendCodeMap.get("pos.send"), fcmExtraSend); //default가 Y
         log.debug("pushInfoMap.getpos.send props:" + sendCodeMap.get("pos.send"));
         log.debug("fcmExtraSend props:" + fcmExtraSend);
 
@@ -92,7 +92,7 @@ public class PushSender {
                 HttpPushSingleRequestDto httpPushSingleRequestDto = setHttpPushRequestDto(sendPushCodeRequestDto, serviceType, type);
                 log.debug("httpPushSingleRequestDto:{}", httpPushSingleRequestDto);
                 setPushResult(requestHttpSinglePush(httpPushSingleRequestDto));
-                //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우
+                //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우  C003이 아니면서 U+Tv인경우일 듯
                 sendExtraPush(sendPushCodeRequestDto, type, serviceType, extraSendYn);
             } // pushType for end
             String sType = StringUtils.defaultIfEmpty(serviceType, "H");

@@ -124,7 +124,6 @@ public class PushSingleDomainService {
             } finally {
                 setPushProgressCnt(dto.getServiceId(), -1);
             }
-
             // 200 : 정상 처리, 재시도 예외인 경우
             isFutureSuccess.set(recvStatusCode.get().equals("200") || isRetryExcludeCode(recvStatusCode.get()));
         });
