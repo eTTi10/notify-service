@@ -1,6 +1,6 @@
 mmsroot:
   mms:
-    gateway_index: ${smsGatewayIndex}
+    gateway_index: 1
     X_Kmms_SVCCODE: 1
     X_Kmms_TextInput: 1
     X_Kmms_redistribution: 1.0
