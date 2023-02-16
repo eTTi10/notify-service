@@ -28,8 +28,11 @@ import com.lguplus.fleta.exception.mmsagent.SystemBusyException;
 import com.lguplus.fleta.exception.mmsagent.SystemErrorException;
 import java.util.Map;
 import javax.annotation.PostConstruct;
+
+import com.lguplus.fleta.properties.MmsProps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -37,17 +40,20 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 
 public class MmsAgentDomainService {
-
+    private final MmsProps mmsProps;
+    @Value("${mmsroot.mms.gateway_index}")
+    private String gatewayIndex;
     private final SettingDomainClient apiClient;
     private final MmsAgentConfig config;
     private final MmsAgentClient mmsSoap;
 
     private Map<String, ?> mmsConfig;//yml파일 mms
-
+    private Map<String, String> mapServers; //yml파일 servers
     @PostConstruct
     private void initialized() {
         //yml설정파일 객체생성
         mmsConfig = config.getMms();//1레벨 객체
+        mapServers = mmsProps.findMapByIndex(gatewayIndex).orElseThrow();
     }
 
     /**
@@ -76,7 +82,7 @@ public class MmsAgentDomainService {
             .mmsMsg(settingApi.getName())//메세지
             .mmsRep(sendMmsRequestDto.getReplacement())
             .build();
-        String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mmsDto);
+        String returnMmsCode = mmsSoap.sendMMS(mmsConfig, mapServers, mmsDto);
 
         if (!returnMmsCode.equals("1000")) {
             switch (returnMmsCode) {

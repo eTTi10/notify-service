@@ -9,4 +9,6 @@ import java.util.Map;
 public interface MmsAgentClient {
 
     String sendMMS(Map<String, ?> mmsConfig, MmsRequestDto mmsDto);
+    String sendMMS(Map<String, ?> mmsConfig,Map<String, String> mapServers, MmsRequestDto mmsDto);
+
 }
