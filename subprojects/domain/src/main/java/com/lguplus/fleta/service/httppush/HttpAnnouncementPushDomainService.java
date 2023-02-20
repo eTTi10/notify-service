@@ -42,7 +42,7 @@ public class HttpAnnouncementPushDomainService {
         List<String> items = httpPushAnnounceRequestDto.getItems();
 
         Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, items);
-
+        log.debug("paramMap ::::::::::::::: {}", paramMap);
         OpenApiPushResponseDto openApiPushResponseDto = httpPushClient.requestHttpPushAnnouncement(paramMap);
         log.debug("openApiPushResponseDto ::::::::::::::: {}", openApiPushResponseDto);
 

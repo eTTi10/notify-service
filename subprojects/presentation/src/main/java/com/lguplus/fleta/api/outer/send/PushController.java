@@ -55,9 +55,9 @@ public class PushController {
 
         SendPushCodeRequestBodyVo sendPushCodeRequestBodyVo = xmlHttpMessageConverter
             .getObjectMapper().readValue(requestBodyStr, SendPushCodeRequestBodyVo.class);
-
+        log.debug("sendPushCodeRequestVo{}",sendPushCodeRequestVo.getRegId());
         SendPushCodeRequestDto sendPushCodeRequestDto = sendPushCodeRequestBodyVo.convert(sendPushCodeRequestVo, requestBodyStr);
-
+        log.debug("sendPushCodeRequestDto = {}", sendPushCodeRequestDto.getRegistrationId());
         return pushService.sendPushCode(sendPushCodeRequestDto);
 
     }

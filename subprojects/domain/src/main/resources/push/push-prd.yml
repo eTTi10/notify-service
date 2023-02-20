@@ -157,6 +157,7 @@ push:
 #    - id: "30125"
 #      name: GAME Android
 #      password: lguplus_game_live
+    ## 이경우만 extra push tv일 떄가 아닌듯? 8100 이때는 8100으로 나가게 된다.
     - id: "21006"
       name: Push Module work_2020.03.04
       password: UTVseamless_FCM1

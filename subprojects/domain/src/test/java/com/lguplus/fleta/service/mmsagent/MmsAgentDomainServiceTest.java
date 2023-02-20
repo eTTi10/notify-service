@@ -28,6 +28,8 @@ import com.lguplus.fleta.exception.mmsagent.SystemBusyException;
 import com.lguplus.fleta.exception.mmsagent.SystemErrorException;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.lguplus.fleta.properties.MmsProps;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,6 +58,8 @@ class MmsAgentDomainServiceTest {
     private static final String svcType = "E";
     @Mock
     private static MmsAgentClient mmsSoap;
+    @Mock
+    private static MmsProps mmsProps;
     private static MmsAgentConfig mmsAgentConfig;
     private static Map<String, Object> mmsConfig;//yml파일/mms
     @Mock
@@ -84,7 +88,7 @@ class MmsAgentDomainServiceTest {
 
         mmsAgentConfig.setMms(mmsConfig);
 
-        mmsAgentDomainService = new MmsAgentDomainService(apiClient, mmsAgentConfig, mmsSoap);
+        mmsAgentDomainService = new MmsAgentDomainService(mmsProps,apiClient, mmsAgentConfig, mmsSoap);
         ReflectionTestUtils.invokeMethod(mmsAgentDomainService, "initialized");
         log.info(mmsAgentDomainService.toString());
     }

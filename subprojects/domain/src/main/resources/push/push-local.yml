@@ -72,7 +72,7 @@ push:
         channelId: PsAgt
         channelNumber: "0000"
         timeout: 2000
-        closeSecond: 150
+        closeSecond: 10150
       destination: 222.231.13.85
       retry: 2
 
@@ -114,6 +114,10 @@ push:
   ########################
   service:
     - id: "00007"
+      name: MIMS(IPTV)
+      type: LGUPUSH_OLD
+      password: smartux
+    - id: "20002"
       name: MIMS(IPTV)
       type: LGUPUSH_OLD
       password: smartux

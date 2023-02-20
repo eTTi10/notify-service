@@ -3,6 +3,7 @@ package com.lguplus.fleta.service.httppush;
 import com.lguplus.fleta.client.HttpPushClient;
 import com.lguplus.fleta.data.dto.request.inner.HttpPushSingleRequestDto;
 import com.lguplus.fleta.data.dto.response.inner.HttpPushResponseDto;
+import com.lguplus.fleta.data.dto.response.inner.OpenApiPushResponseDto;
 import com.lguplus.fleta.exception.httppush.HttpPushCustomException;
 import com.lguplus.fleta.util.HttpPushSupport;
 import java.util.List;
@@ -57,9 +58,9 @@ public class HttpSinglePushDomainService {
         List<String> items = httpPushSingleRequestDto.getItems();
 
         Map<String, Object> paramMap = httpPushSupport.makePushParameters(applicationId, serviceId, pushType, message, regId, items);
-
-        httpPushClient.requestHttpPushSingle(paramMap);
-
+        log.debug("log 제출 용 paramMap = {}", paramMap);
+        OpenApiPushResponseDto forLog = httpPushClient.requestHttpPushSingle(paramMap);
+        log.debug("log 제출 용 forLog = {}", forLog);
         // 성공
         return HttpPushResponseDto.builder().build();
     }

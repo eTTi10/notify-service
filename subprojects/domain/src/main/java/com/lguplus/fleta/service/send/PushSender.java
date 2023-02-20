@@ -75,9 +75,9 @@ public class PushSender {
         initPushCodeValues();
 
         //입력받은 sendCode 를 이용해 푸시발송에 필요한 정보를 가져온다
-
+        log.debug("serviceTypes = {}", sendPushCodeRequestDto.getSendCode());
         Map<String, String> sendCodeMap = getSendCodeMap(sendPushCodeRequestDto.getSendCode());
-
+        log.debug("sendCodeMap = {}", sendCodeMap);
         //invalid sendCode 체크해서 Exception
         checkGCMBody(sendCodeMap);
 
@@ -85,7 +85,6 @@ public class PushSender {
         String extraSendYn = StringUtils.defaultIfEmpty(sendCodeMap.get("pos.send"), fcmExtraSend); //default가 Y
         log.debug("pushInfoMap.getpos.send props:" + sendCodeMap.get("pos.send"));
         log.debug("fcmExtraSend props:" + fcmExtraSend);
-
         for (String serviceType : serviceTypes) {
             initPushValues();
             for (String type : pushTypes) {
@@ -93,6 +92,7 @@ public class PushSender {
                 log.debug("httpPushSingleRequestDto:{}", httpPushSingleRequestDto);
                 setPushResult(requestHttpSinglePush(httpPushSingleRequestDto));
                 //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우  C003이 아니면서 U+Tv인경우일 듯
+                log.debug("sendPushCodeRequestDto: {} ",String.valueOf(sendPushCodeRequestDto));
                 sendExtraPush(sendPushCodeRequestDto, type, serviceType, extraSendYn);
             } // pushType for end
             String sType = StringUtils.defaultIfEmpty(serviceType, "H");
@@ -250,7 +250,8 @@ public class PushSender {
 
         inputMap.put("saId", sendPushCodeRequestDto.getSaId());
         inputMap.put("stbMac", sendPushCodeRequestDto.getStbMac());
-
+        log.debug("inputMap = {}", inputMap);
+        //regId를 못받음.
         RegIdDto regIdDto = Optional.ofNullable(personalizationDomainClient.getRegistrationID(inputMap)).orElse(RegIdDto.builder().registrationId("").build());
 
         log.debug("personalizationDomainClient.getRegistrationID() regIdDto:{}", regIdDto);
@@ -472,6 +473,7 @@ public class PushSender {
     public PushRequestSingleDto getExtraPushRequestDto(SendPushCodeRequestDto sendPushCodeRequestDto, String serviceTarget, String pushType) {
 
         String registrationId = getRegistrationID(sendPushCodeRequestDto);
+        log.debug("################################getRegistrationID {}", registrationId);
         String sendCode = sendPushCodeRequestDto.getSendCode();
         Map<String, String> paramMap = sendPushCodeRequestDto.getReserve();
         List<String> items = sendPushCodeRequestDto.getItems();
