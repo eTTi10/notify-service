@@ -10,7 +10,9 @@ import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
 import javax.validation.Payload;
+import javax.validation.metadata.ConstraintDescriptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -144,8 +146,16 @@ public class OuterControllerAdvice {
         final ErrorResponseDto response, final Throwable th) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
 
+
         Class<? extends Throwable> aClass = th.getClass();
-        log.debug("aClass = {}", aClass);
+//        log.debug("aClass = {}", aClass);
+//        BindException ex =  (BindException)th;
+//        log.debug("aClass = {}", ex.getAllErrors().get(0));
+//        ObjectError oe = ex.getAllErrors().get(0);
+//        ConstraintDescriptor<?> constraintDescriptor = oe.unwrap(ConstraintViolation.class).getConstraintDescriptor();
+//        Set<Class<? extends Payload>> payloads = constraintDescriptor.getPayload();
+//        log.debug("payloads = {}", payloads);
+
         if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
