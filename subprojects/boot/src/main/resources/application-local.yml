@@ -84,3 +84,7 @@ feign:
         requestInterceptors:
           - com.lguplus.fleta.config.PushFeignInterceptor
         errorDecoder: com.lguplus.fleta.provider.rest.PushAnnounceClientImpl.PushErrorDecoder
+  httpclient:
+    disableSslValidation: true
+  okhttp:
+    enabled: true

@@ -13,7 +13,7 @@ push:
         ip: 211.115.75.227
         port1: 5556
         port2: 6556
-        protocol: http
+        protocol: https
         url: /restapi/push/single/servicekey
         auth: auth=0000002640;C8ACEEC7A62254021B14
 
@@ -23,7 +23,7 @@ push:
         ip: 211.115.75.227
         port1: 5555
         port2: 6555
-        protocol: http
+        protocol: https
         url: /restapi/push/announce
         auth: auth=0000002640;C4170CB54D1114224B9A
 
@@ -72,7 +72,7 @@ push:
         channelId: PsAgt
         channelNumber: "0000"
         timeout: 2000
-        closeSecond: 10150
+        closeSecond: 150
       destination: 222.231.13.85
       retry: 2
 

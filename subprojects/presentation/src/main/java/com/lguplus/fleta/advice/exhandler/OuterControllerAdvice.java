@@ -3,15 +3,19 @@ package com.lguplus.fleta.advice.exhandler;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
+import com.lguplus.fleta.exception.MmsParameterMissingException;
 import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
 
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Payload;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -24,6 +28,7 @@ public class OuterControllerAdvice {
     /**
      *
      */
+    private static final String IPTV_SEND_MMS_API_URI = "POST /mims/sendMms";
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
     private static final Map<String, List<String>> UNCONVERTIBLE_ERROR_CODE_PATTERNS = new HashMap<>();
 
@@ -91,7 +96,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
         final BindException ex) {
         log.info(ex.getMessage(), ex);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex),ex));
     }
 
     /**
@@ -116,7 +121,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
         final Throwable th) {
         log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build(),th));
     }
 
     /**
@@ -127,7 +132,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> handleThrowable(final HttpServletRequest request,
         final Throwable th) {
         log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th),th));
     }
 
     /**
@@ -136,17 +141,21 @@ public class OuterControllerAdvice {
      * @return
      */
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
-        final ErrorResponseDto response) {
+        final ErrorResponseDto response, final Throwable th) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
+
+        Class<? extends Throwable> aClass = th.getClass();
+        log.debug("aClass = {}", aClass);
         if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
         }
-        if (uri.equals("POST /mims/sendMms") && Objects.equals(response.getMessage(), "필수 요청 정보 누락(ctn 가 Null 혹은 빈값 입니다.)")){
+
+        if (uri.equals(IPTV_SEND_MMS_API_URI) && aClass.isAssignableFrom(MmsParameterMissingException.class)){
             ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag(response.getFlag()).message(response.getMessage()).build();
             return errorResponseVo;
         }
-        if (uri.equals("POST /mims/sendMms") && Objects.equals(response.getMessage(), "필수 요청 정보 누락(mms_cd 가 Null 혹은 빈값 입니다.)")){
+        if (uri.equals(IPTV_SEND_MMS_API_URI) && aClass.isAssignableFrom(MmsParameterMissingException.class)){
             ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag(response.getFlag()).message(response.getMessage()).build();
             return errorResponseVo;
         }

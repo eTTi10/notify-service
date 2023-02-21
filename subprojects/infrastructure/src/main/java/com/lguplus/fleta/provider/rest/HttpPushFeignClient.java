@@ -25,7 +25,7 @@ public interface HttpPushFeignClient {
      */
     @PostMapping(value = "/restapi/push/single/servicekey")
     OpenApiPushResponseDto requestHttpPushSingle(URI baseUri, @RequestBody Map<String, Object> paramMap);
-
+//todo 인증서 에러 무시하는 기능 찾아서 할 것.
     /**
      * 공지 푸시
      *
