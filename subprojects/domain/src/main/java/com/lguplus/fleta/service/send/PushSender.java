@@ -93,7 +93,7 @@ public class PushSender {
                 setPushResult(requestHttpSinglePush(httpPushSingleRequestDto));
                 //푸시의 대상타입이 U+tv이며 sendCode에 대한 property가 추가발송에 해당하는 경우  C003이 아니면서 U+Tv인경우일 듯
                 log.debug("sendPushCodeRequestDto: {} ",String.valueOf(sendPushCodeRequestDto));
-                sendExtraPush(sendPushCodeRequestDto, type, serviceType, extraSendYn);
+//                sendExtraPush(sendPushCodeRequestDto, type, serviceType, extraSendYn);
             } // pushType for end
             String sType = StringUtils.defaultIfEmpty(serviceType, "H");
             //serviceType별 성공실패 기록

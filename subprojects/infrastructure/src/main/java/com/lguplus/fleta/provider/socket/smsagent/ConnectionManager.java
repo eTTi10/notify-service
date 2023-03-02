@@ -62,11 +62,10 @@ public class ConnectionManager extends Thread implements Connector, MessageSende
         currentThread = Thread.currentThread();
         do {
             try (final Socket socket = new Socket()) {
-                log.debug("Connect to {}:{}", ip, port);
-
                 final InetSocketAddress socketAddress = new InetSocketAddress(ip, port);
                 socket.setSoTimeout(SOCKET_TIMEOUT);
                 socket.connect(socketAddress, CONNECT_TIMEOUT);
+                log.debug("Connect to {}:{}", ip, port);
                 outputStream = new BufferedOutputStream(socket.getOutputStream());
 
                 messageReader = new MessageReader(socket.getInputStream(), this, this);
