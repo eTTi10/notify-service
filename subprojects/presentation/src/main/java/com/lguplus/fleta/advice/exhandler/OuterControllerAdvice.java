@@ -3,34 +3,28 @@ package com.lguplus.fleta.advice.exhandler;
 import com.lguplus.fleta.data.dto.response.CommonResponseDto;
 import com.lguplus.fleta.data.dto.response.ErrorResponseDto;
 import com.lguplus.fleta.data.vo.error.ErrorResponseVo;
-import com.lguplus.fleta.exception.MmsParameterMissingException;
+import com.lguplus.fleta.data.vo.error.TrailedErrorResponseVo;
 import com.lguplus.fleta.exception.UndefinedException;
 import com.lguplus.fleta.exhandler.CustomErrorResponseConverter;
 import com.lguplus.fleta.exhandler.ErrorResponseResolver;
-
-import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolation;
-import javax.validation.Payload;
-import javax.validation.metadata.ConstraintDescriptor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Slf4j
 @RestControllerAdvice("com.lguplus.fleta.api.outer")
 public class OuterControllerAdvice {
 
-    /**
-     *
-     */
-    private static final String IPTV_SEND_MMS_API_URI = "POST /mims/sendMms";
     private static final Map<String, CustomErrorResponseConverter> CUSTOM_ERROR_RESPONSE_CONVERTERS = new HashMap<>();
     private static final Map<String, List<String>> UNCONVERTIBLE_ERROR_CODE_PATTERNS = new HashMap<>();
 
@@ -98,7 +92,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> handleBindException(final HttpServletRequest request,
         final BindException ex) {
         log.info(ex.getMessage(), ex);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex),ex));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(ex)));
     }
 
     /**
@@ -123,7 +117,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> httpException(final HttpServletRequest request,
         final Throwable th) {
         log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build(),th));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, ErrorResponseDto.builder().flag("9999").message("기타 에러").build()));
     }
 
     /**
@@ -134,7 +128,7 @@ public class OuterControllerAdvice {
     public ResponseEntity<CommonResponseDto> handleThrowable(final HttpServletRequest request,
         final Throwable th) {
         log.error(th.getMessage(), th);
-        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th),th));
+        return ResponseEntity.ok().body(getCustomErrorResponse(request, errorResponseResolver.resolve(th)));
     }
 
     /**
@@ -143,33 +137,17 @@ public class OuterControllerAdvice {
      * @return
      */
     private CommonResponseDto getCustomErrorResponse(final HttpServletRequest request,
-        final ErrorResponseDto response, final Throwable th) {
+        final ErrorResponseDto response) {
         final String uri = request.getMethod() + " " + request.getRequestURI();
-
-
-        Class<? extends Throwable> aClass = th.getClass();
-//        log.debug("aClass = {}", aClass);
-//        BindException ex =  (BindException)th;
-//        log.debug("aClass = {}", ex.getAllErrors().get(0));
-//        ObjectError oe = ex.getAllErrors().get(0);
-//        ConstraintDescriptor<?> constraintDescriptor = oe.unwrap(ConstraintViolation.class).getConstraintDescriptor();
-//        Set<Class<? extends Payload>> payloads = constraintDescriptor.getPayload();
-//        log.debug("payloads = {}", payloads);
 
         if (Optional.ofNullable(UNCONVERTIBLE_ERROR_CODE_PATTERNS.get(uri)).orElse(List.of()).stream()
             .anyMatch(regexp -> response.getFlag().matches(regexp))) {
             return response;
         }
 
-        if (uri.equals(IPTV_SEND_MMS_API_URI) && aClass.isAssignableFrom(MmsParameterMissingException.class)){
-            ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag(response.getFlag()).message(response.getMessage()).build();
-            return errorResponseVo;
-        }
-        if (uri.equals(IPTV_SEND_MMS_API_URI) && aClass.isAssignableFrom(MmsParameterMissingException.class)){
-            ErrorResponseVo errorResponseVo = ErrorResponseVo.errorResponseBuilder().flag(response.getFlag()).message(response.getMessage()).build();
-            return errorResponseVo;
-        }
-        final CustomErrorResponseConverter converter = CUSTOM_ERROR_RESPONSE_CONVERTERS.get(uri);
+        final CustomErrorResponseConverter converter = response.getFlag().endsWith("_") ?
+                new CustomErrorResponseConverter(TrailedErrorResponseVo.class, "trailedErrorResponseBuilder") :
+                CUSTOM_ERROR_RESPONSE_CONVERTERS.get(response.getFlag());
         if (converter == null) {
             return response;
         }
