@@ -54,8 +54,10 @@ push:
     announce:
       server:
         ip: 211.115.75.227
-        port: 9200
-        protocol: http
+#        port: 9200
+#        protocol: http
+        port: 4530
+        protocol: https
         url: /pushhttp.uplus.co.kr/deviceInfo?service=upush
         header: application/json
         encoding: UTF-8

@@ -232,6 +232,8 @@ public class PushSender {
         } else {
             if (check1001Flag && serviceTypeSize > 1) {
                 return SendPushResponseDto.builder().flag("1001").message(MESSAGE_1001).service(pushServiceResultDtoArrayList).build();
+            } else if (firstFailCode.equals("1115")) {
+                return SendPushResponseDto.builder().flag("9999").message("기타 오류["+firstFailMessage+"]").service(pushServiceResultDtoArrayList).build();
             } else {
                 return SendPushResponseDto.builder().flag(firstFailCode).message(firstFailMessage).service(pushServiceResultDtoArrayList).build();
             }
